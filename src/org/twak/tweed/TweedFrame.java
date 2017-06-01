@@ -36,10 +36,12 @@ import javax.vecmath.Vector3d;
 
 import org.twak.tweed.gen.Gen;
 import org.twak.utils.HalfMesh2;
+import org.twak.utils.ImageU;
 import org.twak.utils.ListDownLayout;
 import org.twak.utils.ListRightLayout;
 import org.twak.utils.ObjDump;
 import org.twak.utils.PaintThing;
+import org.twak.utils.Show;
 import org.twak.utils.WeakListener;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.SuperMeshPainter;
@@ -111,10 +113,13 @@ public class TweedFrame {
 	    		Vector3d pt = tweed.cursorPosition;
 	    		if (coordLabel != null)
 	    			coordLabel.setText( pt == null ? "..." : String.format( "%.4f %.4f", pt.x, pt.z) );
+	    		
+	    		JFrame.setDefaultLookAndFeelDecorated(true);
+
+	    		
 	    	}
 	    }, 100, 100, TimeUnit.MILLISECONDS);
-	    
-	    
+		
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 	    frame.pack();
 	    frame.setVisible(!HEADLESS);
@@ -367,9 +372,9 @@ public class TweedFrame {
 		selectedGenListener.fire();
 	}
 	
-	public static void main (String[] args)throws Throwable {
+	public static void main (String[] args) throws Throwable {
 		
-		WindowManager.init( "chordatlas", "/org/twak/tweed/resources/icon256.png" );
+		WindowManager.init( "chordatlas", "/org/twak/tweed/resources/icon128.png" );
 		
 		UIManager.put("Slider.paintValue", false);
 		
