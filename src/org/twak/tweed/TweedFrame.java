@@ -43,17 +43,17 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.SuperMeshPainter;
-import org.twak.viewTrace.ViewTrace;
 
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.thoughtworks.xstream.XStream;
 
-public class TweedFrame extends JFrame{
+public class TweedFrame {
 	
 	public Tweed tweed;
 	Canvas canvas;
+	public JFrame frame;
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
@@ -64,7 +64,9 @@ public class TweedFrame extends JFrame{
 		
 		instance = this;
 		
-		WindowManager.register( this );
+		frame = new JFrame();
+		
+		WindowManager.register( frame );
 		
 		Dimension d3Dim = new Dimension (1024, 640);
 		
@@ -85,12 +87,12 @@ public class TweedFrame extends JFrame{
 		canvas = ctx.getCanvas();
 		canvas.setPreferredSize(d3Dim);
 		
-		setLayout(new BorderLayout());
-		add(buildUI(), BorderLayout.EAST);
-		add(canvas, BorderLayout.CENTER);
-	    setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		frame.setLayout(new BorderLayout());
+		frame.add(buildUI(), BorderLayout.EAST);
+		frame.add(canvas, BorderLayout.CENTER);
+		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		
-	    addWindowListener( new WindowAdapter() {
+	    frame.addWindowListener( new WindowAdapter() {
 	    	public void windowClosing(WindowEvent e) {
 	    		TweedSettings.save();
 	    	};
@@ -113,9 +115,9 @@ public class TweedFrame extends JFrame{
 	    }, 100, 100, TimeUnit.MILLISECONDS);
 	    
 	    
-	    setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		pack();
-		setVisible(!HEADLESS);
+	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	    frame.pack();
+	    frame.setVisible(!HEADLESS);
 		
 		tweed.startCanvas();
 	}
@@ -140,7 +142,7 @@ public class TweedFrame extends JFrame{
 		out.add ( pane, BorderLayout.CENTER );
 		
 		JMenuBar menuBar = new JMenuBar();
-		setJMenuBar( menuBar );
+		frame.setJMenuBar( menuBar );
 
 		//Build the first menu.
 		JMenu menu = new JMenu("File");
@@ -367,10 +369,8 @@ public class TweedFrame extends JFrame{
 	
 	public static void main (String[] args)throws Throwable {
 		
-		WindowManager.init( "Chord Atlas", "/org/twak/tweed/resources/icon256.png" );
+		WindowManager.init( "chordatlas", "/org/twak/tweed/resources/icon256.png" );
 		
-		ViewTrace.installPainters();
-		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		UIManager.put("Slider.paintValue", false);
 		
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false); // show menus over 3d canvas

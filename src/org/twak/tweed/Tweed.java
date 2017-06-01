@@ -1,5 +1,6 @@
 package org.twak.tweed;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -590,5 +591,9 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.ortho = false;
 		TweedSettings.settings.fov = 0;
 		setCameraPerspective();
+	}
+
+	public Component frame() {
+		return frame.frame;
 	}
 }

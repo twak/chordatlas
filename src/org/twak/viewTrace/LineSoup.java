@@ -16,6 +16,7 @@ import org.twak.utils.DRectangle;
 import org.twak.utils.Graph2D;
 import org.twak.utils.Line;
 import org.twak.utils.LinearForm;
+import org.twak.utils.PaintThing;
 import org.twak.viewTrace.QuadTree.AABBQT;
 import org.twak.viewTrace.QuadTree.AxisAlignedBoundingBox;
 import org.twak.viewTrace.QuadTree.PointRegionQuadTree;
@@ -28,6 +29,10 @@ public class LineSoup {
 	
 	public Set<Line> all = new HashSet<>();
 	boolean multiColour = false;
+	
+	static {
+		 PaintThing.lookup.put(LineSoup.class, new LineSoupPainter() );
+	}
 	
 	public LineSoup() {
 	}

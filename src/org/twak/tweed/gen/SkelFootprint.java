@@ -310,7 +310,7 @@ public class SkelFootprint {
 			if ( TRUE ) { //color roofs
 				
 				if (blockGen.transparency != 1) {
-					JOptionPane.showMessageDialog( TweedFrame.instance, "Error sampling colors..I'll fix that: try again!" );
+					JOptionPane.showMessageDialog( tweed.frame(), "Error sampling colors..I'll fix that: try again!" );
 					m.close();
 					blockGen.transparency = 1;
 					blockGen.calculateOnJmeThread();

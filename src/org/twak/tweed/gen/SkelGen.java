@@ -81,7 +81,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		this.footprint = footprint;
 		this.blockGen = blockGen;
 		
-		ProgressMonitor m = new ProgressMonitor( tweed.frame, "Optimizing", "", 0, 100 );
+		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
 
 		m.setProgress( 1 );
 		m.setMillisToPopup( 0 );
@@ -97,7 +97,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		this.toRender = mesh;
 		
-		ProgressMonitor m = new ProgressMonitor( tweed.frame, "Optimizing", "", 0, 100 );
+		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
 		
 		m.setProgress( 1 );
 		m.setMillisToPopup( 0 );

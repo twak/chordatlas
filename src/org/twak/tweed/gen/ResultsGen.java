@@ -275,7 +275,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 			}
 		}
 		
-		JOptionPane.showMessageDialog( tweed.frame, "Can't find solution for center " + cen );
+		JOptionPane.showMessageDialog( tweed.frame(), "Can't find solution for center " + cen );
 	}
 
 }

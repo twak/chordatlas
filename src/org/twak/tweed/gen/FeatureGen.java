@@ -222,7 +222,7 @@ public class FeatureGen extends Gen {
 			if (center.distance( maybePt.get() ) < 1)
 				return blockFeatures.get(maybePt.get());
 			else {
-				JOptionPane.showMessageDialog( tweed.frame, "block features not found "+ center.x+"_" + center.y );
+				JOptionPane.showMessageDialog( tweed.frame.frame, "block features not found "+ center.x+"_" + center.y );
 				throw new Error();
 			}
 		}

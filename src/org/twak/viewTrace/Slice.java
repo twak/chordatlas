@@ -792,8 +792,6 @@ public class Slice extends JComponent {
 			e.printStackTrace();
 		}
 		
-		ViewTrace.installPainters();
-		 
 //		new Slice(new File("/home/twak/data/mesh/for_profile.obj"), new File("/home/twak/data/mesh/slice_building.gml"));
 //		new Slice(new File("/home/twak/data/mesh/whitefriars.obj"), new File("/home/twak/data/mesh/whitefriars_gis.obj"));
 //		new Slice(new File("/home/twak/data/ludgate/ge.obj"), new File("/home/twak/data/ludgate/gis.obj"));
