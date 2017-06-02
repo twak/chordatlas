@@ -14,11 +14,11 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.utils.Arrayz;
-import org.twak.utils.Loop;
-import org.twak.utils.ObjDump;
-import org.twak.utils.Rainbow;
+import org.twak.utils.collections.Arrayz;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.Line3d;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.Rainbow;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;

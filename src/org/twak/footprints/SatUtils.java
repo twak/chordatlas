@@ -17,8 +17,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.tweed.Tweed;
-import org.twak.utils.LoopL;
-import org.twak.utils.Loopz;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopz;
 
 public class SatUtils {
 

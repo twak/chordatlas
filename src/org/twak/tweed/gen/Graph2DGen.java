@@ -6,8 +6,8 @@ import java.util.Set;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
-import org.twak.utils.Graph2D;
-import org.twak.utils.Line;
+import org.twak.utils.geom.Graph2D;
+import org.twak.utils.geom.Line;
 
 public abstract class Graph2DGen extends LineGen {
 

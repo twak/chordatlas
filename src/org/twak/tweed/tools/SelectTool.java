@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
-import org.twak.utils.LoopL;
+import org.twak.utils.collections.LoopL;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;

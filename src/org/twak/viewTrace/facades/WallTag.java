@@ -3,8 +3,8 @@ package org.twak.viewTrace.facades;
 import java.util.Arrays;
 import java.util.List;
 
-import org.twak.straightskeleton.Tag;
-import org.twak.utils.Line;
+import org.twak.camp.Tag;
+import org.twak.utils.geom.Line;
 
 public class WallTag extends Tag{
 	

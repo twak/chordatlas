@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import org.twak.utils.Line;
 import org.twak.tweed.gen.FeatureGen.MegaFeatures;
-import org.twak.utils.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.LineHeight;
 import org.twak.viewTrace.facades.MiniFacade;

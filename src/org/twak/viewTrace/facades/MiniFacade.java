@@ -1,5 +1,7 @@
 package org.twak.viewTrace.facades;
 
+import static org.twak.utils.geom.DRectangle.Bounds.*;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -22,18 +24,17 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.dbg.Plot.ICanEdit;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.utils.DRectangle;
-import org.twak.utils.Line;
-import org.twak.utils.MultiMap;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
+import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.PanMouseAdaptor;
-import org.twak.utils.Rainbow;
 import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.Rainbow;
 import org.twak.utils.ui.SimplePopup;
 import org.twak.utils.ui.SimplePopup2;
-import org.twak.utils.DRectangle.Bounds;
-import static org.twak.utils.DRectangle.Bounds.*;
 
 public class MiniFacade implements ICanPaint, ICanEdit {
 	

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.twak.utils.DRectangle;
+import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.Grid.Id;
 import org.twak.viewTrace.facades.MiniFacade.Feature;

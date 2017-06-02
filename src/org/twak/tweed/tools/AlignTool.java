@@ -17,8 +17,8 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MiniGen;
-import org.twak.utils.ListDownLayout;
-import org.twak.utils.Rainbow;
+import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Rainbow;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;

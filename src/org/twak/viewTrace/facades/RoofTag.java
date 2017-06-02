@@ -1,6 +1,6 @@
 package org.twak.viewTrace.facades;
 
-import org.twak.straightskeleton.Tag;
+import org.twak.camp.Tag;
 
 public class RoofTag extends Tag{
 	

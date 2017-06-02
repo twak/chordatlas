@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.twak.utils.MultiMapSet;
+import org.twak.utils.collections.MultiMapSet;
 
 
 public class Closer<E> {

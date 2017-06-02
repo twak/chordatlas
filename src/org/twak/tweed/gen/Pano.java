@@ -14,8 +14,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
-import org.twak.utils.LinearForm3D;
 import org.twak.utils.MUtils;
+import org.twak.utils.geom.LinearForm3D;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;

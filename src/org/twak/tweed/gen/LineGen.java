@@ -13,8 +13,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.Tweed;
-import org.twak.utils.Arrayz;
-import org.twak.utils.Line;
+import org.twak.utils.collections.Arrayz;
+import org.twak.utils.geom.Line;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;

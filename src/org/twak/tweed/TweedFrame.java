@@ -35,14 +35,14 @@ import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
 import org.twak.tweed.gen.Gen;
-import org.twak.utils.HalfMesh2;
 import org.twak.utils.ImageU;
-import org.twak.utils.ListDownLayout;
-import org.twak.utils.ListRightLayout;
-import org.twak.utils.ObjDump;
 import org.twak.utils.PaintThing;
-import org.twak.utils.Show;
 import org.twak.utils.WeakListener;
+import org.twak.utils.geom.HalfMesh2;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.ListRightLayout;
+import org.twak.utils.ui.Show;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.SuperMeshPainter;
 

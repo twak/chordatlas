@@ -12,9 +12,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.batik.parser.ParseException;
 import org.apache.batik.parser.PathHandler;
 import org.apache.batik.parser.PathParser;
-import org.twak.utils.ConsecutivePairs;
-import org.twak.utils.ObjDump;
 import org.twak.utils.Pair;
+import org.twak.utils.collections.ConsecutivePairs;
+import org.twak.utils.geom.ObjDump;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 

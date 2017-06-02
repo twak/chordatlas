@@ -11,8 +11,8 @@ import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.dbg.Plot;
-import org.twak.utils.HalfMesh2;
 import org.twak.utils.PaintThing;
+import org.twak.utils.geom.HalfMesh2;
 import org.twak.viewTrace.SuperMeshPainter;
 
 public class SSBuilder {

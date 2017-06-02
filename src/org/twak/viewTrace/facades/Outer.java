@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.twak.utils.DRectangle;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.PaintThing.ICanPaint;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Colour;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 

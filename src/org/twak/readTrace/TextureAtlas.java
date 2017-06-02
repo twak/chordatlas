@@ -14,9 +14,9 @@ import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 
 import org.twak.utils.BitTwiddle;
-import org.twak.utils.ObjDump;
-import org.twak.utils.ObjDump.Face;
-import org.twak.utils.ObjDump.Material;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.geom.ObjDump.Face;
+import org.twak.utils.geom.ObjDump.Material;
 
 
 /**

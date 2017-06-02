@@ -38,9 +38,9 @@ import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.utils.ListDownLayout;
 import org.twak.utils.MUtils;
-import org.twak.utils.ObjDump;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;

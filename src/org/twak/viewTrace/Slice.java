@@ -38,19 +38,19 @@ import javax.vecmath.Vector2d;
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.dbg.Plot;
-import org.twak.utils.Arrayz;
-import org.twak.utils.Graph2D;
-import org.twak.utils.Line;
-import org.twak.utils.ListDownLayout;
-import org.twak.utils.Loop;
-import org.twak.utils.LoopL;
-import org.twak.utils.Loopable;
 import org.twak.utils.MUtils;
-import org.twak.utils.ObjDump;
-import org.twak.utils.ObjRead;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PanMouseAdaptor;
+import org.twak.utils.collections.Arrayz;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
+import org.twak.utils.geom.Graph2D;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.geom.ObjRead;
 import org.twak.utils.triangulate.EarCutTriangulator;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 
 public class Slice extends JComponent {

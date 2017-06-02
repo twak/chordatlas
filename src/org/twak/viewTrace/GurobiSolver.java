@@ -9,12 +9,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import org.twak.utils.Cache;
-import org.twak.utils.Line;
-import org.twak.utils.Loop;
-import org.twak.utils.LoopL;
-import org.twak.utils.Loopable;
-import org.twak.utils.Loopz;
-import org.twak.utils.ObjDump;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
+import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.ObjDump;
 
 import gurobi.GRB;
 import gurobi.GRB.DoubleAttr;

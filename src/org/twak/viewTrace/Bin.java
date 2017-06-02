@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.twak.utils.Arrayz;
 import org.twak.utils.MUtils;
+import org.twak.utils.collections.Arrayz;
 
 public class Bin<E> {
 

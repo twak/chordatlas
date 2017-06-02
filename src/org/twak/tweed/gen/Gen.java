@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 import javax.swing.JComponent;
 
 import org.twak.tweed.Tweed;
-import org.twak.utils.Rainbow;
+import org.twak.utils.ui.Rainbow;
 
 import com.jme3.scene.Node;
 

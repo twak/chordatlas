@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
-import org.twak.utils.Line3D;
+import org.twak.utils.geom.Line3D;
 
 import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;

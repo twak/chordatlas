@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.twak.utils.HalfMesh2.HalfEdge;
-import org.twak.utils.HalfMesh2.HalfFace;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.HalfMesh2.HalfFace;
 
 public class SuperFace extends HalfFace {
 

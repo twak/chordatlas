@@ -15,9 +15,9 @@ import javax.swing.event.ChangeListener;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.handles.HandleMe;
-import org.twak.utils.ListDownLayout;
-import org.twak.utils.ObjDump;
-import org.twak.utils.ObjRead;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.geom.ObjRead;
+import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;

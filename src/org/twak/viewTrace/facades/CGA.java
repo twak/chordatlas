@@ -9,10 +9,10 @@ import javax.vecmath.Point2d;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Cache;
-import org.twak.utils.DRectangle;
-import org.twak.utils.Loop;
-import org.twak.utils.Loopz;
-import org.twak.utils.DRectangle.RectDir;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.DRectangle.RectDir;
 
 /**
  * Old code for greebling via CGA-esque grammar

@@ -20,33 +20,33 @@ import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.twak.siteplan.campskeleton.SitePlan;
+import org.twak.siteplan.campskeleton.Siteplan;
 import org.twak.siteplan.jme.Jme3z;
+import org.twak.camp.Output;
+import org.twak.camp.Skeleton;
+import org.twak.camp.Tag;
+import org.twak.camp.Output.Face;
+import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.Plan;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
-import org.twak.straightskeleton.Output;
-import org.twak.straightskeleton.Output.Face;
-import org.twak.straightskeleton.Skeleton;
-import org.twak.straightskeleton.Tag;
-import org.twak.straightskeleton.ui.Bar;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cache;
-import org.twak.utils.HalfMesh2;
-import org.twak.utils.HalfMesh2.HalfEdge;
-import org.twak.utils.HalfMesh2.HalfFace;
-import org.twak.utils.Line;
-import org.twak.utils.ListDownLayout;
-import org.twak.utils.Loop;
-import org.twak.utils.LoopL;
-import org.twak.utils.Loopable;
-import org.twak.utils.Loopz;
 import org.twak.utils.MUtils;
-import org.twak.utils.ObjDump;
 import org.twak.utils.WeakListener.Changed;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
+import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.HalfMesh2;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.Greeble;
 import org.twak.viewTrace.facades.Greeble.OnClick;
@@ -349,7 +349,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				SitePlan cs = new SitePlan( skel.plan ) {
+				Siteplan cs = new Siteplan( skel.plan ) {
 
 					public void show( Output output, Skeleton threadKey ) {
 

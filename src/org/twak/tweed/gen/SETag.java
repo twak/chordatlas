@@ -1,6 +1,6 @@
 package org.twak.tweed.gen;
 
-import org.twak.straightskeleton.Tag;
+import org.twak.camp.Tag;
 
 public class SETag extends Tag {
 

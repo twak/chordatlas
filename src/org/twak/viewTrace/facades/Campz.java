@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.twak.straightskeleton.Output;
-import org.twak.straightskeleton.Output.Face;
-import org.twak.utils.MultiMap;
+import org.twak.camp.Output;
+import org.twak.camp.Output.Face;
+import org.twak.utils.collections.MultiMap;
 
 public class Campz {
 

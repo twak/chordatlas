@@ -4,10 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 
 import org.twak.utils.PaintThing.ICanPaintU;
-import org.twak.utils.Line;
+import org.twak.utils.geom.Line;
+import org.twak.utils.ui.Rainbow;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PanMouseAdaptor;
-import org.twak.utils.Rainbow;
 
 public class LineSoupPainter implements ICanPaintU {
 	

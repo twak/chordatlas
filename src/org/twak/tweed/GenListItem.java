@@ -21,10 +21,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.gen.Gen;
-import org.twak.utils.ListRightLayout;
 import org.twak.utils.WeakListener;
 import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.ListRightLayout;
 import org.twak.utils.ui.SimplePopup2;
 
 public class GenListItem extends JPanel {

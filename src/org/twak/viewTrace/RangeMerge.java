@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.twak.utils.ConsecutiveItPairsGap;
-import org.twak.utils.ConsecutivePairs;
 import org.twak.utils.Pair;
+import org.twak.utils.collections.ConsecutiveItPairsGap;
+import org.twak.utils.collections.ConsecutivePairs;
 
 public class RangeMerge<T> {
 

@@ -13,9 +13,9 @@ import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
 import org.twak.tweed.gen.FeatureGen.MegaFeatures;
-import org.twak.utils.DRectangle;
-import org.twak.utils.ObjDump;
-import org.twak.utils.Rainbow;
+import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 

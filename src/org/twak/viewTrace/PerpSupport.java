@@ -3,9 +3,9 @@ package org.twak.viewTrace;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.twak.utils.Graph2D;
-import org.twak.utils.Line;
-import org.twak.utils.LinearForm;
+import org.twak.utils.geom.Graph2D;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.LinearForm;
 
 public class PerpSupport {
 	

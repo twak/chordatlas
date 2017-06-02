@@ -12,13 +12,13 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.MeshBuilder;
-import org.twak.utils.ConsecutivePairs;
-import org.twak.utils.LinearForm3D;
-import org.twak.utils.Loop;
 import org.twak.utils.MUtils;
 import org.twak.utils.MUtils.Frame;
+import org.twak.utils.collections.ConsecutivePairs;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.Line3d;
-import org.twak.utils.MultiMap;
+import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.Pair;
 
 /**

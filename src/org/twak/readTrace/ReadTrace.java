@@ -27,9 +27,9 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.geotools.referencing.operation.matrix.Matrix4;
 import org.twak.utils.BitTwiddle;
-import org.twak.utils.CountThings;
 import org.twak.utils.MUtils;
-import org.twak.utils.ObjDump;
+import org.twak.utils.collections.CountThings;
+import org.twak.utils.geom.ObjDump;
 
 import com.thoughtworks.xstream.XStream;
 

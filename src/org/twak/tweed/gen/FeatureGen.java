@@ -29,12 +29,12 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.utils.HalfMesh2.HalfEdge;
-import org.twak.utils.Line;
-import org.twak.utils.MultiMap;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
 import org.twak.utils.PaintThing.ICanPaintU;
+import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.viewTrace.facades.MiniFacade;
 

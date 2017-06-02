@@ -11,8 +11,8 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.utils.HalfMesh2.HalfEdge;
 import org.twak.utils.PaintThing;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 

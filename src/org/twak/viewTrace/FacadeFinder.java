@@ -19,17 +19,17 @@ import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.SkelGen.SimpleMass;
-import org.twak.utils.Anglez;
-import org.twak.utils.Line;
-import org.twak.utils.LinearForm;
-import org.twak.utils.Loop;
-import org.twak.utils.LoopL;
-import org.twak.utils.Loopable;
-import org.twak.utils.Loopz;
 import org.twak.utils.MUtils;
-import org.twak.utils.MultiMap;
-import org.twak.utils.Streamz;
-import org.twak.utils.SuperLoop;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
+import org.twak.utils.collections.Loopz;
+import org.twak.utils.collections.MultiMap;
+import org.twak.utils.collections.Streamz;
+import org.twak.utils.collections.SuperLoop;
+import org.twak.utils.geom.Anglez;
+import org.twak.utils.geom.Line;
+import org.twak.utils.geom.LinearForm;
 
 public class FacadeFinder {
 

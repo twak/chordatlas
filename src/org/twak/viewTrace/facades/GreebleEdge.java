@@ -11,17 +11,17 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.twak.camp.Output;
+import org.twak.camp.Output.Face;
+import org.twak.camp.Output.SharedEdge;
 import org.twak.siteplan.jme.MeshBuilder;
-import org.twak.straightskeleton.Output;
-import org.twak.straightskeleton.Output.Face;
-import org.twak.straightskeleton.Output.SharedEdge;
-import org.twak.utils.Line;
-import org.twak.utils.LinearForm3D;
-import org.twak.utils.Loop;
-import org.twak.utils.Loopable;
 import org.twak.utils.MUtils;
-import org.twak.utils.MultiMap;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.Loopable;
+import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.Line;
 import org.twak.utils.geom.Line3d;
+import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.Tube.CrossGen;
 
 public class GreebleEdge {

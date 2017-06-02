@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.twak.utils.Line;
-import org.twak.utils.LinearForm3D;
-import org.twak.utils.ObjRead;
+import org.twak.utils.geom.Line;
 import org.twak.utils.geom.Line3d;
+import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.geom.ObjRead;
 import org.twak.utils.results.LineOnPlane;
 import org.twak.utils.results.OOB;
 

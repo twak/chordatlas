@@ -13,9 +13,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
 import org.twak.tweed.Tweed;
-import org.twak.utils.Arrayz;
-import org.twak.utils.Cancellable;
 import org.twak.utils.MUtils;
+import org.twak.utils.collections.Arrayz;
+import org.twak.utils.ui.Cancellable;
 
 import com.jme3.asset.TextureKey;
 import com.jme3.material.Material;

@@ -6,7 +6,7 @@ import javax.swing.JLabel;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.utils.ObjDump;
+import org.twak.utils.geom.ObjDump;
 
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
