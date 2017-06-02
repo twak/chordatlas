@@ -22,7 +22,6 @@ import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.dbg.Plot.ICanEdit;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
@@ -35,6 +34,7 @@ import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.Rainbow;
 import org.twak.utils.ui.SimplePopup;
 import org.twak.utils.ui.SimplePopup2;
+import org.twak.utils.ui.Plot.ICanEdit;
 
 public class MiniFacade implements ICanPaint, ICanEdit {
 	

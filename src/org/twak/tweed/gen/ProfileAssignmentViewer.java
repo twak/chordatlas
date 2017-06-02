@@ -11,10 +11,10 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.SuperLine;
 
 public class ProfileAssignmentViewer {

@@ -37,7 +37,6 @@ import javax.vecmath.Vector2d;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.dbg.Plot;
 import org.twak.utils.MUtils;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PanMouseAdaptor;
@@ -51,6 +50,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.triangulate.EarCutTriangulator;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.WindowManager;
 
 public class Slice extends JComponent {

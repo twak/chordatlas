@@ -15,7 +15,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.Tweed;
-import org.twak.tweed.dbg.Plot;
+import org.twak.utils.ui.Plot;
 
 import com.thoughtworks.xstream.XStream;
 

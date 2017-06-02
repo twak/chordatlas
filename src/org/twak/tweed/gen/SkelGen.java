@@ -32,7 +32,6 @@ import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cache;
 import org.twak.utils.MUtils;
@@ -47,6 +46,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.Greeble;
 import org.twak.viewTrace.facades.Greeble.OnClick;
@@ -349,7 +349,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Siteplan cs = new Siteplan( skel.plan ) {
+				Siteplan cs = new Siteplan( skel.plan, false ) {
 
 					public void show( Output output, Skeleton threadKey ) {
 

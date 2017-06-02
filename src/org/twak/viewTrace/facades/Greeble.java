@@ -1,6 +1,5 @@
 package org.twak.viewTrace.facades;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,11 +18,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import org.geotools.graph.util.SwingUtil;
 import org.twak.camp.Edge;
 import org.twak.camp.Output;
-import org.twak.camp.Tag;
 import org.twak.camp.Output.Face;
+import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.jme.Jme3z;
@@ -48,6 +46,7 @@ import org.twak.utils.geom.Line;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
@@ -113,15 +112,7 @@ public class Greeble {
 				wallColor = ((WallTag)t).color;
 				bestWallArea = area;
 			}
-			
 		}
-		
-//		Node n = new Node();
-//		ColorRGBA col = Jme3z.toJme( Rainbow.next( this ) ); 
-//		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-//		mat.setColor( "Diffuse", col );
-//		mat.setColor( "Ambient", col );
-//		mat.setBoolean( "UseMaterialColors", true );
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 
@@ -130,6 +121,7 @@ public class Greeble {
 		for (List<Face> chain : Campz.findChains( output )) {
 			
 			mbs = new Cach<float[],MeshBuilder>( s -> new MeshBuilder() );
+			
 //			for ( Face f : output.faces.values() )
 //				mbs.get(roofColor).add3d( Loopz.insertInnerEdges( f.getLoopL() ), zToYup );
 			
@@ -145,7 +137,6 @@ public class Greeble {
 				
 				MiniFacade mf2 = new MiniFacade ( wt.miniFacade );
 				
-//				new Plot(wt.miniFacade);
 				
 				Line facadeLine;
 				{
@@ -158,32 +149,18 @@ public class Greeble {
 				mf2.scaleX( meshSE[0], meshSE[1] );
 				
 				
-//				for (MiniFacade mf : wt.)
-//				MeshBuilder mb = new MeshBuilder();
-//				
-//				Line r = mf2.imageFeatures.mega.megafacade;
-//				Line3d m = Pointz.to3( r );
-//				
-//				
-//				mb.add( m.fromPPram(  ));
-				
 				// find window locations in 3 space
 				mf2.rects.values().stream()
 						.flatMap ( f -> f.stream() )
 						.map     ( r -> new QuadF (r, facadeLine) )
 						.forEach ( q -> features.add(q) );
 				
-//				PaintThing.debug.clear();
-//				new Plot (facadeLine);
-//				features.stream().forEach( f -> PaintThing.debug.put( 1, f.corners[0] ) );
-				
 				mf = mf2;
 			}
 
-			for ( Face f : chain )
+			for ( Face f : chain ) {
 				face( f, mf, features, roofColor, wallColor );
-			
-//			System.out.println( "exterior features " + features.size() );
+			}
 			
 			for (QuadF w : features)
 				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) &&
@@ -228,12 +205,9 @@ public class Greeble {
 			geom = new Geometry ("material_"+col[0]+"_"+col[1]+"_"+col[2], mbs.get(col).getMesh() );
 		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 		mat.setColor( "Diffuse", new ColorRGBA( col[0], col[1], col[2], col[3] ) );
-		mat.setColor( "Ambient", new ColorRGBA( col[0], col[1], col[2], col[3] ) );
-//			mat.setColor( "Specular", new ColorRGBA( col[0], col[1], col[2], col[3] ) );
-//			mat.setFloat("Shininess", 64f);
+		mat.setColor( "Ambient", new ColorRGBA( col[0] * 0.5f, col[1]* 0.5f, col[2]* 0.5f, col[3] ) );
 		
 		mat.setBoolean( "UseMaterialColors", true );
-//			mat.setBoolean( "VertexLighting", true );
 		
 		geom.setMaterial( mat );
 		geom.updateGeometricState();
@@ -456,8 +430,8 @@ public class Greeble {
 		
 		Point3d bottomS = f.definingSE.iterator().next().getStart( f ), bottomE = f.definingSE.iterator().next().getEnd( f );
 		
-		Point3d start = new Point3d ( bottomS ); // edge.start.getLoc3();
-		Point3d end   = new Point3d ( bottomE ); // edge.start.getLoc3();
+		Point3d start = new Point3d ( bottomS );
+		Point3d end   = new Point3d ( bottomE );
 		
 		to2dXY.m33 = 1;
 		to2dXY.transform( start );
@@ -495,22 +469,20 @@ public class Greeble {
 			forFace.rects.clear();
 		}
 		
-		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
 		
-		LoopL<Point2d> sides = findRectagle(flat, Pointz.to2( start ), Pointz.to2(end) );
-		
+		LoopL<Point2d> sides = null;
 		DRectangle facadeRect = null;
-		if (sides != null) 
-			facadeRect = findRect( sides.remove(0) );
+		
+		if ( wallTag != null ) {
+			sides = findRectagle( flat, Pointz.to2( start ), Pointz.to2( end ) );
+
+			if ( sides != null )
+				facadeRect = findRect( sides.remove( 0 ) );
+		}
 		
 		List<DRectangle> floors = new ArrayList();
 		List<MeshBuilder> materials = new ArrayList();
-		
-//		if (wallTag != null) {
-//			wallTag.groundFloorColor = new float[] {1,0,0,1};
-//			faceMaterial = mbs.get( new float[]{0,1,0,1} );
-//		}
 		
 		if (wallTag != null && facadeRect != null && mf != null && 
 				wallTag.isGroundFloor && mf.groundFloorHeight > 0 && wallTag.groundFloorColor != null &&
@@ -536,12 +508,6 @@ public class Greeble {
 			if (sides != null)
 				faceMaterial.add( sides, to3d );
 		}
-		
-
-//		else {
-//			faceMaterial.add(ll.singleton()	, true);
-//			return;
-//		}
 
 		for ( int j = 0; j < floors.size(); j++ ) {
 			
@@ -601,16 +567,6 @@ public class Greeble {
 			balcony = new float[] {0.2f, 0.2f, 0.2f, 1},
 			moudling = new float[] {0.7f, 0.7f, 0.7f, 1};
 	
-//	protected double fromRects ( Loop<Point2d> rect, Matrix4d to3d, MiniFacade mf, WallTag wallTag, 
-//			MeshBuilder normalWall, MeshBuilder ground, 
-//			Cache<float[], MeshBuilder> mbs,
-//			List<DRectangle> occlusions, DRectangle all ) {
-//
-//		buildGrid (all, to3d, mf, wallTag, mbs );
-//		
-//		return 0;
-//	}
-
 	private DRectangle findRect( Loop<Point2d> rect ) {
 		double[] bounds = Loopz.minMax2d( rect );
 		

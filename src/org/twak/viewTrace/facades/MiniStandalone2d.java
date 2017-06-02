@@ -15,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
-import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.FeatureGen;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
 import org.twak.tweed.gen.FeatureGen.MegaFeatures;
@@ -24,6 +23,7 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.geom.Line;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Plot;
 import org.twak.utils.PanMouseAdaptor;
 
 import com.thoughtworks.xstream.XStream;

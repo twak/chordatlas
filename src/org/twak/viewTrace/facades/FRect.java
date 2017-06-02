@@ -10,7 +10,6 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.dbg.Plot.ICanEdit;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.MutableDouble;
@@ -20,6 +19,7 @@ import org.twak.utils.collections.ConsecutivePairs;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line;
+import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class FRect extends DRectangle implements ICanEdit {

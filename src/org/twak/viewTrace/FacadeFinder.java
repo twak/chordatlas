@@ -15,7 +15,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import org.twak.tweed.dbg.Plot;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.SkelGen.SimpleMass;
@@ -30,6 +29,7 @@ import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.Line;
 import org.twak.utils.geom.LinearForm;
+import org.twak.utils.ui.Plot;
 
 public class FacadeFinder {
 
