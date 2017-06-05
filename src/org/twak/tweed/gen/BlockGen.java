@@ -257,7 +257,7 @@ public class BlockGen extends ObjGen {
 	
 	@Override
 	public void dumpObj( ObjDump dump ) {
-		dump.setCurrentTexture( filename, 1, 1 );
+		dump.setCurrentMaterial( Color.blue, 0.5);
 		dump.addAll (getCroppedMesh());
 	}
 }

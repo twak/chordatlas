@@ -522,7 +522,7 @@ public class PlaneGen extends Gen implements IDumpObjs {
 	@Override
 	public void dumpObj( ObjDump dump ) {
 		
-		dump.setCurrentTexture( "windows ", 1, 1 );
+		dump.setCurrentMaterial( Color.orange, 0.5);
 		
 		Jme3z.dump( dump, gNode, 0 );
 		

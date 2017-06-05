@@ -1,5 +1,6 @@
 package org.twak.tweed.gen;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -161,7 +162,7 @@ public class ObjGen extends Gen implements IDumpObjs {
 
 	@Override
 	public void dumpObj( ObjDump dump ) {
-		dump.setCurrentTexture( filename, 1, 1 );
+		dump.setCurrentMaterial( Color.pink, 0.5);
 		dump.addAll (new ObjRead( new File (Tweed.JME+filename) ));
 	}
 

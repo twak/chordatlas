@@ -77,9 +77,9 @@ import com.jme3.ui.Picture;
 public class Tweed extends SimpleApplication {
 
 	
-	public final static String DATA =   System.getProperty("user.home")+"/data/regent"; // we read the datafiles from here
+	public final static String DATA   =   System.getProperty("user.home")+"/data/regent"; // we read the datafiles from here
 	public final static String CONFIG = System.getProperty("user.home")+"/Desktop/"; // we write all sort of stuff here
-	public final static String JME = new File(System.getProperty("user.home")).getParent()+"/"; // root of asset resource-tree for jMonkey
+	public final static String JME    = new File(System.getProperty("user.home"))+"/"; // root of asset resource-tree for jMonkey
 	
 	public final static String 
 			CLICK = "Click", 
