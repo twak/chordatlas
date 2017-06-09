@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.swing.ProgressMonitor;
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
 import org.twak.tweed.gen.FeatureGen.MFPoint;
@@ -146,7 +147,7 @@ public class SkelSolver {
 			}).start();
 			
 			try {
-  			    model.write( "./problem"+System.currentTimeMillis()+".mps");
+  			    model.write( Tweed.CONFIG + "problem_"+System.currentTimeMillis()+".mps");
 				model.optimize();
 			} finally {
 				gurobiDone = true;				
@@ -258,7 +259,7 @@ public class SkelSolver {
 
 	public void buildProblem() throws GRBException {
 
-		model = new GRBModel( new GRBEnv( "./"+System.currentTimeMillis()+".log" ) );
+		model = new GRBModel( new GRBEnv( Tweed.CONFIG+System.currentTimeMillis()+".log" ) );
 		target = new GRBQuadExpr();
 		edgeInfo = new HashMap<>();
 		faceInfo = new HashMap<>();
