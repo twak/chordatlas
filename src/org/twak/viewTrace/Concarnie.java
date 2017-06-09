@@ -25,6 +25,7 @@ import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.apache.commons.math3.geometry.partitioning.Region;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.twak.utils.Line;
 import org.twak.utils.MUtils;
 import org.twak.utils.PaintThing;
 import org.twak.utils.Pair;
@@ -37,7 +38,6 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.MultiMapSet;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.Graph2D;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.UnionWalker;
 

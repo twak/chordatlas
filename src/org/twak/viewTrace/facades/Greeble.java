@@ -33,8 +33,9 @@ import org.twak.tweed.gen.SETag;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
-import org.twak.utils.Cach;
-import org.twak.utils.Cache;
+import org.twak.utils.Cach2;
+import org.twak.utils.Cache2;
+import org.twak.utils.Line;
 import org.twak.utils.MUtils;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
@@ -42,11 +43,9 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
@@ -61,7 +60,17 @@ public class Greeble {
 
 	Tweed tweed;
 	Node node = new Node();
-	Cache<float[],MeshBuilder> mbs;
+	
+	Cache2<String, float[], MatMeshBuilder> mbs = 
+			new Cach2<String, float[], MatMeshBuilder>( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
+	
+	final static float[] 
+			glass = new float[] {0.0f, 0.0f, 0.0f, 1},
+			wood = new float[] {0.8f, 0.8f, 0.8f, 1 },
+			balcony = new float[] {0.2f, 0.2f, 0.2f, 1},
+			moudling = new float[] {0.7f, 0.7f, 0.7f, 1};
+
+	
 	OnClick onClick;
 	
 	
@@ -75,13 +84,6 @@ public class Greeble {
 		createMesh( output );
 		return node;
 	}
-	
-	private final static Matrix4d zToYup = new Matrix4d(
-			1,0,0,0,
-			0,0,1,0,
-			0,1,0,0,
-			0,0,0,1
-	);
 
 	public void createMesh( Output output ) {
 		
@@ -95,6 +97,7 @@ public class Greeble {
 			return;
 		
 		double bestWallArea = 0, bestRoofArea = 0;
+		
 		
 		for ( Face f : output.faces.values() )  {
 			
@@ -114,13 +117,14 @@ public class Greeble {
 			}
 		}
 		
+		mbs.clear();
+		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
-
 		edges( output, roofColor );
+		
 		
 		for (List<Face> chain : Campz.findChains( output )) {
 			
-			mbs = new Cach<float[],MeshBuilder>( s -> new MeshBuilder() );
 			
 //			for ( Face f : output.faces.values() )
 //				mbs.get(roofColor).add3d( Loopz.insertInnerEdges( f.getLoopL() ), zToYup );
@@ -163,75 +167,62 @@ public class Greeble {
 			}
 			
 			for (QuadF w : features)
-				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) &&
-						w.foundAll() ) {
-					createDormerWindow( w, mbs.get( wood ), mbs.get( glass ), 
+				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
+					createDormerWindow( w,  mbs.get( "wood", wood ),  mbs.get( "glass", glass ), 
 							(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 				}
 			
 			
 			
-			for (float[] col : new HashSet<> ( mbs.cache.keySet()) ) {
-				
-				if (col == null)
-					col = new float[] {0,1,0,1};
-				
-				node.attachChild( mb2Geom( output, chain, col ) );
-			}
+			for ( String mName : mbs.cache.keySet() )
+				for (float[] mCol : mbs.cache.get( mName ).keySet() )		
+					node.attachChild( mb2Geom( output, chain, mName, mCol ) );
 		}
-
-		
 	}
 
 	private void edges( Output output, float[] roofColor ) {
-		mbs = new Cach<float[], MeshBuilder>( s -> new MeshBuilder() ); // todo: move cach of mbs somewhere clean
 
-		GreebleEdge.roowWallGreeble( output, mbs.get( roofColor ), mbs.get( glass ) );
+		GreebleEdge.roowWallGreeble( output, mbs.get( "tile", roofColor ),  mbs.get( "brick", new float[] {1,0,0,1 } ) );
+		
 		for ( Face f : output.faces.values() )
-			GreebleEdge.roofGreeble( f, mbs.get( roofColor ) );
-
-		for ( float[] col : new HashSet<>( mbs.cache.keySet() ) ) {
-
-			if ( col == null )
-				col = new float[] { 0, 1, 0, 1 };
-
-			node.attachChild( mb2Geom( output, null, col ) );
-		}
+			GreebleEdge.roofGreeble( f, mbs.get( "tile", roofColor ) );
 	}
 
-	private Geometry mb2Geom( Output output, List<Face> chain, float[] col ) {
+	private Geometry mb2Geom( Output output, List<Face> chain, String name, float[] col ) {
 		Geometry geom;
 		{
-			geom = new Geometry ("material_"+col[0]+"_"+col[1]+"_"+col[2], mbs.get(col).getMesh() );
-		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-		mat.setColor( "Diffuse", new ColorRGBA( col[0], col[1], col[2], col[3] ) );
-		mat.setColor( "Ambient", new ColorRGBA( col[0] * 0.5f, col[1]* 0.5f, col[2]* 0.5f, col[3] ) );
-		
-		mat.setBoolean( "UseMaterialColors", true );
-		
-		geom.setMaterial( mat );
-		geom.updateGeometricState();
-		geom.updateModelBound();
-		
-		if (chain != null)
-		geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { new ClickMe() {
-			@Override
-			public void clicked( Object data ) {
-				
-				try {
-					SwingUtilities.invokeAndWait( new Runnable() {
-						
-						@Override
-						public void run() {
-							selected(output, node, findSuperEdge(output, chain) );
+			geom = new Geometry( "material_" + col[ 0 ] + "_" + col[ 1 ] + "_" + col[ 2 ], mbs.get( name, col ).getMesh() );
+			geom.setUserData( Jme3z.MAT_KEY, name );
+			
+			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			mat.setColor( "Diffuse", new ColorRGBA( col[ 0 ], col[ 1 ], col[ 2 ], col[ 3 ] ) );
+			mat.setColor( "Ambient", new ColorRGBA( col[ 0 ] * 0.5f, col[ 1 ] * 0.5f, col[ 2 ] * 0.5f, col[ 3 ] ) );
+
+			mat.setBoolean( "UseMaterialColors", true );
+
+			geom.setMaterial( mat );
+			geom.updateGeometricState();
+			geom.updateModelBound();
+
+			if ( chain != null )
+				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { new ClickMe() {
+					@Override
+					public void clicked( Object data ) {
+
+						try {
+							SwingUtilities.invokeAndWait( new Runnable() {
+
+								@Override
+								public void run() {
+									selected( output, node, findSuperEdge( output, chain ) );
+								}
+							} );
+						} catch ( Throwable th ) {
+							th.printStackTrace();
 						}
-					} );
-				} catch ( Throwable th ) {
-					th.printStackTrace();
-				}
-			}
-		} } );
-		
+					}
+				} } );
+
 		}
 		return geom;
 	}
@@ -292,7 +283,7 @@ public class Greeble {
 		
 	private void face (Face f, MiniFacade mf, Set<QuadF> features, float[] roofColor, float[] wallColor ) {
 
-		float[] color = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+		MatMeshBuilder faceColor = mbs.get( "error", new float[] { 0.5f, 0.5f, 0.5f, 1.0f } );
 		
 		WallTag wallTag = null;
 
@@ -301,19 +292,12 @@ public class Greeble {
 			if ( t instanceof WallTag ) {
 				
 				wallTag = ( (WallTag) t );
-				
-				if (wallTag.color != null)
-					color = wallTag.color;
-				
-				else color = wallColor;
+				faceColor = mbs.get( "brick", wallTag.color != null ? wallTag.color : wallColor );
 
 			} else if ( t instanceof RoofTag ) {
-				RoofTag rt = (RoofTag)t;
 				
-				if (rt.color == null)
-					color = roofColor;
-				else
-					color = ( (RoofTag) t ).color;
+				RoofTag rt = (RoofTag)t;
+				faceColor = mbs.get("tile", rt.color != null ? rt.color : roofColor );
 			}
 		}
 
@@ -326,14 +310,13 @@ public class Greeble {
 					return;
 		}
 
-		MeshBuilder faceColor = mbs.get( color );
 
 		for ( Loop<Point3d> ll : f.getLoopL() ) {
 				
 			if (wallTag != null) 
 				wallTag.isGroundFloor = f.definingCorners.iterator().next().z < 1;
 				
-			mapTo2d( f, ll, mf, wallTag, features, faceColor, mbs );
+			mapTo2d( f, ll, mf, wallTag, features, faceColor );
 		}
 	}
 
@@ -413,8 +396,7 @@ public class Greeble {
 			MiniFacade mf,
 			WallTag wallTag, 
 			Set<QuadF> features, 
-			MeshBuilder faceMaterial, 
-			Cache<float[], MeshBuilder> mbs ) {
+			MatMeshBuilder faceMaterial ) {
 		
 		Matrix4d to2dXY = new Matrix4d();
 		
@@ -491,15 +473,16 @@ public class Greeble {
 			
 			floors.addAll ( facadeRect.splitY( mf.groundFloorHeight ) );
 			
+			MatMeshBuilder gfm = mbs.get( "brick", wallTag.groundFloorColor ); 
 			
 			for ( Loop<Point2d> loop : sides ) {
 				
 				Loop<Point2d>[] cut = Loopz.cutConvex( loop, new LinearForm( 0, 1, mf.groundFloorHeight ) );
 				faceMaterial.add( cut[ 1 ].singleton(), to3d );
-				mbs.get( wallTag.groundFloorColor ).add( cut[ 0 ].singleton(), to3d );
+				gfm.add( cut[ 0 ].singleton(), to3d );
 			}
 			
-			materials.add( mbs.get( wallTag.groundFloorColor ) );
+			materials.add( gfm );
 			materials.add( faceMaterial );
 		}
 		else {
@@ -555,17 +538,10 @@ public class Greeble {
 				to3d,
 				forFace,
 				m,
-				wallTag,
-				mbs );
+				wallTag );
 		
 		}
 	}
-	
-	final static float[] 
-			glass = new float[] {0.0f, 0.0f, 0.0f, 1},
-			wood = new float[] {0.8f, 0.8f, 0.8f, 1 },
-			balcony = new float[] {0.2f, 0.2f, 0.2f, 1},
-			moudling = new float[] {0.7f, 0.7f, 0.7f, 1};
 	
 	private DRectangle findRect( Loop<Point2d> rect ) {
 		double[] bounds = Loopz.minMax2d( rect );
@@ -1067,7 +1043,7 @@ public class Greeble {
 	}
 
 	private void buildGrid( DRectangle all, Matrix4d to3d, MiniFacade mf, 
-			MeshBuilder wallColorMat, WallTag wallTag, Cache<float[], MeshBuilder> mbs ) {
+			MeshBuilder wallColorMat, WallTag wallTag ) {
 
 		Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
 
@@ -1082,7 +1058,7 @@ public class Greeble {
 						@Override
 						public void instance( DRectangle rect ) {
 							createWindow( rect, to3d, 
-									wallColorMat, mbs.get( wood ), mbs.get( glass ), 
+									wallColorMat, mbs.get( "wood", wood ), mbs.get( "glass", glass ), 
 									wallTag.windowDepth, 
 									(float) wallTag.sillDepth, 
 									(float) w.attachedHeight.get(Feature.SILL).d, 
@@ -1098,7 +1074,7 @@ public class Greeble {
 					balcon.grow (0.2);
 					balcon.height = bHeight;
 					
-					createBalcony( balcon, to3d, mbs.get( balcony ), wallTag.balconyDepth );
+					createBalcony( balcon, to3d, mbs.get( "metal", balcony ), wallTag.balconyDepth );
 				}
 				
 			}
@@ -1116,7 +1092,7 @@ public class Greeble {
 						@Override
 						public void instance( DRectangle rect ) {
 
-							createWindow( rect, to3d, wallColorMat, mbs.get( wood ), mbs.get( glass ), 
+							createWindow( rect, to3d, wallColorMat, mbs.get( "wood", wood ), mbs.get( "glass", glass ), 
 									wallTag.windowDepth, 
 									(float) wallTag.sillDepth, 
 									(float) s.attachedHeight.get(Feature.SILL).d, 
@@ -1131,7 +1107,7 @@ public class Greeble {
 					g.insert( d, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createDoor( rect, to3d, wallColorMat, mbs.get( new float[] {0,0,0.3f, 1} ), wallTag.doorDepth );
+							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", new float[] {0,0,0.3f, 1} ), wallTag.doorDepth );
 						}
 					} );
 			}
@@ -1141,7 +1117,7 @@ public class Greeble {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createBalcony( rect, to3d, mbs.get( balcony ), wallTag.balconyDepth );
+							createBalcony( rect, to3d, mbs.get( "metal", balcony ), wallTag.balconyDepth );
 						}
 
 						@Override
@@ -1156,7 +1132,7 @@ public class Greeble {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							moulding( to3d, rect, mbs.get( moudling ) );
+							moulding( to3d, rect, mbs.get( "brick", moudling ) );
 						}
 					} );
 			}

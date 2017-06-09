@@ -9,11 +9,11 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import org.twak.utils.Cache;
+import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.ObjDump;
 
 import gurobi.GRB;

@@ -2,7 +2,7 @@ package org.twak.viewTrace;
 
 import javax.vecmath.Point2d;
 
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 
 class SupportPoint {
 	

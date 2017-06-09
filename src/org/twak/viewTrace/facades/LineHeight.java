@@ -2,7 +2,7 @@ package org.twak.viewTrace.facades;
 
 import javax.vecmath.Point2d;
 
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 
 public class LineHeight extends Line {
 

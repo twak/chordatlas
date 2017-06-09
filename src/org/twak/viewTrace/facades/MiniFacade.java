@@ -23,11 +23,11 @@ import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureGen.ImageFeatures;
+import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.ui.ColourPicker;

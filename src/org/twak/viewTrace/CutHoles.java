@@ -6,12 +6,12 @@ import java.util.Map;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
+import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 

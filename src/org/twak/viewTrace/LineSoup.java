@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
 
+import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Graph2D;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.LinearForm;
 import org.twak.viewTrace.QuadTree.AABBQT;
 import org.twak.viewTrace.QuadTree.AxisAlignedBoundingBox;

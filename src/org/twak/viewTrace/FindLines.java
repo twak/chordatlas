@@ -11,11 +11,11 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.twak.utils.Line;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.ConsecutiveItPairs;
 import org.twak.utils.collections.MultiMapSet;
 import org.twak.utils.geom.Anglez;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.LinearForm;
 import org.twak.viewTrace.RangeMerge.Result;
 

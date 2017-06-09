@@ -28,8 +28,8 @@ import javax.vecmath.Vector3d;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.utils.Line;
 import org.twak.utils.MUtils;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 

@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.gen.FeatureGen.MegaFeatures;
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.LineHeight;
@@ -57,7 +57,7 @@ public class SuperEdge extends HalfEdge {
 
 	public double[] findRange() {
 		
-		if ( mini.isEmpty() || mini.get( 0 ).imageFeatures == null)
+		if ( mini == null || mini.isEmpty() || mini.get( 0 ).imageFeatures == null)
 			return null;
 		
  	    Line mf = mini.get(0).imageFeatures.mega.megafacade; // todo: bad place for this method.

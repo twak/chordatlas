@@ -3,7 +3,7 @@ package org.twak.viewTrace;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 
 public class SuperLine extends Line {
 

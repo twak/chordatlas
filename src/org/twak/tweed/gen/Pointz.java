@@ -6,7 +6,7 @@ import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 import org.twak.utils.geom.Line3d;
 
 import com.jme3.math.Vector3f;

@@ -10,11 +10,11 @@ import java.util.Map;
 
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
+import org.twak.utils.Line;
 import org.twak.utils.MUtils;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.geom.Line;
 import org.twak.utils.PanMouseAdaptor;
 
 public class Grid implements ICanPaint {

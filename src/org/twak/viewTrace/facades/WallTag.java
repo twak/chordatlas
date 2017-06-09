@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.twak.camp.Tag;
-import org.twak.utils.geom.Line;
+import org.twak.utils.Line;
 
 public class WallTag extends Tag{
 	

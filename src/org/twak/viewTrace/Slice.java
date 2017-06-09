@@ -37,6 +37,7 @@ import javax.vecmath.Vector2d;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.twak.tweed.Tweed;
+import org.twak.utils.Line;
 import org.twak.utils.MUtils;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PanMouseAdaptor;
@@ -45,7 +46,6 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.Graph2D;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.triangulate.EarCutTriangulator;

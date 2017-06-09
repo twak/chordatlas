@@ -48,6 +48,7 @@ import org.twak.tweed.gen.FeatureGen.MegaFeatures;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
+import org.twak.utils.Line;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.DHash;
 import org.twak.utils.collections.Loop;
@@ -56,7 +57,6 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.HalfMesh2;
-import org.twak.utils.geom.Line;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
@@ -306,6 +306,8 @@ public class SkelFootprint {
 		
 		System.out.println("sampling...");
 		for ( HalfFace f : mesh ) {
+			
+			System.out.println(f.hashCode());
 			
 			if ( TRUE ) { //color roofs
 				
