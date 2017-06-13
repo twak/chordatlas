@@ -46,6 +46,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
@@ -122,9 +123,7 @@ public class Greeble {
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		edges( output, roofColor );
 		
-		
 		for (List<Face> chain : Campz.findChains( output )) {
-			
 			
 //			for ( Face f : output.faces.values() )
 //				mbs.get(roofColor).add3d( Loopz.insertInnerEdges( f.getLoopL() ), zToYup );

@@ -53,31 +53,47 @@ public class GreebleEdge {
 				if (f1 == null || f2 == null)
 					continue;
 				
-				Point3d
+				EdgePoint
 					bs = findAdjacent(se.start, se.end  , boundary),
 					be = findAdjacent(se.end  , se.start, boundary);
 				
 				if (bs != null && be != null) {
 					
-					LinearForm3D 
-						cutS = cut (bs, se.start, se.end),
-						cutE = cut (se.start, se.end, be);
+					LinearForm3D cutS, cutE; 
+					
+					if ( isOverhang( bs.se ) ) 
+						cutS = cut (bs.pt, se.start, se.end); // between two angles
+					else
+						cutS = new LinearForm3D( LinearForm3D.linePerp ( toXZ( se.end ), toXZ( se.start ) )  ); // flat at end
+					
+					if ( isOverhang( be.se ))
+						cutE = cut (se.start, se.end, be.pt);
+					else
+						cutE = new LinearForm3D( LinearForm3D.linePerp ( toXZ( se.start ), toXZ( se.end ) )  ); // flat at end
 					
 					LinearForm3D 
 						right  = new LinearForm3D( toXZ( f1.edge.getPlaneNormal() ), toXZ( f1.edge.start ) ),
-						left = new LinearForm3D( toXZ( f2.edge.getPlaneNormal() ), toXZ(f2.edge.start ) );
+						left   = new LinearForm3D( toXZ( f2.edge.getPlaneNormal() ), toXZ(f2.edge.start ) );
 					
-					// swap left, right iff
-					
-					double angle = f1.edge.getPlaneNormal().angle(f2.edge.getPlaneNormal());
 					
 					Tube.tube(roof, Collections.singleton(cutS), 
 							Collections.singleton(cutE), 
 							new Line3d( toXZ ( se.start ), toXZ (  se.end) ), 
-							 left, right, angle < Math.PI * 0.4 ? new OverhangCross() : new LipCross() );
+							 left, right, isOverhang(se) ? new OverhangCross() : new LipCross() );
 				}
 			}
 	}
+	
+	private static boolean isOverhang (SharedEdge se) {
+		
+		Face f1 = se.left,
+				 f2 = se.right;
+
+		double angle = f1.edge.getPlaneNormal().angle(f2.edge.getPlaneNormal());
+		
+		return angle < Math.PI * 0.4;
+	}
+	
 	
 	private static class OverhangCross implements CrossGen {
 
@@ -200,13 +216,23 @@ public class GreebleEdge {
 		return new Point3d( xy.x, xy.z, xy.y );
 	}
 	
-	private static Point3d findAdjacent(Point3d start, Point3d not, MultiMap<Point3d, SharedEdge> boundary ) {
+	private static class EdgePoint {
+		SharedEdge se;
+		Point3d pt;
+		
+		public EdgePoint (SharedEdge se, Point3d pt) {
+			this.se = se;
+			this.pt = pt;
+		}
+	}
+	
+	private static EdgePoint findAdjacent(Point3d start, Point3d not, MultiMap<Point3d, SharedEdge> boundary ) {
 		
 		for (SharedEdge p : boundary.get(start)) {
 			if ( p.start.equals(start) && !p.end.equals(not) )
-				return p.end;
+				return new EdgePoint( p, p.end );
 			if ( p.end.equals(start) && !p.start.equals(not ) )
-				return p.start;
+				return new EdgePoint( p, p.start );
 		}
 		return null;
 	}

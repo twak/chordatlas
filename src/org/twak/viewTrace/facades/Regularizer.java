@@ -76,9 +76,9 @@ public class Regularizer {
 		
 		miniFacadesUsed += in.size();
 		regularised++;
-		for (MiniFacade mf : in) {
-			seenImages.add ( mf.imageFeatures.ortho );
-		}
+		for (MiniFacade mf : in) 
+			if (mf.imageFeatures != null)
+				seenImages.add ( mf.imageFeatures.ortho );
 		
 		if (in.isEmpty())
 			return Collections.singletonList( gridMini() );

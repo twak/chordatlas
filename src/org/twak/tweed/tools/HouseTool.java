@@ -1,16 +1,19 @@
 package org.twak.tweed.tools;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import org.twak.siteplan.campskeleton.Profile;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.FeatureGen;
+import org.twak.tweed.gen.FeatureGen.ImageFeatures;
+import org.twak.tweed.gen.FeatureGen.MegaFeatures;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SkelGen;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.Line;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
@@ -21,6 +24,7 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import com.thoughtworks.xstream.XStream;
 
 public class HouseTool extends Tool {
 
@@ -33,16 +37,18 @@ public class HouseTool extends Tool {
 
 		MiniFacade mini;
 		
-//		{
-//			MegaFeatures mf = new MegaFeatures((Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
-//			ImageFeatures imf = FeatureGen.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
-//			mini = imf.miniFacades.get( 2 );
-//		}
+		MegaFeatures mf = new MegaFeatures((Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
+		ImageFeatures imf = FeatureGen.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
+		mini = imf.miniFacades.get( 2 );
+		imf.mega = mf;	
+		
 		{
 			mini = new MiniFacade();
 			mini.width = 30;
 			mini.height = 20;
 			mini.rects.put( Feature.WINDOW, new FRect( 5, 5, 3, 3 ) );
+			mini.color = new double[] {0.8,0.8,0.3,1};
+			mini.imageFeatures = imf;
 		}
 		
 		double[] minMax = new double[] {0, 20, 0, 20};
@@ -70,6 +76,8 @@ public class HouseTool extends Tool {
 				SuperEdge se = (SuperEdge)e;
 				
 				se.prof = p;
+				se.addMini( mini );
+				se.proceduralFacade = mf;
 				
 				if ( first )
 					se.addMini( mini );

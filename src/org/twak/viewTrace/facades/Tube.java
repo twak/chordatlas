@@ -36,6 +36,9 @@ public class Tube {
 			Collection<LinearForm3D> before, Collection<LinearForm3D> after, 
 			Line3d line, LinearForm3D left, LinearForm3D right, CrossGen gen ) {
 		
+		if (angle ( before, line) < 0.1 || angle ( after, line ) < 0.1 )
+			return; // too pointy to touch
+		
 		Point3d middle = line.fromPPram( 0.5 );
 		
 		Vector3d along = line.dir();
@@ -58,21 +61,33 @@ public class Tube {
 		List<Point3d> profilePts = gen.gen( leftDir, rightDir ).stream().
 				map( p -> MUtils.fromXY( frame, p ) ).collect( Collectors.toList() );
 		
-		List<LinearForm3D> hit = new ArrayList<>();
+		List<LinearForm3D> dummy = new ArrayList<>();
 		
 		for (Pair <Point3d, Point3d> pair : new ConsecutivePairs<Point3d>( profilePts, true ) ) {
 			
 			Point3d 
-					f1 = clip (pair.first(), along, after, hit ),
-					f2 = clip (pair.second(), along, after, hit ),
-					b1 = clip (pair.first(), nAlong, before, hit ),
-					b2 = clip (pair.second(), nAlong, before, hit );
+					f1 = clip ( pair.first (), along , after , dummy ),
+					f2 = clip ( pair.second(), along , after , dummy ),
+					b1 = clip ( pair.first (), nAlong, before, dummy ),
+					b2 = clip ( pair.second(), nAlong, before, dummy );
 
 			out.add (f2, f1, b1, b2);
 		}
 		
-		cap( out, after ,  along, profilePts, true  );
-		cap( out, before, nAlong, profilePts, false );
+//		cap( out, after ,  along, profilePts, true  );
+//		cap( out, before, nAlong, profilePts, false );
+	}
+
+	private static double angle( Collection<LinearForm3D> lfs, Line3d line ) {
+		
+		double min = Double.MAX_VALUE;
+		
+		for ( LinearForm3D lf : lfs ) {
+			Point3d s = lf.project( line.start ), e = lf.project( line.end );
+			min = Math.min( min, line.angle( new Line3d( s, e ).dir() ) );
+		}
+		
+		return min;
 	}
 
 	private static void cap( MeshBuilder out, Collection<LinearForm3D> after, 
