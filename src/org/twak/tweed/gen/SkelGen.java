@@ -5,11 +5,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -20,16 +18,19 @@ import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.twak.siteplan.campskeleton.Siteplan;
-import org.twak.siteplan.jme.Jme3z;
 import org.twak.camp.Output;
+import org.twak.camp.Output.Face;
 import org.twak.camp.Skeleton;
 import org.twak.camp.Tag;
-import org.twak.camp.Output.Face;
 import org.twak.camp.ui.Bar;
+import org.twak.mmg.MOgram;
+import org.twak.mmg.media.Facade2d;
+import org.twak.mmg.ui.MOgramEditor;
 import org.twak.siteplan.campskeleton.Plan;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
+import org.twak.siteplan.campskeleton.Siteplan;
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
@@ -42,9 +43,9 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.HalfMesh2;
-import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.SuperLine;
@@ -205,10 +206,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		for ( Loop<HalfEdge> loopHE : edges ) {
 
 			
-			
-			
-			
-			
 			Map<Point2d, SuperEdge> ses = new HashMap();
 
 			Loop<Point2d> lp = new Loop();
@@ -278,19 +275,27 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	Map<SuperFace, Node> geometry = new IdentityHashMap<>();
+	MOgram mogram = null;
 	
 	public synchronized void setSkel( PlanSkeleton skel, Output output, SuperFace sf ) {
 		
 		if (geometry.get(sf) != null)
 			geometry.get(sf).removeFromParent();
+
+		Node house;
 		
-		Node house = new Greeble(tweed).showSkeleton( output, new OnClick() {
-			
+		OnClick onclick = new OnClick() {
 			@Override
 			public void selected( Output output, Node house2, SuperEdge se ) {
 				SkelGen.this.selected(skel, house2, sf, se);
 			}
-		} );
+		};
+		
+		if (mogram == null)
+			house = new Greeble(tweed).showSkeleton( output, onclick );
+		else
+			house = new MMGGreeble(tweed).showSkeleton(output, onclick);
+			
 		
 		gNode.attachChild( house );
 		geometry.put(sf, house);
@@ -298,6 +303,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.getRootNode().updateGeometricState();
 		tweed.getRootNode().updateModelBound();
 		tweed.gainFocus();
+		
 	}
 
 	private void selected( PlanSkeleton skel, Node house, SuperFace sf, SuperEdge se ) {
@@ -361,9 +367,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 								
 								setSkel( skel, output, sf);
 								
-								tweed.getRootNode().updateGeometricState();
-								tweed.getRootNode().updateModelBound();
-								tweed.gainFocus();
 							}
 						} );
 					};
@@ -374,6 +377,20 @@ public class SkelGen extends Gen implements IDumpObjs {
 		} );
 
 		ui.add( camp );
+		
+		JButton mmg = new JButton("mmg");
+		mmg.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				MOgram mg = buildMOGram (sf, se);
+				
+				new MOgramEditor( mg ).setVisible( true );;
+			}
+		} );
+		
+		ui.add( mmg );
 
 		JButton mini = new JButton("minis");
 		mini.addActionListener( e -> new MiniViewer( se ) );
@@ -397,6 +414,37 @@ public class SkelGen extends Gen implements IDumpObjs {
 		ui.add( plan );
 		
 		tweed.frame.setGenUI(ui);
+	}
+	
+	private MOgram buildMOGram( SuperFace sf, SuperEdge se ) {
+		
+		MOgram mg;
+		
+		if (se.mogram != null)
+			mg = se.mogram;
+		else {
+			
+			mg = se.mogram = new MOgram();
+			
+//			- compute to2d for sf 
+//			- add face boundaries to mogram
+//			- add windows to mogram
+//			- label face boundaries
+			
+		}
+
+		mg.medium = new Facade2d() {
+			public void doRender( MOgram mogram ) {
+
+				SkelGen.this.mogram = mogram;
+
+				PlanSkeleton skel = calc( sf );
+				if ( skel != null )
+					setSkel( skel, skel.output, sf );
+			};
+		};
+		
+		return mg;
 	}
 
 	public static Profile tagWalls( Profile profile, float[] roofColor, SuperEdge se, Point2d s, Point2d e ) {

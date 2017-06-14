@@ -76,6 +76,12 @@
 			<artifactId>siteplan</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.twak.mmg</groupId>
+			<artifactId>mmg</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.vecmath</groupId>
