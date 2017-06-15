@@ -31,7 +31,7 @@ import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.DumbCluster1DImpl;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.viewTrace.InAxDouble;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -565,7 +565,7 @@ public class Regularizer {
 			}
 		}
 		
-		return count == 0? 0 : MUtils.clamp( total / count, 0.2, o.height/2);
+		return count == 0? 0 : Mathz.clamp( total / count, 0.2, o.height/2);
 	}
 
 	private double dimensionSpread( List<FRect> found ) {
@@ -812,7 +812,7 @@ public class Regularizer {
 			}
 			
 			if (p1.size() >= 3) { 
-				double score = MUtils.L2 ( Arrayz.toIntArray( p1 ) , Arrayz.toIntArray( p2 ) ) * 0.4 +
+				double score = Mathz.L2 ( Arrayz.toIntArray( p1 ) , Arrayz.toIntArray( p2 ) ) * 0.4 +
 						( w1.getCenter().distance( w2.getCenter() ) ) * 2 / (w1.width + w2.width);
 				if (score < 1)
 					return score;
@@ -897,7 +897,7 @@ public class Regularizer {
 					Vector2d delta = new Vector2d(b.getCenter());
 					delta.sub (a.getCenter());
 					
-					if (wDir.angle( delta ) > MUtils.PI6 )
+					if (wDir.angle( delta ) > Mathz.PI6 )
 						continue;
 					
 					double dist = a.getCenter().distanceSquared( b.getCenter() );

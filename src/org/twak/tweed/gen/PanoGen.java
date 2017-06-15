@@ -38,7 +38,7 @@ import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 
@@ -92,7 +92,7 @@ public class PanoGen extends Gen implements IDumpObjs {
 		Iterator<Pano> pit = panos.iterator();
 		while (pit.hasNext()) {
 			Pano p = pit.next();
-			if (p.rx == 0 && Math.abs ( p.rz - MUtils.TwoPI ) < 1e-6)
+			if (p.rx == 0 && Math.abs ( p.rz - Mathz.TwoPI ) < 1e-6)
 				pit.remove();
 		}
 		

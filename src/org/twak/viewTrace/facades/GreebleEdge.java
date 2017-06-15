@@ -16,7 +16,7 @@ import org.twak.camp.Output.Face;
 import org.twak.camp.Output.SharedEdge;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.MultiMap;

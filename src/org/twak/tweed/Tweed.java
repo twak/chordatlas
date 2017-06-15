@@ -38,7 +38,7 @@ import org.twak.tweed.tools.HandleTool;
 import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.app.DebugKeysAppState;
@@ -303,21 +303,21 @@ public class Tweed extends SimpleApplication {
 
 	private void setFov( int i ) {
 		
-		TweedSettings.settings.fov = MUtils.clamp( TweedSettings.settings.fov + i, -100, 100 );
+		TweedSettings.settings.fov = Mathz.clamp( TweedSettings.settings.fov + i, -100, 100 );
 		System.out.println("fov now " + TweedSettings.settings.fov);
 		setCameraPerspective();
 	}
 
 	private void setCameraSpeed( int i ) {
 		
-		TweedSettings.settings.cameraSpeed = MUtils.clamp( TweedSettings.settings.cameraSpeed+i, -25, 3 );
+		TweedSettings.settings.cameraSpeed = Mathz.clamp( TweedSettings.settings.cameraSpeed+i, -25, 3 );
 		System.out.println("camera speed now " + TweedSettings.settings.cameraSpeed);
 		getFlyByCamera().setMoveSpeed( (float) Math.pow (2, (TweedSettings.settings.cameraSpeed /2 ) + 8) );
 	}
 	
 	private void setAmbient( int i ) {
 		
-		TweedSettings.settings.ambient = MUtils.clamp( TweedSettings.settings.ambient + i * 0.1, 0, 2 );
+		TweedSettings.settings.ambient = Mathz.clamp( TweedSettings.settings.ambient + i * 0.1, 0, 2 );
 		System.out.println("ambient now " + TweedSettings.settings.ambient);
 		ambient.setColor(ColorRGBA.White.mult( (float) TweedSettings.settings.ambient));
   		sun.setColor( new ColorRGBA(1f, 0.95f, 0.99f, 1f).mult( 2- (float)TweedSettings.settings.ambient) );

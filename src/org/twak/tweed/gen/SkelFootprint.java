@@ -61,7 +61,7 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.MutableDouble;
 import org.twak.utils.PaintThing;
 import org.twak.viewTrace.ColorRGBAPainter;
@@ -390,7 +390,7 @@ public class SkelFootprint {
 							
 							if ( se2.profLine == null && (se2.over == null || ((SuperEdge)se2.over).profLine == null ) && 
 									e2.over != null && e2.line().intersects(proj) != null && 
-									MUtils.inRange( e2.line().absAngle( proj ), 0.25 * Math.PI, 0.75 * Math .PI)) {
+									Mathz.inRange( e2.line().absAngle( proj ), 0.25 * Math.PI, 0.75 * Math .PI)) {
 								crossedBy.get(e2).d += ProfileGen.HORIZ_SAMPLE_DIST;
 							}
 						}
@@ -501,7 +501,7 @@ public class SkelFootprint {
 		for (MegaFeatures mf : minis.keySet())
 			pt: for ( MFPoint pt : minis.get(mf) ) {
 				
-				if ( !MUtils.inRange( mf.megafacade.findPPram( pt ), 0, 1 ) )
+				if ( !Mathz.inRange( mf.megafacade.findPPram( pt ), 0, 1 ) )
 						continue;
 				
 				Vector2d dir = pt.mega.megafacade.dir();

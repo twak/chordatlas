@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.Arrayz;
 
 public class Bin<E> {
@@ -64,8 +64,8 @@ public class Bin<E> {
 		if (thing != null && es == null)
 			es = new HashSet[weights.length];
 		
-		valStart = MUtils.clamp( valStart, min, max );
-		valEnd   = MUtils.clamp( valEnd  , min, max );
+		valStart = Mathz.clamp( valStart, min, max );
+		valEnd   = Mathz.clamp( valEnd  , min, max );
 		
 		for (int i = getI(valStart); i < getI(valEnd); i++ ) {
 			
@@ -96,7 +96,7 @@ public class Bin<E> {
 	public Set<E> getThings (int i, double range) {
 
 		int spread = (int) ( range * weights.length / (max - min) );
-		spread = MUtils.clamp (spread, 0, weights.length);
+		spread = Mathz.clamp (spread, 0, weights.length);
 		
 		return getThings(i, new int[]{ spread, spread});
 		

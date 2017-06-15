@@ -27,7 +27,7 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.geotools.referencing.operation.matrix.Matrix4;
 import org.twak.utils.BitTwiddle;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.CountThings;
 import org.twak.utils.geom.ObjDump;
 
@@ -623,7 +623,7 @@ public class ReadTrace {
 	}
 
 	private boolean isMagic8Visible( double[] magic8, int i ) {
-		return magic8 [ (int) MUtils.clamp  ( (double)((int)Math.floor ( i + 0.5 )), 0, 7) ] > 0;
+		return magic8 [ (int) Mathz.clamp  ( (double)((int)Math.floor ( i + 0.5 )), 0, 7) ] > 0;
 	}
 
 	private float[] locTrans(int[] fs, Matrix4d viewMatrix) {

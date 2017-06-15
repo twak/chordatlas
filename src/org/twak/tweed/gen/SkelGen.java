@@ -36,7 +36,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -510,7 +510,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	private static boolean isRoof( Bar b ) {
-		return Math.abs ( MUtils.PI2 + new Line ( b.start, b.end).aTan2() ) > 0.2;
+		return Math.abs ( Mathz.PI2 + new Line ( b.start, b.end).aTan2() ) > 0.2;
 	}
 
 	private static Profile toProfile( Prof prof ) {

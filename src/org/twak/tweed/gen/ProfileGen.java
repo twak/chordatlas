@@ -33,7 +33,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.VizSkelGen.Mode;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -471,8 +471,8 @@ public class ProfileGen extends Gen {
 											face.put( hi, l );
 											lines.remove( toProc );
 
-											face.minP = MUtils.min( face.minP, lps ); // bit strange: depends on the processing order of the set
-											face.maxP = MUtils.max( face.maxP, lpe );
+											face.minP = Mathz.min( face.minP, lps ); // bit strange: depends on the processing order of the set
+											face.maxP = Mathz.max( face.maxP, lpe );
 										}
 									}
 								}

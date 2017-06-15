@@ -19,7 +19,7 @@ import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.SkelGen.SimpleMass;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -117,7 +117,7 @@ public class FacadeFinder {
 						whichPoly.get(b).size() == 1 && (
 						a.distanceSquared(b) < 0.0001 ||
 						b.distanceSquared(c) < 0.0001 ||
-						angle < 0.2 && Math.abs ( MUtils.area(a, b, c) ) < 50 * TOL * TOL  ) )
+						angle < 0.2 && Math.abs ( Mathz.area(a, b, c) ) < 50 * TOL * TOL  ) )
 				{
 					current.getPrev().setNext(current.getNext());
 					current.getNext().setPrev(current.getPrev());
@@ -262,7 +262,7 @@ public class FacadeFinder {
 					Point2d cen = mega.project( p, false );
 					
 					if ( mega.isOnLeft( p ) && mega.distance( p, true ) < 20 &&
-						MUtils.inRange( mega.findPPram( cen ), 0, 1 ) ) {
+						Mathz.inRange( mega.findPPram( cen ), 0, 1 ) ) {
 
 							double height = panos.get(p).location.y;
 							ToProject out = new ToProject( s, e, 0, height + 30 );

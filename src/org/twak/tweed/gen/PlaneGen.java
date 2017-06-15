@@ -29,7 +29,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 
@@ -229,15 +229,15 @@ public class PlaneGen extends Gen implements IDumpObjs {
 				if (cr != null) 
 					dist = Math.min (maxDepth, cr.getDistance() );
 				
-				dist = MUtils.clamp ( ( dist - minDepth ) / ( maxDepth - minDepth ), 0, 1);
+				dist = Mathz.clamp ( ( dist - minDepth ) / ( maxDepth - minDepth ), 0, 1);
 				
 				int d = (int)(dist * 256);
 				double r = dist*256 - d;
 				
 				Color c = new Color( 
-						MUtils.clamp ( d + (r > 0.25 ? 1 : 0), 0, 255),
-						MUtils.clamp ( d + (r > 0.50 ? 1 : 0), 0, 255),
-						MUtils.clamp ( d + (r > 0.75 ? 1 : 0), 0, 255) );
+						Mathz.clamp ( d + (r > 0.25 ? 1 : 0), 0, 255),
+						Mathz.clamp ( d + (r > 0.50 ? 1 : 0), 0, 255),
+						Mathz.clamp ( d + (r > 0.75 ? 1 : 0), 0, 255) );
 				
 				out.setRGB( x, y, c.getRGB() );
 			}
@@ -307,7 +307,7 @@ public class PlaneGen extends Gen implements IDumpObjs {
 				if (! Double.isNaN( worldPos.x ) &&
 					  requested.distanceSquared( worldPos ) < 30 ) { 
 					
-					double delta = MUtils.signedAngle( 
+					double delta = Mathz.signedAngle( 
 							new Vector2d ( worldNormal.x, worldNormal.z ), 
 							new Vector2d ( planeNormal.x, planeNormal.z ) ) ;
 					

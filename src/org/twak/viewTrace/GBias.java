@@ -9,7 +9,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Graph2D;
 import org.twak.viewTrace.QuadTree.AABBQT;
@@ -103,7 +103,7 @@ public class GBias {
 						bestScore = score;
 					}
 				}
-				else if ( MUtils.inRangeTol( angle, MUtils.PI2, PI8 ) ){
+				else if ( Mathz.inRangeTol( angle, Mathz.PI2, PI8 ) ){
 					
 					double score = 0.2 * ( PI8 - angle ) / dist;
 

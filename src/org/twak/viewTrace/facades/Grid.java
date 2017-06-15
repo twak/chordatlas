@@ -11,7 +11,7 @@ import java.util.Map;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
 import org.twak.utils.geom.DRectangle;
@@ -283,7 +283,7 @@ public class Grid implements ICanPaint {
 		   y1 = y.find( r.y ),
 		   y2 = y.find (r.getMaxY() );
 		
-		if (MUtils.notNull(x1, x2, y1, y2)) 
+		if (Mathz.notNull(x1, x2, y1, y2)) 
 			return x1.next == x2 && y1.next == y2;
 
 		return false;

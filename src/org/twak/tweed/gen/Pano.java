@@ -14,7 +14,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.geom.LinearForm3D;
 
 import com.jme3.math.FastMath;
@@ -171,7 +171,7 @@ public class Pano {
 			
 			if ( planeMaskCache.get() != null ) {
 				
-				double  x = MUtils.clamp( (1-angle) * planeMaskCache.get().getWidth(), 0, planeMaskCache.get().getWidth()-1 ),
+				double  x = Mathz.clamp( (1-angle) * planeMaskCache.get().getWidth(), 0, planeMaskCache.get().getWidth()-1 ),
 						y = elevation * planeMaskCache.get().getHeight();
 				
 				Color c = new Color ( planeMaskCache.get().getRGB( (int) x, (int) y ) );
@@ -217,7 +217,7 @@ public class Pano {
 
 	private void get( BufferedImage image, double x, double y, double weight, double[] result ) {
 
-		int ix = MUtils.clamp( (int) x, 0, image.getWidth() - 1 ), iy = MUtils.clamp( (int) y, 0, image.getHeight() - 1 );
+		int ix = Mathz.clamp( (int) x, 0, image.getWidth() - 1 ), iy = Mathz.clamp( (int) y, 0, image.getHeight() - 1 );
 
 		Color ac = new Color( image.getRGB( ix, iy ) );
 

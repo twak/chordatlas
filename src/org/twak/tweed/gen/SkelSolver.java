@@ -31,7 +31,7 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 
 import gurobi.GRB;
@@ -556,10 +556,10 @@ public class SkelSolver {
 				if ( 
 						e.end.distanceSquared(start) < tol * tol &&
 						l.isOnLeft(e.start) && l.isOnLeft ( e.end ) &&
-						MUtils.inRangeTol( e.line().absAngle( e.next.line() ), MUtils.PI2, 1 )  )
+						Mathz.inRangeTol( e.line().absAngle( e.next.line() ), Mathz.PI2, 1 )  )
 					{
 						double angle = l.absAngle( e.line() );
-						if ( ( e.next.over == null && MUtils.inRangeTol( angle, MUtils.PI2, 1 ) ) || // regular T-jn on edge or left corner
+						if ( ( e.next.over == null && Mathz.inRangeTol( angle, Mathz.PI2, 1 ) ) || // regular T-jn on edge or left corner
 						     ( e.over == null && e.next.over == null && angle < 1) ) // right corner	
 							out.add(e);
 					}
@@ -892,7 +892,7 @@ public class SkelSolver {
 	}
 	
 	private static boolean lt (HalfEdge a, HalfEdge b) { // arbitrary & consistent ordering over a,b
-		return MUtils.order(a.start.x, b.start.x, a.start.y, b.start.y, a.end.x, b.end.x, a.end.y, b.end.y);
+		return Mathz.order(a.start.x, b.start.x, a.start.y, b.start.y, a.end.x, b.end.x, a.end.y, b.end.y);
 	}
 
 	private void buildBadGeom( boolean isContraint ) throws GRBException {
@@ -1017,7 +1017,7 @@ public class SkelSolver {
 		
 		Line al = projLine (a, b), bl = projLine( b, a );
 		
-		return MUtils.max ( 
+		return Mathz.max ( 
 					al.start.distanceSquared( bl.start ),  
 					al.start.distanceSquared( bl.end ),  
 					al.end.distanceSquared( bl.start ),  
@@ -1027,8 +1027,8 @@ public class SkelSolver {
 	
 	private static Line projLine( Line a, Line b ) {
 		
-		double s = MUtils.clamp01 ( a.findPPram( b.start ) ),
-				   e = MUtils.clamp01 ( a.findPPram( b.end ) );
+		double s = Mathz.clamp01 ( a.findPPram( b.start ) ),
+				   e = Mathz.clamp01 ( a.findPPram( b.end ) );
 			
 			return new Line (a.fromPPram( s ), a.fromPPram( e ));
 	}

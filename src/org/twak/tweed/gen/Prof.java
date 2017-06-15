@@ -27,7 +27,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.collections.Arrayz;
@@ -160,8 +160,8 @@ public class Prof extends ArrayList<Point2d> {
 			minD -= tol;
 			maxD += tol;
 			
-			LinearForm min = new LinearForm( MUtils.UP ).findC( new Point2d(minD,0) );
-			LinearForm max = new LinearForm( MUtils.UP ).findC( new Point2d(maxD,0) );
+			LinearForm min = new LinearForm( Mathz.UP ).findC( new Point2d(minD,0) );
+			LinearForm max = new LinearForm( Mathz.UP ).findC( new Point2d(maxD,0) );
 			
 			for (int i = 0; i < monotonic.size()-1; i ++) {
 				Point2d a = monotonic.get(i), b = monotonic.get(i+1);
@@ -503,8 +503,8 @@ public class Prof extends ArrayList<Point2d> {
 				
 //				if (iteration < 1)
 //					return MUtils.PI2;
-				if (iteration < 1 && aBin.getWeight( MUtils.PI2 ) >= 5 )
-					return MUtils.PI2;
+				if (iteration < 1 && aBin.getWeight( Mathz.PI2 ) >= 5 )
+					return Mathz.PI2;
 				
 				int aBinI = aBin.maxI();
 				
@@ -544,8 +544,8 @@ public class Prof extends ArrayList<Point2d> {
 		for (int i = 0; i < llines.size(); i++) {
 			Line l = llines.get(i);
 			double angle = l.aTan2();
-			if ( angle < MUtils.PI2+0.1  && angle > MUtils.PI2- 0.4 )
-				llines.set (i, FindLines.rotateToAngle( l, l.fromPPram( 0.5 ), MUtils.PI2 ) );
+			if ( angle < Mathz.PI2+0.1  && angle > Mathz.PI2- 0.4 )
+				llines.set (i, FindLines.rotateToAngle( l, l.fromPPram( 0.5 ), Mathz.PI2 ) );
 		}
 
 		Line bottomLine = llines.get( 0 );
@@ -665,8 +665,8 @@ public class Prof extends ArrayList<Point2d> {
 				
 //				if (iteration < 1)
 //					return MUtils.PI2;
-				if (iteration < 1 && aBin.getWeight( MUtils.PI2 ) >= 10 )
-					return MUtils.PI2;
+				if (iteration < 1 && aBin.getWeight( Mathz.PI2 ) >= 10 )
+					return Mathz.PI2;
 				
 				int aBinI = aBin.maxI();
 				
@@ -704,8 +704,8 @@ public class Prof extends ArrayList<Point2d> {
 		for (int i = 0; i < llines.size(); i++) {
 			Line l = llines.get(i);
 			double angle = l.aTan2();
-			if ( angle < MUtils.PI2 + 0.4  && angle > MUtils.PI2- 0.4 )
-				llines.set (i, FindLines.rotateToAngle( l, l.fromPPram( 0.5 ), MUtils.PI2 ) );
+			if ( angle < Mathz.PI2 + 0.4  && angle > Mathz.PI2- 0.4 )
+				llines.set (i, FindLines.rotateToAngle( l, l.fromPPram( 0.5 ), Mathz.PI2 ) );
 		}
 		
 //		llines.stream().filter( l -> l.start.y > l.end.y ).forEach( l -> l.reverseLocal() );
@@ -840,7 +840,7 @@ public class Prof extends ArrayList<Point2d> {
 					
 					pt = new Point2d(pt);
 					pt.x = Math.min( pt.x, lastP.x );
-					pt.y = MUtils.max( 0, pt.y, lastP.y );
+					pt.y = Mathz.max( 0, pt.y, lastP.y );
 					
 					if (clean.isEmpty() && pt.y > 0.2) { 
 						clean.add ( new Point2d (pt.x, 0));
@@ -855,8 +855,8 @@ public class Prof extends ArrayList<Point2d> {
 					if (clean.size() >= 3 ) {
 						Point2d a= clean.get(clean.size() - 1 ), b = clean.get(clean.size() - 2 ), c = clean.get(clean.size() - 3 );
 						if(
-							Math.abs ( MUtils.area( c, b, a )) < 0.1 || 
-							MUtils.absAngleBetween( a, b, c ) < 0.1 )
+							Math.abs ( Mathz.area( c, b, a )) < 0.1 || 
+							Mathz.absAngleBetween( a, b, c ) < 0.1 )
 								clean.remove (clean.size() -2);
 					}
 					
@@ -880,7 +880,7 @@ public class Prof extends ArrayList<Point2d> {
 		for ( int i = 2; i < size(); i++ ) {
 
 			Point2d a = get( i - 2 ), b = get( i - 1 ), c = get( i );
-			if ( Math.abs( MUtils.area( a, b, c ) ) < areaTol ) {
+			if ( Math.abs( Mathz.area( a, b, c ) ) < areaTol ) {
 				remove( i - 1 );
 				i--;
 			}
@@ -1318,7 +1318,7 @@ public class Prof extends ArrayList<Point2d> {
 			Line line = new Line (pts.first(), pts.second());
 			
 			double angle = line.aTan2();
-			if (angle > MUtils.PI2 - tol && angle < MUtils.PI2 + tol)
+			if (angle > Mathz.PI2 - tol && angle < Mathz.PI2 + tol)
 				length += line.length();
 		}
 		

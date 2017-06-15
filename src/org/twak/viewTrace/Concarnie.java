@@ -26,7 +26,7 @@ import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.apache.commons.math3.geometry.partitioning.Region;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.ConsecutiveItPairs;
@@ -333,7 +333,7 @@ public class Concarnie {
 					
 					for (double d : rmGet) {
 
-						d = MUtils.clamp (d, lf1, lf2);
+						d = Mathz.clamp (d, lf1, lf2);
 						occupied.add(lf.fromPParam(d));
 					}
 				}
@@ -671,7 +671,7 @@ public class Concarnie {
 				if ( 
 						a.distanceSquared(b) < 0.0001 || // corner filter moves corners to same point!
 						b.distanceSquared(c) < 0.0001 ||
-						angle < 0.2 && Math.abs ( MUtils.area(a, b, c) ) < 50 * P.CON_TOL * P.CON_TOL  ) // nearly parallel, but small area removed
+						angle < 0.2 && Math.abs ( Mathz.area(a, b, c) ) < 50 * P.CON_TOL * P.CON_TOL  ) // nearly parallel, but small area removed
 //					ab.length() + bc.length() > TOL/2 && 
 //						angle > Math.PI - 0.1 ) // pointy corner
 //						a.distanceSquared(c) < 0.0001 )
@@ -748,7 +748,7 @@ public class Concarnie {
 	public static double maxPerpDistance(Line a, Line b) {
 		
 		return Math.sqrt(
-				MUtils.max (
+				Mathz.max (
 					distanceSquared (b.start, a ),
 					distanceSquared (b.end  , a ),
 					distanceSquared (a.start, b ),
@@ -833,7 +833,7 @@ public class Concarnie {
 				
 		Point2d cen = new Point2d(ax, ay);
 		
-		double c = set.stream().collect(Collectors.summingDouble(x -> MUtils.area(cen, x.end, x.start)) ).doubleValue();
+		double c = set.stream().collect(Collectors.summingDouble(x -> Mathz.area(cen, x.end, x.start)) ).doubleValue();
 		
 //		System.out.println(set.size()+ " area " + c);
 		

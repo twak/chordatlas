@@ -4,6 +4,7 @@ import org.twak.mmg.functions.DivideOBB;
 import org.twak.mmg.functions.DividePointOBB;
 import org.twak.mmg.functions.Erase;
 import org.twak.mmg.functions.FixedLinearForm;
+import org.twak.mmg.functions.FixedNum;
 import org.twak.mmg.functions.FixedOBB;
 import org.twak.mmg.functions.FixedPoint;
 import org.twak.mmg.functions.FixedSegmentPath;
@@ -42,7 +43,6 @@ import org.twak.mmg.functions.TwoLinearPoint;
 import org.twak.mmg.functions.TwoPointCirclePath;
 import org.twak.mmg.functions.TwoPointLinear;
 import org.twak.mmg.functions.TwoPointSegment;
-import org.twak.mmg.functions.script.FixedNum;
 
 /**
  *

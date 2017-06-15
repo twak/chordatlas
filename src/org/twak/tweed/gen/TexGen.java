@@ -13,7 +13,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
 import org.twak.tweed.Tweed;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.ui.Cancellable;
 
@@ -164,15 +164,15 @@ public class TexGen extends ObjGen {
 	// http://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
 	private void cast(float[][] pts, float[][] uvs, BufferedImage srcPano, BufferedImage target, Cancellable cancel, int[] texSize) {
 
-		int     minX = (int) MUtils.min(uvs[0][0], uvs[1][0], uvs[2][0]) - 1,
-				maxX = (int) Math.ceil(MUtils.max(uvs[0][0], uvs[1][0], uvs[2][0])) + 1,
-				minY = (int) MUtils.min(uvs[0][1], uvs[1][1], uvs[2][1]) -1,
-				maxY = (int) Math.ceil(MUtils.max(uvs[0][1], uvs[1][1], uvs[2][1])) + 1;
+		int     minX = (int) Mathz.min(uvs[0][0], uvs[1][0], uvs[2][0]) - 1,
+				maxX = (int) Math.ceil(Mathz.max(uvs[0][0], uvs[1][0], uvs[2][0])) + 1,
+				minY = (int) Mathz.min(uvs[0][1], uvs[1][1], uvs[2][1]) -1,
+				maxY = (int) Math.ceil(Mathz.max(uvs[0][1], uvs[1][1], uvs[2][1])) + 1;
 
-		maxX = MUtils.clamp(maxX, 0, texSize[0] - 1);
-		minX = MUtils.clamp(minX, 0, texSize[0] - 1);
-		maxY = MUtils.clamp(maxY, 0, texSize[1] - 1);
-		minY = MUtils.clamp(minY, 0, texSize[1] - 1);
+		maxX = Mathz.clamp(maxX, 0, texSize[0] - 1);
+		minX = Mathz.clamp(minX, 0, texSize[0] - 1);
+		maxY = Mathz.clamp(maxY, 0, texSize[1] - 1);
+		minY = Mathz.clamp(minY, 0, texSize[1] - 1);
 
 		float[] uvs01 = Arrayz.sub(uvs[1], uvs[0]), 
 				uvs02 = Arrayz.sub(uvs[2], uvs[0]);

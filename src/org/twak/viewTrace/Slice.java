@@ -38,7 +38,7 @@ import javax.vecmath.Vector2d;
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.Arrayz;
@@ -651,7 +651,7 @@ public class Slice extends JComponent {
 //					   (counter.total(a,b) == 1 || 
 //					    counter.total(b,c) == 1 || 
 //					    counter.total(c,a) == 1   ) &&
-					   MUtils.min(
+					   Mathz.min(
 							   a.distanceSquared(b),
 							   b.distanceSquared(c),
 							   c.distanceSquared(a)

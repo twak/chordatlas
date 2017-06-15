@@ -12,8 +12,8 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.MeshBuilder;
-import org.twak.utils.MUtils;
-import org.twak.utils.MUtils.Frame;
+import org.twak.utils.Mathz;
+import org.twak.utils.Mathz.Frame;
 import org.twak.utils.collections.ConsecutivePairs;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
@@ -49,17 +49,17 @@ public class Tube {
 		Vector3d o1 = left.normal(), u1 = new Vector3d();
 		u1.cross( along, o1 );
 		
-		Frame frame = MUtils.buildFrame ( o1, u1, along, middle);
+		Frame frame = Mathz.buildFrame ( o1, u1, along, middle);
 		
 		Vector3d u2 = right.normal();
 		u2.cross( u2, along );
 //		u2.add( middle );
 		
-		Vector2d leftDir = MUtils.toXY ( frame, u1 );
-		Vector2d rightDir = MUtils.toXY ( frame, u2 );
+		Vector2d leftDir = Mathz.toXY ( frame, u1 );
+		Vector2d rightDir = Mathz.toXY ( frame, u2 );
 		
 		List<Point3d> profilePts = gen.gen( leftDir, rightDir ).stream().
-				map( p -> MUtils.fromXY( frame, p ) ).collect( Collectors.toList() );
+				map( p -> Mathz.fromXY( frame, p ) ).collect( Collectors.toList() );
 		
 		List<LinearForm3D> dummy = new ArrayList<>();
 		

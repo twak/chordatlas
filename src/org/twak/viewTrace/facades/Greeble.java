@@ -36,7 +36,7 @@ import org.twak.tweed.gen.WindowGen.Window;
 import org.twak.utils.Cach2;
 import org.twak.utils.Cache2;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -268,7 +268,7 @@ public class Greeble {
 		};
 
 		// if good, stretch whole minifacade to mesh
-		if ( MUtils.inRange( ( out[1] - out[0]) / (mf.width), 0.66, 1.4 ) )
+		if ( Mathz.inRange( ( out[1] - out[0]) / (mf.width), 0.66, 1.4 ) )
 			return out;
 		
 		// else snap to the closest of start/end

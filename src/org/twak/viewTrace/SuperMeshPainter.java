@@ -10,7 +10,7 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.Line;
-import org.twak.utils.MUtils;
+import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.geom.HalfMesh2;
@@ -54,7 +54,7 @@ public class SuperMeshPainter implements ICanPaintU {
 				Color c;
 				
 				if (false) {
-					int h = (int) MUtils.clamp( ( (SuperFace) f ).height * 5, 0, 255 );
+					int h = (int) Mathz.clamp( ( (SuperFace) f ).height * 5, 0, 255 );
 					
 					if ( ( (SuperFace) f ).height == -Double.MAX_VALUE)
 						c = Color.green;
