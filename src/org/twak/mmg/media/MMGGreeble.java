@@ -23,6 +23,7 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.Greeble;
+import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MatMeshBuilder;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -35,9 +36,12 @@ public class MMGGreeble extends Greeble {
 	public MMGGreeble( Tweed tweed, MOgram mogram ) {
 		super( tweed );
 		this.mogram = mogram;
+
 	}
 
-	protected void mapTo2d( Face f, Loop<Point3d> ll, MiniFacade mf, WallTag wallTag, Set<QuadF> features, MatMeshBuilder faceMaterial ) {
+	
+	@Override
+	protected void mapTo2d( Face f, Loop<LPoint3d> ll, MiniFacade mf, WallTag wallTag, Set<QuadF> features, MatMeshBuilder faceMaterial ) {
 
 		Matrix4d to2dXY = new Matrix4d();
 
@@ -135,7 +139,7 @@ public class MMGGreeble extends Greeble {
 		}
 
 		FaceFountain ff = findFaceFountain();
-		ff.face = flat;
+//		ff.face = flat;
 		
 		MMG mmg = new MMG();
 		mogram.evaluate( mmg );

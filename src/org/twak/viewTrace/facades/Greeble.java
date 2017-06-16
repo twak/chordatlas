@@ -48,6 +48,8 @@ import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Plot;
+import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
+import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
@@ -311,53 +313,13 @@ public class Greeble {
 		}
 
 
-		for ( Loop<Point3d> ll : f.getLoopL() ) {
+		for ( Loop<LPoint3d> ll : GreebleHelper.findPerimeter( f ) ) {
 				
 			if (wallTag != null) 
 				wallTag.isGroundFloor = f.definingCorners.iterator().next().z < 1;
 				
 			mapTo2d( f, ll, mf, wallTag, features, faceColor );
 		}
-	}
-
-	public static class LPoint3d extends Point3d {
-		String nextLabel = "none";
-		
-		public LPoint3d (Point3d loc, String label) {
-			super (loc);
-			this.nextLabel = label;
-		}
-	}
-	
-	public final static String WALL_EDGE = "wall", ROOF_EDGE = "roof", FLOOR_LABEL = "floor";
-	public LoopL<LPoint3d> findPerimeter (Face f) {
-		
-		LoopL<LPoint3d> out = new LoopL<>();
-
-		
-		for (Loop<SharedEdge> loop : f.edges) {
-			
-			Loop<LPoint3d> lout = new Loop<>();
-			out.add(lout);
-			
-			for (SharedEdge se : loop) {
-				
-				String label;
-				
-				Face other = se.getOther( f );
-				
-				if (other == null || se.start.z < 0.1 && se.end.z < 0.1)
-					label = FLOOR_LABEL;
-				else if ( GreebleEdge.isWall( other ) )
-					label = WALL_EDGE;
-				else
-					label = ROOF_EDGE;
-				
-				lout.append( new LPoint3d( se.getStart( f ), label ) );
-			}
-		}
-		
-		return out;
 	}
 	
 	protected static class QuadF {
@@ -387,7 +349,7 @@ public class Greeble {
 			return found[0] != null && found[1] != null && found[2] != null && found[3] != null;
 		}
 
-		public boolean project (Matrix4d to2d, Matrix4d to3d, Loop<Point2d> facade, LinearForm3D facePlane, Vector3d perp ) {
+		public boolean project (Matrix4d to2d, Matrix4d to3d, Loop<? extends Point2d> facade, LinearForm3D facePlane, Vector3d perp ) {
 
 			boolean allInside = true;
 			
@@ -432,7 +394,7 @@ public class Greeble {
 	
 	protected void mapTo2d( 
 			Face f, 
-			Loop<Point3d> ll, 
+			Loop<LPoint3d> ll, 
 			MiniFacade mf,
 			WallTag wallTag, 
 			Set<QuadF> features, 
@@ -466,7 +428,7 @@ public class Greeble {
 		to2dXY.transform( start );
 		to2dXY.transform( end );
 		
-		Loop<Point2d> flat = Loopz.to2dLoop( Loopz.transform (ll, to2dXY), 1, new HashMap<>() );
+		Loop<LPoint2d> flat = GreebleHelper.to2dLoop( GreebleHelper.transform (ll, to2dXY), 1 );
 
 		Matrix4d to3d = new Matrix4d( to2dXY );
 		to3d.invert();
@@ -892,13 +854,13 @@ public class Greeble {
 //			moulding( to3d, new DRectangle(winPanel.x, winPanel.getMaxY(), winPanel.width, corniceHeight), wall );
 	}
 
-	protected LoopL<Point2d> findRectagle( Loop<Point2d> flat, Point2d s, Point2d e ) {
+	protected LoopL<Point2d> findRectagle( Loop<LPoint2d> flat, Point2d s, Point2d e ) {
 
 //		new Plot(flat);
 		
 		List<Point2d> left = new ArrayList<>(), right = new ArrayList<>();
 		
-		for (Loopable<Point2d> pt : flat.loopableIterator()) {
+		for (Loopable<LPoint2d> pt : flat.loopableIterator()) {
 			if (pt.get().equals (s) && left.isEmpty()) {
 				double h = pt.get().y;
 				do {
