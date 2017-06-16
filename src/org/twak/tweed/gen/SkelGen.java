@@ -296,7 +296,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		else
 			house = new MMGGreeble(tweed).showSkeleton(output, onclick);
 			
-		
 		gNode.attachChild( house );
 		geometry.put(sf, house);
 
