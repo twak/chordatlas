@@ -23,6 +23,8 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.Greeble;
+import org.twak.viewTrace.facades.GreebleHelper;
+import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MatMeshBuilder;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -69,7 +71,7 @@ public class MMGGreeble extends Greeble {
 		to2dXY.transform( start );
 		to2dXY.transform( end );
 
-		Loop<Point2d> flat = Loopz.to2dLoop( Loopz.transform( ll, to2dXY ), 1, new HashMap<>() );
+		Loop<LPoint2d> flat = GreebleHelper.to2dLoop( GreebleHelper.transform( ll, to2dXY ), 1 );
 
 		Matrix4d to3d = new Matrix4d( to2dXY );
 		to3d.invert();
@@ -131,7 +133,7 @@ public class MMGGreeble extends Greeble {
 		return mogram;
 	}
 
-	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<Point2d> flat, MiniFacade forFace ) {
+	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
 
 		for ( Feature f : Feature.values() ) {
 			FeatureFountain ff = getFF( f );
@@ -139,7 +141,7 @@ public class MMGGreeble extends Greeble {
 		}
 
 		FaceFountain ff = findFaceFountain();
-//		ff.face = flat;
+		ff.face = flat;
 		
 		MMG mmg = new MMG();
 		mogram.evaluate( mmg );

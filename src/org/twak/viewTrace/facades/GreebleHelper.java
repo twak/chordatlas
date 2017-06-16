@@ -22,16 +22,16 @@ public class GreebleHelper {
 	}
 	
 	public static class LPoint2d extends Point2d {
-		String nextLabel = "none";
+		public String label = "none";
 		
 		public LPoint2d (Point2d loc, String label) {
 			super (loc);
-			this.nextLabel = label;
+			this.label = label;
 		}
 
 		public LPoint2d( double x, double y, String label ) {
 			super (x, y);
-			this.nextLabel = label;
+			this.label = label;
 		}
 	}
 	
