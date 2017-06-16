@@ -1,5 +1,6 @@
 package org.twak.mmg.media;
 import org.twak.mmg.MOgram;
+import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.DivideOBB;
 import org.twak.mmg.functions.DividePointOBB;
 import org.twak.mmg.functions.Erase;
@@ -43,6 +44,8 @@ import org.twak.mmg.functions.TwoLinearPoint;
 import org.twak.mmg.functions.TwoPointCirclePath;
 import org.twak.mmg.functions.TwoPointLinear;
 import org.twak.mmg.functions.TwoPointSegment;
+import org.twak.mmg.functions.FeatureFountain;
+import org.twak.mmg.prim.Label;
 
 /**
  *
@@ -65,13 +68,28 @@ public class Facade2d extends Medium {
                     PathExportPoints.class,
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
                     TwoPointCirclePath.class, PointCircle.class,
-                    Erase.class
+                    Erase.class,
+                    
+                    AddLabel.class,
+                    
+                    FeatureFountain.class,
                 });
     }
 
     public void doRender( MOgram mogram ) {
-    	
+    	if (renderListener != null)
+    		renderListener.doRender( mogram );
     }
+    
+    public interface RenderListener {
+		public void doRender( MOgram mogram );
+    }
+
+    RenderListener renderListener;
+    
+	public void setRenderListener( RenderListener renderListener ) {
+		this.renderListener = renderListener;
+	}
     
 //    public static class Extrude {
 //    	Loop<Point2d> shape;

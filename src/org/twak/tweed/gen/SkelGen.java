@@ -25,6 +25,8 @@ import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.media.Facade2d;
+import org.twak.mmg.media.Facade2d.RenderListener;
+import org.twak.mmg.media.MMGGreeble;
 import org.twak.mmg.ui.MOgramEditor;
 import org.twak.siteplan.campskeleton.Plan;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -262,18 +264,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		return skel;
 	}
 
-	private double maxZ( Output output ) {
-		
-		double maxZ = -Double.MAX_VALUE;
-		
-		for (Face f : output.faces.values())
-			for (Loop<Point3d> ll : f.points)
-				for (Point3d pt : ll)
-					maxZ = Math.max(pt.z, maxZ);
-			
-		return maxZ;
-	}
-
 	Map<SuperFace, Node> geometry = new IdentityHashMap<>();
 	MOgram mogram = null;
 	
@@ -291,10 +281,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 			}
 		};
 		
-		if (mogram == null)
-			house = new Greeble(tweed).showSkeleton( output, onclick );
-		else
-			house = new MMGGreeble(tweed).showSkeleton(output, onclick);
+		Greeble greeble = mogram == null ? new Greeble( tweed ) : new MMGGreeble( tweed, mogram );
+		
+		house = greeble.showSkeleton( output, onclick );
 			
 		gNode.attachChild( house );
 		geometry.put(sf, house);
@@ -302,12 +291,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.getRootNode().updateGeometricState();
 		tweed.getRootNode().updateModelBound();
 		tweed.gainFocus();
-		
 	}
 
 	private void selected( PlanSkeleton skel, Node house, SuperFace sf, SuperEdge se ) {
-		
-//		importFeatures (skel, geom);
 		
 		JPanel ui = new JPanel();
 		ui.setLayout( new ListDownLayout() );
@@ -385,7 +371,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 				
 				MOgram mg = buildMOGram (sf, se);
 				
-				new MOgramEditor( mg ).setVisible( true );;
+				MOgramEditor.quitOnLastClosed = false;
+				new MOgramEditor( mg ).setVisible( true );
 			}
 		} );
 		
@@ -421,27 +408,22 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		if (se.mogram != null)
 			mg = se.mogram;
-		else {
-			
-			mg = se.mogram = new MOgram();
-			
-//			- compute to2d for sf 
-//			- add face boundaries to mogram
-//			- add windows to mogram
-//			- label face boundaries
-			
-		}
+		else 
+			mg = se.mogram = MMGGreeble.createTemplateMOgram();
 
-		mg.medium = new Facade2d() {
+		((Facade2d) mg.medium).setRenderListener ( new RenderListener() {
+			
 			public void doRender( MOgram mogram ) {
 
 				SkelGen.this.mogram = mogram;
+				
+				// create synthetic mogram here
 
 				PlanSkeleton skel = calc( sf );
 				if ( skel != null )
 					setSkel( skel, skel.output, sf );
-			};
-		};
+			}
+		} );
 		
 		return mg;
 	}

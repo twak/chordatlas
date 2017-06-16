@@ -433,7 +433,7 @@ public class GreebleEdge {
 		return new LinearForm3D( new Vector3d(aD.x, aD.z, aD.y), new Point3d(pt.x, pt.z, pt.y)  );
 	}
 
-	private static boolean isWall (Face face) {
+	public static boolean isWall (Face face) {
 		
 		return face != null && face.profile.stream().anyMatch( x -> x instanceof WallTag );
 	}

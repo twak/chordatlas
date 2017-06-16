@@ -26,7 +26,7 @@ public class FRect extends DRectangle implements ICanEdit {
 	
 	// these are variously used around the Regularizer...
 	public MultiMap<Feature, FRect> attached = new MultiMap<>();
-	Feature f;
+	public Feature f;
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
@@ -52,8 +52,8 @@ public class FRect extends DRectangle implements ICanEdit {
 		super();
 	}
 	
-	public FRect( double d, double e, double f, double h ) {
-		super (d,e,f,h);
+	public FRect( double x, double y, double w, double h ) {
+		super (x,y,w,h);
 	}
 
 

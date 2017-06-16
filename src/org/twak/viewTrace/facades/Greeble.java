@@ -21,6 +21,7 @@ import javax.vecmath.Vector3d;
 import org.twak.camp.Edge;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
+import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -62,7 +63,7 @@ public class Greeble {
 	Tweed tweed;
 	Node node = new Node();
 	
-	Cache2<String, float[], MatMeshBuilder> mbs = 
+	protected Cache2<String, float[], MatMeshBuilder> mbs = 
 			new Cach2<String, float[], MatMeshBuilder>( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
 	
 	final static float[] 
@@ -319,13 +320,53 @@ public class Greeble {
 		}
 	}
 
-	private static class QuadF {
+	public static class LPoint3d extends Point3d {
+		String nextLabel = "none";
+		
+		public LPoint3d (Point3d loc, String label) {
+			super (loc);
+			this.nextLabel = label;
+		}
+	}
+	
+	public final static String WALL_EDGE = "wall", ROOF_EDGE = "roof", FLOOR_LABEL = "floor";
+	public LoopL<LPoint3d> findPerimeter (Face f) {
+		
+		LoopL<LPoint3d> out = new LoopL<>();
+
+		
+		for (Loop<SharedEdge> loop : f.edges) {
+			
+			Loop<LPoint3d> lout = new Loop<>();
+			out.add(lout);
+			
+			for (SharedEdge se : loop) {
+				
+				String label;
+				
+				Face other = se.getOther( f );
+				
+				if (other == null || se.start.z < 0.1 && se.end.z < 0.1)
+					label = FLOOR_LABEL;
+				else if ( GreebleEdge.isWall( other ) )
+					label = WALL_EDGE;
+				else
+					label = ROOF_EDGE;
+				
+				lout.append( new LPoint3d( se.getStart( f ), label ) );
+			}
+		}
+		
+		return out;
+	}
+	
+	protected static class QuadF {
 		
 		Point3d[] 
 			corners = new Point3d[4],
 			found   = new Point3d[4];
 		
-		FRect original;
+		public FRect original;
 		
 		public QuadF( FRect rect, Line megafacade ) {
 			
@@ -389,7 +430,7 @@ public class Greeble {
 		}
 	}
 	
-	private void mapTo2d( 
+	protected void mapTo2d( 
 			Face f, 
 			Loop<Point3d> ll, 
 			MiniFacade mf,
@@ -542,7 +583,7 @@ public class Greeble {
 		}
 	}
 	
-	private DRectangle findRect( Loop<Point2d> rect ) {
+	protected DRectangle findRect( Loop<Point2d> rect ) {
 		double[] bounds = Loopz.minMax2d( rect );
 		
 		DRectangle all = new DRectangle(
@@ -851,7 +892,7 @@ public class Greeble {
 //			moulding( to3d, new DRectangle(winPanel.x, winPanel.getMaxY(), winPanel.width, corniceHeight), wall );
 	}
 
-	private LoopL<Point2d> findRectagle( Loop<Point2d> flat, Point2d s, Point2d e ) {
+	protected LoopL<Point2d> findRectagle( Loop<Point2d> flat, Point2d s, Point2d e ) {
 
 //		new Plot(flat);
 		
