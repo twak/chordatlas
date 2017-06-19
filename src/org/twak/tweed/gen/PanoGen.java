@@ -150,9 +150,9 @@ public class PanoGen extends Gen implements IDumpObjs {
 
 		File meta = getMetaFile();
 
-		if ( meta.exists() )
-			panos = (List<Pano>) new XStream().fromXML( meta );
-		else 
+//		if ( meta.exists() )
+//			panos = (List<Pano>) new XStream().fromXML( meta );
+//		else 
 		{
 
 			panos.clear();

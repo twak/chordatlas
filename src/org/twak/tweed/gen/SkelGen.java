@@ -16,10 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 
 import org.twak.camp.Output;
-import org.twak.camp.Output.Face;
 import org.twak.camp.Skeleton;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
@@ -62,7 +60,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class SkelGen extends Gen implements IDumpObjs {
-
 
 	BlockGen blockGen;
 
@@ -416,10 +413,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 			public void doRender( MOgram mogram ) {
 
 				SkelGen.this.mogram = mogram;
-				
-				// create synthetic mogram here
 
 				PlanSkeleton skel = calc( sf );
+				
 				if ( skel != null )
 					setSkel( skel, skel.output, sf );
 			}

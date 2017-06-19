@@ -11,12 +11,18 @@ import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
 import org.twak.mmg.Command;
+import org.twak.mmg.Function;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
-import org.twak.mmg.functions.FaceFountain;
+import org.twak.mmg.Walk;
+import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
+import org.twak.mmg.functions.FeatureFountain.LabelledListWrapper;
+import org.twak.mmg.prim.Label;
+import org.twak.mmg.prim.ScreenSpace;
+import org.twak.mmg.steps.Static;
 import org.twak.tweed.Tweed;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
@@ -116,55 +122,82 @@ public class MMGGreeble extends Greeble {
 		mmg( to2d, to3d, flat, forFace );
 	}
 
+	
 	public static MOgram createTemplateMOgram() {
+		
 		MOgram mogram = new MOgram();
 		mogram.medium = new Facade2d();
+		
+		ScreenSpace.lastPosition = 0;
+		
+		Loop<LPoint2d> boundary = new Loop<>(
+				new LPoint2d( 0, 0     , GreebleHelper.FLOOR_EDGE ),
+				new LPoint2d( 7, 0     , GreebleHelper.WALL_EDGE  ),
+				new LPoint2d( 7, -5    , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( 3.5, -10 , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
+				);
+
+		mogram.add (new MO (new FacadeFountain( boundary )));
 
 		MiniFacade templateMF = new MiniFacade();
 
-		int i = 0;
-		for ( Feature f : Feature.values() ) {
-
-			templateMF.rects.put( f, new FRect( i++ * 3, 3, 2, 2.5 ) );
-
-			mogram.add( new MO( new FeatureFountain( f, templateMF ) ) );
+		for (int i = 0; i < 3; i++)
+			templateMF.rects.put( Feature.WINDOW, new FRect( i * 1.7 + 1, -4, 1.5, 1 ) );
+		
+		templateMF.rects.put( Feature.DOOR, new FRect( 1, -2.5, 1.5, 2.5 ) );
+		
+		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
+			FeatureFountain ff = new FeatureFountain( f, templateMF );
+			MO ffM = new MO(ff);
+			mogram.add(ffM);
+			
+			LabelledListWrapper lwr = new LabelledListWrapper( ff.label );
+			MO lwrM = new MO(lwr);
+			lwrM.scrubWalks();
+			mogram.add(lwrM);
+			
+			Walk w = new Walk(lwr.toString() + "_i:1");
+            w.add(new Static(ffM));
+            lwrM.setWalk(0, w); 
+			
+			
 		}
-
+		
 		return mogram;
 	}
 
 	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
 
-		for ( Feature f : Feature.values() ) {
-			FeatureFountain ff = getFF( f );
-			ff.mini = forFace;
-		}
+		FeatureFountain fe = (FeatureFountain) find(FeatureFountain.class);
+		fe.mini = forFace;
 
-		FaceFountain ff = findFaceFountain();
-		ff.face = flat;
-		
+		for ( Command c : mogram )
+			if ( c.function.getClass() == FacadeFountain.class )
+				( (FacadeFountain) c.function ).face = flat;
+
 		MMG mmg = new MMG();
 		mogram.evaluate( mmg );
 		
-		for (Node n : mmg.allNodes) {
+//		for (Node n : mmg.allNodes) {
 //			if (n.result instanceof )
 //			mbs.get( "mmg", new float[] {1, 1, 1, 1} ).addDepth()
-		}
+//		}
 	}
 
-	private FaceFountain findFaceFountain() {
+	private Function find(Class k) {
 		for ( Command c : mogram )
-			if ( c.function.getClass() == FaceFountain.class )
-				return (FaceFountain) c.function;
+			if ( c.function.getClass() == k )
+				return (FacadeFountain) c.function;
 		return null;
 	}
 
-	private FeatureFountain getFF( Feature f ) {
-
-		for ( Command c : mogram )
-			if ( c.function.getClass() == FeatureFountain.class && ( (FeatureFountain) c.function ).feature == f )
-				return (FeatureFountain) c.function;
-
-		return null;
-	}
+//	private FeatureFountain getFF( Feature f ) {
+//
+//		for ( Command c : mogram )
+//			if ( c.function.getClass() == FeatureFountain.class && ( (FeatureFountain) c.function ).feature == f )
+//				return (FeatureFountain) c.function;
+//
+//		return null;
+//	}
 }

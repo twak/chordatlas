@@ -35,7 +35,11 @@ public class GreebleHelper {
 		}
 	}
 	
-	public final static String WALL_EDGE = "wall", ROOF_EDGE = "roof", FLOOR_LABEL = "floor";
+	public final static String 
+			WALL_EDGE  = "wall", 
+			ROOF_EDGE  = "roof", 
+			FLOOR_EDGE = "floor";
+	
 	public static LoopL<LPoint3d> findPerimeter (Face f) {
 		
 		LoopL<LPoint3d> out = new LoopL<>();
@@ -53,7 +57,7 @@ public class GreebleHelper {
 				Face other = se.getOther( f );
 				
 				if (other == null || se.start.z < 0.1 && se.end.z < 0.1)
-					label = FLOOR_LABEL;
+					label = FLOOR_EDGE;
 				else if ( GreebleEdge.isWall( other ) )
 					label = WALL_EDGE;
 				else

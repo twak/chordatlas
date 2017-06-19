@@ -30,10 +30,10 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
+import org.twak.utils.streams.InAxDouble;
 import org.twak.utils.DumbCluster1DImpl;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
-import org.twak.viewTrace.InAxDouble;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class Regularizer {

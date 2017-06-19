@@ -17,6 +17,7 @@ import org.twak.utils.collections.ConsecutiveItPairs;
 import org.twak.utils.collections.MultiMapSet;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.LinearForm;
+import org.twak.utils.streams.InAxDoubleArray;
 import org.twak.viewTrace.RangeMerge.Result;
 
 /**
