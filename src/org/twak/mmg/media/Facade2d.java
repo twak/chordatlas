@@ -11,6 +11,7 @@ import org.twak.mmg.functions.FixedOBB;
 import org.twak.mmg.functions.FixedPoint;
 import org.twak.mmg.functions.FixedSegmentPath;
 import org.twak.mmg.functions.FourLinearOBB;
+import org.twak.mmg.functions.LabelToPath;
 import org.twak.mmg.functions.LiftTwoPt1Path;
 import org.twak.mmg.functions.LiftTwoPt1TwoPoint;
 import org.twak.mmg.functions.OBBExportLinearForm;
@@ -45,6 +46,9 @@ import org.twak.mmg.functions.TwoLinearPoint;
 import org.twak.mmg.functions.TwoPointCirclePath;
 import org.twak.mmg.functions.TwoPointLinear;
 import org.twak.mmg.functions.TwoPointSegment;
+import org.twak.mmg.media.sketch2D.SketchPath;
+import org.twak.mmg.prim.OBB;
+import org.twak.mmg.prim.Path;
 
 /**
  *
@@ -73,10 +77,14 @@ public class Facade2d extends Medium {
                     
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
                     TwoPointCirclePath.class, PointCircle.class,
+                    
                     Erase.class,
                     AddLabel.class,
-//                    FeatureFountain.class, FacadeFountain.class,
+                    LabelToPath.class,
                 });
+        
+        renderTypes.put ( OBB.class , DepthColor.class );
+        renderTypes.put ( Path.class, DepthColor.class );
     }
 
     public void doRender( MOgram mogram ) {

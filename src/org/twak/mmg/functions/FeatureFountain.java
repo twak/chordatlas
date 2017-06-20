@@ -56,7 +56,7 @@ public class FeatureFountain extends Function {
 	}
 	
 	@Override
-	public Object evaluate( List<Object> params, List<Object> curry, Node node ) {
+	public Object evaluate( List<Object> params, List<Object> curry, Node node, MMG mmg ) {
 		if ( node.function == this )
 			return node.curriedArguments.get(0);
 		else

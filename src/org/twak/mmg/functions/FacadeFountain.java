@@ -55,7 +55,7 @@ public class FacadeFountain extends Function {
 	}
 
 	@Override
-	public Object evaluate( List<Object> params, List<Object> curry, Node node ) {
+	public Object evaluate( List<Object> params, List<Object> curry, Node node, MMG mmg ) {
 		return node.curriedArguments.get(0);
 	}
 
