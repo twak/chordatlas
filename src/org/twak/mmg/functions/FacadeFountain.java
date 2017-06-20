@@ -12,6 +12,8 @@ import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
 import org.twak.mmg.Node;
 import org.twak.mmg.prim.Label;
+import org.twak.mmg.prim.LineSegment;
+import org.twak.mmg.prim.Path;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
@@ -20,16 +22,17 @@ import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 public class FacadeFountain extends Function {
 
 	public Loop<LPoint2d> face;
-	Map<String, Label> labelLookup = new LinkedHashMap<>();
+	String feature;
 
 	public FacadeFountain() {
+		color = fixed;
 	}
 
-	public FacadeFountain( Loop<LPoint2d> face ) {
+	public FacadeFountain( Loop<LPoint2d> face, String feature ) {
 
+		this();
 		this.face = face;
-
-		color = fixed;
+		this.feature = feature;
 	}
 
 	@Override
@@ -37,34 +40,23 @@ public class FacadeFountain extends Function {
 
 		List<Node> out = new ArrayList<>();
 
-		for ( LPoint2d f : face ) {
-			Label l = labelLookup.get( f.label );
-			if ( l == null ) {
-				l = new Label( f.label );
-				labelLookup.put( f.label, l );
-			}
-		}
-
-		for (Label l : labelLookup.values()) {
-			FixedLabel labelFn = new FixedLabel( l );
-			Node label = new Node( labelFn );
-			out.add( label );
-		}
+		List<Object> result = new ArrayList<>();
 		
-		for ( Loopable<LPoint2d> lp : face.loopableIterator() ) {
-			FixedSegmentPath segFn = new FixedSegmentPath( new Line( new Point2d( lp.get() ), new Point2d( lp.getNext().get() ) ) );
-			Node segNode = new Node( segFn );
-			out.add( segNode );
-			labelLookup.get( lp.get().label ).label( segNode, mmg );
-		}
+		for ( Loopable<LPoint2d> lp : face.loopableIterator() ) 
+			if (lp.get().label.equals (feature))
+				result.add ( new Path ( new LineSegment ( new Line( new Point2d( lp.get() ), new Point2d( lp.getNext().get() ) ) ) ) );
 
+		Node segNode = new Node( this );
+		out.add( segNode );
+		
+		segNode.curriedArguments.add(result);
+		
 		return out;
 	}
 
 	@Override
 	public Object evaluate( List<Object> params, List<Object> curry, Node node ) {
-		// TODO Auto-generated method stub
-		return null;
+		return node.curriedArguments.get(0);
 	}
 
 }

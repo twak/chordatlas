@@ -17,9 +17,11 @@ import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.Walk;
+import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
-import org.twak.mmg.functions.FeatureFountain.LabelledListWrapper;
+import org.twak.mmg.functions.FixedLabel;
+import org.twak.mmg.functions.LabellingListWrapper;
 import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.ScreenSpace;
 import org.twak.mmg.steps.Static;
@@ -138,7 +140,25 @@ public class MMGGreeble extends Greeble {
 				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
 				);
 
-		mogram.add (new MO (new FacadeFountain( boundary )));
+		for (String s : new String[] { 
+			GreebleHelper.FLOOR_EDGE,
+			GreebleHelper. ROOF_EDGE,
+			GreebleHelper. WALL_EDGE } ) {
+		
+			FixedLabel fl = new FixedLabel(s);
+			MO flm = new MO(fl);
+			mogram.add(flm);
+			
+			FacadeFountain ff = new FacadeFountain( boundary, s );
+			MO ffm = new MO (ff);
+			mogram.add (ffm);
+			
+			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
+			MO lwM = new MO(lw);
+			lwM.scrubWalks();
+			mogram.add(lwM);
+			staticWalk( ffm, lw.toString(), lwM,0 );
+		}
 
 		MiniFacade templateMF = new MiniFacade();
 
@@ -148,56 +168,41 @@ public class MMGGreeble extends Greeble {
 		templateMF.rects.put( Feature.DOOR, new FRect( 1, -2.5, 1.5, 2.5 ) );
 		
 		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
+			
+			FixedLabel fl = new FixedLabel(f.name().toLowerCase());
+			MO flm = new MO(fl);
+			mogram.add(flm);
+			
 			FeatureFountain ff = new FeatureFountain( f, templateMF );
 			MO ffM = new MO(ff);
 			mogram.add(ffM);
-			
-			LabelledListWrapper lwr = new LabelledListWrapper( ff.label );
-			MO lwrM = new MO(lwr);
-			lwrM.scrubWalks();
-			mogram.add(lwrM);
-			
-			Walk w = new Walk(lwr.toString() + "_i:1");
-            w.add(new Static(ffM));
-            lwrM.setWalk(0, w); 
-			
-			
+
+			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
+			MO lwM = new MO(lw);
+			lwM.scrubWalks();
+			mogram.add(lwM);
+			staticWalk( ffM, lw.toString(), lwM,0 ); 
 		}
 		
 		return mogram;
 	}
 
-	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
 
-		FeatureFountain fe = (FeatureFountain) find(FeatureFountain.class);
-		fe.mini = forFace;
+	private static void staticWalk( MO from, String name, MO to, int index ) {
+		Walk w = new Walk(name + "_i:"+index);
+		w.add(new Static(from));
+		to.setWalk(index, w);
+	}
+
+	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
 
 		for ( Command c : mogram )
 			if ( c.function.getClass() == FacadeFountain.class )
 				( (FacadeFountain) c.function ).face = flat;
+			else if ( c.function.getClass() == FeatureFountain.class )
+				( (FeatureFountain) c.function ).mini = forFace;
 
 		MMG mmg = new MMG();
 		mogram.evaluate( mmg );
-		
-//		for (Node n : mmg.allNodes) {
-//			if (n.result instanceof )
-//			mbs.get( "mmg", new float[] {1, 1, 1, 1} ).addDepth()
-//		}
 	}
-
-	private Function find(Class k) {
-		for ( Command c : mogram )
-			if ( c.function.getClass() == k )
-				return (FacadeFountain) c.function;
-		return null;
-	}
-
-//	private FeatureFountain getFF( Feature f ) {
-//
-//		for ( Command c : mogram )
-//			if ( c.function.getClass() == FeatureFountain.class && ( (FeatureFountain) c.function ).feature == f )
-//				return (FeatureFountain) c.function;
-//
-//		return null;
-//	}
 }
