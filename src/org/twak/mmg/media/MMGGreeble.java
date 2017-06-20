@@ -1,33 +1,26 @@
 package org.twak.mmg.media;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
 import org.twak.mmg.Command;
-import org.twak.mmg.Function;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
-import org.twak.mmg.Node;
 import org.twak.mmg.Walk;
-import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
 import org.twak.mmg.functions.FixedLabel;
 import org.twak.mmg.functions.LabellingListWrapper;
-import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.ScreenSpace;
 import org.twak.mmg.steps.Static;
 import org.twak.tweed.Tweed;
 import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.Greeble;
@@ -47,6 +40,9 @@ public class MMGGreeble extends Greeble {
 		super( tweed );
 		this.mogram = mogram;
 
+		
+		
+		
 	}
 
 	

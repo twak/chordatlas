@@ -500,11 +500,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public static Prof moveToX0( Prof prof ) {
 		Prof out = new Prof(prof);
 		
-		
 		double tol = 0.01;
-		
-		if (out.get(out.size()-1).x == -5.224493710986535)
-			System.out.println("bah");
 		
 		if (out.get( 1 ).y == tol && out.get(2).y == tol && out.size() >= 4 ) { // post-process out steps :(
 			out.remove( 0 );
