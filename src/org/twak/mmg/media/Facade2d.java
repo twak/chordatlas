@@ -58,7 +58,7 @@ public class Facade2d extends Medium {
 	
     public Facade2d()
     {
-        super( "sketch 2d", new Class[]
+        super( "façade 2d", new Class[]
                 {
                     FixedPoint.class, TwoPointLinear.class, PointLinear.class, PointLinearLinear.class,
                     ProjectPointLinearOffset.class, PointOpposite.class, PointOffset.class, 

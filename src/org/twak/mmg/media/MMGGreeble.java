@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -12,16 +13,22 @@ import org.twak.mmg.Command;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
+import org.twak.mmg.Node;
 import org.twak.mmg.Walk;
 import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
 import org.twak.mmg.functions.FixedLabel;
 import org.twak.mmg.functions.LabellingListWrapper;
+import org.twak.mmg.prim.Path;
+import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.prim.ScreenSpace;
 import org.twak.mmg.steps.Static;
 import org.twak.tweed.Tweed;
+import org.twak.utils.CloneSerializable;
 import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.ui.Colour;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.Greeble;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -39,12 +46,7 @@ public class MMGGreeble extends Greeble {
 	public MMGGreeble( Tweed tweed, MOgram mogram ) {
 		super( tweed );
 		this.mogram = mogram;
-
-		
-		
-		
 	}
-
 	
 	@Override
 	protected void mapTo2d( Face f, Loop<LPoint3d> ll, MiniFacade mf, WallTag wallTag, Set<QuadF> features, MatMeshBuilder faceMaterial ) {
@@ -192,13 +194,33 @@ public class MMGGreeble extends Greeble {
 
 	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
 
-		for ( Command c : mogram )
+		MOgram m2 = (MOgram) CloneSerializable.xClone( mogram );
+		
+		for ( Command c : m2)
 			if ( c.function.getClass() == FacadeFountain.class )
 				( (FacadeFountain) c.function ).face = flat;
 			else if ( c.function.getClass() == FeatureFountain.class )
 				( (FeatureFountain) c.function ).mini = forFace;
 
 		MMG mmg = new MMG();
-		mogram.evaluate( mmg );
+		m2.evaluate( mmg );
+		
+		for (Node n : m2.evaluate( new MMG() ).findNodes()) 
+			if ( n.context.mo.renderData != null) {
+				DepthColor dc = (DepthColor)n.context.mo.renderData;
+				mbs.get( n.name, Colour.toF4(dc.color) ).add( toLoop ((Path)n.result), to3d );
+			}
+		
+	}
+
+	private LoopL<Point2d> toLoop( Path result ) {
+		
+		LoopL<Point2d> out = new LoopL<>();
+		Loop<Point2d> lp = out.loop();
+		
+		for (Segment s: result.segments) 
+			lp.append( lp.getFirst() );
+		
+		return out;
 	}
 }
