@@ -28,7 +28,6 @@ public class FeatureFountain extends Function {
 	public Feature f;
 
 	public FeatureFountain() {
-		outputType = List.class;
 		color = fixed;
 	}
 

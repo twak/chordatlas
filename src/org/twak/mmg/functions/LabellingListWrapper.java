@@ -7,14 +7,13 @@ import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
 import org.twak.mmg.Node;
 import org.twak.mmg.prim.Label;
-import org.twak.mmg.prim.OBB;
 
 public class LabellingListWrapper extends ListWrapper {
 
 	Label l;
 	
 	public LabellingListWrapper( Label l ) {
-		super( OBB.class );
+		super( );
 		
 		this.l = l;
 		this.color = repeat;

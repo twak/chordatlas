@@ -46,9 +46,6 @@ import org.twak.mmg.functions.TwoLinearPoint;
 import org.twak.mmg.functions.TwoPointCirclePath;
 import org.twak.mmg.functions.TwoPointLinear;
 import org.twak.mmg.functions.TwoPointSegment;
-import org.twak.mmg.media.sketch2D.SketchPath;
-import org.twak.mmg.prim.OBB;
-import org.twak.mmg.prim.Path;
 
 /**
  *
@@ -83,10 +80,13 @@ public class Facade2d extends Medium {
                     LabelToPath.class,
                 });
         
-        renderTypes.put ( OBB.class , DepthColor.class );
-        renderTypes.put ( Path.class, DepthColor.class );
     }
 
+    @Override
+    public RenderData getDefaultRenderData( ) {
+    	return new DepthColor();
+    }
+    
     public void doRender( MOgram mogram ) {
     	if (renderListener != null)
     		renderListener.doRender( mogram );
@@ -101,12 +101,4 @@ public class Facade2d extends Medium {
 	public void setRenderListener( RenderListener renderListener ) {
 		this.renderListener = renderListener;
 	}
-    
-//    public static class Extrude {
-//    	Loop<Point2d> shape;
-//    	double distance = 0.3;
-//    	Color color;
-//    }
-//    
-//    public abstract void render (List<Extrude> shapes);
 }
