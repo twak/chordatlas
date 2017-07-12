@@ -268,10 +268,10 @@ public class SkelSolver {
 		buildIsEdge();
 		buildBadGeom( false );
 		
+		buildProfiles();
+		
 		if (minis != null && !minis.isEmpty())
 			buildMini();
-		
-		buildProfiles();
 		
 		for (HalfEdge he : edges) {
 			target.addTerm( 10  * he.length(), edgeInfo.get(he).edgeNoProfile );
@@ -429,7 +429,9 @@ public class SkelSolver {
 		for ( int e = 0; e < edges.size(); e++) {
 			
 			SuperEdge se = (SuperEdge) edges.get(e);
+			
 			edgeInfo.put( se, new EdgeVars (
+					
 					model.addVar( 0.0, 1.0, 0, GRB.BINARY, IS_EDGE ),
 					model.addVar( 0.0, 1.0, 0, GRB.BINARY, IS_NOT_EDGE  ),
 					se.profLine != null || ( se.over != null && ((SuperEdge)se.over).profLine != null ) ? 1 : 0,
@@ -759,7 +761,6 @@ public class SkelSolver {
 
 	private void buildProfiles() throws GRBException {
 		
-		
 		for (HalfEdge e : edges) {
 			
 			if ( ((SuperEdge)e).profLine == null) // when a profile ends, we assume it can't start again...
@@ -773,7 +774,6 @@ public class SkelSolver {
 				set ( ev.profile[p], p==0 ? 1 : 0 );
 			}
 		}
-		
 		
 		Cache2<HalfEdge, HalfEdge, GRBVar> isProfileDifferent = new Cache2<HalfMesh2.HalfEdge, HalfMesh2.HalfEdge, GRBVar>() {
 

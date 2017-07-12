@@ -60,7 +60,7 @@ public class SolverState implements Serializable
 		this.profFit = profFit;
 	}
 
-	public SolverState shitCopy( boolean removeMegaFacades ) {
+	public SolverState copy( boolean removeMegaFacades ) {
 		
 		SolverState out = (SolverState) CloneSerializable.xClone( this );
 		

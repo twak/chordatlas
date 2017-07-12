@@ -144,7 +144,7 @@ public class SkelFootprint {
 			
 			System.out.print("..");
 			
-			SS = memcache.shitCopy(false);
+			SS = memcache.copy(false);
 			
 			new Plot (SS.globalProfs);
 			
@@ -177,11 +177,10 @@ public class SkelFootprint {
 			postProcesss(SS);
 		
 		dbgCountProfileEdges( SS );
-		
 		dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
-//		dbgShowProfiles( SS.mesh, null, SS.profFit, "postprocess" );
 		
-		PaintThing.debug.put( 1, footprint );
+//		dbgShowProfiles( SS.mesh, null, SS.profFit, "postprocess" );
+//		PaintThing.debug.put( 1, footprint );
 //		SS.debugSolverResult();
 		
 		return SS.mesh;
@@ -353,7 +352,7 @@ public class SkelFootprint {
 		}
 		
 		if ( output != null ) 
-			SS.shitCopy( true ).save( output, false );
+			SS.copy( true ).save( output, false );
 	}
 
 	private void mergeOnProfiles(HalfMesh2 mesh, List<Line> footprint) {

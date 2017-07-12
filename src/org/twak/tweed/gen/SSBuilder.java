@@ -91,7 +91,7 @@ public class SSBuilder {
 	
 	private void save(SolverState solverState) {
 		
-		solverState.shitCopy( true ).save( new File ( Tweed.DATA+ File.separator+"blockSolver" + File.separator
+		solverState.copy( true ).save( new File ( Tweed.DATA+ File.separator+"blockSolver" + File.separator
 		+ profileGen.blockGen.nameCoords() + File.separator +"problem.xml" ), true );
 		
 		System.out.println("...saved!");
