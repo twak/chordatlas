@@ -88,7 +88,10 @@ public class GreebleEdge {
 		
 		Face f1 = se.left,
 				 f2 = se.right;
-
+		
+		if (f1 == null || f2 == null)
+			return false;
+		
 		double angle = f1.edge.getPlaneNormal().angle(f2.edge.getPlaneNormal());
 		
 		return angle < Math.PI * 0.4;
@@ -296,6 +299,8 @@ public class GreebleEdge {
 					
 					Point3d s = se.getStart( f ), e = se.getEnd(f);
 					
+					if (end.contains( null ) || start.contains( null ))
+						continue;
 					
 					Tube.tube( roof, end, start,
 							new Line3d( new Point3d (s.x, s.z, s.y), new Point3d (e.x, e.z, e.y) )

@@ -306,8 +306,6 @@ public class SkelFootprint {
 		System.out.println("sampling...");
 		for ( HalfFace f : mesh ) {
 			
-			System.out.println(f.hashCode());
-			
 			if ( TRUE ) { //color roofs
 				
 				if (blockGen.transparency != 1) {
@@ -335,17 +333,14 @@ public class SkelFootprint {
 		
 		removeExposedFaces      ( mesh );
 		
-		
-//		if (TRUE)
-//			return new SolverState( mesh, minis, globalProfs, profFit );
-		
 		return new SolverState( mesh, minis, globalProfs, profFit );
 	}
 
 	public static void solve( SolverState SS, ProgressMonitor m, File output, long timeLimitSec ) {
 		
 		try {
-			new SkelSolver(SS, m, timeLimitSec ).solve();
+			new GreedySkelSolver(SS, m, timeLimitSec ).solve();
+//			new SkelSolver(SS, m, timeLimitSec ).solve();
 		}
 		catch (Throwable th) {
 			th.printStackTrace();
@@ -1125,7 +1120,7 @@ public class SkelFootprint {
 		
 		double[] minMax = Loopz.minMax2d( pts );
 
-		double sample = 0.4;
+		double sample = 2;
 
 		double missCost = 30;
 		
