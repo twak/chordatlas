@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
-import org.twak.utils.geom.Line3D;
+import org.twak.utils.geom.Ray3d;
 
 import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;
@@ -139,8 +139,8 @@ public class MoveHandle extends Handle {
 		Vector3f cd = tweed.getCamera().getWorldCoordinates(a, 0).subtract(c);
 		
 		Point3d pt = 
-				new Line3D ( tod ( c ), tod ( cd ) ).closestPointOn(
-				new Line3D ( tod ( s ), tod ( dir ) ) );
+				new Ray3d ( tod ( c ), tod ( cd ) ).closestPointOn(
+				new Ray3d ( tod ( s ), tod ( dir ) ) );
 		
 		return new Vector3f( (float) pt.x, (float) pt.y, (float) pt.z);
 	}
