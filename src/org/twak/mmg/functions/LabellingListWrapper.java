@@ -3,6 +3,7 @@ package org.twak.mmg.functions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.twak.mmg.Command;
 import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
 import org.twak.mmg.Node;
@@ -20,7 +21,7 @@ public class LabellingListWrapper extends ListWrapper {
 	}
 	
     @Override
-    public List<Node> createSN( InputSet inputSet, MMG mmg ) {
+    public List<Node> createSN( InputSet inputSet, MMG mmg, Command MO ) {
     	
         List<Node> out = new ArrayList();
         
