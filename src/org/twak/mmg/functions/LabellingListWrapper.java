@@ -21,7 +21,7 @@ public class LabellingListWrapper extends ListWrapper {
 	}
 	
     @Override
-    public List<Node> createSN( InputSet inputSet, MMG mmg, Command MO ) {
+    public List<Node> createSN( InputSet inputSet, MMG mmg, Command mo ) {
     	
         List<Node> out = new ArrayList();
         
