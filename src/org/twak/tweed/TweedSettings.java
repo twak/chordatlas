@@ -28,8 +28,11 @@ public class TweedSettings {
 //	public String gmlCoordSystem = "EPSG:27700"; 
 
 	
-	public double trans[] = new double[] { 426138.059429821,975725.769060029 }; // oviedo
-	public String gmlCoordSystem = "EPSG:2062"; 
+	public double trans[] = new double[] { 121659.721974586034776,486774.576303347887006 }; // amsterdam
+	public String gmlCoordSystem = "EPSG:28992";
+	
+//	public double trans[] = new double[] { 426138.059429821,975725.769060029 }; // oviedo
+//	public String gmlCoordSystem = "EPSG:2062"; 
 
 //	public double trans[] = new double[] { 13506158.343432899564505,326522.905302504834253 }; // detroit
 //	public String gmlCoordSystem = "EPSG:2253"; 

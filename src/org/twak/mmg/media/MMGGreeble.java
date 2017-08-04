@@ -151,11 +151,11 @@ public class MMGGreeble extends Greeble {
 			MO ffm = new MO (ff);
 			mogram.add (ffm);
 			
-			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
-			MO lwM = new MO(lw);
-			lwM.scrubWalks();
-			mogram.add(lwM);
-			staticWalk( ffm, lw.toString(), lwM,0 );
+//			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
+//			MO lwM = new MO(lw);
+//			lwM.scrubWalks();
+//			mogram.add(lwM);
+//			staticWalk( ffm, lw.toString(), lwM,0 );
 		}
 
 		MiniFacade templateMF = new MiniFacade();
@@ -175,11 +175,11 @@ public class MMGGreeble extends Greeble {
 			MO ffM = new MO(ff);
 			mogram.add(ffM);
 
-			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
-			MO lwM = new MO(lw);
-			lwM.scrubWalks();
-			mogram.add(lwM);
-			staticWalk( ffM, lw.toString(), lwM,0 ); 
+//			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
+//			MO lwM = new MO(lw);
+//			lwM.scrubWalks();
+//			mogram.add(lwM);
+//			staticWalk( ffM, lw.toString(), lwM,0 ); 
 		}
 		
 		return mogram;

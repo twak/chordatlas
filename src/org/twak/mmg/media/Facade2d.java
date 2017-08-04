@@ -11,7 +11,7 @@ import org.twak.mmg.functions.FixedOBB;
 import org.twak.mmg.functions.FixedPoint;
 import org.twak.mmg.functions.FixedSegmentPath;
 import org.twak.mmg.functions.FourLinearOBB;
-import org.twak.mmg.functions.LabelToPath;
+import org.twak.mmg.functions.LabelToFace;
 import org.twak.mmg.functions.LiftTwoPt1Path;
 import org.twak.mmg.functions.LiftTwoPt1TwoPoint;
 import org.twak.mmg.functions.OBBExportLinearForm;
@@ -77,7 +77,7 @@ public class Facade2d extends Medium {
                     
                     Erase.class,
                     AddLabel.class,
-                    LabelToPath.class,
+                    LabelToFace.class,
                 });
         
     }

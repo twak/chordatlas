@@ -77,8 +77,8 @@ public class ReadTrace {
 	public static void main(String[] args) throws Throwable {
 		String dataDir = "/home/twak/dump/blah";
 		
-//		new ReadTrace( dataDir );
-		new ReadTrace( dataDir, CACHE_FILE );
+		new ReadTrace( dataDir );
+//		new ReadTrace( dataDir, CACHE_FILE );
 	}
 	
 	public ReadTrace(String dumpF, File cacheFile) throws Throwable {
@@ -159,7 +159,7 @@ public class ReadTrace {
 				
 				endOfBlock = false;
 			}
-			else if ( currentFrame == 58 ) //  
+			else if ( currentFrame == 816 ) //  
 			{
 				if (line.indexOf("glDisableVertexAttribArray") > -1)
 					endOfBlock = true;
@@ -487,7 +487,9 @@ public class ReadTrace {
 			out.dump( new File( folder, "model.obj" ) );
 		else
 		{
-			new XStream().toXML( miniTransform, new FileOutputStream( new File (miniMesh, "index.xml") ) );
+			File f= new File (miniMesh, "index.xml");
+			f.getParentFile().mkdirs();
+			new XStream().toXML( miniTransform, new FileOutputStream( f ) );
 		}
 	}
 	
