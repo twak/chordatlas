@@ -38,7 +38,7 @@ public class FeatureFountain extends Function {
 	}
 
 	@Override
-	public List<Node> createSN( InputSet inputSet, MMG mmg, Command mo ) {
+	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo ) {
 		List<Node> out = new ArrayList<>();
 
 		Node parent = new Node( this );
