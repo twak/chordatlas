@@ -19,6 +19,7 @@ import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
 import org.twak.mmg.functions.FixedLabel;
 import org.twak.mmg.functions.LabellingListWrapper;
+import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.Path;
 import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.prim.ScreenSpace;
@@ -143,7 +144,7 @@ public class MMGGreeble extends Greeble {
 			GreebleHelper. ROOF_EDGE,
 			GreebleHelper. WALL_EDGE } ) {
 		
-			FixedLabel fl = new FixedLabel(s);
+			FixedLabel fl = new FixedLabel( new Label( s ) );
 			MO flm = new MO(fl);
 			mogram.add(flm);
 			
@@ -167,7 +168,7 @@ public class MMGGreeble extends Greeble {
 		
 		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
 			
-			FixedLabel fl = new FixedLabel(f.name().toLowerCase());
+			FixedLabel fl = new FixedLabel( new Label ( f.name().toLowerCase()) );
 			MO flm = new MO(fl);
 			mogram.add(flm);
 			
