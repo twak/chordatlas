@@ -25,7 +25,6 @@ import javax.vecmath.Vector4d;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
-import org.geotools.referencing.operation.matrix.Matrix4;
 import org.twak.utils.BitTwiddle;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.CountThings;
@@ -36,6 +35,8 @@ import com.thoughtworks.xstream.XStream;
 public class ReadTrace {
 
 	private static File CACHE_FILE =  new File("/home/twak/Desktop/frames.xml");
+	
+	private static int FRAME = 291;
 	
 	File folder;
 	
@@ -54,7 +55,6 @@ public class ReadTrace {
 	
 	Pattern bindBufferRE  =  Pattern.compile(".*glBindBuffer\\(target\\ =\\ GL_([^,]*).*buffer\\ =\\ (\\d*).*");
 	Pattern glBufferDataRE = Pattern.compile(".*glBufferData\\(target\\ =\\ GL_([^,]*).*\\\"(.*)\\\".*" );
-	
 	Pattern bindTextureRE =  Pattern.compile(".*glBindTexture.*texture\\ =\\ (\\d*).*");
 	Pattern glCompressedTexture =  Pattern.compile(".*glCompressedTexImage2D.*width\\ =\\ (\\d*).*height\\ =\\ (\\d*).*\\\"(.*)\\\".*");
 	Pattern glActiveTexture = Pattern.compile(".*glActiveTexture\\(texture\\ =\\ GL_TEXTURE([^\\)]*)\\)");
@@ -109,10 +109,6 @@ public class ReadTrace {
 		String line;
 
 		boolean inBlock = false;
-
-		
-//		ObjDump out = new ObjDump();
-		
 		boolean endOfBlock = false;
 	
 		// need to distinguish gl_element_array_buffer and gl_array_buffer
@@ -159,18 +155,20 @@ public class ReadTrace {
 				
 				endOfBlock = false;
 			}
-			else if ( currentFrame == 816 ) //  
+			else if ( currentFrame == FRAME ) //  
 			{
-				if (line.indexOf("glDisableVertexAttribArray") > -1)
-					endOfBlock = true;
+//				if (line.indexOf("glDisableVertexAttribArray") > -1)
+//					endOfBlock = true;
 				
 				if (!endOfBlock && 
 					(
-							line.indexOf("glUniform1fv(location = 9, count = 8, value = ") > -1 ||  /*first useful data starts with alpha mask 8 element mystery*/
-							line.indexOf("glUniform1fv(location = 1, count = 8, value = ") > -1 ||  /*first useful data starts with alpha mask 8 element mystery*/
+//							line.indexOf("glUniform1fv(location = 10, count = 8, value = ") > -1 ||  /*first useful data starts with alpha mask 8 element mystery*/
+//							line.indexOf("glUniform1fv(location = 1, count = 8, value = ") > -1 ||  /*first useful data starts with alpha mask 8 element mystery*/
+							line.indexOf("glUniform1fv(location = ") > -1 ||  /*first useful data starts with alpha mask 8 element mystery*/
 							( block >= 1 && line.indexOf("glBindTexture(target = GL_TEXTURE_2D") /*some dont set the alpha mask */ > -1 )) ) {
 					
 					inBlock = true;
+					System.out.println("> bs");
 				}
 
 				System.out.println( line );
@@ -701,7 +699,7 @@ public class ReadTrace {
 			"([^,]*),\\ " +
 			"([^\\}]*).*");
 
-	Pattern viewMatrixPattern = Pattern.compile(".*glUniformMatrix4fv\\(location\\ =\\ 2.*\\{" +
+	Pattern viewMatrixPattern = Pattern.compile(".*glUniformMatrix4fv\\(location\\ =\\ 6.*\\{" +
 //	Pattern viewMatrixPattern = Pattern.compile(".*glUniformMatrix4fv\\(location\\ =\\ 0.*\\{" +
 			"([^,]*),\\ " +
 			"([^,]*),\\ " +
@@ -720,7 +718,7 @@ public class ReadTrace {
 			"([^,]*),\\ " +
 			"([^\\}]*).*");
 	
-	Pattern magic8Pattern = Pattern.compile(".*glUniform1fv\\(location\\ =\\ 9,\\ count\\ =\\ 8,\\ value\\ =\\ \\{" +
+	Pattern magic8Pattern = Pattern.compile(".*glUniform1fv\\(location\\ =\\ 10,\\ count\\ =\\ 8,\\ value\\ =\\ \\{" +
 			"([^,]*),\\ " +
 			"([^,]*),\\ " +
 			"([^,]*),\\ " +
