@@ -9,12 +9,10 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
 import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.geotools.referencing.CRS;
@@ -24,11 +22,9 @@ import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.FeatureGen;
 import org.twak.tweed.gen.GMLGen;
-import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.HeightGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.ResultsGen;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
@@ -564,6 +560,8 @@ public class Tweed extends SimpleApplication {
 		panel.setLayout( new ListDownLayout() );
 		ButtonGroup bg = new ButtonGroup();
 
+		panel.add( new JLabel("tools") );
+		
 		for ( Tool t : tools ) {
 
 			JToggleButton tb = new JToggleButton( t.getName() );
@@ -580,7 +578,7 @@ public class Tweed extends SimpleApplication {
 			panel.add( tb );
 		}
 		
-		((JToggleButton)panel.getComponent( 0 ) ).setSelected( true );
+		((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
 
 	}
 

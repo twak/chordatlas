@@ -4,26 +4,33 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -35,14 +42,14 @@ import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
 import org.twak.tweed.gen.Gen;
-import org.twak.utils.ImageU;
+import org.twak.tweed.gen.ObjGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
-import org.twak.utils.ui.Show;
+import org.twak.utils.ui.SimplePopup2;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.SuperMeshPainter;
 
@@ -135,16 +142,6 @@ public class TweedFrame {
 		
 		JPanel out = new JPanel(new BorderLayout());
 
-		layerList = new JPanel (new ListDownLayout());
-		
-		JScrollPane listScroll = new JScrollPane(layerList);
-		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
-		listScroll.setPreferredSize(new Dimension (200, 300) );
-		
-		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT,  listScroll, genUI );
-//		pane.setResizeWeight(0.2);
-		
-		out.add ( pane, BorderLayout.CENTER );
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar( menuBar );
@@ -237,6 +234,46 @@ public class TweedFrame {
 		    };
 		});
 		
+		layerList = new JPanel (new ListDownLayout());
+		
+		JPanel layers = new JPanel();
+		layers.setLayout( new BorderLayout() );
+		layers.add( new JLabel("layers"), BorderLayout.NORTH );
+		
+		JScrollPane listScroll = new JScrollPane(layerList);
+		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
+		listScroll.setPreferredSize(new Dimension (200, 300) );
+		layers.add( listScroll, BorderLayout.CENTER );
+		
+		
+		JPanel addRemoveLayer = new JPanel();
+		{
+			addRemoveLayer.setLayout( new FlowLayout( FlowLayout.RIGHT ) );
+			layers.add( addRemoveLayer, BorderLayout.SOUTH );
+
+			JButton addLayer = new JButton( "+" );
+			addLayer.addMouseListener( new MouseAdapter() {
+				@Override
+				public void mousePressed( MouseEvent e ) {
+					addLayer(e);
+				}
+			} );
+			JButton removeLayer = new JButton( "-" );
+			removeLayer.addActionListener( e -> removeGen( selectedGen ) );
+			addRemoveLayer.add( addLayer );
+			addRemoveLayer.add( removeLayer );
+		}
+		
+		JPanel options = new JPanel( new BorderLayout() );
+		{
+			options.add( new JLabel( "options" ), BorderLayout.NORTH );
+			options.add( genUI, BorderLayout.CENTER );
+		}
+		
+		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT,  layers, options );
+		
+		out.add ( pane, BorderLayout.CENTER );
+		
 		JPanel toolPanel = new JPanel( new ListRightLayout() );
 
 		tweed.addUI(toolPanel);
@@ -251,6 +288,38 @@ public class TweedFrame {
 	}
 	
 	JLabel coordLabel;
+	
+	
+	private void addLayer (MouseEvent evt) {
+		
+		SimplePopup2 sp = new SimplePopup2( evt );
+
+		sp.add( "+ obj (lightwave)", new Runnable() {
+			@Override
+			public void run() {
+				
+				FileDialog fd = new FileDialog((java.awt.Frame) null);
+				
+				fd.setFilenameFilter( new FilenameFilter() {
+					@Override
+					public boolean accept( File dir, String name ) {
+						return name.toLowerCase().endsWith( "obj" );
+					}
+				} );
+				
+				fd.setVisible(true);
+
+				String obj = fd.getDirectory() + fd.getFile();
+				
+				obj = new File( Tweed.JME ).toPath().relativize( new File( obj ).toPath() ).toString();
+				
+				if (obj != null)
+					addGen( new ObjGen( obj, tweed ), true );
+			}
+		} );
+		
+		sp.show();
+	}
 	
 	private void setGens(TweedSave fromXML) {
 
@@ -293,13 +362,17 @@ public class TweedFrame {
 	
 	public void removeGen(Gen gen) {
 		
+		if (gen == null) {
+			JOptionPane.showMessageDialog( frame, "no layer selected" );
+			return;
+		}
+		
 		tweed.enqueue( new Runnable() {
 			@Override
 			public void run() {
 				gen.gNode.removeFromParent();
 			}
 		});
-		
 		
 		genList.remove(gen);
 		
