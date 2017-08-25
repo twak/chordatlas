@@ -27,9 +27,11 @@ import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.dbg.Imagez;
 import org.twak.tweed.gen.BlockGen;
-import org.twak.tweed.gen.GMLGen;
-import org.twak.tweed.gen.GMLGen.Mode;
+import org.twak.tweed.gen.GISGen;
+import org.twak.tweed.gen.GISGen.Mode;
+import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.Pano;
+import org.twak.tweed.gen.PanoGen;
 import org.twak.tweed.gen.PlaneGen;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
@@ -91,13 +93,14 @@ public class FacadeTool extends SelectTool {
 
 		Map<Point2d, Pano> panos = new HashMap<>();
 
-		for ( Pano pg : tweed.panos.getPanos() ) {
-			Point2d pt = new Point2d( pg.location.x, pg.location.z );
+		for ( Gen gen : tweed.frame.gens( PanoGen.class ) )
+			for ( Pano pg : ( (PanoGen) gen ).getPanos() ) {
+				Point2d pt = new Point2d( pg.location.x, pg.location.z );
 
-			if ( pt.x > minMax[ 0 ] && pt.x < minMax[ 1 ] && pt.y > minMax[ 4 ] && pt.y < minMax[ 5 ] )
+				if ( pt.x > minMax[ 0 ] && pt.x < minMax[ 1 ] && pt.y > minMax[ 4 ] && pt.y < minMax[ 5 ] )
 
-				panos.put( pt, pg );
-		}
+					panos.put( pt, pg );
+			}
 
 		List<Point3d> objPoints = null;
 		if ( block != null ) {
@@ -131,7 +134,7 @@ public class FacadeTool extends SelectTool {
 
 				File blockFile = new File (Tweed.DATA + File.separator + "features_rendered"+File.separator+blockName );
 						
-				if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE )
+				if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE )
 					try {
 						FileUtils.deleteDirectory( blockFile );
 					} catch ( IOException e1 ) {
@@ -189,7 +192,7 @@ public class FacadeTool extends SelectTool {
 						File imageFolder;
 						String imageFilename = null;
 
-						if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE ) {
+						if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE ) {
 							imageFolder = new File( megaFolder, "" + fc );
 							imageFilename = "orthographic";
 						}
@@ -242,7 +245,7 @@ public class FacadeTool extends SelectTool {
 						}
 					}
 					
-					if (GMLGen.mode == Mode.RENDER_SELECTED_FACADE)
+					if (GISGen.mode == Mode.RENDER_SELECTED_FACADE)
 						Imagez.writeSummary (new File (megaFolder, "summary.png"), images);
 				}
 			}
@@ -251,7 +254,7 @@ public class FacadeTool extends SelectTool {
 
 		};
 
-		if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE )
+		if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE )
 			thread.start();
 		else
 			thread.run();
@@ -291,17 +294,17 @@ public class FacadeTool extends SelectTool {
 	@Override
 	public void getUI( JPanel panel ) {
 
-		JComboBox<GMLGen.Mode> allOne = new JComboBox<>();
+		JComboBox<GISGen.Mode> allOne = new JComboBox<>();
 
-		allOne.addItem( GMLGen.Mode.RENDER_ALL_FACADES );
-		allOne.addItem( GMLGen.Mode.RENDER_SELECTED_FACADE );
-		allOne.addItem( GMLGen.Mode.RENDER_SAT );
-		allOne.setSelectedItem( GMLGen.mode );
+		allOne.addItem( GISGen.Mode.RENDER_ALL_FACADES );
+		allOne.addItem( GISGen.Mode.RENDER_SELECTED_FACADE );
+		allOne.addItem( GISGen.Mode.RENDER_SAT );
+		allOne.setSelectedItem( GISGen.mode );
 		allOne.addActionListener( new ActionListener() {
 			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				GMLGen.mode = (Mode) allOne.getSelectedItem();
+				GISGen.mode = (Mode) allOne.getSelectedItem();
 			}
 		} );
 		

@@ -268,7 +268,7 @@ public class AlignTool extends Tool {
 		
 		p.setLayout( new ListDownLayout() );
 		
-		JCheckBox w = new JCheckBox( "write", write );
+		JCheckBox w = new JCheckBox( "write to index.xml", write );
 		w.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {

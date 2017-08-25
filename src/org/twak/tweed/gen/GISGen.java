@@ -39,13 +39,14 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Graph2D;
 import org.twak.utils.geom.Line3d;
+import org.twak.utils.geom.ObjRead;
 import org.twak.utils.geom.UnionWalker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.Closer;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.GMLReader;
 
-public class GMLGen extends LineGen3d {
+public class GISGen extends LineGen3d {
 
 	List<Line3d> lines = new ArrayList();
 
@@ -55,18 +56,45 @@ public class GMLGen extends LineGen3d {
 	
 	Map<Integer, BlockGen> lastMesh = new HashMap<>();
 	
-	public GMLGen( String filename, Matrix4d toOrigin, Tweed tweed ) {
+	public GISGen( File objFile, Tweed tweed ) {
+		
+		super( "gis_o_" + objFile.getName(), tweed );
+		
+		ObjRead gObj = new ObjRead( objFile );
+		
+		LoopL<Point3d> fromOBJ = new LoopL<>();
+		Closer<Point3d> closer = new Closer<>();
+		
+		for (int[] face : gObj.faces)
+		{
+			Loop<Point3d> loop = fromOBJ.newLoop();
+			
+			List<Point3d> points = new ArrayList<>();
+			
+			for (int i = 0; i < face.length; i++) {
+				Point3d p = new Point3d (gObj.pts[face[i]] );
+				p.y = 0;//!
+				loop.append( p );
+				points.add( p );
+			}
+			closer.add( points.toArray( new Point3d[points.size()]) );
+		}
+		
+		createBlocks( closer, fromOBJ );
+	}
+	
+	public GISGen( String gmlFile, Matrix4d toOrigin, String crs, Tweed tweed ) {
 
-		super( "G2D " + new File( filename ).getName(), tweed );
-		this.filename = filename;
+		super( "gis_g_" + new File( gmlFile ).getName(), tweed );
+		this.filename = gmlFile;
 
 		Closer<Point3d> closer = new Closer<>();
 	
 		LoopL<Point3d> polies = null;
 		try {
-			polies = GMLReader.readGML3d( new File( filename ), 
+			polies = GMLReader.readGML3d( new File( gmlFile ), 
 					DefaultGeocentricCRS.CARTESIAN,
-					CRS.decode( TweedSettings.settings.gmlCoordSystem ) );
+					CRS.decode( crs ) );
 		} catch ( NoSuchAuthorityCodeException e ) {
 			e.printStackTrace();
 			return;
@@ -103,6 +131,10 @@ public class GMLGen extends LineGen3d {
 			closer.add( points.toArray( new Point3d[points.size()]) );
 		}
 		
+		createBlocks( closer, polies );
+	}
+
+	private void createBlocks( Closer<Point3d> closer, LoopL<Point3d> polies ) {
 		Map<Point3d, Integer> bMap = closer.findMap();
 		
 		if (TweedSettings.settings.snapFootprintVert > 0) {
@@ -236,31 +268,34 @@ public class GMLGen extends LineGen3d {
 		l.mkdirs();
 
 		File objFile = new File( l, "cropped.obj" );
-		tweed.miniGen.clip( hull, objFile );
-
-		Graph2D g2 = new Graph2D();
-
-		polies.stream().flatMap( ll -> ll.streamAble() ).forEach( 
-				x -> g2.add( new Point2d( x.get().x, x.get().z ), new Point2d( x.getNext().get().x, x.getNext().get().z ) ) );
-
-		g2.removeInnerEdges();
-
-		//	new Plot (true, g2 );
-
-		UnionWalker uw = new UnionWalker();
-		for ( Point2d p : g2.map.keySet() )
-			for ( Line line : g2.map.get( p ) )
-				uw.addEdge(  line.end, line.start );
-		//	new Plot (true, new ArrayList( uw.map.keySet()) );
-
-		Loopz.writeXZObj( uw.findAll(), new File( l, "gis.obj" ), true );
-		Loopz.writeXZObj( Loopz.to2dLoop(polies, 1, null), new File( l, "gis_footprints.obj" ), false );
-
-		BlockGen bg = new BlockGen( l, tweed, polies ) ;
 		
-		lastMesh.put( index, bg );
-		
-		tweed.frame.addGen( bg, true );
+		for ( Gen gen : tweed.frame.gens( MiniGen.class ) ) {
+			
+			( (MiniGen) gen ).clip( hull, objFile );
+
+			Graph2D g2 = new Graph2D();
+
+			polies.stream().flatMap( ll -> ll.streamAble() ).forEach( x -> g2.add( new Point2d( x.get().x, x.get().z ), new Point2d( x.getNext().get().x, x.getNext().get().z ) ) );
+
+			g2.removeInnerEdges();
+
+			//	new Plot (true, g2 );
+
+			UnionWalker uw = new UnionWalker();
+			for ( Point2d p : g2.map.keySet() )
+				for ( Line line : g2.map.get( p ) )
+					uw.addEdge( line.end, line.start );
+			//	new Plot (true, new ArrayList( uw.map.keySet()) );
+
+			Loopz.writeXZObj( uw.findAll(), new File( l, "gis.obj" ), true );
+			Loopz.writeXZObj( Loopz.to2dLoop( polies, 1, null ), new File( l, "gis_footprints.obj" ), false );
+
+			BlockGen bg = new BlockGen( l, tweed, polies );
+
+			lastMesh.put( index, bg );
+
+			tweed.frame.addGen( bg, true );
+		}
 		
 	}
 

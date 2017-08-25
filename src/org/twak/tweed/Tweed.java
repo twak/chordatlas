@@ -6,10 +6,14 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
@@ -17,11 +21,13 @@ import javax.vecmath.Vector3d;
 
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.FeatureGen;
-import org.twak.tweed.gen.GMLGen;
+import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.HeightGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.PanoGen;
@@ -35,8 +41,11 @@ import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
+import org.twak.utils.MutableDouble;
 import org.twak.utils.ui.ListDownLayout;
 
+import com.google.common.io.Files;
+import com.google.common.io.LineProcessor;
 import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
@@ -77,6 +86,8 @@ public class Tweed extends SimpleApplication {
 	public final static String CONFIG = System.getProperty("user.home")+"/Desktop/"; // we write all sort of stuff here
 	public final static String JME    = new File(System.getProperty("user.home"))+"/"; // root of asset resource-tree for jMonkey
 	
+	public static final String LAT_LONG = "EPSG:4326";
+	
 	public final static String 
 			CLICK = "Click", 
 			MOUSE_MOVE = "MouseyMousey", 
@@ -87,13 +98,14 @@ public class Tweed extends SimpleApplication {
 
 	public TweedFrame frame;
 	
-	public PanoGen panos;
-	public MiniGen miniGen;
 	public HeightGen heights;
 	public FeatureGen features;
 	private Picture background;
 	
 	public Vector3d cursorPosition;
+	protected String lastCRS;
+	public double[] lastOffset;
+
 
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
@@ -167,10 +179,9 @@ public class Tweed extends SimpleApplication {
 //	    shadows.setEdgeFilteringMode(EdgeFilteringMode.PCF8);
 //	    viewPort.addProcessor(shadows);
 		
-	    
-		double trans[] = TweedSettings.settings.trans;
 		cam.setLocation(TweedSettings.settings.cameraLocation);
 		cam.setRotation(TweedSettings.settings.cameraOrientation);
+	    
 	
 		setFov(0);
 		setCameraSpeed( 0 );
@@ -187,19 +198,10 @@ public class Tweed extends SimpleApplication {
 		
 		try {
 			
-			MathTransform transform = CRS.findMathTransform(
-					CRS.decode( TweedSettings.settings.gmlCoordSystem ), 
-					DefaultGeocentricCRS.CARTESIAN, true );
+			addGML(new File (Tweed.DATA + "/gis.gml"), TweedSettings.settings.gmlCoordSystem );
 			
-			toOrigin = buildOrigin ( trans[0], trans[1], transform );
-			fromOrigin = new Matrix4d( toOrigin );
-			fromOrigin.invert();
-			
-//			tweed.addGen ( this.heights = new HeightGen( new File (folder+"/heights.csv"), this ) );
-			
-			frame.addGen ( new GMLGen( Tweed.DATA + "/gis.gml", toOrigin                   , this ), true );
-			frame.addGen ( this.miniGen  = new MiniGen   ( new File ( Tweed.DATA +"/minimesh/"   ), this ), true );
-			frame.addGen ( this.panos    = new PanoGen   ( new File ( Tweed.DATA +"/panos/"      ), this, "EPSG:4326" ), true );
+			frame.addGen ( new MiniGen   ( new File ( Tweed.DATA +"/minimesh/"   ), this ), true );
+			frame.addGen ( new PanoGen   ( new File ( Tweed.DATA +"/panos/"      ), this, LAT_LONG ), true );
 			frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), this ), false );
 			frame.addGen ( new ResultsGen( new File ( Tweed.DATA+"/solutions/"), this ), true );
 
@@ -280,6 +282,71 @@ public class Tweed extends SimpleApplication {
 			}
 		}, TOGGLE_ORTHO );
 		
+	}
+	
+	private final static Pattern SRS_EX    = Pattern.compile( ".*srsName=\\\"([^\\\"]*).*" ),
+								 OFFSET_EX = Pattern.compile(".*<gml:X>([0-9\\\\.]*)</gml:X><gml:Y>([0-9\\\\.]*).*");
+	
+	public void addGML( File gmlFile, String guessCRS) throws Exception {
+		
+		lastOffset = new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY };
+		
+		if (guessCRS == null)
+			guessCRS = Files.readLines( gmlFile, Charset.forName( "UTF-8" ), new LineProcessor<String>() {
+
+			String crs;
+			
+			@Override
+			public boolean processLine( String line ) throws IOException {
+				
+				Matcher m = SRS_EX.matcher( line );
+				
+				if (m.matches()) {
+					crs = m.group( 1 );
+					return false;
+				}
+				
+				m = OFFSET_EX.matcher( line );
+				
+				if (m.matches() && lastOffset[0] == Double.POSITIVE_INFINITY ) {// bounds def before we see a CRS...
+					lastOffset[0] = Double.parseDouble( m.group( 1 ) );
+					lastOffset[1] = Double.parseDouble( m.group( 2 ) );
+				}
+				
+				return true;
+			}
+
+			@Override
+			public String getResult() {
+				return crs;
+			}
+		} );
+		
+		if (guessCRS == null) {
+			JOptionPane.showMessageDialog( frame.frame, "Failed to guess coordinate system for "+gmlFile.getName() );
+			return;
+		}
+		
+
+		lastCRS = guessCRS;
+		
+		// assume same CS for whole GML file!
+		System.out.println( "Assuming CRS " + guessCRS + " for all of " + gmlFile.getName() );
+		
+		MathTransform transform = CRS.findMathTransform( CRS.decode( guessCRS ), DefaultGeocentricCRS.CARTESIAN, true );
+		
+		if (lastOffset[0] == Double.POSITIVE_INFINITY ) {
+			lastOffset[0] = TweedSettings.settings.trans[0];
+			lastOffset[1] = TweedSettings.settings.trans[1];
+		}
+		
+		System.out.println( "Using CRS --> World space offset of " + lastOffset[0] + ", " + lastOffset[1] );
+		
+		toOrigin = buildOrigin ( lastOffset[0], lastOffset[1], transform );
+		fromOrigin = new Matrix4d( toOrigin );
+		fromOrigin.invert();
+		
+		frame.addGen ( new GISGen( gmlFile.toString(), toOrigin, guessCRS, this ), true );
 	}
 
 	private void setCameraPerspective() {
@@ -480,7 +547,7 @@ public class Tweed extends SimpleApplication {
 		}
 
 	};
-
+	
 	public void clearBackground() {
 		Material mat1 = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat1.setColor("Color", ColorRGBA.Black);

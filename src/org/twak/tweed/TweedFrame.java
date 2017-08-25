@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -41,10 +42,11 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
-import org.twak.tweed.gen.GMLGen;
+import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
+import org.twak.tweed.gen.PanoGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -121,8 +123,15 @@ public class TweedFrame {
 			@Override
 			public void run() {
 				Vector3d pt = tweed.cursorPosition;
-				if ( coordLabel != null )
-					coordLabel.setText( pt == null ? "..." : String.format( "%.4f %.4f", pt.x, pt.z ) );
+				if ( coordLabel != null ) {
+					worldLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
+							pt.x, 
+							pt.z) );
+					coordLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
+							pt.x + tweed.lastOffset[0], 
+							pt.z + tweed.lastOffset[1]) );
+					crsLabel.setText(tweed.lastCRS);
+				}
 
 				JFrame.setDefaultLookAndFeelDecorated( true );
 
@@ -278,16 +287,28 @@ public class TweedFrame {
 
 		tweed.addUI( toolPanel );
 
-		coordLabel = new JLabel( "..." );
+		coordLabel = new JLabel( "" );
 		coordLabel.setHorizontalAlignment( SwingConstants.CENTER );
+		worldLabel = new JLabel( "" );
+		worldLabel.setHorizontalAlignment( SwingConstants.CENTER );
+		crsLabel = new JLabel( "none" );
+		crsLabel.setHorizontalAlignment( SwingConstants.CENTER );
 
 		out.add( toolPanel, BorderLayout.NORTH );
-		out.add( coordLabel, BorderLayout.SOUTH );
+		
+		JPanel coords = new JPanel( new ListDownLayout() );
+		coords.add( worldLabel );
+		coords.add( coordLabel );
+		coords.add( crsLabel );
+		
+		out.add( coords, BorderLayout.SOUTH );
 
+		out.setPreferredSize( new Dimension( 300, frame.getHeight() ) );
+		
 		return out;
 	}
 
-	JLabel coordLabel;
+	JLabel coordLabel, crsLabel, worldLabel;
 
 	private void addLayer( MouseEvent evt ) {
 
@@ -296,11 +317,9 @@ public class TweedFrame {
 		sp.add( "+ mesh (obj)", new Runnable() {
 			@Override
 			public void run() {
-
-				removeMeshSources();
-
 				new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 					public void heresTheFile( File obj ) throws Throwable {
+						removeMeshSources();
 						String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
 						removeMeshSources();
 						addGen( new ObjGen( f, tweed ), true );
@@ -312,9 +331,7 @@ public class TweedFrame {
 		sp.add( "+ mesh (minimesh)", new Runnable() {
 			@Override
 			public void run() {
-
 				new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "xml" ) {
-
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
 						removeMeshSources();
@@ -327,16 +344,10 @@ public class TweedFrame {
 		sp.add( "+ gis (obj)", new Runnable() {
 			@Override
 			public void run() {
-
-				removeGISSources();
-
 				new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
-					
 					public void heresTheFile( File obj ) throws Throwable {
-						
-						String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
-						removeMeshSources();
-						addGen( new ObjGen( f, tweed ), true );
+						removeGISSources();
+						addGen ( new GISGen( obj, tweed ), true );
 					};
 				};
 			}
@@ -346,14 +357,23 @@ public class TweedFrame {
 			@Override
 			public void run() {
 				
-				removeGISSources();
 				
 				new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
-					
-					public void heresTheFile( File obj ) throws Throwable {
-						
-						addGen( new GMLGen( obj.toString(), null, tweed ), true );
-						removeMeshSources();
+					public void heresTheFile( File gml ) throws Throwable {
+						removeGISSources();
+						tweed.addGML( gml, null );
+					};
+				};
+			}
+		} );
+		
+		sp.add( "+ panos (jpg)", new Runnable() {
+			@Override
+			public void run() {
+				new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
+					public void heresTheFile( File oneOfMany ) throws Throwable {
+						removeGens( PanoGen.class );
+						addGen( new PanoGen( oneOfMany.getParentFile(), tweed, Tweed.LAT_LONG ), true );
 					};
 				};
 			}
@@ -369,7 +389,7 @@ public class TweedFrame {
 	}
 	
 	private void removeGISSources() {
-		removeGens( GMLGen.class );
+		removeGens( GISGen.class );
 	}
 
 	private void setGens( TweedSave fromXML ) {
@@ -521,6 +541,10 @@ public class TweedFrame {
 		genUI.doLayout();
 		genUI.repaint();
 
+	}
+
+	public List<Gen> gens( Class<? extends Gen> klass ) {
+		return genList.stream().filter( g -> g.getClass() == klass ).collect( Collectors.toList() );
 	}
 
 }
