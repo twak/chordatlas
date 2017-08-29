@@ -223,7 +223,6 @@ public class FeatureGen extends Gen {
 				return blockFeatures.get(maybePt.get());
 			else {
 				JOptionPane.showMessageDialog( tweed.frame.frame, "block features not found "+ center.x+"_" + center.y );
-				throw new Error();
 			}
 		}
 		

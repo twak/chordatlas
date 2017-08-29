@@ -1057,8 +1057,13 @@ public class GreedySkelSolver {
 		print ("nearby profile terms " + countNearbyProfiles);
 		print ("total half edges " + edges.size() );
 		print ("total faces " + faceInfo.size() );
+		try {
 		if ( profFit.get( edges.get(0)  ) != null)
 			print ("total profiles " + profFit.get( edges.get(0)  ).length );
+		}
+		catch (Throwable th) {
+			th.printStackTrace();
+		}
 		print( "total edge length " + totalEdgeLength );
 		
 		print( "\nobjective fn breakdown follows...\n" );

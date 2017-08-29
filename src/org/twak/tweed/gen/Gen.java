@@ -47,6 +47,9 @@ public abstract class Gen {
 	
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+		
+		tweed.frame.refreshGenList();
+		
 		tweed.enqueue(new Callable() {
 			public Object call() throws Exception {
 				if (visible) 

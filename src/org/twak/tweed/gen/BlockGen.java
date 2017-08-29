@@ -46,7 +46,7 @@ public class BlockGen extends ObjGen {
 	
 	public BlockGen( File l, Tweed tweed, LoopL<Point3d> polies ) {
 		
-		super ( new File(l, "cropped.obj").getPath().substring( Tweed.JME.length() ), tweed);
+		super ( new File(l, GISGen.CROPPED_OBJ ).getPath().substring( Tweed.JME.length() ), tweed);
 //		gis = new ObjRead( new File(l, "gis.obj") );
 		this.polies = polies;
 		this.root = l;

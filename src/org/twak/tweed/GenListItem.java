@@ -122,5 +122,10 @@ public class GenListItem extends JPanel {
 		
 		addMouseListener(ml);
 	}
+
+	public void refresh() {
+		visible.setSelected( gen.visible );
+		color.setBackground(gen.color);
+	}
 	
 }

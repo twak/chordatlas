@@ -1,6 +1,7 @@
 package org.twak.tweed.gen;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
@@ -46,7 +48,11 @@ import org.twak.viewTrace.Closer;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.GMLReader;
 
+import com.google.common.io.Files;
+
 public class GISGen extends LineGen3d {
+
+	public static final String CROPPED_OBJ = "cropped.obj";
 
 	List<Line3d> lines = new ArrayList();
 
@@ -65,17 +71,22 @@ public class GISGen extends LineGen3d {
 		LoopL<Point3d> fromOBJ = new LoopL<>();
 		Closer<Point3d> closer = new Closer<>();
 		
-		for (int[] face : gObj.faces)
-		{
+		for (int[] face : gObj.faces) {
+			
 			Loop<Point3d> loop = fromOBJ.newLoop();
 			
 			List<Point3d> points = new ArrayList<>();
 			
 			for (int i = 0; i < face.length; i++) {
-				Point3d p = new Point3d (gObj.pts[face[i]] );
-				p.y = 0;//!
+				
+				Point3d p = new Point3d ( gObj.pts[face[i]] ), 
+						n = new Point3d ( gObj.pts[ face[ ( i + 1 ) % face.length ] ] );
+
+				n.y = p.y = 0;//!
 				loop.append( p );
 				points.add( p );
+				
+				lines.add( new Line3d( p, n ) );
 			}
 			closer.add( points.toArray( new Point3d[points.size()]) );
 		}
@@ -267,12 +278,34 @@ public class GISGen extends LineGen3d {
 
 		l.mkdirs();
 
-		File objFile = new File( l, "cropped.obj" );
+		File croppedFile = new File( l, CROPPED_OBJ );
 		
-		for ( Gen gen : tweed.frame.gens( MiniGen.class ) ) {
+		boolean found = false;
+		
+		for ( Gen gen : tweed.frame.gens( MiniGen.class ) ) { // minigen == optimised obj
 			
-			( (MiniGen) gen ).clip( hull, objFile );
+			( (MiniGen) gen ).clip( hull, croppedFile );
 
+			
+			found = true;
+		}
+		
+		if (!found) 
+			
+			for ( Gen gen : tweed.frame.gens( ObjGen.class ) ) { // obj == just import whole obj
+			
+				ObjGen objg = (ObjGen) gen;
+				
+				try {
+					Files.asByteSource( objg.getFile() ).copyTo (Files.asByteSink( croppedFile ));
+					objg.setVisible( false );
+					found = true;
+				} catch ( IOException e ) {
+					e.printStackTrace();
+				}
+			}
+		
+		if ( found ) {
 			Graph2D g2 = new Graph2D();
 
 			polies.stream().flatMap( ll -> ll.streamAble() ).forEach( x -> g2.add( new Point2d( x.get().x, x.get().z ), new Point2d( x.getNext().get().x, x.getNext().get().z ) ) );
@@ -295,7 +328,8 @@ public class GISGen extends LineGen3d {
 			lastMesh.put( index, bg );
 
 			tweed.frame.addGen( bg, true );
-		}
+		} else
+			JOptionPane.showMessageDialog( tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
 		
 	}
 

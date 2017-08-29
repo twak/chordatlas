@@ -996,38 +996,41 @@ public class Prof extends ArrayList<Point2d> {
 			Point3d p1 = to3d( get(size()-1) ),
 					p2 = to3d( get(size()-1) );
 			
-			Point2d arrow = new Point2d( get(size()-1) );
-			arrow.sub( get ( size()-2 ) );
-			arrow.scale( width * 1.3 / new Vector2d( arrow ).length() );
-			arrow.add( get(size()-1) );
+			Point2d arrow = get ( size()-1 ), arrowE = null;
 			
-			Point3d p3 = to3d (arrow);
-			p1.add( perp );
-			p2.sub( perp );
+			for (int e = size()-1; e >= 0 && get(e).equals( get(size() -1) ); e-- )
+				arrowE = new Point2d( get(e) );
+			
+			if ( arrowE != null ) {
 
-			p1.add( delta );
-			p2.add( delta );
-			p3.add( delta );
-			
-			
-			
-			int o = coords.size() / 3;
-			
-			inds.add( o + 0 );
-			inds.add( o + 1 );
-			inds.add( o + 2 );
-			
-			inds.add( o + 2 );
-			inds.add( o + 1 );
-			inds.add( o + 0 );
-			
-			for (Point3d pt : new Point3d[] {p1, p2, p3} ) {
-				coords.add( (float) pt.x );
-				coords.add( (float) pt.y );
-				coords.add( (float) pt.z );
-			}					
-			
-			
+				arrow.sub( arrowE );
+				arrow.scale( width * 1.3 / new Vector2d( arrow ).length() );
+				arrow.add( get( size() - 1 ) );
+
+				Point3d p3 = to3d( arrow );
+				p1.add( perp );
+				p2.sub( perp );
+
+				p1.add( delta );
+				p2.add( delta );
+				p3.add( delta );
+
+				int o = coords.size() / 3;
+
+				inds.add( o + 0 );
+				inds.add( o + 1 );
+				inds.add( o + 2 );
+
+				inds.add( o + 2 );
+				inds.add( o + 1 );
+				inds.add( o + 0 );
+
+				for ( Point3d pt : new Point3d[] { p1, p2, p3 } ) {
+					coords.add( (float) pt.x );
+					coords.add( (float) pt.y );
+					coords.add( (float) pt.z );
+				}
+			}
 		}
 		
 		

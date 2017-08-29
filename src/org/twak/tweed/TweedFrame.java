@@ -409,6 +409,12 @@ public class TweedFrame {
 			addGen( g, true );
 		}
 	}
+	
+	public void refreshGenList() {
+		for ( Component c : layerList.getComponents() ) 
+			if ( c instanceof GenListItem  )
+				((GenListItem)c).refresh();
+	}
 
 	public void removeBelowGen( Gen below ) {
 

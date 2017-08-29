@@ -74,8 +74,9 @@ public class FindLines {
 		Iterator<Line> filter = remaining.iterator();
 
 		while (filter.hasNext()) {
-			double l = filter.next().length();
-			if (l == 0)
+			Line l = filter.next();
+//			double l = filter.next().length();
+			if (l.lengthSquared() == 0 || l.hasNaN() )
 				filter.remove();
 		}
 		

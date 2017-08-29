@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -29,6 +30,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
 import org.twak.siteplan.jme.Jme3z;
+import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.VizSkelGen.Mode;
@@ -41,6 +43,7 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
+import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.FindLines;
 import org.twak.viewTrace.GBias;
@@ -57,7 +60,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.thoughtworks.xstream.XStream;
 
-public class ProfileGen extends Gen {
+public class ProfileGen extends Gen  implements IDumpObjs {
 
 	public LoopL<Point2d> gis;
 
@@ -85,8 +88,8 @@ public class ProfileGen extends Gen {
 
 		super( "profile", tweed );
 
-		HORIZ_SAMPLE_DIST = TweedSettings.settings.profileHSampleDist;
-		HEIGHT_DELTA = TweedSettings.settings.profileVSampleDist;
+		HORIZ_SAMPLE_DIST = 1;//TweedSettings.settings.profileHSampleDist;
+		HEIGHT_DELTA = 0.5;//TweedSettings.settings.profileVSampleDist;
 		
 		tweed.frame.removeGens( ProfileGen.class );
 		tweed.frame.removeGens( JmeGen.class );
@@ -305,6 +308,9 @@ public class ProfileGen extends Gen {
 						dRange.get(i)[MIN], dRange.get(i)[MAX],
 						pg.tweed, pg.gNode );
 				
+				if ( Double.isNaN( prof.get( prof.size() -1 ).x ) )
+					System.out.println(">>>");
+				
 				if (prof.size() >= 2)
 					profiles.put( i,  prof );
 			}
@@ -501,8 +507,10 @@ public class ProfileGen extends Gen {
 
 		addOnJmeThread.clear();
 		
-		if (faces == null)	
+		if (faces == null || faces.isEmpty()) {
+			JOptionPane.showMessageDialog( tweed.frame(), "Failed to cluster facades" );
 			return;
+		}
 		
 		Node mfNode = new Node();
 		Node cProfileNode = new Node();
@@ -605,15 +613,15 @@ public class ProfileGen extends Gen {
 					dbgProfileLookup.put( i++, pMF );
 
 					if ( DBG ) {
-						//	ColorRGBA color = new ColorRGBA( randy.nextFloat(), randy.nextFloat(), randy.nextFloat(), 1 );
 						
-						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( 
-								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
-								dispCol, 3 ));
-//								dispCol.add( ColorRGBA.White.mult ( .5f ) ), 3 ) );
+//						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( 
+//								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
+//								dispCol, 3 ));
+						
+						render ( new ArrayList<>(pMF.profiles.values()), tweed, profileNode );
 						
 						for ( Prof p : pMF.profiles.values() ) {
-							p.render( tweed, profileNode, dispCol, 1f );
+//							p.render( tweed, profileNode, dispCol, 1f );
 							
 							new Prof( p ).parameterize().render( tweed, cProfileNode, dispCol.add( ColorRGBA.Gray ), 1f );
 							
@@ -795,10 +803,15 @@ public class ProfileGen extends Gen {
 		
 		for (Prof p : ofs) {
 			Geometry g = new Geometry();
-			g.setMesh( p.renderStrip( HORIZ_SAMPLE_DIST, null ) );
+			g.setMesh( p.renderStrip( HORIZ_SAMPLE_DIST/2, null ) );
 			g.setMaterial( mat );
 			n.attachChild( g );
 		}
 		
+	}
+
+	@Override
+	public void dumpObj( ObjDump dump ) {
+		Jme3z.dump(dump, gNode, 0);
 	}
 }

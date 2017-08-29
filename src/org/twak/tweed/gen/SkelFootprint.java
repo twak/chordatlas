@@ -1381,11 +1381,12 @@ public class SkelFootprint {
 		
 		MultiMap<SuperLine,List<Prof>> profSets = new MultiMap<>();
 
-		System.out.println("clustering profiles over sweep edges...");
+		System.out.println("clustering "+globalProfs.size() + " profiles over sweep edges...");
 		
 		for (Line l : footprint)
 			profileRuns( (SuperLine) l, profSets );
 
+		Prof example = null;
 		
 		if ( false ) {
 			Node dbg = new Node();
@@ -1401,10 +1402,13 @@ public class SkelFootprint {
 			tweed.frame.addGen( new JmeGen( "global src", tweed, dbg ), true );
 		}
 		
-		System.out.println("cleaning profiles...");
+		System.out.println("cleaning "+ profSets.values().stream().flatMap( c -> c.stream() ).count() +" profiles...");
 		
 		for ( SuperLine sl : profSets.keySet() )
 			for ( List<Prof> lp : profSets.get( sl ) ) {
+				
+				if (example == null)
+					example = lp.get( 0 );
 				
 				Prof p = Prof.parameterize( sl, lp );
 				if (p != null && p.size() > 1)
@@ -1437,7 +1441,7 @@ public class SkelFootprint {
 		
 		System.out.println( "after remove similar " + globalProfs.size() );
 		{
-			Prof vertical = new Prof( globalProfs.get( 0 ) ); 
+			Prof vertical = new Prof( example ); 
 			vertical.clear();
 			vertical.add( new Point2d() );
 			vertical.add( new Point2d( 0, 20 ) );

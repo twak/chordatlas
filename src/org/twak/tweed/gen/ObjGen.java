@@ -20,6 +20,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.ui.ListDownLayout;
 
+import com.google.common.io.ByteSource;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -163,7 +164,11 @@ public class ObjGen extends Gen implements IDumpObjs {
 	@Override
 	public void dumpObj( ObjDump dump ) {
 		dump.setCurrentMaterial( Color.pink, 0.5);
-		dump.addAll (new ObjRead( new File (Tweed.JME+filename) ));
+		dump.addAll (new ObjRead( getFile() ));
+	}
+
+	public File getFile() {
+		return new File (Tweed.JME + filename );
 	}
 
 }
