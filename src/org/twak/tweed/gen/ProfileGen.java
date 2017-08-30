@@ -86,7 +86,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	
 	public ProfileGen( BlockGen blockGen, LoopL<Point2d> gis, Tweed tweed ) {
 
-		super( "profile", tweed );
+		super( "raw profiles", tweed );
 
 		HORIZ_SAMPLE_DIST = 1;//TweedSettings.settings.profileHSampleDist;
 		HEIGHT_DELTA = 0.5;//TweedSettings.settings.profileVSampleDist;
@@ -425,7 +425,6 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		
 		while ( !lines.isEmpty() ) {
 
-			
 			System.out.println("clustering megafacdes " + lines.size() );
 			
 			LineAtHeight start = lines.get( 0 ); // longest line
@@ -490,7 +489,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 				if (face.values().stream().flatMap( x -> x.stream() ).count() > 5)
 					faces.add(face);
 				else 
-					System.out.println("foo");
+					System.out.println("skipping small megafacade");
 			
 			}
 
@@ -546,13 +545,14 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 					}
 				}
 
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 1 ) );
+				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 0.1f, true ) );
 				
 				Line l2 = mf.origin.line;
 				Line3d oLine = new Line3d( 
 						l2.start.x, getHeight( mf.origin.height ), l2.start.y, 
 						l2.end.x, getHeight( mf.origin.height ), l2.end.y );
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 3 ) );
+				
+				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
 			}
 		
 //			if ( mf.area > TweedSettings.settings.megaFacadeAreaThreshold )
@@ -614,19 +614,23 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 
 					if ( DBG ) {
 						
-//						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( 
-//								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
-//								dispCol, 3 ));
+						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( 
+								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
+								dispCol, 0.3f, true ));
 						
 						render ( new ArrayList<>(pMF.profiles.values()), tweed, profileNode );
 						
+						List<Prof> cleans = new ArrayList<>();
+						
 						for ( Prof p : pMF.profiles.values() ) {
 //							p.render( tweed, profileNode, dispCol, 1f );
-							
-							new Prof( p ).parameterize().render( tweed, cProfileNode, dispCol.add( ColorRGBA.Gray ), 1f );
+							cleans.add( new Prof( p ).parameterize() );
+//							.render( tweed, cProfileNode, dispCol.add( ColorRGBA.Gray ), 1f );
 							
 						}
-						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 3 ) );
+						
+						render ( cleans, tweed, cProfileNode );
+						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
 						profileNode.setUserData( ProfileGen.class.getSimpleName(), i );
 						addOnJmeThread.add( profileNode );
 					}
@@ -636,8 +640,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		}
 		
 		if (DBG) {
-			tweed.frame.addGen( new JmeGen( "megafacade", tweed, mfNode  ), false );
-			tweed.frame.addGen( new JmeGen( "clean", tweed, cProfileNode ), false );
+			tweed.frame.addGen( new JmeGen( "horizontal lines", tweed, mfNode  ), false );
+			tweed.frame.addGen( new JmeGen( "clean profiles", tweed, cProfileNode ), false );
 		}
 		
 		calculateOnJmeThread();
@@ -794,12 +798,17 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	public static void render( List<Prof> ofs, Tweed tweed, Node n ) {
 
 		Random randy = new Random(ofs.hashCode());
-		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
-		mat.setColor( "Color", 
-				new ColorRGBA(
-						randy.nextFloat(), 
-						0.2f+ 0.5f * randy.nextFloat(), 
-						0.5f+ 0.5f * randy.nextFloat(), 1) );
+		
+		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+		
+		ColorRGBA col = new ColorRGBA(
+				randy.nextFloat(), 
+				0.2f+ 0.5f * randy.nextFloat(), 
+				0.5f+ 0.5f * randy.nextFloat(), 1);
+		
+		mat.setColor( "Diffuse", col );
+		mat.setColor( "Ambient", col.mult( 0.5f ) );
+		mat.setBoolean( "UseMaterialColors", true );
 		
 		for (Prof p : ofs) {
 			Geometry g = new Geometry();

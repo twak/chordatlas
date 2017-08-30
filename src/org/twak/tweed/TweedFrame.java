@@ -229,7 +229,13 @@ public class TweedFrame {
 					if ( g.visible && g instanceof IDumpObjs )
 						( (IDumpObjs) g ).dumpObj( dump );
 
-				dump.dump( new File( Tweed.CONFIG + "all.obj" ) );
+				new SimpleFileChooser(frame, true, "save all as obj", new File (Tweed.CONFIG, "all.obj"), "obj") {
+					@Override
+					public void heresTheFile( File f ) throws Throwable {
+						dump.dump( f );
+					}
+				}; 
+				
 
 			};
 		} );
