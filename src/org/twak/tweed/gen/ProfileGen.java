@@ -379,6 +379,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		for (Node n : addOnJmeThread)
 			gNode.attachChild( n );
 		
+		gNode.updateGeometricState();
+		gNode.updateModelBound();
+		
 		super.calculate( );
 	}
 
@@ -614,6 +617,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 
 					if ( DBG ) {
 						
+
 						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( 
 								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
 								dispCol, 0.3f, true ));
@@ -709,7 +713,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	@Override
 	public JComponent getUI() {
 		
-		JSlider slider = new JSlider( JSlider.VERTICAL, -1, gNode.getChildren().size(), -1 );
+		JSlider slider = new JSlider( JSlider.HORIZONTAL, -1, gNode.getChildren().size(), -1 );
 
 		slider.addChangeListener( new ChangeListener() {
 
@@ -730,17 +734,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 										s.setCullHint( CullHint.Always );
 							}
 						}
-
-						if ( value != -1 ) {
-
-							//						MegaFacade mf =  dbgProfileLookup.get( value );
-							//						Line l2 = mf.origin.line;
-							//						Line3d oLine = new Line3d( 
-							//								l2.start.x, getHeight( mf.origin.height ), l2.start.y, 
-							//								l2.end  .x, getHeight( mf.origin.height ), l2.end  .y );
-							//						Prof.findPlanLines(mf.profiles.values(), oLine ); 
-							//						tweed.gainFocus();
-						}
+						
+						tweed.gainFocus();
 					}
 				} );
 			}
@@ -748,7 +743,6 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		
 		JButton skel = new JButton("optimize");
 		skel.addActionListener( ae -> doSkel() );
-		
 		
 		JComboBox<Mode> vizMode = new JComboBox<>(Mode.values());
 		vizMode.addActionListener(e -> doViz( (Mode) vizMode.getSelectedItem() ) );
@@ -760,6 +754,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		stateBuilder.addActionListener( ae -> new SSBuilder(this, tweed.features) );
 		
 		JPanel out = new JPanel( new ListDownLayout() );
+		out.add( new JLabel("profiles rendered:") );
 		out.add( slider );
 		out.add( skel );
 		out.add( new JLabel("viz:") );
@@ -816,7 +811,6 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			g.setMaterial( mat );
 			n.attachChild( g );
 		}
-		
 	}
 
 	@Override
