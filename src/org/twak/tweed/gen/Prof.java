@@ -996,18 +996,22 @@ public class Prof extends ArrayList<Point2d> {
 			Point3d p1 = to3d( get(size()-1) ),
 					p2 = to3d( get(size()-1) );
 			
-			Point2d arrow = get ( size()-1 ), arrowE = null;
+			Point2d arrowT = new Point2d ( get ( size()-1 ) ), 
+					arrowB = null;
 			
-			for (int e = size()-1; e >= 0 && get(e).equals( get(size() -1) ); e-- )
-				arrowE = new Point2d( get(e) );
+			for (int e = size()-2; e >= 0; e-- )
+				if ( !get(e).equals( get(size() -1) ) ) {
+					arrowB = new Point2d( get(e) );
+					break;
+				}
 			
-			if ( arrowE != null ) {
+			if ( arrowB != null ) {
 
-				arrow.sub( arrowE );
-				arrow.scale( width * 1.3 / new Vector2d( arrow ).length() );
-				arrow.add( get( size() - 1 ) );
+				arrowT.sub( arrowB );
+				arrowT.scale( width * 1.3 / new Vector2d( arrowT ).length() );
+				arrowT.add( get( size() - 1 ) );
 
-				Point3d p3 = to3d( arrow );
+				Point3d p3 = to3d( arrowT );
 				p1.add( perp );
 				p2.sub( perp );
 
