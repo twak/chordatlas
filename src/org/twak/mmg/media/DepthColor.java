@@ -36,7 +36,7 @@ public class DepthColor extends RenderData {
 		out.add(visCheck);
 		
 		JButton c = new JButton("color");
-		c.addActionListener( k -> new ColourPicker(color) {
+		c.addActionListener( k -> new ColourPicker(mogram.mogramEditor, color) {
 			
 			@Override
 			public void picked( Color color ) {

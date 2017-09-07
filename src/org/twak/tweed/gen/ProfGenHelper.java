@@ -54,7 +54,7 @@ public class ProfGenHelper {
 			public void actionPerformed( ActionEvent e ) {
 				BufferedImage bi = new BufferedImage (pot.getWidth(), pot.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 				
-				for (File f : new File ( Tweed.CONFIG +  "vid").listFiles())
+				for (File f : new File ( Tweed.SCRATCH +  "vid").listFiles())
 					f.delete();
 				
 				int c = 0;
@@ -63,7 +63,7 @@ public class ProfGenHelper {
 					slider.setValue( i );
 					pot.publicPaintComponent( bi.getGraphics() );
 					try {
-						ImageIO.write( bi, "png", new File ( String.format ( Tweed.CONFIG +  "vid/%05d.png", c++ ) ));
+						ImageIO.write( bi, "png", new File ( String.format ( Tweed.SCRATCH +  "vid/%05d.png", c++ ) ));
 						
 					} catch ( IOException f ) {
 						f.printStackTrace();
@@ -80,7 +80,7 @@ public class ProfGenHelper {
 
 	public static void main (String[] args) {
 		
-		new ProfGenHelper( (List<Prof>) new XStream().fromXML( new File( Tweed.CONFIG + "profiles.xml" ) ) );
+		new ProfGenHelper( (List<Prof>) new XStream().fromXML( new File( Tweed.SCRATCH + "profiles.xml" ) ) );
 		
 	}
 }

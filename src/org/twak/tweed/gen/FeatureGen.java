@@ -215,8 +215,8 @@ public class FeatureGen extends Gen {
 	
 	public BlockFeatures getBlock( Point2d center ) {
 		
-		Optional<Point2d> maybePt = blockFeatures.keySet().stream().min( (a,b ) -> Double.compare( a.distance(center), b.distance(center) ) );
-		
+		Optional<Point2d> maybePt = blockFeatures.keySet().stream().min( 
+				(a,b ) -> Double.compare( a.distance(center), b.distance(center) ) );
 		
 		if (maybePt.isPresent()) {
 			if (center.distance( maybePt.get() ) < 1)

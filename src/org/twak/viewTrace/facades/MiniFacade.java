@@ -636,7 +636,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 			@Override
 			public void run() {
 
-				new ColourPicker( new Color ( (float) color[0], (float) color[1], (float) color[2]  )) {
+				new ColourPicker( null, new Color ( (float) color[0], (float) color[1], (float) color[2]  )) {
 					
 					@Override
 					public void picked( Color color ) {

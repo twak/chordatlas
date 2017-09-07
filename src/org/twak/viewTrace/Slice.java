@@ -444,7 +444,7 @@ public class Slice extends JComponent {
 					
 				}
 				
-				out.dump(new File( Tweed.CONFIG +"test2.obj"));
+				out.dump(new File( Tweed.SCRATCH +"test2.obj"));
 			}
 
 
@@ -459,7 +459,7 @@ public class Slice extends JComponent {
 				
 				BufferedImage bi = new BufferedImage (Slice.this.getWidth(), Slice.this.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 				
-				for (File f : new File ( Tweed.CONFIG +  "vid").listFiles())
+				for (File f : new File ( Tweed.SCRATCH +  "vid").listFiles())
 					f.delete();
 				
 				int c = 0;
@@ -468,7 +468,7 @@ public class Slice extends JComponent {
 					heightSlider.setValue( i );
 					Slice.this.paintComponent( bi.getGraphics() );
 					try {
-						ImageIO.write( bi, "png", new File ( String.format ( Tweed.CONFIG +  "vid/%05d.png", c++ ) ));
+						ImageIO.write( bi, "png", new File ( String.format ( Tweed.SCRATCH +  "vid/%05d.png", c++ ) ));
 						
 					} catch ( IOException e ) {
 						e.printStackTrace();
@@ -482,7 +482,7 @@ public class Slice extends JComponent {
 		sl.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				new SliceSolver(new File( Tweed.CONFIG + "test2.obj" ), Slice.this, P);
+				new SliceSolver(new File( Tweed.SCRATCH + "test2.obj" ), Slice.this, P);
 			}
 		});
 		
@@ -532,7 +532,7 @@ public class Slice extends JComponent {
 				g2.dispose();
 				
 				try {
-					ImageIO.write( out, "png", new File (Tweed.CONFIG +  "lines") );
+					ImageIO.write( out, "png", new File (Tweed.SCRATCH +  "lines") );
 				} catch ( IOException e ) {
 					e.printStackTrace();
 				}
@@ -800,7 +800,7 @@ public class Slice extends JComponent {
 //		new Slice(new File("/home/twak/data/tallis/to_slice.obj"), new File("/home/twak/data/tallis/tallis.gml"));
 //		new Slice(new File("/home/twak/data/lerfosgade/lerfosgade.obj"), new File("/home/twak/data/lerfosgade/gis.obj"), new SliceParameters(), true);
 //		new Slice(new File("/home/twak/data/waverley/waverley.obj"), new File("/home/twak/data/waverley/gis.obj"));
-		new Slice( new File( Tweed.CONFIG +  "meshes/194" ), 10 );
+		new Slice( new File( Tweed.SCRATCH +  "meshes/194" ), 10 );
 	}
 
 //	private static boolean isGEHorizVert (Line l ) {

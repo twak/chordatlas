@@ -3,6 +3,12 @@ package org.twak.tweed;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import org.twak.tweed.gen.Gen;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -63,25 +69,32 @@ public class TweedSettings {
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
 	
+	public List<Gen> genList = new ArrayList<>();
+	
 	public TweedSettings() {
 	}
 
 	public static void load( File folder ) {
+		
+		if (!folder.isDirectory())
+			folder = folder.getParentFile();
+		
 		TweedSettings.folder = folder;
+		
 		try {
 			settings = (TweedSettings) new XStream(new PureJavaReflectionProvider()).fromXML( new File( folder, "tweed.xml" ) );
 		} catch ( Throwable th ) {
 			settings = new TweedSettings();
-			save();
+			save(false);
 			th.printStackTrace();
 		}
 	}
 
-	public static void save() {
+	public static void save(boolean backup) {
 		if (folder != null) {
 			FileOutputStream fos = null;
 			try {
-				fos = new FileOutputStream( new File( folder, "tweed.xml" ) );
+				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
 				TweedSettings.settings.badGeomAngle = -0.1;
 				new XStream(new PureJavaReflectionProvider()).toXML( TweedSettings.settings, fos );
 			} catch ( Throwable e ) {
@@ -96,6 +109,8 @@ public class TweedSettings {
 					}	
 			}
 		}
+		else if (!backup) 
+			JOptionPane.showMessageDialog( null, "save failed" );
 	}
 
 }

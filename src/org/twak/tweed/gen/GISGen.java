@@ -64,7 +64,7 @@ public class GISGen extends LineGen3d {
 	
 	public GISGen( File objFile, Tweed tweed ) {
 		
-		super( "gis_o_" + objFile.getName(), tweed );
+		super( "gis (o)" + objFile.getName(), tweed );
 		
 		ObjRead gObj = new ObjRead( objFile );
 		
@@ -96,7 +96,7 @@ public class GISGen extends LineGen3d {
 	
 	public GISGen( String gmlFile, Matrix4d toOrigin, String crs, Tweed tweed ) {
 
-		super( "gis_g_" + new File( gmlFile ).getName(), tweed );
+		super( "gis (g)" + new File( gmlFile ).getName(), tweed );
 		this.filename = gmlFile;
 
 		Closer<Point3d> closer = new Closer<>();
@@ -137,7 +137,6 @@ public class GISGen extends LineGen3d {
 			
 			if (TweedSettings.settings.flipFootprints)
 				poly.reverse();
-//				polies.reverseEachLoop();
 			
 			closer.add( points.toArray( new Point3d[points.size()]) );
 		}
@@ -159,14 +158,9 @@ public class GISGen extends LineGen3d {
 				if (loopl == null)
 					blocks.put(key, loopl = new LoopL<>() );
 				
-
-				
 				if (TweedSettings.settings.calculateFootprintNormals) {
 						if (Loopz.area( Loopz.to2dLoop( poly, 1, null ) ) < 0)
 							poly.reverse();
-						
-						
-						
 					}
 				
 				loopl.add(poly);
@@ -268,7 +262,7 @@ public class GISGen extends LineGen3d {
 
 		Loop<Point3d> hull = new Loop<Point3d>( ( Arrays.stream( chull.getLineSegments() ).map( x -> new Point3d( x.getStart().getX(), 0, x.getStart().getY() ) ).collect( Collectors.toList() ) ) );
 
-		File root = new File( Tweed.JME + "Desktop/meshes/" );
+		File root = new File( Tweed.SCRATCH + "meshes" + File.separator );
 
 		int i = 0;
 		File l;

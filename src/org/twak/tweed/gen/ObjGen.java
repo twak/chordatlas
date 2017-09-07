@@ -13,6 +13,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.handles.HandleMe;
@@ -72,10 +73,11 @@ public class ObjGen extends Gen implements IDumpObjs {
 		if (transparency == 0) { 
 			mat = new Material(tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
 			
-			mat.setColor( "Diffuse", ColorRGBA.DarkGray );
-			mat.setColor( "Ambient", ColorRGBA.DarkGray );
-//			mat.setColor( "Diffuse", genCol );
-//			mat.setColor( "Ambient", genCol );
+			ColorRGBA c = Jme3z.toJme( color );
+			
+			mat.setColor( "Diffuse", c );
+			mat.setColor( "Ambient", c );
+			
 			mat.setBoolean( "UseMaterialColors", true );
 
 		}

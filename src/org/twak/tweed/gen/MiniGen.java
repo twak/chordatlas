@@ -165,6 +165,7 @@ public class MiniGen extends Gen implements HandleMe {
 	
 	
 	private final static int MAX = 1000;
+	private static final boolean IMPORT_TEXTURES = false;
 
 	@Override
 	public JComponent getUI() {
@@ -301,6 +302,7 @@ public class MiniGen extends Gen implements HandleMe {
 				File readFolder = new File( root, e.getKey() + "" );
 				ObjDump or = new ObjDump( new File( readFolder, "model.obj" ) );
 
+				
 				for ( ObjDump.Material mat : or.material2Face.keySet() ) {
 
 					f:
@@ -315,7 +317,7 @@ public class MiniGen extends Gen implements HandleMe {
 							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
 								if ( inside( pt, halfPlanes ) ) {
 
-									if ( ! (
+									if ( IMPORT_TEXTURES && ! (
 											(obj.currentMaterial != null && obj.currentMaterial.equals( mat ) ) ||
 											(obj.currentMaterial == null && mat == null ) ) ) {
 										

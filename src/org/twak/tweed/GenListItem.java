@@ -63,7 +63,7 @@ public class GenListItem extends JPanel {
 			
 			public void mousePressed(MouseEvent e) {
 				
-				new ColourPicker(gen.color) {
+				new ColourPicker(tweed.frame, gen.color) {
 					
 					@Override
 					public void picked(Color c) {

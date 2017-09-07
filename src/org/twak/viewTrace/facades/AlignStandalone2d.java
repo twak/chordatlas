@@ -89,7 +89,7 @@ public class AlignStandalone2d extends JPanel {
 					for (int j = imageSlide.getMinimum(); j < imageSlide.getMaximum(); j++) {
 						imageSlide.setValue( j );
 						plot();
-						plot.writeImage(Tweed.CONFIG+i+"_"+(j==-1? "all":("image_"+j) )+"_align");
+						plot.writeImage(Tweed.SCRATCH+i+"_"+(j==-1? "all":("image_"+j) )+"_align");
 					}
 				}
 			}

@@ -86,7 +86,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	
 	public ProfileGen( BlockGen blockGen, LoopL<Point2d> gis, Tweed tweed ) {
 
-		super( "raw profiles", tweed );
+		super( "profiles", tweed );
 
 		HORIZ_SAMPLE_DIST = 1;//TweedSettings.settings.profileHSampleDist;
 		HEIGHT_DELTA = 0.5;//TweedSettings.settings.profileVSampleDist;
@@ -308,9 +308,6 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 						dRange.get(i)[MIN], dRange.get(i)[MAX],
 						pg.tweed, pg.gNode );
 				
-				if ( Double.isNaN( prof.get( prof.size() -1 ).x ) )
-					System.out.println(">>>");
-				
 				if (prof.size() >= 2)
 					profiles.put( i,  prof );
 			}
@@ -515,7 +512,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		}
 		
 		Node mfNode = new Node();
-		Node cProfileNode = new Node();
+//		Node cProfileNode = new Node();
 		Random randy = new Random(2);
 		dbgProfileLookup.clear();
 		
@@ -624,16 +621,16 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 						
 						render ( new ArrayList<>(pMF.profiles.values()), tweed, profileNode );
 						
-						List<Prof> cleans = new ArrayList<>();
+//						List<Prof> cleans = new ArrayList<>();
 						
-						for ( Prof p : pMF.profiles.values() ) {
+//						for ( Prof p : pMF.profiles.values() ) {
 //							p.render( tweed, profileNode, dispCol, 1f );
-							cleans.add( new Prof( p ).parameterize() );
+//							cleans.add( new Prof( p ).parameterize() );
 //							.render( tweed, cProfileNode, dispCol.add( ColorRGBA.Gray ), 1f );
-							
-						}
+//							
+//						}
 						
-						render ( cleans, tweed, cProfileNode );
+//						render ( cleans, tweed, cProfileNode );
 						profileNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
 						profileNode.setUserData( ProfileGen.class.getSimpleName(), i );
 						addOnJmeThread.add( profileNode );
@@ -643,10 +640,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			}
 		}
 		
-		if (DBG) {
+		if (DBG) 
 			tweed.frame.addGen( new JmeGen( "horizontal lines", tweed, mfNode  ), false );
-			tweed.frame.addGen( new JmeGen( "clean profiles", tweed, cProfileNode ), false );
-		}
+//			tweed.frame.addGen( new JmeGen( "clean profiles", tweed, cProfileNode ), false );
 		
 		calculateOnJmeThread();
 		
@@ -750,7 +746,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		JButton writeProfiles = new JButton("dump profs");
 		writeProfiles.addActionListener( ae -> writeProfiles() );
 		
-		JButton stateBuilder = new JButton("preview");
+		JButton stateBuilder = new JButton("preview results");
 		stateBuilder.addActionListener( ae -> new SSBuilder(this, tweed.features) );
 		
 		JPanel out = new JPanel( new ListDownLayout() );
@@ -783,7 +779,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		}
 		
 		try {
-			new XStream().toXML( out, new FileOutputStream( new File ( Tweed.CONFIG+"profiles.xml" ) ) );
+			new XStream().toXML( out, new FileOutputStream( new File ( Tweed.SCRATCH+"profiles.xml" ) ) );
 			
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();

@@ -168,9 +168,10 @@ public class SkelFootprint {
 				m.close();
 				return SS.mesh;
 			}
-			
-			solve( SS, m, null, Long.MAX_VALUE );// new File (Tweed.CONFIG+"solver_state.xml") );
-//			solve( SS, m, new File (Tweed.CONFIG+"solver_state.xml") );
+		
+			solve( SS, m, 
+					skelGen.blockGen.getSolutionFile(),
+					Long.MAX_VALUE );
 		}
 		
 		if ( TRUE ) 
@@ -339,8 +340,8 @@ public class SkelFootprint {
 	public static void solve( SolverState SS, ProgressMonitor m, File output, long timeLimitSec ) {
 		
 		try {
-			new GreedySkelSolver(SS, m, timeLimitSec ).solve();
-//			new SkelSolver(SS, m, timeLimitSec ).solve();
+//			new GreedySkelSolver(SS, m, timeLimitSec ).solve();
+			new SkelSolver(SS, m, timeLimitSec ).solve();
 		}
 		catch (Throwable th) {
 			th.printStackTrace();
@@ -868,7 +869,7 @@ public class SkelFootprint {
 		}
 		
 		try {
-			GRBEnv env = new GRBEnv( Tweed.CONFIG+"mip1.log" );
+			GRBEnv env = new GRBEnv( Tweed.SCRATCH+"mip1.log" );
 			GRBModel model = new GRBModel( env );
 
 			int colors = 3;

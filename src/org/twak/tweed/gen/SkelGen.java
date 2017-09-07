@@ -77,7 +77,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 	
 	public SkelGen( List<Line> footprint, Tweed tweed, BlockGen blockGen ) {
-		super( "skel", tweed );
+		super( "model", tweed );
 		this.footprint = footprint;
 		this.blockGen = blockGen;
 		

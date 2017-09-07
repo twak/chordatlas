@@ -55,6 +55,8 @@ public class SSBuilder {
 		
 		quick = new JCheckBox( "quick", true );
 		
+		PaintThing.debug.clear();
+		
 		plot = new Plot(preview, save, opt, 
 				new JLabel ("mega area"), megaArea, 
 				new JLabel("GIS"), gisInterior,
@@ -104,7 +106,7 @@ public class SSBuilder {
 			public void run() {
 				
 				SkelFootprint.solve( solverState, new ProgressMonitor( null, "optimising", "result.getName()", 0, 100 ), 
-						new File (Tweed.CONFIG+"solver_state.xml"), Long.MAX_VALUE );
+						new File (Tweed.SCRATCH+"solver_state.xml"), Long.MAX_VALUE );
 
 				profileGen.tweed.frame.removeGens( SkelGen.class );
 				profileGen.tweed.frame.addGen( new SkelGen( solverState.mesh, profileGen.tweed, profileGen.blockGen ), true );

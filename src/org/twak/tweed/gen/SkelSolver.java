@@ -147,7 +147,7 @@ public class SkelSolver {
 			}).start();
 			
 			try {
-  			    model.write( Tweed.CONFIG + "problem_"+System.currentTimeMillis()+".mps");
+  			    model.write( Tweed.SCRATCH + "problem_"+System.currentTimeMillis()+".mps");
 				model.optimize();
 			} finally {
 				gurobiDone = true;				
@@ -259,7 +259,7 @@ public class SkelSolver {
 
 	public void buildProblem() throws GRBException {
 
-		model = new GRBModel( new GRBEnv( Tweed.CONFIG+System.currentTimeMillis()+".log" ) );
+		model = new GRBModel( new GRBEnv( Tweed.SCRATCH+System.currentTimeMillis()+".log" ) );
 		target = new GRBQuadExpr();
 		edgeInfo = new HashMap<>();
 		faceInfo = new HashMap<>();

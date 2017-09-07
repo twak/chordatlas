@@ -41,6 +41,10 @@ import com.thoughtworks.xstream.XStream;
 
 public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 
+	public static final String 
+			SOLUTIONS   = "solutions",
+			SOLVER_FILE = "solver_state.xml";
+
 	File root;
 	
 	List<MeshFile> toAdd = Collections.synchronizedList( new ArrayList<>() );
@@ -74,9 +78,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 					.filter (s -> s.getName().equals("done.xml" ) )
 					.collect( Collectors.toList() );
 			
-			
-//			files = files.subList( 0, Math.min (files.size(), 3) );
-			
 			new Parallel<File, MeshFile>( files, x -> readMesh(x, plot), meshes -> loaded(meshes), false );
 			
 		} catch ( IOException e ) {
@@ -107,9 +108,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 	AtomicInteger plansOut = new AtomicInteger(), plansIn = new AtomicInteger(), meshFacades = new AtomicInteger();
 	
 	private MeshFile readMesh(File f, boolean plot) {
-		
-//		if (f.getName().contains( "482.0861860288687_-965.1306367886863" )) 
-//			return null;
 		
 		System.out.println("reading solution " + f.getParentFile().getName());
 		
@@ -178,33 +176,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 				Regularizer.regularised + "  total images " + 
 				Regularizer.seenImages.size() );
 		System.out.println(" total features: " + Regularizer.totalFeature);
-			
-			
-//			if ( block != null )
-//				for ( HalfFace f : block ) {
-//
-//					try {
-//					PlanSkeleton skel = SkelGen.calc( (SuperFace) f );
-//
-//					if ( skel != null ) {
-//
-//						Node house = new Greeble( tweed ).showSkeleton( skel.output, new OnClick() {
-//							@Override
-//							public void selected( Output output, Node house2, SuperEdge se ) {
-//							}
-//						} );
-//
-//						gNode.attachChild( house );
-//					}
-//					}
-//					catch (Throwable th) {
-//						System.out.println( "while processing lbock wiht corner "+block.faces.get( 0 ).e.start );
-//						th.printStackTrace();
-//					}
-//				}
-
-//		if (!pNode.getChildren().isEmpty())
-//			tweed.frame.addGen( new JmeGen( "sProfs", tweed, pNode ), false );
 		
 		gNode.updateModelBound();
 		gNode.updateGeometricState();

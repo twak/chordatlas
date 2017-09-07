@@ -87,7 +87,7 @@ public class SatUtils {
 			}
 
 			g.dispose();
-			ImageIO.write( out, "png", new File( Tweed.CONFIG + "ssat.png" ) );
+			ImageIO.write( out, "png", new File( Tweed.SCRATCH + "ssat.png" ) );
 			
 		} catch ( Throwable e ) {
 			e.printStackTrace();

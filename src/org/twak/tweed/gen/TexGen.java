@@ -78,7 +78,7 @@ public class TexGen extends ObjGen {
 
 	protected void setTexture(Geometry g, Material mat) {
 //		setTexture(g, mat, new int[] { 2048,2048} /*preview size */, pano.getSmallPano(), new File("/home/twak/Desktop/foo.png") );
-		setTexture(g, mat, new int[] {1024, 1024} /*preview size */, pano.getSmallPano(), new File( Tweed.CONFIG + "foo.png") );
+		setTexture(g, mat, new int[] {1024, 1024} /*preview size */, pano.getSmallPano(), new File( Tweed.SCRATCH + "foo.png") );
 	}
 	
 	protected void renderTexture( File writeTo ) {

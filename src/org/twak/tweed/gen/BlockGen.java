@@ -7,6 +7,7 @@ import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.vecmath.Point2d;
@@ -18,12 +19,14 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
+import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.viewTrace.Slice;
 import org.twak.viewTrace.SliceParameters;
 import org.twak.viewTrace.SliceSolver;
 
 import com.jme3.asset.ModelKey;
 import com.jme3.scene.Spatial;
+import com.thoughtworks.xstream.XStream;
 
 public class BlockGen extends ObjGen {
 
@@ -40,11 +43,11 @@ public class BlockGen extends ObjGen {
 	public BlockGen( File l, Tweed tweed, LoopL<Point3d> polies ) {
 		
 		super ( new File(l, GISGen.CROPPED_OBJ ).getPath().substring( Tweed.JME.length() ), tweed);
-//		gis = new ObjRead( new File(l, "gis.obj") );
+
 		this.polies = polies;
 		this.root = l;
 		this.name = "block";
-		this.transparency = 1;
+		this.transparency = 0;
 		
 		this.center = Loopz.average( Loopz.to2dLoop( polies, 1, null ) );
 		System.out.println("creating block with name: " + nameCoords() );
@@ -54,7 +57,6 @@ public class BlockGen extends ObjGen {
 	public void calculate() {
 		
 		super.calculate();
-
 		doClicked(gNode);
 	}
 
@@ -121,15 +123,28 @@ public class BlockGen extends ObjGen {
 			}
 		} );
 		
-		JButton features = new JButton("features");
-		features.addActionListener( e -> tweed.frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), tweed ), false ) );
+		JButton loadSln = new JButton( "load sln" );
+		loadSln.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				File f = getSolutionFile();
+				if ( f.exists() ) {
 
+					SolverState SS = (SolverState) new XStream().fromXML( f );
+					SkelFootprint.postProcesss( SS );
+					tweed.frame.addGen( new SkelGen( SS.mesh, tweed, BlockGen.this ), true );
+				} else {
+					JOptionPane.showMessageDialog( tweed.frame(), "Unable to find pre-computed solution.\n" + f );
+				}
+			}
+		} );
+		
 		JTextArea name = new JTextArea( nameCoords() );
 		
 		panel.add(profiles,0 );
 		panel.add( slice, 1 );
 		panel.add( tooD );
-		panel.add( features );
+		panel.add( loadSln );
 		panel.add( name );
 		
 		return panel;
@@ -197,5 +212,13 @@ public class BlockGen extends ObjGen {
 	public void dumpObj( ObjDump dump ) {
 		dump.setCurrentMaterial( Color.blue, 0.5);
 		dump.addAll (getCroppedMesh());
+	}
+
+	public File getInputFolder( String dir ) {
+		return new File (Tweed.DATA, dir+File.separator+nameCoords() );
+	}
+
+	public File getSolutionFile() {
+		return new File (getInputFolder(ResultsGen.SOLUTIONS),ResultsGen.SOLVER_FILE);
 	}
 }

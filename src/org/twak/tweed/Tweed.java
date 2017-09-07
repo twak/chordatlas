@@ -83,8 +83,8 @@ public class Tweed extends SimpleApplication {
 
 	
 	public final static String DATA   =   System.getProperty("user.home")+"/data/regent"; // we read the datafiles from here
-	public final static String CONFIG = System.getProperty("user.home")+"/Desktop/"; // we write all sort of stuff here
-	public final static String JME    = new File(System.getProperty("user.home"))+"/"; // root of asset resource-tree for jMonkey
+	public final static String SCRATCH   =   DATA + File.separator + "scratch" + File.separator; // we read the datafiles from here
+	public final static String JME    = DATA+File.separator; // root of asset resource-tree for jMonkey
 	
 	public static final String LAT_LONG = "EPSG:4326";
 	
@@ -330,7 +330,6 @@ public class Tweed extends SimpleApplication {
 
 		lastCRS = guessCRS;
 		
-		// assume same CS for whole GML file!
 		System.out.println( "Assuming CRS " + guessCRS + " for all of " + gmlFile.getName() );
 		
 		MathTransform transform = CRS.findMathTransform( CRS.decode( guessCRS ), DefaultGeocentricCRS.CARTESIAN, true );

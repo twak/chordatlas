@@ -226,7 +226,7 @@ public abstract class GMLReader {
 			obj.addFace(pts);
 		}
 		
-		obj.dump(new File( Tweed.CONFIG + "langham.obj"));
+		obj.dump(new File( Tweed.SCRATCH + "langham.obj"));
 	}
 	
 	public static Graph2D readGMLToGraph (File in) {
