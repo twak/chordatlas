@@ -72,7 +72,7 @@ public class FacadeTool extends SelectTool {
 
 	@Override
 	public String getName() {
-		return "render";
+		return "render panoramas";
 	}
 
 	@Override

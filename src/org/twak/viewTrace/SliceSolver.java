@@ -25,7 +25,7 @@ import gurobi.GRBModel;
 import gurobi.GRBQuadExpr;
 import gurobi.GRBVar;
 
-public class GurobiSolver {
+public class SliceSolver {
 
 	private static class State {
 		
@@ -45,7 +45,7 @@ public class GurobiSolver {
 	File outfile;
 	SliceParameters P;
 	
-	public GurobiSolver(File outFile, Slice slice, SliceParameters P) {
+	public SliceSolver(File outFile, Slice slice, SliceParameters P) {
 		this.outfile = outFile;
 		this.P  = P;
 		go(slice);

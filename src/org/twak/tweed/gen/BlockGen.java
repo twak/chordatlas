@@ -4,32 +4,25 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.twak.footprints.SatUtils;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
-import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
-import org.twak.viewTrace.GurobiSolver;
 import org.twak.viewTrace.Slice;
 import org.twak.viewTrace.SliceParameters;
+import org.twak.viewTrace.SliceSolver;
 
 import com.jme3.asset.ModelKey;
-import com.jme3.math.ColorRGBA;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class BlockGen extends ObjGen {
@@ -85,42 +78,19 @@ public class BlockGen extends ObjGen {
 		}
 	}
 	
-	boolean fireGenEvents = true;
-	
 	@Override
 	public JComponent getUI() {
 		
 		JPanel panel = (JPanel) super.getUI();
+
+		JButton profiles = new JButton ("profiles");
+		profiles.addActionListener( e -> doProfile() );
 		
-		JComboBox<Selected> box = new JComboBox<>();
-		
-		box.addActionListener( new ActionListener() {
+		JButton slice = new JButton ("slice");
+		slice.addActionListener( new ActionListener() {
+			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				if (fireGenEvents) {
-					selectedSelectedName = ((Selected)box.getSelectedItem()).name;
-					tweed.enqueue(new Runnable() {
-						public void run() {
-							((Selected)box.getSelectedItem()).onSelect();
-						}
-					} );
-				}
-			}
-		} );
-		
-		fireGenEvents = false;
-		
-		box.addItem( new Selected("input") {
-			@Override
-			public void onSelect() {
-				show ("cropped.obj");
-			}
-		});
-		
-		box.addItem( new Selected("slice") {
-			@Override
-			public void onSelect() {
-				
 				new Thread() {
 					public void run() {
 
@@ -128,69 +98,37 @@ public class BlockGen extends ObjGen {
 
 						if ( !fs.exists() ) 
 						{
-							new GurobiSolver( fs, 
+							new SliceSolver( fs, 
 									new Slice( 
 											getCroppedFile(), 
 											getGISFile(), P, false ), P );
 						}
-
-						show( "sliced.obj" );
+						
+						tweed.frame.addGen( new ObjGen( 
+								new File ( Tweed.JME).toPath().relativize( fs.toPath() ).toString(),
+								tweed ), true); 
 					}
-
 
 				}.start();
 			}
-		});
+		} );
 		
-//		box.addItem( new Selected("skel") {
-//			@Override
-//			public void onSelect() {
-//				tweed.tweed.addGen(new OldProfileGen( BlockGen.this, Loopz.toXZLoop( polies ), tweed), true);
-//			}
-//		});
-		
-		box.addItem( new Selected("profile") {
-			@Override
-			public void onSelect() {
-				doProfile();
-			}
-
-		});
-		
-		for (int i = 0; i < box.getItemCount(); i++)
-			if ( selectedSelectedName.equals( box.getItemAt( i ).name ) )
-				box.setSelectedIndex( i );
-		
-		fireGenEvents = true;
-		
-//		box.addItem( new Selected("gis") {
-//			@Override
-//			public void onSelect() {
-//				show ("gis.obj");
-//			}
-//		});
-		
-		JButton tooD = new JButton( "slice" );
+		JButton tooD = new JButton( "slice UI" );
 		tooD.addActionListener( new ActionListener() {
-			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				new Slice( root, ProfileGen.SLICE_SCALE );
 			}
 		} );
 		
-//		JButton windows = new JButton("wins");
-//		windows.addActionListener( e -> tweed.frame.addGen(new WindowGen(tweed), true) );
-		
 		JButton features = new JButton("features");
 		features.addActionListener( e -> tweed.frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), tweed ), false ) );
 
 		JTextArea name = new JTextArea( nameCoords() );
 		
-		
-		panel.add( box, 0 );
-		panel.add( tooD, 1 );
-//		panel.add( windows );
+		panel.add(profiles,0 );
+		panel.add( slice, 1 );
+		panel.add( tooD );
 		panel.add( features );
 		panel.add( name );
 		

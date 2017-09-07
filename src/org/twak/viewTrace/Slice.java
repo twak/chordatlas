@@ -482,7 +482,7 @@ public class Slice extends JComponent {
 		sl.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				new GurobiSolver(new File( Tweed.CONFIG + "test2.obj" ), Slice.this, P);
+				new SliceSolver(new File( Tweed.CONFIG + "test2.obj" ), Slice.this, P);
 			}
 		});
 		

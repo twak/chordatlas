@@ -69,10 +69,10 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		try {
 					
 			List<File> files = Files.walk(f.toPath())
-			.filter(Files::isRegularFile)
-			.map (p -> p.toFile())
-			.filter (s -> s.getName().equals("done.xml" ) )
-			.collect( Collectors.toList() );
+					.filter(Files::isRegularFile)
+					.map (p -> p.toFile())
+					.filter (s -> s.getName().equals("done.xml" ) )
+					.collect( Collectors.toList() );
 			
 			
 //			files = files.subList( 0, Math.min (files.size(), 3) );
