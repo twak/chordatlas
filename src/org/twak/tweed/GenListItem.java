@@ -3,6 +3,7 @@ package org.twak.tweed;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -21,6 +22,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.ICanSave;
 import org.twak.utils.WeakListener;
 import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.ui.ColourPicker;
@@ -85,6 +87,8 @@ public class GenListItem extends JPanel {
 		});
 		
 		JLabel name = new JLabel(gen.name);
+		if (!(gen instanceof ICanSave))
+			name.setFont( name.getFont().deriveFont( Font.ITALIC ) );
 		add(name);
 		
 		

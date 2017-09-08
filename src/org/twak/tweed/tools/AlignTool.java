@@ -7,8 +7,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 import javax.swing.text.NumberFormatter;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -45,7 +47,6 @@ public class AlignTool extends Tool {
 	Vector3f[] alignMarkers = new Vector3f[2],
 			otherMarkers = new Vector3f[2];
 	
-	boolean write = false; //write coords to disk
 	
 	double vOffset = 0;
 	
@@ -141,7 +142,7 @@ public class AlignTool extends Tool {
 		Transform t = new Transform();
 		t.fromTransformMatrix( Jme3z.toJme ( toOrigin ) );
 		
-		toAlign.moveTo( t, write );
+		toAlign.moveTo( t );
 		
 //		System.out.println ( "bounds "+ toAlign.gNode.getWorldBound() );
 		
@@ -268,11 +269,11 @@ public class AlignTool extends Tool {
 		
 		p.setLayout( new ListDownLayout() );
 		
-		JCheckBox w = new JCheckBox( "write to index.xml", write );
+		JButton w = new JButton( "write to index.xml");
 		w.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				write = w.isSelected();
+				toAlign.save();
 			}
 		} );
 		
@@ -294,6 +295,8 @@ public class AlignTool extends Tool {
 			}
 		} );
 		
+		
+		
 		JFormattedTextField tf = new JFormattedTextField( new NumberFormatter() );
 		tf.setValue( vOffset );
 		tf.addActionListener( new ActionListener() {
@@ -306,6 +309,7 @@ public class AlignTool extends Tool {
 		
 		p.add(w);
 		p.add(swap);
+		p.add(new JLabel("height offset:"));
 		p.add(tf);
 		
 	}

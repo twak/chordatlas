@@ -229,10 +229,13 @@ public class FeatureGen extends Gen {
 		return new BlockFeatures();
 	}
 	
+	File folder;
+	
 	public FeatureGen( File folder, Tweed tweed ) {
 		
 		super( "features", tweed );
 		
+		this.folder = folder;
 		tweed.frame.removeGens( this.getClass() );
 		tweed.features = this;
 		
@@ -241,6 +244,17 @@ public class FeatureGen extends Gen {
 			return;
 		}
 		
+		init();
+	}
+	
+	@Override
+	public void onLoad( Tweed tweed ) {
+		
+		super.onLoad( tweed );
+		init();
+	}
+
+	public void init() {
 		File[] files = folder.listFiles();
 		Arrays.sort( files );
 		

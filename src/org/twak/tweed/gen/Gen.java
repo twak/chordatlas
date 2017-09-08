@@ -23,13 +23,23 @@ public abstract class Gen {
 	public transient Node gNode;
 	public transient Tweed tweed;
 	
-	Node parentNode;
-
+	transient Node parentNode;
+	
+	public Gen() {}
+	
 	public Gen(String name, Tweed tweed) {
-		this.tweed = tweed;
 		this.name = name;
+		init(tweed);
+	}
+
+	private void init(Tweed tweed) {
+		this.tweed = tweed;
 		parentNode = tweed.getRootNode();
 		gNode = new Node("gen " + name);
+	}
+	
+	public void onLoad( Tweed tweed ) {
+		init (tweed);
 	}
 
 	public void calculate() {

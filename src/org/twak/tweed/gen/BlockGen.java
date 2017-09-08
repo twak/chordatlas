@@ -30,7 +30,6 @@ import com.thoughtworks.xstream.XStream;
 
 public class BlockGen extends ObjGen {
 
-//	ObjRead gis;
 	File root;
 	String selectedSelectedName = "";
 	public LoopL<Point3d> polies;

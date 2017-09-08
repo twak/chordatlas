@@ -59,16 +59,17 @@ import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
 import com.thoughtworks.xstream.XStream;
 
-public class PanoGen extends Gen implements IDumpObjs {
+public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	
 	File folder;
-	List<Pano> panos = new ArrayList();
+	transient List<Pano> panos = new ArrayList();
 	
 	String sourceCRS;
 	
 	transient Pano selectedPano = null;
 	transient JPanel ui = new JPanel();
 	
+	public PanoGen() {}
 	public PanoGen(File folder, Tweed tweed, String sourceCRS ) {
 		super ("panos "+folder.getName(), tweed);
 		this.folder = folder;
@@ -212,14 +213,13 @@ public class PanoGen extends Gen implements IDumpObjs {
 
 			{
 				Point3d tmp = new Point3d(trans);
-				tweed.toOrigin.transform( tmp );
+				TweedSettings.settings.toOrigin.transform( tmp );
 				tmp.get( trans );
 				
 				tmp = new Point3d(north);
-				tweed.toOrigin.transform( tmp );
+				TweedSettings.settings.toOrigin.transform( tmp );
 				tmp.get( north );
 			}
-			
 			
 			if (TweedSettings.settings.gmlCoordSystem.equals ("EPSG:2062") ) { // oviedo :(
 				trans[2] -= 258;

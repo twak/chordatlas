@@ -43,6 +43,7 @@ import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
 import org.twak.utils.MutableDouble;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.WindowManager;
 
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -81,10 +82,32 @@ import com.jme3.ui.Picture;
 
 public class Tweed extends SimpleApplication {
 
+	public static String DATA; // we read the datafiles from here
+	public static String SCRATCH; // we read the datafiles from here
+	public static String JME; // root of asset resource-tree for jMonkey
 	
-	public final static String DATA   =   System.getProperty("user.home")+"/data/regent"; // we read the datafiles from here
-	public final static String SCRATCH   =   DATA + File.separator + "scratch" + File.separator; // we read the datafiles from here
-	public final static String JME    = DATA+File.separator; // root of asset resource-tree for jMonkey
+	public void initFrom( String dataDir ) {
+
+		if (JME != null)
+			assetManager.unregisterLocator( JME, FileLocator.class ); 
+		
+		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
+		SCRATCH = DATA + File.separator + "scratch" + File.separator;
+		JME = DATA + File.separator;
+
+		cam.setLocation( TweedSettings.settings.cameraLocation );
+		cam.setRotation( TweedSettings.settings.cameraOrientation );
+
+
+		assetManager.registerLocator(Tweed.JME, FileLocator.class);
+		
+		setFov( 0 );
+		setCameraSpeed( 0 );
+
+		frame.setGens( TweedSettings.settings.genList );
+		
+		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
+	}
 	
 	public static final String LAT_LONG = "EPSG:4326";
 	
@@ -100,23 +123,21 @@ public class Tweed extends SimpleApplication {
 	
 	public HeightGen heights;
 	public FeatureGen features;
+	
 	private Picture background;
 	
 	public Vector3d cursorPosition;
-	protected String lastCRS;
 	public double[] lastOffset;
 
 
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
 			new HouseTool(this), 
-			new HandleTool(this), 
-			new AlignTool(this), 
+//			new HandleTool(this), 
+//			new AlignTool(this), 
 			new FacadeTool(this) };
 	
 	public Tool tool;
-	
-	public Matrix4d toOrigin, fromOrigin;
 	
 	private AmbientLight ambient;
 	private DirectionalLight sun;
@@ -136,7 +157,7 @@ public class Tweed extends SimpleApplication {
 	
 	public void simpleInitApp() {
 
-		TweedSettings.load( new File ( Tweed.DATA ) );
+//		TweedSettings.load( new File ( Tweed.DATA ) );
 		
 		point = new PointLight();
 		point.setEnabled( true );
@@ -157,7 +178,6 @@ public class Tweed extends SimpleApplication {
 		rootNode.addLight(ambient);
 		setAmbient( 0 );
 
-		assetManager.registerLocator(Tweed.JME, FileLocator.class);
 
 		setDisplayFps(false);
 		setDisplayStatView(false);
@@ -186,7 +206,7 @@ public class Tweed extends SimpleApplication {
 		setFov(0);
 		setCameraSpeed( 0 );
 		
-		if ( TweedSettings.settings.SSAO ) {
+		if ( true ) {//TweedSettings.settings.SSAO ) {
 			
 			FilterPostProcessor fpp = new FilterPostProcessor( assetManager );
 			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
@@ -196,18 +216,7 @@ public class Tweed extends SimpleApplication {
 			viewPort.addProcessor( fpp );
 		}
 		
-		try {
-			
-			addGML(new File (Tweed.DATA + "/gis.gml"), TweedSettings.settings.gmlCoordSystem );
-			
-			frame.addGen ( new MiniGen   ( new File ( Tweed.DATA +"/minimesh/"   ), this ), true );
-			frame.addGen ( new PanoGen   ( new File ( Tweed.DATA +"/panos/"      ), this, LAT_LONG ), true );
-			frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), this ), false );
-			frame.addGen ( new ResultsGen( new File ( Tweed.DATA+"/solutions/"), this ), true );
-
-		} catch ( Throwable e ) {
-			e.printStackTrace();
-		}
+		TweedSettings.loadDefault();
 		
 		inputManager.addMapping(MOUSE_MOVE, new MouseAxisTrigger( MouseInput.AXIS_X, false ) );
 		inputManager.addMapping(MOUSE_MOVE, new MouseAxisTrigger( MouseInput.AXIS_Y, false ) );
@@ -327,8 +336,7 @@ public class Tweed extends SimpleApplication {
 			return;
 		}
 		
-
-		lastCRS = guessCRS;
+		TweedSettings.settings.gmlCoordSystem = guessCRS;
 		
 		System.out.println( "Assuming CRS " + guessCRS + " for all of " + gmlFile.getName() );
 		
@@ -341,11 +349,11 @@ public class Tweed extends SimpleApplication {
 		
 		System.out.println( "Using CRS --> World space offset of " + lastOffset[0] + ", " + lastOffset[1] );
 		
-		toOrigin = buildOrigin ( lastOffset[0], lastOffset[1], transform );
-		fromOrigin = new Matrix4d( toOrigin );
-		fromOrigin.invert();
+		TweedSettings.settings.toOrigin = buildOrigin ( lastOffset[0], lastOffset[1], transform );
+		TweedSettings.settings.fromOrigin = new Matrix4d( TweedSettings.settings.toOrigin );
+		TweedSettings.settings.fromOrigin.invert();
 		
-		frame.addGen ( new GISGen( gmlFile.toString(), toOrigin, guessCRS, this ), true );
+		frame.addGen ( new GISGen( gmlFile.toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
 	}
 
 	private void setCameraPerspective() {
@@ -385,7 +393,7 @@ public class Tweed extends SimpleApplication {
   		sun.setColor( new ColorRGBA(1f, 0.95f, 0.99f, 1f).mult( 2- (float)TweedSettings.settings.ambient) );
 	}
 	
-	private void setTool( Tool newTool ) {
+	public void setTool( Tool newTool ) {
 		
 		Tool oldTool = tool;
 		
@@ -554,11 +562,11 @@ public class Tweed extends SimpleApplication {
 		background.setMaterial(mat1);
 	}
 	
-	final static String BG_LOC = "Desktop/bg.png";
+	final static String BG_LOC = "scratch/bg.jpg";
 	public void setBackground (BufferedImage bi ) {
 		
 		try {
-			ImageIO.write(bi, "png", new File ( JME + BG_LOC ) );
+			ImageIO.write(bi, "jpg", new File ( JME + BG_LOC ) );
 			TextureKey key = new TextureKey(BG_LOC);
 			getAssetManager().deleteFromCache(key);
 			background.setMaterial(null);

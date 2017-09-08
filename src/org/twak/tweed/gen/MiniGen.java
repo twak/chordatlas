@@ -36,6 +36,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.handles.HandleMe;
+import org.twak.tweed.tools.AlignTool;
 import org.twak.utils.FileUtils;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
@@ -57,21 +58,31 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
 
-public class MiniGen extends Gen implements HandleMe {
+public class MiniGen extends Gen implements HandleMe, ICanSave {
 	
 	File root;
-	MiniTransform trans;
-	int polycount = 100000;
+	transient MiniTransform trans;
 
 	boolean renderLines = false;
 	float transparency = 1;
 	
-	List<double[]> bounds = new ArrayList();
+	transient List<double[]> bounds = new ArrayList();
+	
+	public MiniGen() {}
 	
 	public MiniGen(File root, Tweed tweed) {
 		super (root.getName(), tweed);
-		
 		this.root = root;
+		init();
+	}
+
+	@Override
+	public void onLoad( Tweed tweed ) {
+		super.onLoad( tweed );
+		init();
+	}
+	
+	public void init() {
 		trans = (MiniTransform) new XStream ().fromXML ( new File (root, "index.xml") );
 	}
 
@@ -135,7 +146,7 @@ public class MiniGen extends Gen implements HandleMe {
 		gNode.setUserData( EventMoveHandle.class.getSimpleName(),new Object[] { new EventMoveHandle() {
 			@Override
 			public void posChanged() {
-				MiniGen.this.moved();
+				MiniGen.this.save();
 			}
 		}} );
 		
@@ -145,7 +156,7 @@ public class MiniGen extends Gen implements HandleMe {
 	}
 
 
-	public void moved() {
+	public void save() {
 		
 		trans.offset = gNode.getLocalTransform().toTransformMatrix();
 		System.out.println(trans.offset);
@@ -232,21 +243,23 @@ public class MiniGen extends Gen implements HandleMe {
 			}
 		});
 
+		JButton align = new JButton("align tool");
+		align.addActionListener( e -> tweed.setTool(new AlignTool(tweed)) );
+		
 		out.add(clear);
 		out.add(all);
 		out.add(renderLines);
 		out.add(renderTransparent);
+		out.add(align);
 		
 		return out;
 	}
 
-	public void moveTo( Transform t, boolean write ) {
+	public void moveTo( Transform t ) {
 		
 		tweed.enqueue( new Runnable() {
 			public void run() {
 				gNode.setLocalTransform( t );
-				if ( write )
-					moved();
 				tweed.gainFocus();
 			}
 		} );

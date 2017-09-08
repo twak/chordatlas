@@ -545,14 +545,14 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 					}
 				}
 
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 0.1f, true ) );
+				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 0.3f, true ) );
 				
 				Line l2 = mf.origin.line;
 				Line3d oLine = new Line3d( 
 						l2.start.x, getHeight( mf.origin.height ), l2.start.y, 
 						l2.end.x, getHeight( mf.origin.height ), l2.end.y );
 				
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
+//				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
 			}
 		
 //			if ( mf.area > TweedSettings.settings.megaFacadeAreaThreshold )

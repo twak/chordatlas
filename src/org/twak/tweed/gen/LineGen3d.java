@@ -32,6 +32,8 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 
 	protected String filename;
 
+	public LineGen3d() {}
+	
 	public LineGen3d(String name, Tweed tweed) {
 		super(name, tweed);
 	}
@@ -66,7 +68,7 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 			}
 
 			m.setBuffer( VertexBuffer.Type.Position, 3, Arrayz.toFloatArray( coords ) );
-			m.setBuffer( VertexBuffer.Type.Index, 2, Arrayz.toIntArray( inds ) );
+			m.setBuffer( VertexBuffer.Type.Index   , 2, Arrayz.toIntArray  ( inds   ) );
 
 			geom = new Geometry( filename, m );
 			geom.setCullHint(  CullHint.Never );

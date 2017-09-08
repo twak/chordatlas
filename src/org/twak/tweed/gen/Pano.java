@@ -14,7 +14,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
+import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
+import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.LinearForm3D;
 
 import com.jme3.math.FastMath;
@@ -108,8 +110,8 @@ public class Pano {
 			convert( mediumFile = name + "_medium.png", 2048 );
 
 			try {
-				pano = ImageIO.read( new File( smallFile ) );
-				panoMedium = ImageIO.read( new File( mediumFile ) );
+				pano = ImageIO.read( new File( Tweed.SCRATCH, smallFile ) );
+				panoMedium = ImageIO.read( new File( Tweed.SCRATCH, mediumFile ) );
 			} catch ( IOException e ) {
 				dontLoadPano = true;
 				e.printStackTrace();
@@ -123,8 +125,16 @@ public class Pano {
 			try {
 
 				System.out.println( "downscaling " + orig.getPath() + " to " + i + "x" + i );
-				Runtime.getRuntime().exec( new String[] { "convert", downSampled.getAbsolutePath(), "-resize", 
-						i + "x" + i, orig.getParentFile().getPath() + f  } ).waitFor();
+				
+				ProcessBuilder pb = new ProcessBuilder( "convert", orig.getPath(), "-resize", 
+						i + "x" + i, Tweed.SCRATCH + File.separator + f  );
+				
+				Process p = pb.start();
+				
+				Streamz.inheritIO(p.getInputStream(), System.out);
+				Streamz.inheritIO(p.getErrorStream(), System.err);
+				
+				System.out.println( "result " + p.waitFor() );
 				
 			} catch ( Throwable e ) {
 				e.printStackTrace();

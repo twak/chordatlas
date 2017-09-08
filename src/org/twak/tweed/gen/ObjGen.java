@@ -21,7 +21,6 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.ui.ListDownLayout;
 
-import com.google.common.io.ByteSource;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -39,8 +38,9 @@ public class ObjGen extends Gen implements IDumpObjs {
 	boolean renderLines = false;
 	float transparency = 1;
 
-	Geometry geometry;
+	transient Geometry geometry;
 	
+	public ObjGen() {}
 	public ObjGen(String filename, Tweed tweed) {
 		super("obj " + new File(filename).getName(), tweed);
 		this.filename = filename;

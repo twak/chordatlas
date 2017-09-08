@@ -17,6 +17,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 
@@ -97,7 +98,7 @@ public class SatUtils {
 	public static Point2d worldToLLong( Tweed tweed, Point3d cen ) {
 
 		Point3d out = new Point3d( cen );
-		tweed.fromOrigin.transform( out );
+		TweedSettings.settings.fromOrigin.transform( out );
 
 		try {
 			double[] latLong = new double[3];

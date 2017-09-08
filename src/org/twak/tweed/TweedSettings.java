@@ -1,14 +1,19 @@
 package org.twak.tweed;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.vecmath.Matrix4d;
 
+import org.eclipse.xsd.XSDTerm;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.ICanSave;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -18,7 +23,8 @@ import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider
 public class TweedSettings {
 
 	public static TweedSettings settings = new TweedSettings();
-	static File folder;
+	public static RecentFiles recentFiles;
+	static File folder; // location of data file
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
@@ -69,6 +75,9 @@ public class TweedSettings {
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
 	
+
+	public Matrix4d toOrigin, fromOrigin;
+	
 	public List<Gen> genList = new ArrayList<>();
 	
 	public TweedSettings() {
@@ -82,17 +91,32 @@ public class TweedSettings {
 		TweedSettings.folder = folder;
 		
 		try {
-			settings = (TweedSettings) new XStream(new PureJavaReflectionProvider()).fromXML( new File( folder, "tweed.xml" ) );
+			
+			File def = new File( folder, "tweed.xml" );
+			
+			if (!def.exists())
+				settings = new TweedSettings();
+			else
+				settings = (TweedSettings) new XStream(new PureJavaReflectionProvider()).fromXML( def );
+			
+			TweedFrame.instance.tweed.initFrom( folder.toString() );
+			
 		} catch ( Throwable th ) {
 			settings = new TweedSettings();
-			save(false);
+			save(true);
 			th.printStackTrace();
 		}
+		
+		writeRecentFiles();
 	}
 
 	public static void save(boolean backup) {
 		if (folder != null) {
+			
+			settings.genList = TweedFrame.instance.genList.stream().filter( g -> g instanceof ICanSave ).collect( Collectors.toList() );
+			
 			FileOutputStream fos = null;
+			
 			try {
 				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
 				TweedSettings.settings.badGeomAngle = -0.1;
@@ -108,9 +132,47 @@ public class TweedSettings {
 						e.printStackTrace();
 					}	
 			}
+			
+			if (!backup)
+				writeRecentFiles();
+			
 		}
 		else if (!backup) 
 			JOptionPane.showMessageDialog( null, "save failed" );
+	}
+	
+	private static File RECENT_FILE_LOCATION  = new File ( System.getProperty("user.home") +File.separator+".tweed_config");
+	
+	public static void writeRecentFiles() {
+		
+		if (folder == null)
+			return;
+		
+		if (recentFiles.f.isEmpty() || !recentFiles.f.get(0).equals (folder) ) {
+			recentFiles.f.add( 0, folder );
+			try {
+				new XStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
+			} catch ( FileNotFoundException e ) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void loadDefault() {
+
+		if (recentFiles == null) {
+			try {
+				recentFiles = (RecentFiles) new XStream().fromXML( RECENT_FILE_LOCATION );
+			}
+			catch (Throwable th) {
+				System.out.println( "couldn't load recent project list" );
+				recentFiles = new RecentFiles();
+			}
+		}
+		
+		if (!recentFiles.f.isEmpty())
+			load( recentFiles.f.get( 0 ) );
+		
 	}
 
 }

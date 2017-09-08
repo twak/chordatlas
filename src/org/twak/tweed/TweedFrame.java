@@ -12,9 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -43,6 +40,7 @@ import javax.vecmath.Vector3d;
 import org.twak.tweed.gen.FeatureGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
@@ -60,10 +58,11 @@ import org.twak.viewTrace.SuperMeshPainter;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
-import com.thoughtworks.xstream.XStream;
 
 public class TweedFrame {
 
+	private static final String TWEED_XML = "tweed.xml";
+	public static final String APP_NAME = "chordatlas";
 	public Tweed tweed;
 	Canvas canvas;
 	public JFrame frame;
@@ -129,7 +128,7 @@ public class TweedFrame {
 					coordLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
 							pt.x + tweed.lastOffset[0], 
 							pt.z + tweed.lastOffset[1]) );
-					crsLabel.setText(tweed.lastCRS);
+					crsLabel.setText(TweedSettings.settings.gmlCoordSystem);
 				}
 
 				JFrame.setDefaultLookAndFeelDecorated( true );
@@ -186,25 +185,38 @@ public class TweedFrame {
 		load.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-					new SimpleFileChooser(frame, false, "select a workspace", new File ( Tweed.DATA ), "tweed.xml") {
+					new SimpleFileChooser(frame, false, "select a workspace", Tweed.DATA == null ? null : new File ( Tweed.DATA ), TWEED_XML) {
 						
 						@Override
 						public void heresTheFile( File f ) throws Throwable {
 							TweedSettings.load(f);
-							setGens( TweedSettings.settings.genList );
 						}
 					};
 			}
 		} );
 
-		JMenuItem neu = new JMenuItem( "new", KeyEvent.VK_S );
+		JMenuItem neu = new JMenuItem( "new...", KeyEvent.VK_S );
 		neu.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK ) );
 		menu.add(neu);
 		
 		neu.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				TweedSettings.folder = null;
+				
+					new SimpleFileChooser(frame, false, "select a file in the root of the workspace") {
+						@Override
+						public void heresTheFile( File f ) throws Throwable {
+							
+							TweedSettings.folder = f.getParentFile();
+							
+							if (new File (TweedSettings.folder, TWEED_XML).exists()) {
+								JOptionPane.showMessageDialog( frame, TWEED_XML + " already exists at this location, pick another (or delete...)" );
+								return;
+							}
+							
+							TweedSettings.load( TweedSettings.folder );
+						}
+					};
 			}
 		} );
 		
@@ -338,31 +350,6 @@ public class TweedFrame {
 
 		SimplePopup2 sp = new SimplePopup2( evt );
 
-		sp.add( "+ mesh (obj)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
-					public void heresTheFile( File obj ) throws Throwable {
-						removeMeshSources();
-						String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
-						addGen( new ObjGen( f, tweed ), true );
-					};
-				};
-			}
-		} );
-
-		sp.add( "+ mesh (minimesh)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "xml" ) {
-					@Override
-					public void heresTheFile( File f ) throws Throwable {
-						removeMeshSources();
-						addGen( new MiniGen( f.getParentFile(), tweed ), true );
-					}
-				};
-			}
-		} );
 		
 		sp.add( "+ gis (obj)", new Runnable() {
 			@Override
@@ -390,12 +377,40 @@ public class TweedFrame {
 			}
 		} );
 		
+		if (hasGIS() ) {
+		sp.add( "+ mesh (obj)", new Runnable() {
+			@Override
+			public void run() {
+				new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
+					public void heresTheFile( File obj ) throws Throwable {
+//						removeMeshSources();
+						String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
+						addGen( new MeshGen( f, tweed ), true );
+					};
+				};
+			}
+		} );
+
+		sp.add( "+ mesh (minimesh)", new Runnable() {
+			@Override
+			public void run() {
+				new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "index.xml" ) {
+					@Override
+					public void heresTheFile( File f ) throws Throwable {
+//						removeMeshSources();
+						addGen( new MiniGen( f.getParentFile(), tweed ), true );
+					}
+				};
+			}
+		} );
+
+		
 		sp.add( "+ panos (jpg)", new Runnable() {
 			@Override
 			public void run() {
 				new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
 					public void heresTheFile( File oneOfMany ) throws Throwable {
-						removeGens( PanoGen.class );
+//						removeGens( PanoGen.class );
 						addGen( new PanoGen( oneOfMany.getParentFile(), tweed, Tweed.LAT_LONG ), true );
 					};
 				};
@@ -406,24 +421,29 @@ public class TweedFrame {
 			removeGens( FeatureGen.class );
 			tweed.frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), tweed ), false );
 		} );
+		}
 
 		
 		sp.show();
 
 	}
 
-	private void removeMeshSources() {
+	private boolean hasGIS() {
+		return genList.stream().filter( g -> g instanceof GISGen ).findAny().isPresent();
+	}
+
+	protected void removeMeshSources() {
 		removeGens( MiniGen.class );
 		removeGens( ObjGen.class );
 	}
 	
-	private void removeGISSources() {
+	protected void removeGISSources() {
 		removeGens( GISGen.class );
 	}
 
-	private void setGens( List<Gen> nGens ) {
+	public void setGens( List<Gen> nGens ) {
 
-		for ( Gen g : genList )
+		for ( Gen g : new ArrayList<Gen> ( genList ) )
 			removeGen( g );
 
 		layerList.removeAll();
@@ -435,6 +455,7 @@ public class TweedFrame {
 		}
 
 		for ( Gen g : nGens ) {
+			g.onLoad( tweed );
 			addGen( g, true );
 		}
 	}
@@ -552,7 +573,7 @@ public class TweedFrame {
 
 	public static void main( String[] args ) throws Throwable {
 
-		WindowManager.init( "chordatlas", "/org/twak/tweed/resources/icon128.png" );
+		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon128.png" );
 
 		UIManager.put( "Slider.paintValue", false );
 

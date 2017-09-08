@@ -50,21 +50,50 @@ import org.twak.viewTrace.GMLReader;
 
 import com.google.common.io.Files;
 
-public class GISGen extends LineGen3d {
+public class GISGen  extends LineGen3d implements ICanSave {
 
 	public static final String CROPPED_OBJ = "cropped.obj";
 
-	List<Line3d> lines = new ArrayList();
+	transient List<Line3d> lines = new ArrayList();
+	transient Map<Integer,LoopL<Point3d>> blocks = new HashMap<>();
+	transient Map<Integer, BlockGen> lastMesh = new HashMap<>();
 
-	Map<Integer,LoopL<Point3d>> blocks = new HashMap<>();
+	File objFile;
+	String gmlFile;
+	Matrix4d toOrigin;
+	String crs;
 	
-	FacadeFinder ff;
-	
-	Map<Integer, BlockGen> lastMesh = new HashMap<>();
+	public GISGen() {}
 	
 	public GISGen( File objFile, Tweed tweed ) {
 		
-		super( "gis (o)" + objFile.getName(), tweed );
+		super( "gis(o) " + objFile.getName(), tweed );
+		this.objFile = objFile ;
+		initObj();
+	}
+	
+	public GISGen( String gmlFile, Matrix4d toOrigin, String crs, Tweed tweed ) {
+
+		super( "gis(g) " + new File( gmlFile ).getName(), tweed );
+		this.filename = gmlFile;
+		this.gmlFile = gmlFile;
+		this.toOrigin = toOrigin;
+		this.crs = crs;
+
+		initGML();
+	}
+	
+	@Override
+	public void onLoad( Tweed tweed ) {
+		
+		super.onLoad( tweed );
+		if (objFile != null) // fixme: subclass pls
+			initObj();
+		else if (gmlFile != null)
+			initGML();
+	}
+	
+	public void initObj() {
 		
 		ObjRead gObj = new ObjRead( objFile );
 		
@@ -81,7 +110,7 @@ public class GISGen extends LineGen3d {
 				
 				Point3d p = new Point3d ( gObj.pts[face[i]] ), 
 						n = new Point3d ( gObj.pts[ face[ ( i + 1 ) % face.length ] ] );
-
+				
 				n.y = p.y = 0;//!
 				loop.append( p );
 				points.add( p );
@@ -93,12 +122,8 @@ public class GISGen extends LineGen3d {
 		
 		createBlocks( closer, fromOBJ );
 	}
-	
-	public GISGen( String gmlFile, Matrix4d toOrigin, String crs, Tweed tweed ) {
 
-		super( "gis (g)" + new File( gmlFile ).getName(), tweed );
-		this.filename = gmlFile;
-
+	public void initGML() {
 		Closer<Point3d> closer = new Closer<>();
 	
 		LoopL<Point3d> polies = null;
