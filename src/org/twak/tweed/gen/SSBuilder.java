@@ -18,14 +18,14 @@ import org.twak.viewTrace.SuperMeshPainter;
 public class SSBuilder {
 
 	private ProfileGen profileGen;
-	FeatureGen features;
+	FeatureCache features;
 	
 	Plot plot;
 	
 	JSlider megaArea, gisInterior, heightCutoff, mfSoft, pMerge, exposed;
 	JCheckBox quick;
 	
-	public SSBuilder( ProfileGen profileGen, FeatureGen features ) {
+	public SSBuilder( ProfileGen profileGen, FeatureCache features ) {
 		
 		this.profileGen = profileGen;
 		this.features = features;
@@ -75,7 +75,7 @@ public class SSBuilder {
 		sf.megaFacadeAreaThreshold = megaArea.getValue() * 60 / 1000.;
 		SkelFootprint.gisInterior  = gisInterior.getValue() / 1000.;
 		sf.heightCutoff            = heightCutoff.getValue() * 10 / 1000.;
-		FeatureGen.MFWidthTol      = mfSoft.getValue()  * 10 / 1000.;
+		FeatureCache.MFWidthTol      = mfSoft.getValue()  * 10 / 1000.;
 		sf.profMergeTol            = pMerge.getValue() / 1000.;
 		sf.exitA = quick.isSelected();
 		SkelFootprint.exposedFaceFrac = exposed.getValue() / 1000.;
@@ -83,7 +83,7 @@ public class SSBuilder {
 		System.out.println("megafacade area threshold " + sf.megaFacadeAreaThreshold );
 		System.out.println("gis inters (higher more outside)" + SkelFootprint.gisInterior);
 		System.out.println("height insdie/outside threshold " + sf.heightCutoff);
-		System.out.println("MFPoint width invalidity " + FeatureGen.MFWidthTol);
+		System.out.println("MFPoint width invalidity " + FeatureCache.MFWidthTol);
 		System.out.println("profile over edge merge (higher, less merging)" + sf.profMergeTol);
 		System.out.println("exposed face kiler (higher, less removed)" + SkelFootprint.exposedFaceFrac);
 		

@@ -11,8 +11,8 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.Rainbow;
@@ -66,7 +66,7 @@ public class WindowGen extends Gen implements IDumpObjs {
 			s.removeFromParent();
 		
 		
-		FeatureGen fg = tweed.features;
+		FeatureCache fg = tweed.features;
 		
 		int i = 0;
 

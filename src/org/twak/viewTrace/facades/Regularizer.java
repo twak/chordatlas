@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Cache2;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.DumbCluster1D.Cluster;

@@ -43,8 +43,8 @@ import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.FeatureGen.MFPoint;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache.MFPoint;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
@@ -268,7 +268,7 @@ public class SkelFootprint {
 		}
 	}
 	
-	public  SolverState buildFootprint( List<Line> footprint, ProgressMonitor m, FeatureGen features, 
+	public  SolverState buildFootprint( List<Line> footprint, ProgressMonitor m, FeatureCache features, 
 			BlockGen blockGen ) {
 		
 		MultiMap<MegaFeatures, MFPoint> minis = features == null ? null : features.createMinis(blockGen);

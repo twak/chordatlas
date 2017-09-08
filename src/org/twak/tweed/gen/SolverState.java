@@ -19,8 +19,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.FeatureGen.MFPoint;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache.MFPoint;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.CloneSerializable;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.Line;

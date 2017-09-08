@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -84,8 +85,8 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	}
 	
 	@Override
+	
 	public void onLoad( Tweed tweed ) {
-		
 		super.onLoad( tweed );
 		if (objFile != null) // fixme: subclass pls
 			initObj();
@@ -139,11 +140,13 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			return;
 		}
 		
-		if ( tweed.heights != null )
+		Optional<Gen> hg = tweed.frame.gens( HeightGen.class ).stream().findAny();
+		
+		if ( hg.isPresent() )
 			for ( Loop<Point3d> poly : polies ) {
 				if ( poly instanceof SuperLoop ) {
 					SuperLoop sl = ( (SuperLoop) poly );
-					sl.properties.putAll( tweed.heights.getProperties( (String) sl.properties.get( "name" ) ) );
+					sl.properties.putAll( ((HeightGen)hg.get()).getProperties( (String) sl.properties.get( "name" ) ) );
 				}
 			}
 

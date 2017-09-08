@@ -235,7 +235,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		
 		for (File f : new File (tweed.DATA+File.separator +"solutions").listFiles()) {
 			try {
-			Point2d fp = FeatureGen.fileToCenter( f.getName() );
+			Point2d fp = FeatureCache.fileToCenter( f.getName() );
 			if (fp.distanceSquared( cen ) < 1) {
 				new Thread( () -> load( f, true ) ).start();
 				return;

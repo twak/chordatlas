@@ -22,7 +22,7 @@ import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;

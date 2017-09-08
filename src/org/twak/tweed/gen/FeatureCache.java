@@ -42,7 +42,7 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
 
-public class FeatureGen extends Gen {
+public class FeatureCache {
 
 	public static class ImageFeatures implements ICanPaint {
 		
@@ -230,10 +230,11 @@ public class FeatureGen extends Gen {
 	}
 	
 	File folder;
+	Tweed tweed;
 	
-	public FeatureGen( File folder, Tweed tweed ) {
+	public FeatureCache( File folder, Tweed tweed ) {
 		
-		super( "features", tweed );
+		this.tweed = tweed;
 		
 		this.folder = folder;
 		tweed.frame.removeGens( this.getClass() );
@@ -247,64 +248,11 @@ public class FeatureGen extends Gen {
 		init();
 	}
 	
-	@Override
-	public void onLoad( Tweed tweed ) {
-		
-		super.onLoad( tweed );
-		init();
-	}
-
 	public void init() {
 		File[] files = folder.listFiles();
 		Arrays.sort( files );
 		
 		Arrays.stream( files ).filter( f -> f.isDirectory() ).forEach( f -> new BlockFeatures( f, blockFeatures ) );
-	}
-
-	@Override
-	public void calculate() {
-
-		for ( Spatial s : gNode.getChildren() )
-			s.removeFromParent();
-		
-//		float heightMin = 0, heightMax = 30;
-//		
-//		for (MegaFeatures mega : megas ) {
-//		
-//		Mesh mesh1 = new Mesh();
-//		{
-//			Vector3f[] vertices = new Vector3f[4];
-//			vertices[ 0 ] = new Vector3f( (float) mega.megafacade.start.x, heightMin, (float) mega.megafacade.start.y );
-//			vertices[ 1 ] = new Vector3f( (float) mega.megafacade.start.x, heightMax, (float) mega.megafacade.start.y );
-//			vertices[ 2 ] = new Vector3f( (float) mega.megafacade.end  .x, heightMin, (float) mega.megafacade.end  .y   );
-//			vertices[ 3 ] = new Vector3f( (float) mega.megafacade.end  .x, heightMax, (float) mega.megafacade.end  .y   );
-//
-//			Vector3f[] texCoord = new Vector3f[4];
-//			texCoord[ 0 ] = new Vector3f( 0, 0, 0 );
-//			texCoord[ 1 ] = new Vector3f( 1, 0, 0 );
-//			texCoord[ 2 ] = new Vector3f( 0, 1, 0 );
-//			texCoord[ 3 ] = new Vector3f( 1, 1, 0 );
-//
-//			int[] indexes = { 0, 1, 3, 3, 2, 0, 3, 1, 0, 0, 2, 3 };
-//
-//			mesh1.setBuffer( VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer( vertices ) );
-//
-//			mesh1.setBuffer( VertexBuffer.Type.TexCoord, 3, BufferUtils.createFloatBuffer( texCoord ) );
-//			mesh1.setBuffer( VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer( indexes ) );
-//			mesh1.updateBound();
-//		}
-//		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
-//		mat.getAdditionalRenderState().setBlendMode( BlendMode.Alpha );
-//		mat.setColor( "Color", new ColorRGBA( color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0.5f ) );
-//
-//		Geometry spat = new Geometry( "Box", mesh1 );
-//		spat.setMaterial( mat );
-//
-//		gNode.attachChild( spat );
-//		}
-		
-		
-		super.calculate();
 	}
 	
 	public static ImageFeatures readFeatures( File fFolder, MegaFeatures megaFeatures ) {
@@ -479,11 +427,6 @@ public class FeatureGen extends Gen {
 		}
 
 		return out;
-	}
-	
-	@Override
-	public JComponent getUI() {
-		return new JLabel("!");
 	}
 
 	static {

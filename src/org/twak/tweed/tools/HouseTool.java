@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.FeatureGen;
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SkelGen;
 import org.twak.tweed.gen.SuperEdge;
@@ -38,7 +38,7 @@ public class HouseTool extends Tool {
 		MiniFacade mini;
 		
 		MegaFeatures mf = new MegaFeatures((Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
-		ImageFeatures imf = FeatureGen.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
+		ImageFeatures imf = FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
 		mini = imf.miniFacades.get( 2 );
 		imf.mega = mf;	
 		

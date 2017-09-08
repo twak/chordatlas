@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeListener;
 
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Plot;

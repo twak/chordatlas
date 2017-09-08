@@ -38,16 +38,16 @@ public class TweedSettings {
 //	public String gmlCoordSystem = "EPSG:27700"; 
 //	public double trans[] = new double[] { 261826.04,665079.33 }; // glasgow
 //	public String gmlCoordSystem = "EPSG:27700"; 
-
-	
-	public double trans[] = new double[] { 121659.721974586034776,486774.576303347887006 }; // amsterdam
-	public String gmlCoordSystem = "EPSG:28992";
-	
+//	public double trans[] = new double[] { 121659.721974586034776,486774.576303347887006 }; // amsterdam
+//	public String gmlCoordSystem = "EPSG:28992";
 //	public double trans[] = new double[] { 426138.059429821,975725.769060029 }; // oviedo
 //	public String gmlCoordSystem = "EPSG:2062"; 
-
 //	public double trans[] = new double[] { 13506158.343432899564505,326522.905302504834253 }; // detroit
 //	public String gmlCoordSystem = "EPSG:2253"; 
+
+	public double trans[] = null; // edit this to set GIS offset before creating new workspace (above are twak's custom offsets!) 
+	public String gmlCoordSystem = null;
+	
 	
 	public boolean flipFootprints = true;
 	public double ambient = 0.5;
@@ -170,8 +170,15 @@ public class TweedSettings {
 			}
 		}
 		
-		if (!recentFiles.f.isEmpty())
-			load( recentFiles.f.get( 0 ) );
+		if (!recentFiles.f.isEmpty()) {
+			File last = recentFiles.f.get( 0 );
+			if (last.exists())
+				load( last );
+			else {
+				JOptionPane.showMessageDialog( null, "Can't find last project " + last.getName() );
+				recentFiles.f.remove( 0 );
+			}
+		}
 		
 	}
 

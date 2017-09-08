@@ -529,7 +529,10 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			
 			System.out.println("building profiles over megafacade " + i +"/"+faces.size());
 			
-			ColorRGBA dispCol = new ColorRGBA( randy.nextFloat(), randy.nextFloat(), randy.nextFloat(), 1 );
+			ColorRGBA dispCol = new ColorRGBA( 
+					color.getRed() *  randy.nextFloat() / 255f, 
+					color.getGreen() *  randy.nextFloat() / 255f, 
+					color.getBlue() *  randy.nextFloat() / 255f, 1 );
 			
 			if ( DBG ) 
 			{
@@ -552,7 +555,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 						l2.start.x, getHeight( mf.origin.height ), l2.start.y, 
 						l2.end.x, getHeight( mf.origin.height ), l2.end.y );
 				
-//				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.3f, true ) );
+				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.5f, true ) );
 			}
 		
 //			if ( mf.area > TweedSettings.settings.megaFacadeAreaThreshold )
@@ -619,7 +622,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 								new Line3d( profileLine.start.x, 0, profileLine.start.y, profileLine.end.x, 0, profileLine.end.y ) ),
 								dispCol, 0.3f, true ));
 						
-						render ( new ArrayList<>(pMF.profiles.values()), tweed, profileNode );
+						render ( new ArrayList<>(pMF.profiles.values()), tweed, dispCol, profileNode );
 						
 //						List<Prof> cleans = new ArrayList<>();
 						
@@ -786,19 +789,19 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		}
 	}
 	
-	public static void render( List<Prof> ofs, Tweed tweed, Node n ) {
+	public void render( List<Prof> ofs, Tweed tweed, ColorRGBA col, Node n ) {
 
 		Random randy = new Random(ofs.hashCode());
 		
 		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 		
-		ColorRGBA col = new ColorRGBA(
-				randy.nextFloat(), 
-				0.2f+ 0.5f * randy.nextFloat(), 
-				0.5f+ 0.5f * randy.nextFloat(), 1);
+//		ColorRGBA col = new ColorRGBA(
+//				randy.nextFloat(), 
+//				0.2f+ 0.5f * randy.nextFloat(), 
+//				0.5f+ 0.5f * randy.nextFloat(), 1);
 		
 		mat.setColor( "Diffuse", col );
-		mat.setColor( "Ambient", col.mult( 0.5f ) );
+		mat.setColor( "Ambient", col.mult( 0.1f ) );
 		mat.setBoolean( "UseMaterialColors", true );
 		
 		for (Prof p : ofs) {

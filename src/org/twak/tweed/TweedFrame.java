@@ -37,7 +37,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
-import org.twak.tweed.gen.FeatureGen;
+import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
@@ -107,6 +107,7 @@ public class TweedFrame {
 		frame.addWindowListener( new WindowAdapter() {
 			public void windowClosing( WindowEvent e ) {
 				TweedSettings.save(true);
+				Tweed.deleteScratch();
 			};
 		} );
 
@@ -121,13 +122,13 @@ public class TweedFrame {
 			@Override
 			public void run() {
 				Vector3d pt = tweed.cursorPosition;
-				if ( coordLabel != null ) {
+				if ( coordLabel != null && TweedSettings.settings.trans != null) {
 					worldLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
 							pt.x, 
 							pt.z) );
 					coordLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
-							pt.x + tweed.lastOffset[0], 
-							pt.z + tweed.lastOffset[1]) );
+							pt.x + TweedSettings.settings.trans[0], 
+							pt.z + TweedSettings.settings.trans[1]) );
 					crsLabel.setText(TweedSettings.settings.gmlCoordSystem);
 				}
 
@@ -377,50 +378,44 @@ public class TweedFrame {
 			}
 		} );
 		
-		if (hasGIS() ) {
-		sp.add( "+ mesh (obj)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
-					public void heresTheFile( File obj ) throws Throwable {
-//						removeMeshSources();
-						String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
-						addGen( new MeshGen( f, tweed ), true );
+		if ( hasGIS() ) {
+			sp.add( "+ mesh (obj)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
+						public void heresTheFile( File obj ) throws Throwable {
+							//						removeMeshSources();
+							String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
+							addGen( new MeshGen( f, tweed ), true );
+						};
 					};
-				};
-			}
-		} );
+				}
+			} );
 
-		sp.add( "+ mesh (minimesh)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "index.xml" ) {
-					@Override
-					public void heresTheFile( File f ) throws Throwable {
-//						removeMeshSources();
-						addGen( new MiniGen( f.getParentFile(), tweed ), true );
-					}
-				};
-			}
-		} );
-
-		
-		sp.add( "+ panos (jpg)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
-					public void heresTheFile( File oneOfMany ) throws Throwable {
-//						removeGens( PanoGen.class );
-						addGen( new PanoGen( oneOfMany.getParentFile(), tweed, Tweed.LAT_LONG ), true );
+			sp.add( "+ mesh (minimesh)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "index.xml" ) {
+						@Override
+						public void heresTheFile( File f ) throws Throwable {
+							//						removeMeshSources();
+							addGen( new MiniGen( f.getParentFile(), tweed ), true );
+						}
 					};
-				};
-			}
-		} );
-		
-		sp.add( "+ reload features", () -> {
-			removeGens( FeatureGen.class );
-			tweed.frame.addGen ( new FeatureGen( new File ( Tweed.DATA+"/features/"), tweed ), false );
-		} );
+				}
+			} );
+
+			sp.add( "+ panos (jpg)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
+						public void heresTheFile( File oneOfMany ) throws Throwable {
+							//						removeGens( PanoGen.class );
+							addGen( new PanoGen( oneOfMany.getParentFile(), tweed, Tweed.LAT_LONG ), true );
+						};
+					};
+				}
+			} );
 		}
 
 		

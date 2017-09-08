@@ -26,7 +26,7 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
-import org.twak.tweed.gen.FeatureGen;
+import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.HeightGen;
 import org.twak.tweed.gen.MiniGen;
@@ -81,33 +81,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
 
 public class Tweed extends SimpleApplication {
-
-	public static String DATA; // we read the datafiles from here
-	public static String SCRATCH; // we read the datafiles from here
-	public static String JME; // root of asset resource-tree for jMonkey
-	
-	public void initFrom( String dataDir ) {
-
-		if (JME != null)
-			assetManager.unregisterLocator( JME, FileLocator.class ); 
-		
-		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
-		SCRATCH = DATA + File.separator + "scratch" + File.separator;
-		JME = DATA + File.separator;
-
-		cam.setLocation( TweedSettings.settings.cameraLocation );
-		cam.setRotation( TweedSettings.settings.cameraOrientation );
-
-
-		assetManager.registerLocator(Tweed.JME, FileLocator.class);
-		
-		setFov( 0 );
-		setCameraSpeed( 0 );
-
-		frame.setGens( TweedSettings.settings.genList );
-		
-		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
-	}
 	
 	public static final String LAT_LONG = "EPSG:4326";
 	
@@ -121,13 +94,11 @@ public class Tweed extends SimpleApplication {
 
 	public TweedFrame frame;
 	
-	public HeightGen heights;
-	public FeatureGen features;
+	public FeatureCache features;
 	
 	private Picture background;
 	
 	public Vector3d cursorPosition;
-	public double[] lastOffset;
 
 
 	Tool[] tools = new Tool[] {  
@@ -298,7 +269,7 @@ public class Tweed extends SimpleApplication {
 	
 	public void addGML( File gmlFile, String guessCRS) throws Exception {
 		
-		lastOffset = new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY };
+		double[] lastOffset = new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY };
 		
 		if (guessCRS == null)
 			guessCRS = Files.readLines( gmlFile, Charset.forName( "UTF-8" ), new LineProcessor<String>() {
@@ -331,21 +302,23 @@ public class Tweed extends SimpleApplication {
 			}
 		} );
 		
-		if (guessCRS == null) {
+		if (guessCRS == null || lastOffset[0] == Double.POSITIVE_INFINITY) {
 			JOptionPane.showMessageDialog( frame.frame, "Failed to guess coordinate system for "+gmlFile.getName() );
 			return;
 		}
+		
+		if (TweedSettings.settings.trans != null) {
+			lastOffset[0] = TweedSettings.settings.trans[0];
+			lastOffset[1] = TweedSettings.settings.trans[1];
+		}
+		else 
+			TweedSettings.settings.trans = lastOffset;
 		
 		TweedSettings.settings.gmlCoordSystem = guessCRS;
 		
 		System.out.println( "Assuming CRS " + guessCRS + " for all of " + gmlFile.getName() );
 		
 		MathTransform transform = CRS.findMathTransform( CRS.decode( guessCRS ), DefaultGeocentricCRS.CARTESIAN, true );
-		
-		if (lastOffset[0] == Double.POSITIVE_INFINITY ) {
-			lastOffset[0] = TweedSettings.settings.trans[0];
-			lastOffset[1] = TweedSettings.settings.trans[1];
-		}
 		
 		System.out.println( "Using CRS --> World space offset of " + lastOffset[0] + ", " + lastOffset[1] );
 		
@@ -667,5 +640,43 @@ public class Tweed extends SimpleApplication {
 
 	public Component frame() {
 		return frame.frame;
+	}
+	
+
+	public static String DATA; // we read the datafiles from here
+	public static String SCRATCH; // we read the datafiles from here
+	public static String JME; // root of asset resource-tree for jMonkey
+	
+	public void initFrom( String dataDir ) {
+
+		if (JME != null) {
+			
+			assetManager.unregisterLocator( JME, FileLocator.class );
+			deleteScratch();
+		}
+		
+		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
+		SCRATCH = DATA + File.separator + "scratch" + File.separator;
+		JME = DATA + File.separator;
+
+		cam.setLocation( TweedSettings.settings.cameraLocation );
+		cam.setRotation( TweedSettings.settings.cameraOrientation );
+
+
+		assetManager.registerLocator(Tweed.JME, FileLocator.class);
+		
+		features = new FeatureCache( new File ( dataDir, "features" ), this );
+		
+		setFov( 0 );
+		setCameraSpeed( 0 );
+
+		frame.setGens( TweedSettings.settings.genList );
+		
+		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
+	}
+
+	public static void deleteScratch() {
+		if (Tweed.SCRATCH.contains ("scratch"))
+			new File (Tweed.SCRATCH).delete();
 	}
 }

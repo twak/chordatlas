@@ -21,9 +21,9 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.FeatureGen;
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.tweed.gen.SkelGen.SimpleMass;
 import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
@@ -115,7 +115,7 @@ public class AlignStandalone2d extends JPanel {
 		for ( File f : files )
 			if (f.isDirectory() )  {
 				System.out.println(features.size()+" :: " + f.getName());
-				ImageFeatures imf = FeatureGen.readFeatures (f, mf);
+				ImageFeatures imf = FeatureCache.readFeatures (f, mf);
 				if (imf != null)
 					features.add( imf );
 			}

@@ -18,9 +18,9 @@ import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.FeatureGen.ImageFeatures;
-import org.twak.tweed.gen.FeatureGen.MFPoint;
-import org.twak.tweed.gen.FeatureGen.MegaFeatures;
+import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.FeatureCache.MFPoint;
+import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Cache2;
