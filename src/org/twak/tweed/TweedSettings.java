@@ -150,6 +150,10 @@ public class TweedSettings {
 		
 		if (recentFiles.f.isEmpty() || !recentFiles.f.get(0).equals (folder) ) {
 			recentFiles.f.add( 0, folder );
+			
+			while (recentFiles.f.size() > 20)
+				recentFiles.f.remove( recentFiles.f.size() - 1 );
+			
 			try {
 				new XStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
 			} catch ( FileNotFoundException e ) {
