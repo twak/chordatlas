@@ -176,7 +176,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	
 	
 	private final static int MAX = 1000;
-	private static final boolean IMPORT_TEXTURES = true;
+	private static final boolean IMPORT_TEXTURES = false;
 
 	@Override
 	public JComponent getUI() {
