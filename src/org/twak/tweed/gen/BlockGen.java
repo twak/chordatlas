@@ -106,7 +106,7 @@ public class BlockGen extends ObjGen {
 						}
 						
 						tweed.frame.addGen( new ObjGen( 
-								new File ( Tweed.JME).toPath().relativize( fs.toPath() ).toString(),
+								tweed.toAssetManager( fs ),
 								tweed ), true); 
 					}
 

@@ -415,7 +415,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
-							String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
+							String f = tweed.toAssetManager( obj );
 							addGen( new MeshGen( f, tweed ), true );
 						};
 					};

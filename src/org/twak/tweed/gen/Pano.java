@@ -127,7 +127,7 @@ public class Pano {
 				System.out.println( "downscaling " + orig.getPath() + " to " + i + "x" + i );
 				
 				ProcessBuilder pb = new ProcessBuilder( "convert", orig.getPath(), "-resize", 
-						i + "x" + i, Tweed.SCRATCH + File.separator + f  );
+						i + "x" + i /*+"!" square images */, Tweed.SCRATCH + File.separator + f  );
 				
 				Process p = pb.start();
 				
