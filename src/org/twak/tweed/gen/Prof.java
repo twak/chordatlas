@@ -146,9 +146,10 @@ public class Prof extends ArrayList<Point2d> {
 		}
 
 		if ( first == null ) {
-			lines.clear();
-			monotonic.add( cen );
-			monotonic.add( new Point3d( cen.x, cen.y - 500, cen.z ) );
+			return null;
+//			lines.clear();
+//			monotonic.add( cen );
+//			monotonic.add( new Point3d( cen.x, cen.y - 500, cen.z ) );
 		} else {
 			climb( lines, first, monotonic, maxH, true );
 			climb( lines, first, monotonic, minH, false );

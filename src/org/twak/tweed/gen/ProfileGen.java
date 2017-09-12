@@ -308,7 +308,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 						dRange.get(i)[MIN], dRange.get(i)[MAX],
 						pg.tweed, pg.gNode );
 				
-				if (prof.size() >= 2)
+				if (prof != null && prof.size() >= 2)
 					profiles.put( i,  prof );
 			}
 		}
@@ -791,7 +791,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	
 	public void render( List<Prof> ofs, Tweed tweed, ColorRGBA col, Node n ) {
 
-		Random randy = new Random(ofs.hashCode());
+//		Random randy = new Random(ofs.hashCode());
 		
 		Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 		
