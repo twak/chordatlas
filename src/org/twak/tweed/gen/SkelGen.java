@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 import javax.swing.WindowConstants;
@@ -37,6 +38,7 @@ import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
+import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -310,13 +312,16 @@ public class SkelGen extends Gen implements IDumpObjs {
 					se.toEdit.height = 30;
 					se.toEdit.groundFloorHeight = 2;
 				}
-					
+				
 				Plot p = new Plot (se.toEdit);
 								
+				PaintThing.debug.clear();
+				
 				p.addEditListener( new Changed() {
+					
 					@Override
 					public void changed() {
-						
+						PaintThing.debug.clear();
 						tweed.enqueue( new Runnable() {
 							@Override
 							public void run() {
@@ -346,6 +351,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 						tweed.enqueue( new Runnable() {
 							@Override
 							public void run() {
+								
+								
+								// set sf vertices
+								// set sf profiles
 								
 								setSkel( skel, output, sf);
 								
@@ -547,6 +556,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 //		JButton d = new JButton("show p");
 //		d.addActionListener( e -> skelFootprint.debugShowMeshProfs( skelFootprint.globalProfs) );
 		
+		ui.add(new JLabel("To edit: use select tool"));
 		ui.add(b);
 		ui.add(c);
 //		ui.add(d);

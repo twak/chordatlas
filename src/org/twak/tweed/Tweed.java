@@ -554,11 +554,6 @@ public class Tweed extends SimpleApplication {
 		
 		String bgKey = "background";
 		
-//		if ( background != null ) {
-//			background.removeFromParent();
-//			renderManager.removePreView( bgKey );
-//		}
-		
 		background = new Picture( "background" );
 
 		clearBackground();
@@ -571,7 +566,6 @@ public class Tweed extends SimpleApplication {
 		ViewPort pv = renderManager.createPreView( bgKey, cam );
 		pv.setClearFlags( true, true, true );
 		pv.attachScene( background );
-//		viewPort.setClearFlags( false, true, true );
 		background.updateGeometricState();
 
 	}

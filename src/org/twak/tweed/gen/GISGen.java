@@ -314,7 +314,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		if (!found) 
 			
-			for ( Gen gen : tweed.frame.gens( ObjGen.class ) ) { // obj == just import whole obj
+			for ( Gen gen : tweed.frame.gens( MeshGen.class ) ) { // obj == just import whole obj
 			
 				ObjGen objg = (ObjGen) gen;
 				
