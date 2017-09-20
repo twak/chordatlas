@@ -2,12 +2,17 @@ package org.twak.tweed.gen;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -39,7 +44,9 @@ import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
+import org.twak.utils.Pair;
 import org.twak.utils.WeakListener.Changed;
+import org.twak.utils.collections.ConsecutivePairs;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -178,10 +185,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	private static Double findHeightFromProfiles( SuperFace sf ) {
 
-		Collections.sort( sf.maxProfHeights );
-
-		if (sf.maxProfHeights.isEmpty())
+		if (sf.maxProfHeights == null || sf.maxProfHeights.isEmpty())
 			return sf.height;
+		
+		Collections.sort( sf.maxProfHeights );
 		
 		return sf.maxProfHeights.get( ( int ) (sf.maxProfHeights.size() * 0.9 ) ) + ProfileGen.HEIGHT_DELTA;
 	}
@@ -206,7 +213,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		for ( Loop<HalfEdge> loopHE : edges ) {
 
-			
 			Map<Point2d, SuperEdge> ses = new HashMap();
 
 			Loop<Point2d> lp = new Loop();
@@ -238,9 +244,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 					defpts.add( new Point2d( 0, -sf.height * 1.2 ) );
 
 					profile = new Profile( defpts );
+					
 				} else {
 					profile = toProfile( se.prof );
 				}
+				
 				tagWalls( profile, ( (SuperFace) se.face ).roofColor, se, lpb.get(), lpb.getNext().get() );
 				plan.addLoop( profile.points.get( 0 ), plan.root, profile );
 				
@@ -268,8 +276,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 	public synchronized void setSkel( PlanSkeleton skel, Output output, SuperFace sf ) {
 		
-		if (geometry.get(sf) != null)
-			geometry.get(sf).removeFromParent();
+		removeGeometryFor( sf );
 
 		Node house;
 		
@@ -292,6 +299,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.gainFocus();
 	}
 
+	private void removeGeometryFor( SuperFace sf ) {
+		if (geometry.get(sf) != null) {
+			geometry.get(sf).removeFromParent();
+			geometry.remove(sf);
+		}
+	}
+
 	private void selected( PlanSkeleton skel, Node house, SuperFace sf, SuperEdge se ) {
 		
 		JPanel ui = new JPanel();
@@ -304,6 +318,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
+				
+				closeSitePlan();
 				
 				if (se.toEdit == null) {
 					se.toEdit = new MiniFacade();
@@ -318,14 +334,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 				PaintThing.debug.clear();
 				
 				p.addEditListener( new Changed() {
-					
 					@Override
 					public void changed() {
 						PaintThing.debug.clear();
 						tweed.enqueue( new Runnable() {
 							@Override
 							public void run() {
-								PlanSkeleton skel = calc (sf);
+//								PlanSkeleton skel = calc (sf);
 								setSkel( skel, skel.output , sf);
 							}
 						} );
@@ -342,29 +357,83 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				Siteplan cs = new Siteplan( skel.plan, false ) {
+				
+				closeSitePlan();
+				
+				siteplan = new Siteplan( skel.plan, false ) {
 
+					SuperFace workon = sf;
+					
 					public void show( Output output, Skeleton threadKey ) {
 
 						super.show( output, threadKey );
+						
+						Plot.closeLast();
 
+						
 						tweed.enqueue( new Runnable() {
+							
 							@Override
 							public void run() {
 								
+								removeGeometryFor( workon );
+								tweed.frame.setGenUI(null); // current selection is invalid
 								
-								// set sf vertices
-								// set sf profiles
+								Loop<Bar> bars = skel.plan.points.get( 0 );
+								List<SuperEdge> ses = new ArrayList<>();
 								
-								setSkel( skel, output, sf);
+								workon  = new SuperFace(); // build a new SF with this new plan
+								
+								Set<MiniFacade> seen = new HashSet<>();
+								
+								for (Bar pl : bars) {
+									
+									SuperEdge se = new SuperEdge(pl.start , pl.end, null );
+									
+									Profile profile = skel.plan.profiles.get( pl );
+									
+									
+									
+									se.prof = toProf (profile);
+									se.face = workon; 
+									WallTag w = findWallMini (profile.points);
+									
+									System.out.println("tag " + profile.hashCode());
+									
+									if (seen.add (w.miniFacade) ) {
+										se.toEdit = w.miniFacade;
+									}
+									else 
+									{ // repeated minifacade -> instance
+										
+										Profile p2 = new Profile (profile, new AffineTransform(), (skel.plan));
+										WallTag w2 = new WallTag( w, new MiniFacade(w.miniFacade));
+										setWallTag ( p2.points, w2 );
+										
+										skel.plan.profiles.put( pl, p2 );
+										se.toEdit = w2.miniFacade;
+										seen.add (w2.miniFacade);
+									}
+									
+									ses.add(se);
+								}
+								
+								for (Pair<SuperEdge, SuperEdge> pair : new ConsecutivePairs<>( ses, true )) 
+									pair.first().next = pair.second();
+								
+//								workon.e = ses.get(0);
+//								skel.output = output;
+								setSkel( (PlanSkeleton)threadKey, output, workon);
 								
 							}
+
 						} );
 					};
 				};
-				cs.setVisible( true );
-				cs.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+				siteplan.setVisible( true );
+				siteplan.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 			}
+
 		} );
 
 		ui.add( camp );
@@ -405,7 +474,50 @@ public class SkelGen extends Gen implements IDumpObjs {
 		});
 		ui.add( plan );
 		
+		JButton b = new JButton("view clean profiles");
+		b.addActionListener( e -> 
+			SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed) );
+		ui.add(b);
+		
+		JButton c = new JButton("compare profiles");
+		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs) );
+		ui.add(c);
+		
 		tweed.frame.setGenUI(ui);
+	}
+	
+	private WallTag findWallMini( LoopL<Bar> points ) {
+		
+		Optional<Tag> wall = points.streamE().flatMap( b -> b.tags.stream() ).filter( t -> t instanceof WallTag ).findAny();
+		
+		if (wall.isPresent())
+			return (WallTag)wall.get();
+		
+		return null;
+	}
+	
+	private void setWallTag( LoopL<Bar> points, WallTag w2 ) {
+		
+		b: for (Bar b : points.eIterator()) {
+			Iterator<Tag> tig = b.tags.iterator();
+			while (tig.hasNext()) {
+				if (tig.next() instanceof WallTag) {
+					tig.remove();
+					b.tags.add(w2);
+					continue b;
+				}
+			}
+		}
+		
+	}
+	
+	private static Siteplan siteplan;
+	private void closeSitePlan() {
+		if (siteplan != null) {
+			siteplan.setVisible( false );
+			siteplan.dispose();
+			siteplan = null;
+		}
 	}
 	
 	private MOgram buildMOGram( SuperFace sf, SuperEdge se ) {
@@ -505,6 +617,20 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		return new Profile ( out.stream().map( x -> new Point2d(-x.x, -x.y) ).collect(Collectors.toList()) );
 	}
+	
+	private Prof toProf( Profile profile ) {
+		
+		List<Point2d> pts = profile.points.get( 0 ).stream().
+				map( b -> new Point2d(-b.end.x, -b.end.y) ).collect(Collectors.toList());
+		
+		pts.add(0, new Point2d());
+		
+		Prof prof = new Prof();
+		for (Point2d p : pts)
+			prof.add( p );
+		
+		return prof;
+	}
 
 	public static Prof moveToX0( Prof prof ) {
 		Prof out = new Prof(prof);
@@ -546,37 +672,15 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public JComponent getUI() {
 
 		JPanel ui = new JPanel(new ListDownLayout());		
-		JButton b = new JButton("p runs");
-		b.addActionListener( e -> 
-			SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed) );
-		
-		JButton c = new JButton("compare p");
-		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs) );
-		
-//		JButton d = new JButton("show p");
-//		d.addActionListener( e -> skelFootprint.debugShowMeshProfs( skelFootprint.globalProfs) );
 		
 		ui.add(new JLabel("To edit: use select tool"));
-		ui.add(b);
-		ui.add(c);
-//		ui.add(d);
 		
 		return ui;
 	}
 
 	@Override
 	public void dumpObj( ObjDump dump ) {
-		
 		Jme3z.dump( dump, gNode, 0 );
-		
-//		int i = 0;
-//		for ( Spatial s : gNode.getChildren() ) {
-//			if ( s instanceof Geometry ) {
-//				Mesh m = ( (Geometry) s ).getMesh();
-//				dump.setCurrentTexture( this.hashCode()+"_"+(i++), 1, 1 );
-//				Jme3z.toObj( m, dump );
-//			}
-//		}
 	}
 
 	public static class SimpleMass {
@@ -636,122 +740,4 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		return out;
 	}
-
-
-
-
-
-// old code for pulling profiles from megafacades here (we do it in the optimisation step now)
-//try {
-//	
-//	MegaFacade mf = (MegaFacade) sl.properties.get(MegaFacade.class.getName());
-//		
-//	Prof p = findCleanProfile (se.start, se.end, mf, heights );
-//	
-//	profile = tagWalls ( toProfile ( p ), color, se.line() );
-//	
-//	{
-//		Point2d pt2 = se.line().fromFrac( 0.5 ); 
-//		Geometry r = new Geometry( "strip", p.renderStrip( 1, new Point3d(pt2.x, 0, pt2.y) ) );
-//		r.setMaterial( mat );
-//		pNode.attachChild( r );
-//	}
-//}
-//catch (Throwable th) {
-//	profile = crapProfile();
-//	th.printStackTrace();
-//}
-
-
-//private Profile crapProfile() {
-//	List<Point2d> defpts = new ArrayList<>();
-//	defpts.add( new Point2d( 0, 0 ) );
-//	defpts.add( new Point2d( 0, -6 ) );
-//	defpts.add( new Point2d( 1, -7 ) );
-//
-//	return new Profile( defpts );
-//}
-//
-//private Prof findCleanProfile( Point2d start, Point2d end, MegaFacade mf, List<Double> heights ) {
-//
-//	int s = mf.getIndex(start),
-//		e = mf.getIndex( end ) + 1;
-//	
-//	for (int i = s; i <= e; i++) {
-//		Prof p = mf.profiles.get(i);
-//		if (p != null) 
-//			heights.add( p.get( p.size() -1 ).y );
-//	}
-//	
-//	int boundary = ( e - s ) / 3;
-//	
-//	
-//	s += boundary;
-//	e -= boundary;
-//	
-//	if (s > e )
-//		e = s+1;
-//	
-//	class P {
-//		
-//		Prof prof, clean;
-//		double failLength = 0;
-//		
-//		public P( Prof p, Prof c ) {
-//			this.prof = p;
-//			this.clean = c;
-//		}
-//	}
-//	
-//	Debug deb = new Debug();
-//	debug.add(deb);
-//	
-//	List<P> ps = new ArrayList();
-//
-//	for (int i = s; i <= e; i++) {
-//		Prof p = mf.profiles.get(i);
-//		
-//		
-//		deb.profs.add( p );
-//		
-//		if (p != null) {
-//			
-//			heights.add( p.get( p.size() -1 ).y );
-//			
-//			Prof c = p.parameterize();
-//			deb.cleans.add( c );
-//			if (c != null) {
-//				ps.add(new P(p,c));
-//			}
-//		}
-//	}
-//
-//	for (P c : ps) {
-//		for (P p : ps) {
-//			double d = c.clean.distance(p.prof, true);
-//			if (d < Double.MAX_VALUE)
-//				c.failLength += d;
-//			else
-//				c.failLength += 100;
-//		}
-//		c.failLength /= c.prof.length();
-//	}
-//	
-//	double shortestScore = Double.MAX_VALUE;
-//	P shortestFail = ps.get( 0 );
-//	
-//	for (P p : ps) 
-//		if (p.failLength <= shortestScore) {
-//			shortestScore = p.failLength;
-//			shortestFail = p;
-//		}
-//	
-//	
-//	Prof out = shortestFail.clean;
-//	
-//	deb.clean = new Prof(out);
-//	
-//	return out.moveToX0();
-//	
-//}
 }

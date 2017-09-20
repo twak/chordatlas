@@ -1,12 +1,10 @@
 package org.twak.tweed.tools;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.tweed.gen.Prof;
@@ -24,7 +22,6 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
-import com.thoughtworks.xstream.XStream;
 
 public class HouseTool extends Tool {
 
@@ -35,21 +32,11 @@ public class HouseTool extends Tool {
 	@Override
 	public void clickedOn( Spatial target, Vector3f loc, Vector2f cursorPosition ) {
 
-		MiniFacade mini;
-		
-		MegaFeatures mf = new MegaFeatures((Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
-		ImageFeatures imf = FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
-		mini = imf.miniFacades.get( 2 );
+		MegaFeatures mf = new MegaFeatures( new Line (0,0, 10,0) );//(Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
+		ImageFeatures imf = new ImageFeatures();// FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
 		imf.mega = mf;	
 		
-		{
-			mini = new MiniFacade();
-			mini.width = 30;
-			mini.height = 20;
-			mini.rects.put( Feature.WINDOW, new FRect( 5, 5, 3, 3 ) );
-			mini.color = new double[] {0.8,0.8,0.3,1};
-			mini.imageFeatures = imf;
-		}
+
 		
 		double[] minMax = new double[] {0, 20, 0, 20};
 		HalfMesh2.Builder builder = new HalfMesh2.Builder( SuperEdge.class, SuperFace.class );
@@ -61,7 +48,6 @@ public class HouseTool extends Tool {
 
 		HalfMesh2 mesh = builder.done();
 
-		
 		Prof p = new Prof();
 		
 		p.add( new Point2d (0,0) );
@@ -76,8 +62,11 @@ public class HouseTool extends Tool {
 				SuperEdge se = (SuperEdge)e;
 				
 				se.prof = p;
+				MiniFacade mini = newMini(imf);
 				se.addMini( mini );
 				se.proceduralFacade = mf;
+				
+				se.toEdit = mini;
 				
 				if ( first )
 					se.addMini( mini );
@@ -93,6 +82,18 @@ public class HouseTool extends Tool {
 		}
 		SkelGen sg = new SkelGen( mesh, tweed, null );
 		tweed.frame.addGen( sg, true );
+	}
+	
+	private MiniFacade newMini(ImageFeatures imf) {
+		
+		MiniFacade mini = new MiniFacade();
+		mini = new MiniFacade();
+		mini.width = 30;
+		mini.height = 20;
+		mini.rects.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
+		mini.color = new double[] {0.8,0.8,0.3,1};
+		mini.imageFeatures = imf;
+		return mini;
 	}
 	
 	@Override

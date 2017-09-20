@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
@@ -59,6 +58,11 @@ public class FRect extends DRectangle implements ICanEdit {
 
 	public FRect( DRectangle r ) {
 		super( r );
+	}
+
+	public FRect( Feature feature, double x, double y, double w, double h ) {
+		super (x,y,w,h);
+		this.f = feature;
 	}
 
 	public FRect getAdj(Dir d) {

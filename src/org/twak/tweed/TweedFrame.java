@@ -481,7 +481,7 @@ public class TweedFrame {
 
 		for ( Gen g : nGens ) {
 			g.onLoad( tweed );
-			addGen( g, true );
+			addGen( g, g.visible );
 		}
 	}
 	
@@ -615,9 +615,11 @@ public class TweedFrame {
 	}
 
 	public void setGenUI( JComponent ui ) {
-		genUI.setLayout( new BorderLayout() );
 		genUI.removeAll();
-		genUI.add( ui, BorderLayout.CENTER );
+		if ( ui != null ) {
+			genUI.setLayout( new BorderLayout() );
+			genUI.add( ui, BorderLayout.CENTER );
+		}
 		genUI.revalidate();
 		genUI.doLayout();
 		genUI.repaint();
