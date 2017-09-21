@@ -196,12 +196,8 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 			
 			double h = (Double.parseDouble( (String) r.get( "bottom" ) ) - Double.parseDouble( (String) r.get( "top"  ) )) / scale;
 			
-//			if ("1907".equals ((String) r.get( "right"  )) )
-//				System.out.println("what's happening?!");
-			
 			out.add (new FRect(
 					Double.parseDouble( (String) r.get( "left"   ) ) / scale + left,
-//					Double.parseDouble( (String) r.get( "left"   ) ) / scale + imageXM, // depends on what john's been drinking today
 				    topM - Double.parseDouble( (String) r.get( "bottom"    ) ) / scale,
  				   (Double.parseDouble( (String) r.get( "right"  ) ) - Double.parseDouble( (String) r.get( "left" ) )) / scale,
 				   h
@@ -377,7 +373,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 				{
 					g.setColor( f.color );
 					
-					if (w.width < 10)
+//					if (w.width < 10)
 					g.drawRect( ma.toX( w.x ), ma.toY( -w.y - w.height ), ma.toZoom( w.width ), ma.toZoom( w.height ) );
 					g.setColor( Color.black );
 					if ( w.id >= 0 )
@@ -546,7 +542,9 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		double bestDist = ma.fromZoom( 10 );
 		
 		for (FRect f: getRects()) {
+			
 			double dist = f.getDistance( pt );
+
 			if (dist < bestDist) {
 				bestDist = dist;
 				dragging = f;
@@ -569,8 +567,6 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	public void mouseReleased( MouseEvent e, PanMouseAdaptor ma ) {
 		if (dragging != null)
 			dragging.mouseReleased( e, ma );
-		
-		dragging = null;
 	}
 
 

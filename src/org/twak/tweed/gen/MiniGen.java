@@ -176,7 +176,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	
 	
 	private final static int MAX = 1000;
-	private static final boolean IMPORT_TEXTURES = true;
+	private static final boolean IMPORT_TEXTURES = false;
 
 	@Override
 	public JComponent getUI() {
@@ -295,7 +295,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			norm = new Vector3d( -norm.z, 0, norm.x);
 			norm.normalize();
 			
-			halfPlanes.add ( new LinearForm3D( norm, p.first() ) );
+//			halfPlanes.add ( new LinearForm3D( norm, p.first() ) );
 		}
 		
 		Map<File,File> copied = new HashMap<>();
@@ -306,9 +306,10 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		for ( Map.Entry<Integer, Matrix4d> e : trans.index.entrySet() ) {
 
-			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
-				continue;
-			else {
+//			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
+//				continue;
+//			else
+			{
 				Matrix4d m = new Matrix4d();
 				m.mul( Jme3z.fromMatrix( trans.offset ), e.getValue() );
 
@@ -327,8 +328,9 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 							
 							m.transform( pt );
 
-							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
-								if ( inside( pt, halfPlanes ) ) {
+//							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
+//								if ( inside( pt, halfPlanes ) ) 
+								{
 
 									if ( IMPORT_TEXTURES && ! (
 											(obj.currentMaterial != null && obj.currentMaterial.equals( mat ) ) ||

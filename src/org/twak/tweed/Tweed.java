@@ -19,29 +19,21 @@ import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
-import org.twak.tweed.gen.HeightGen;
-import org.twak.tweed.gen.MiniGen;
-import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.ResultsGen;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
-import org.twak.tweed.tools.AlignTool;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.tweed.tools.HandleTool;
 import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
-import org.twak.utils.MutableDouble;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 
@@ -553,15 +545,10 @@ public class Tweed extends SimpleApplication {
 			e.printStackTrace();
 		}
 	}
-
+	
 	protected void buildBackground() {
 		
 		String bgKey = "background";
-		
-//		if ( background != null ) {
-//			background.removeFromParent();
-//			renderManager.removePreView( bgKey );
-//		}
 		
 		background = new Picture( "background" );
 
@@ -575,7 +562,6 @@ public class Tweed extends SimpleApplication {
 		ViewPort pv = renderManager.createPreView( bgKey, cam );
 		pv.setClearFlags( true, true, true );
 		pv.attachScene( background );
-//		viewPort.setClearFlags( false, true, true );
 		background.updateGeometricState();
 
 	}
@@ -677,6 +663,14 @@ public class Tweed extends SimpleApplication {
 
 	public static void deleteScratch() {
 		if (Tweed.SCRATCH.contains ("scratch"))
-			new File (Tweed.SCRATCH).delete();
+			try {
+				FileUtils.deleteDirectory( new File (Tweed.SCRATCH) );
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
+	}
+
+	public String toAssetManager( File file ) {
+		return new File( Tweed.JME ).toPath().relativize( file.toPath() ).toString();
 	}
 }

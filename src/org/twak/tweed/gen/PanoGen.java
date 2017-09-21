@@ -19,10 +19,7 @@ import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JTextArea;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -44,19 +41,17 @@ import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Mesh.Mode;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
+import com.jme3.util.SkyFactory;
 import com.thoughtworks.xstream.XStream;
 
 public class PanoGen extends Gen implements IDumpObjs, ICanSave {
@@ -96,7 +91,6 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			if (p.rx == 0 && Math.abs ( p.rz - Mathz.TwoPI ) < 1e-6)
 				pit.remove();
 		}
-		
 		
 		Random randy = new Random (0xdeadbeef);
 		
@@ -289,8 +283,6 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 	public void selected( Pano p ) {
 		
-		System.out.println(">>>>");
-		
 		ui.removeAll();
 		ui.setLayout( new ListDownLayout() );
 		
@@ -345,7 +337,6 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 				addCubes( cubes );
 			}
 		} );
-		
 		
 //		JButton render = new JButton("render");
 //		render.addActionListener(new ActionListener() {

@@ -63,7 +63,9 @@ public class GreebleHelper {
 				else
 					label = ROOF_EDGE;
 				
-				lout.append( new LPoint3d( se.getStart( f ), label ) );
+				Point3d pt = se.getStart(f);
+				if (pt != null)
+					lout.append( new LPoint3d( pt, label ) );
 			}
 		}
 		

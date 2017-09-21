@@ -37,7 +37,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
-import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
@@ -48,6 +47,7 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.JLazyMenu;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
 import org.twak.utils.ui.SimpleFileChooser;
@@ -180,7 +180,7 @@ public class TweedFrame {
 			}
 		} );
 
-		JMenuItem load = new JMenuItem( "load...", KeyEvent.VK_S );
+		JMenuItem load = new JMenuItem( "open...", KeyEvent.VK_O );
 		load.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_O, ActionEvent.CTRL_MASK ) );
 		menu.add(load);
 		load.addActionListener( new java.awt.event.ActionListener() {
@@ -195,9 +195,39 @@ public class TweedFrame {
 					};
 			}
 		} );
+		
+		JMenuItem recent = new JLazyMenu( "open recent" ) {
 
-		JMenuItem neu = new JMenuItem( "new...", KeyEvent.VK_S );
-		neu.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK ) );
+			@Override
+			public List<Runnable> getEntries() {
+
+				List<Runnable> out = new ArrayList();
+
+				for ( File r : TweedSettings.recentFiles.f ) {
+
+					out.add( new Runnable() {
+						@Override
+						public void run() {
+							if ( !r.exists() )
+								JOptionPane.showMessageDialog( frame, "Location " + r.getName() + "not found (is it still there?)" );
+							else
+								TweedSettings.load( r );
+						}
+
+						@Override
+						public String toString() {
+							return r.getName();
+						}
+					} );
+
+				}
+				return out;
+			}
+		};
+		menu.add(recent);
+
+		JMenuItem neu = new JMenuItem( "new...", KeyEvent.VK_N );
+		neu.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_N, ActionEvent.CTRL_MASK ) );
 		menu.add(neu);
 		
 		neu.addActionListener( new java.awt.event.ActionListener() {
@@ -221,16 +251,16 @@ public class TweedFrame {
 			}
 		} );
 		
-		JMenuItem remove = new JMenuItem( "delete layer", KeyEvent.VK_MINUS );
-		remove.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
-		menu.add( remove );
-		remove.addActionListener( new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				if ( selectedGen != null )
-					removeGen( selectedGen );
-			};
-		} );
+//		JMenuItem remove = new JMenuItem( "delete layer", KeyEvent.VK_MINUS );
+//		remove.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
+//		menu.add( remove );
+//		remove.addActionListener( new java.awt.event.ActionListener() {
+//			@Override
+//			public void actionPerformed( ActionEvent e ) {
+//				if ( selectedGen != null )
+//					removeGen( selectedGen );
+//			};
+//		} );
 
 		JMenuItem resetBG = new JMenuItem( "reset background", KeyEvent.VK_MINUS );
 		resetBG.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
@@ -247,8 +277,8 @@ public class TweedFrame {
 			};
 		} );
 
-		JMenuItem obj = new JMenuItem( "export obj", KeyEvent.VK_O );
-		obj.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_0, ActionEvent.CTRL_MASK ) );
+		JMenuItem obj = new JMenuItem( "export obj", KeyEvent.VK_E );
+		obj.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_E, ActionEvent.CTRL_MASK ) );
 		menu.add( obj );
 		obj.addActionListener( new java.awt.event.ActionListener() {
 			@Override
@@ -385,7 +415,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
-							String f = new File( Tweed.JME ).toPath().relativize( obj.toPath() ).toString();
+							String f = tweed.toAssetManager( obj );
 							addGen( new MeshGen( f, tweed ), true );
 						};
 					};
@@ -451,7 +481,7 @@ public class TweedFrame {
 
 		for ( Gen g : nGens ) {
 			g.onLoad( tweed );
-			addGen( g, true );
+			addGen( g, g.visible );
 		}
 	}
 	
@@ -585,9 +615,11 @@ public class TweedFrame {
 	}
 
 	public void setGenUI( JComponent ui ) {
-		genUI.setLayout( new BorderLayout() );
 		genUI.removeAll();
-		genUI.add( ui, BorderLayout.CENTER );
+		if ( ui != null ) {
+			genUI.setLayout( new BorderLayout() );
+			genUI.add( ui, BorderLayout.CENTER );
+		}
 		genUI.revalidate();
 		genUI.doLayout();
 		genUI.repaint();
