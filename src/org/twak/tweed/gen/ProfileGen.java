@@ -402,8 +402,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 				try {
 					LineSoup soup = new LineSoup ( ObjSlice.sliceTri(blockGen.getCroppedMesh(), getHeight( hi ), majorAxis ) );
 					FindLines foundLines = new FindLines(soup, 
-//								null,
-									TweedSettings.settings.useGis ? gisBias : null,
+								null,
+//									TweedSettings.settings.useGis ? gisBias : null,
 							-1, null, P);
 					foundLines.result.all.stream().forEach( x -> lines.add(new LineAtHeight( _i, delta, x, foundLines.result.all)) );
 					slices.put( hi, foundLines.result );
@@ -548,14 +548,14 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 					}
 				}
 
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 0.3f, true ) );
+				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), dbg, dispCol, 0.1f, true ) );
 				
 				Line l2 = mf.origin.line;
 				Line3d oLine = new Line3d( 
 						l2.start.x, getHeight( mf.origin.height ), l2.start.y, 
 						l2.end.x, getHeight( mf.origin.height ), l2.end.y );
 				
-				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.5f, true ) );
+//				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.5f, true ) );
 			}
 		
 //			if ( mf.area > TweedSettings.settings.megaFacadeAreaThreshold )
