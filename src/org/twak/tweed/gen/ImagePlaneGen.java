@@ -46,7 +46,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 
-public class PlaneGen extends Gen implements IDumpObjs {
+public class ImagePlaneGen extends Gen implements IDumpObjs {
 
 	public Vector3f a, b;
 	float heightMax, heightMin;
@@ -67,7 +67,8 @@ public class PlaneGen extends Gen implements IDumpObjs {
 
 	}
 
-	public PlaneGen( Tweed tweed, float x1, float y1, float x2, float y2, float heightMin, float heightMax, Collection<Pano> nearby ) {
+	public ImagePlaneGen(){}
+	public ImagePlaneGen( Tweed tweed, float x1, float y1, float x2, float y2, float heightMin, float heightMax, Collection<Pano> nearby ) {
 		super( "plane gen", tweed );
 		
 		this.a = new Vector3f( x1, heightMin, y1 ); // a is the coord-system origin
@@ -79,7 +80,7 @@ public class PlaneGen extends Gen implements IDumpObjs {
 		calcUV();
 	}
 	
-	public PlaneGen( PlaneGen planeGen ) {
+	public ImagePlaneGen( ImagePlaneGen planeGen ) {
 		super( planeGen.name, planeGen.tweed );
 		
 		this.a = new Vector3f(planeGen.a);
@@ -253,7 +254,7 @@ public class PlaneGen extends Gen implements IDumpObjs {
 		return out;
 	}
 	
-	public PlaneGen rotateByAngle(double deltaAngle, double distance) {
+	public ImagePlaneGen rotateByAngle(double deltaAngle, double distance) {
 		
 		Line  nLine = new Line ( new Point2d(a.x, a.z), new Point2d(b.x, b.z ) );
 		Point2d cen = nLine.fromPPram( 0.5 );
@@ -271,7 +272,7 @@ public class PlaneGen extends Gen implements IDumpObjs {
 		start.add(dir);
 		end.sub(dir);
 		
-		PlaneGen out = new PlaneGen(this);
+		ImagePlaneGen out = new ImagePlaneGen(this);
 		
 		out.a.set( (float) start.x, a.y, (float) start.y);
 		out.b.set( (float) end  .x, b.y, (float) end  .y);
@@ -333,6 +334,9 @@ public class PlaneGen extends Gen implements IDumpObjs {
 //		return out;
 	}
 	
+	
+	private final static boolean DO_MASK = false;
+	
 	public BufferedImage render( File folder, float scale, Pano pano, Line mega, String filename ) {
 
 		Point3d worldPos = new Point3d();
@@ -342,12 +346,12 @@ public class PlaneGen extends Gen implements IDumpObjs {
 		planeNormal.set(planeNormal.z, 0, -planeNormal.x);
 		
 		BufferedImage out = new BufferedImage( (int) ( a.distance( b ) * scale ), (int) ( ( heightMax- heightMin) * scale ), BufferedImage.TYPE_3BYTE_BGR );
-		BufferedImage outClip = new BufferedImage( out.getWidth(), out.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
+		BufferedImage outClip;
+		if (DO_MASK)
+			outClip = new BufferedImage( out.getWidth(), out.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
 		
 
 		BufferedImage source = pano.getRenderPano();
-		
-//		List<float[]> cubes = new ArrayList();
 		
 		for ( int x = 0; x < out.getWidth(); x++ ) {
 			for ( int y = 0; y < out.getHeight(); y++ ) {
@@ -363,70 +367,34 @@ public class PlaneGen extends Gen implements IDumpObjs {
 				
 				out.setRGB( x, y, c.getRGB() );
 				
-				Point3d requested = new Point3d(planeWorld[0], planeWorld[1], planeWorld[2]);
 				
-				Color d = Color.white;
-				
-				if ( 
-						Double.isNaN( worldPos.x) || 
-//						requested.distanceSquared( worldPos ) > 30 ||
-//						planeNormal.angle(worldNormal) > 0.5 || 
-						(mega != null && mega.distance( new Point2d(worldPos.x, worldPos.z), true )  > 5 ) 
-					)
+				if ( DO_MASK ) {
+					Color d = Color.white;
+					if ( Double.isNaN( worldPos.x ) || ( mega != null && mega.distance( new Point2d( worldPos.x, worldPos.z ), true ) > 5 ) )
 						d = Color.black;
-				
-				outClip.setRGB( x, y, d.getRGB() );
-				
-//				if (! Double.isNaN( worldPos.x) )
-//					if ( x % 20 == 0 && y % 20 == 0 )
-//						cubes.add( new float[] { (float) worldPos.x, (float) worldPos.y, (float) worldPos.z } );
-				
-			}
-			System.out.println( x + " / " + out.getWidth() );
-		}
-		System.out.println( "render complete" );
-		
-//		addCubes( cubes );
 
+					outClip.setRGB( x, y, d.getRGB() );
+				}
+			}
+			
+			if (x% 100 == 0)
+				System.out.println( x + " / " + out.getWidth() );
+		}
+		System.out.println( "render complete!" );
+		
+		
 		if ( folder != null )
 			try {
 				ImageIO.write( out, "png", new File ( folder, filename+".png" ) );
-				ImageIO.write( outClip, "png", new File ( folder, "mask.png" ) );
+				
+				if (DO_MASK)
+					ImageIO.write( outClip, "png", new File ( folder, "mask.png" ) );
 			} catch ( IOException e1 ) {
 				e1.printStackTrace();
 			}
 		return out;
 	}
 	
-//	static Node cubeDebug;
-//	private void addCubes (List<float[]> cubes) {
-//		tweed.enqueue( new Runnable() {
-//			public void run() {
-//				
-//				if (cubeDebug != null) {
-//					cubeDebug.removeFromParent();
-//				}
-//				cubeDebug = new Node();
-//				
-//				Material mat1 = new Material( tweed.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
-//				mat1.setColor( "Color", ColorRGBA.Blue );
-//				
-//				for (float[] a : cubes) {
-//				
-//					Box box1 = new Box( 0.1f, 0.1f, 0.1f );
-//					Geometry blue = new Geometry( "Box", box1 );
-//					blue.setMaterial( mat1 );
-//					blue.setLocalTranslation( a[ 0 ], a[ 1 ], a[ 2 ] );
-//					blue.updateGeometricState();
-//					cubeDebug.attachChild( blue );
-//				}
-//				
-//				tweed.getRootNode().attachChild( cubeDebug );
-//			}
-//		} );
-//	}
-	
-
 	static File lastLocation; 
 	
 	@Override

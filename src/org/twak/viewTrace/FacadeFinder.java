@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,8 +16,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Pano;
+import org.twak.tweed.gen.PlanesGen;
+import org.twak.tweed.gen.PlanesGen.Plane;
 import org.twak.tweed.gen.SkelGen.SimpleMass;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -26,10 +30,8 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.collections.Streamz;
-import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.LinearForm;
-import org.twak.utils.ui.Plot;
 
 public class FacadeFinder {
 
@@ -63,12 +65,18 @@ public class FacadeFinder {
 	}
 	
 	public enum FacadeMode {
-		PER_GIS, PER_MEGA, PER_CAMERA;
+		PER_GIS, PER_MEGA, PER_CAMERA, PER_CAMERA_CROPPED;
+		
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase().replaceAll( "_", " " );
+		}
 	}
 	
-	public static FacadeMode facadeMode = FacadeMode.PER_CAMERA;
+	public static FacadeMode facadeMode = FacadeMode.PER_CAMERA_CROPPED;
+	public static int count = 0;
 	
-	public FacadeFinder( LoopL<Point2d> _edges, Map<Point2d, Pano> panos, List<Point3d> meshPoints, BlockGen blockGen ) {
+	public FacadeFinder( LoopL<Point2d> _edges, Map<Point2d, Pano> panos, List<Point3d> meshPoints, BlockGen blockGen, PlanesGen drawnPlanes ) {
 
 		LoopL<Point2d> edges = _edges;
 		this.block = blockGen;
@@ -147,7 +155,7 @@ public class FacadeFinder {
 
 			Point2d s = lp.get(), e = lp.getNext().get();
 
-			Loop<Point2d> orig = _edges.get( findOrigPoly( whichPoly, s, e ) );
+//			Loop<Point2d> orig = _edges.get( findOrigPoly( whichPoly, s, e ) );
 
 			Line l = new SuperLine( s, e );
 
@@ -167,6 +175,25 @@ public class FacadeFinder {
 			
 			if (f.length < 2)
 				continue;
+			
+			Line drawnPlane = null;
+			if (drawnPlanes != null) {
+				
+				Line outl = f.getExtent();
+				
+				Optional<Plane> op = drawnPlanes.planes.stream().filter( p -> {
+					Line pl = new Line ( Jme3z.to2 ( p.a ), Jme3z.to2 ( p.b  ) );
+					double angle = pl.absAngle( outl );
+					return pl.distance( outl ) < 5 && (angle < 0.3 || angle > Math.PI - 0.3); 
+				}).findAny();
+				
+				if (op.isPresent()) {
+					drawnPlane = new Line ( Jme3z.to2( op.get().a ), Jme3z.to2( op.get().b ) );
+				}
+				
+				if (drawnPlane == null)
+					continue;
+			}
 			
 			ToProjMega megaResults = new ToProjMega(f.getExtent().reverse());
 			
@@ -272,11 +299,11 @@ public class FacadeFinder {
 						}
 					}
 				
-//				System.out.println( "multi facade has " + out.toProject.size() + " sources" );
-				
-			} else if (facadeMode == FacadeMode.PER_CAMERA ){
+			} else if (facadeMode == FacadeMode.PER_CAMERA || facadeMode == FacadeMode.PER_CAMERA_CROPPED ){
 				
 				Line l = f.getExtent();
+				
+				count += panos.size();
 				
 				for ( Point2d p : panos.keySet() ) {
 					
@@ -294,29 +321,56 @@ public class FacadeFinder {
 						
 						double 
 								xLen = dist * Math.tan(fovX2);
-//						xLen = dist * Math.cos(fovX2);
-
 						
 						Vector2d dirX = l.dir();
 						dirX.normalize();
 						
 						Point2d left = new Point2d(dirX);
+						
 						left.scaleAdd(xLen, cen);
-
+						
 						Point2d right = new Point2d(dirX);
 						right.scaleAdd(-xLen, cen);
+						
+						if ( facadeMode == FacadeMode.PER_CAMERA_CROPPED ) {
+							
+							double min = -2 / l.length(), max = 1 + ( 2 / l.length() );
+							
+							if (drawnPlane != null) {
+
+								double s = l.findPPram( drawnPlane.start ),
+									   e = l.findPPram( drawnPlane.end   );
+								
+								if (s > e) {
+									double tmp = e;
+									e = s;
+									s = tmp;
+								}
+								
+								min = Mathz.clamp( min, s, e );
+								max = Mathz.clamp( max, s, e );
+							}
+							
+							if ( l.findPPram( right ) < min )
+								right = l.fromPPram( min );
+							if ( l.findPPram( left ) > max )
+								left = l.fromPPram( max );
+						}
+						
 						
 						double height = panos.get(p).location.y;
 						
 						ToProject out = new ToProject( right, left, 0, height + 30 );
 						
-						out.toProject.add( panos.get( p ) );
-						megaResults.add( out );
+						if ( left.distance( right ) > 3 ) {
+							out.toProject.add( panos.get( p ) );
+							megaResults.add( out );
+						}
 					}
 				}
-				
-				
 			}
+			
+			
 			Collections.sort( megaResults, new Comparator<ToProject>() {
 				
 				@Override
@@ -345,18 +399,18 @@ public class FacadeFinder {
 		return height;
 	}
 
-	private int findOrigPoly( MultiMap<Point2d, Integer> whichPoly, Point2d s, Point2d e ) {
-		
-		List<Integer > js = whichPoly.get( e );
-		for (Integer i : whichPoly.get( s ) ) {
-			for (Integer j : js) {
-				if (i == j)
-					return i;
-			}
-		}
-		
-		return -1;
-	}
+//	private int findOrigPoly( MultiMap<Point2d, Integer> whichPoly, Point2d s, Point2d e ) {
+//		
+//		List<Integer > js = whichPoly.get( e );
+//		for (Integer i : whichPoly.get( s ) ) {
+//			for (Integer j : js) {
+//				if (i == j)
+//					return i;
+//			}
+//		}
+//		
+//		return -1;
+//	}
 
 	private static class F {
 		

@@ -306,9 +306,9 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		for ( Map.Entry<Integer, Matrix4d> e : trans.index.entrySet() ) {
 
-//			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
-//				continue;
-//			else
+			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
+				continue;
+			else
 			{
 				Matrix4d m = new Matrix4d();
 				m.mul( Jme3z.fromMatrix( trans.offset ), e.getValue() );
@@ -328,8 +328,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 							
 							m.transform( pt );
 
-//							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
-//								if ( inside( pt, halfPlanes ) ) 
+							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
+								if ( inside( pt, halfPlanes ) ) 
 								{
 
 									if ( IMPORT_TEXTURES && ! (

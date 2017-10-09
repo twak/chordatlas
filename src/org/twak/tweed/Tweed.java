@@ -30,7 +30,9 @@ import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.tweed.tools.HandleTool;
 import org.twak.tweed.tools.HouseTool;
+import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
@@ -96,8 +98,9 @@ public class Tweed extends SimpleApplication {
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
 			new HouseTool(this), 
-//			new HandleTool(this), 
+			new HandleTool(this), 
 //			new AlignTool(this), 
+			new PlaneTool(this), 
 			new FacadeTool(this) };
 	
 	public Tool tool;
@@ -345,7 +348,7 @@ public class Tweed extends SimpleApplication {
 
 	private void setCameraSpeed( int i ) {
 		
-		TweedSettings.settings.cameraSpeed = Mathz.clamp( TweedSettings.settings.cameraSpeed+i, -25, 3 );
+		TweedSettings.settings.cameraSpeed = Mathz.clamp( TweedSettings.settings.cameraSpeed+i, -25, 6 );
 		System.out.println("camera speed now " + TweedSettings.settings.cameraSpeed);
 		getFlyByCamera().setMoveSpeed( (float) Math.pow (2, (TweedSettings.settings.cameraSpeed /2 ) + 8) );
 	}
@@ -440,6 +443,8 @@ public class Tweed extends SimpleApplication {
 			oldHeight = cam.getHeight();
 		}
 		
+//		System.out.println(">>" + checkForEnd);
+		
 		if (checkForEnd)
 			if (tool.isDragging()) {
 				tool.dragEnd();
@@ -450,8 +455,6 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.cameraLocation = cam.getLocation();
 		TweedSettings.settings.cameraOrientation = cam.getRotation();
 	}
-	
-	
 	
 	private AnalogListener moveListener = new AnalogListener() {
 		@Override
@@ -476,50 +479,63 @@ public class Tweed extends SimpleApplication {
 				point.setPosition( pos.add ( cam.getDirection().mult( -0.3f ) ));
 		}
 	};
+	
+	private Vector3f getSurfaceSelected(float dist) {
+		CollisionResult cr = getClicked();
+		
+		Vector3f pos = null;
+		
+		if (cr != null) 
+			pos = cr.getContactPoint();
+		
+		
+		if (pos == null) {
+			Vector3f dir = cam.getWorldCoordinates( getInputManager().getCursorPosition(), -dist );
+			dir.subtractLocal( cam.getLocation() );
+			new Ray( cam.getLocation(), dir ).intersectsWherePlane( new Plane(Jme3z.UP, 0), pos = new Vector3f() );
+		}
+		return pos;
+	}
+	
 	private AnalogListener analogListener = new AnalogListener() {
-		public void onAnalog(String name, float intensity, float tpf) {
+		public void onAnalog( String name, float intensity, float tpf ) {
 
-			if (name.equals(CLICK)) {
+			
+			System.out.println(">>");
+			
+			if ( name.equals( CLICK ) ) {
 
-				if (tool.isDragging()) {
-					
-					tool.dragging(inputManager.getCursorPosition());
+				if ( tool.isDragging() ) {
+
+					tool.dragging( inputManager.getCursorPosition(), getSurfaceSelected( 0 ) );
 					checkForEnd = false;
 				} else {
 					CollisionResult cr = getClicked();
 
-					if (cr == null || !(cr.getGeometry().getUserData(CLICK) instanceof Handle)) {
-						
-						
-//						if (cr != null) {
-//							Object[] genA = cr.getGeometry().getUserData(Gen.class.getSimpleName());
-//							if (genA != null)
-//								frame.setSelected((Gen) genA[0]);
-//						}
-
+					if ( cr == null )
 						tool.clear();
 
-						if (cr != null) {
-							
-							Spatial target = cr.getGeometry();
-							
-							while (target.getParent().getUserData( HandleMe.class.getSimpleName() ) != null )
-								target = target.getParent();
-							
-							tool.clickedOn(target, cr.getContactPoint(), inputManager.getCursorPosition());
-						}
-						
-					} else {
-						tool.dragStart(cr. getGeometry(), inputManager.getCursorPosition());
+					if ( tool instanceof PlaneTool || (cr != null && cr.getGeometry().getUserData( CLICK ) instanceof Handle ) ) {
+						tool.dragStart( cr == null ? null : cr.getGeometry(), inputManager.getCursorPosition(), getSurfaceSelected( 0 ) );
 						checkForEnd = false;
+					} else {
+
+						if ( cr != null ) {
+
+							Spatial target = cr.getGeometry();
+
+							while ( target.getParent().getUserData( HandleMe.class.getSimpleName() ) != null )
+								target = target.getParent();
+
+							tool.clickedOn( target, cr.getContactPoint(), inputManager.getCursorPosition() );
+						}
 					}
+
 				}
 			}
-
 		}
-
 	};
-	
+
 	public void clearBackground() {
 		Material mat1 = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat1.setColor("Color", ColorRGBA.Black);

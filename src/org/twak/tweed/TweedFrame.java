@@ -43,6 +43,7 @@ import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
+import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -628,6 +629,14 @@ public class TweedFrame {
 
 	public List<Gen> gens( Class<? extends Gen> klass ) {
 		return genList.stream().filter( g -> g.getClass() == klass ).collect( Collectors.toList() );
+	}
+
+	public <E extends Gen> E  getGenOf( Class<E> klass ) {
+		
+		List<Gen> gens = gens(klass);
+		if (gens.isEmpty())
+			return null;
+		return (E) gens.get(0);
 	}
 
 }
