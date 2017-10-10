@@ -70,11 +70,13 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		this.folder = folder;
 		this.sourceCRS = sourceCRS;
 	}
-	
+		
 	@Override
 	public void calculate( ) {
 		
-		if (!folder.exists())
+		File absFolder = tweed.toWorkspace( PanoGen.this.folder );
+		
+		if (!absFolder.exists())
 			throw new Error("File not found " + this.folder);
 		
 		for (Spatial s : gNode.getChildren())
@@ -152,7 +154,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 			panos.clear();
 			
-			for ( File f : folder.listFiles() )
+			for ( File f : tweed.toWorkspace( folder).listFiles() )
 				if ( f.getName().endsWith( ".jpg" ) )
 					createPanoGen( f, panos );
 			
@@ -165,7 +167,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	}
 
 	private File getMetaFile() {
-		return new File( folder, "panos.xml" );
+		return tweed.toWorkspace( new File( folder, "panos.xml" ) );
 	}
 
 	private void createPanoGen( File f, List<Pano> results ) {

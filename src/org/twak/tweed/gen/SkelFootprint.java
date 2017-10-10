@@ -41,7 +41,6 @@ import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache.MFPoint;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
@@ -49,8 +48,10 @@ import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
+import org.twak.utils.Mathz;
+import org.twak.utils.MutableDouble;
+import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
-import org.twak.utils.collections.DHash;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
@@ -61,9 +62,6 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
-import org.twak.utils.Mathz;
-import org.twak.utils.MutableDouble;
-import org.twak.utils.PaintThing;
 import org.twak.viewTrace.ColorRGBAPainter;
 import org.twak.viewTrace.ModeCollector;
 import org.twak.viewTrace.SuperLine;
@@ -89,14 +87,6 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.util.BufferUtils;
 import com.thoughtworks.xstream.XStream;
-
-import gurobi.GRB;
-import gurobi.GRBEnv;
-import gurobi.GRBException;
-import gurobi.GRBLinExpr;
-import gurobi.GRBModel;
-import gurobi.GRBQuadExpr;
-import gurobi.GRBVar;
 
 public class SkelFootprint {
 	
@@ -341,7 +331,7 @@ public class SkelFootprint {
 		
 		try {
 //			new GreedySkelSolver(SS, m, timeLimitSec ).solve();
-			new SkelSolver(SS, m, timeLimitSec ).solve();
+			new GurobiSkelSolver(SS, m, timeLimitSec ).solve();
 		}
 		catch (Throwable th) {
 			th.printStackTrace();
@@ -849,133 +839,6 @@ public class SkelFootprint {
 			
 			sf.roofColor = col;
 		}
-	}
-
-	private static Point2d cachePoint = null;
-	private static Map<Integer, Integer> cacheClassification = null;
-	
-	public static void findClassifyFootprints( HalfMesh2 mesh, double minHeight ) {
-		
-		if ( cachePoint != null && cachePoint.equals ( mesh.faces.get( 0 ).e.start ) ) {
-			for ( int i = 0; i < mesh.faces.size(); i++ ) {
-				( (SuperFace) mesh.faces.get( i ) ).classification = cacheClassification.get( i );
-			}
-			return;
-			
-		} else
-		{
-			cachePoint = mesh.faces.get( 0 ).e.start;
-			cacheClassification = new HashMap<>();
-		}
-		
-		try {
-			GRBEnv env = new GRBEnv( Tweed.SCRATCH+"mip1.log" );
-			GRBModel model = new GRBModel( env );
-
-			int colors = 3;
-
-			GRBVar[][] xfc = new GRBVar[mesh.faces.size()][colors];
-
-
-			DHash<SuperFace, Integer> f2i = new DHash<>();
-			int fc = mesh.faces.size();
-
-			int bCount = 0;
-			
-			for ( int f = 0; f < fc; f++ ) { // create face colors
-
-				SuperFace sf = (SuperFace) mesh.faces.get( f );
-				f2i.put( sf, f );
-				for ( int c = 0; c < colors; c++ ) { 
-					xfc[ f ][ c ] = model.addVar( 0.0, 1.0, 1.0, GRB.BINARY, "x_f:" + f + " c:" + c );
-					bCount++;
-				}
-			}
-			
-			System.out.println("binary variables " + bCount);
-
-			
-			int lcCount = 0;
-			
-			for ( int f = 0; f < fc; f++ ) { // pick one color per face
-
-				GRBLinExpr expr = new GRBLinExpr();
-
-				for ( int c = 0; c < colors; c++ ) {
-					expr.addTerm( 1, xfc[ f ][ c ] );
-					lcCount ++;
-							
-				}
-
-				model.addConstr( expr, GRB.EQUAL, 1, "overlap_" + f );
-			}
-			
-			System.out.println("lienar binary constraint " + lcCount);
-
-			GRBQuadExpr target = new GRBQuadExpr();
-
-			int tCount = 0;
-			
-			for ( HalfFace f1 : mesh.faces ) {
-
-				int fi1 = f2i.get( (SuperFace) f1 );
-				for ( HalfEdge edge : f1.edges() ) {
-
-					if ( edge.over == null )
-						continue;
-
-					HalfFace f2 = edge.over.face;
-					int fi2 = f2i.get( (SuperFace) f2 );
-
-					double weight = edge.length();
-					boolean soft = ( (SuperEdge) edge ).profLine == null && ( (SuperEdge) edge.over ).profLine == null;
-
-					for ( int c1 = 0; c1 < colors; c1++ )
-						for ( int c2 = 0; c2 < colors; c2++ ) {
-
-							if ( soft && c1 != c2 ) {
-								target.addTerm( weight, xfc[ fi1 ][ c1 ], xfc[ fi2 ][ c2 ] );
-								tCount++;
-							}
-							else if ( !soft && c1 == c2 ) {
-								target.addTerm( 1.5 * weight, xfc[ fi1 ][ c1 ], xfc[ fi2 ][ c2 ] );
-								tCount++;
-							}
-						}
-				}
-			}
-			
-			System.out.println("added " + tCount +" target terms " );
-			
-			model.setObjective( target, GRB.MINIMIZE );
-			model.getEnv().set( GRB.DoubleParam.TimeLimit, 20.0 );
-			model.optimize();
-
-//			System.out.println( "Obj: " + model.get( GRB.DoubleAttr.ObjVal ) );
-
-			for ( int f = 0; f < fc; f++ ) {
-
-				int color = -1;
-				for ( int c1 = 0; c1 < colors; c1++ )
-					if ( xfc[ f ][ c1 ].get( GRB.DoubleAttr.X ) == 1 )
-						color = c1;
-
-				cacheClassification.put ( f, color );
-				
-//				System.out.println( "i: " + f + " " + color );
-				f2i.teg( f ).classification = color;
-			}
-			
-			// Dispose of model and environment
-
-			model.dispose();
-			env.dispose();
-
-		} catch ( GRBException e ) {
-			System.out.println( "Error code: " + e.getErrorCode() + ". " + e.getMessage() );
-			e.printStackTrace();
-		}
-
 	}
 
 	public static void mergeSameClassification( HalfMesh2 mesh ) {

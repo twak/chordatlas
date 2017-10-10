@@ -162,7 +162,7 @@ public class SolverState implements Serializable
 
 						//				PaintThing.paint (f.megafacade, g, ma);
 
-						DumbCluster1D<MFPoint> res = SkelSolver.clusterMinis( f, minis );
+						DumbCluster1D<MFPoint> res = GurobiSkelSolver.clusterMinis( f, minis );
 
 						Vector2d dir = f.megafacade.dir();
 
@@ -183,7 +183,7 @@ public class SolverState implements Serializable
 								PaintThing.paint( pt, g, ma );
 
 								g.setStroke( new BasicStroke( 0.2f ) );
-								for ( HalfEdge e : SkelSolver.findNear( f.megafacade, mfp, mesh ) )
+								for ( HalfEdge e : GurobiSkelSolver.findNear( f.megafacade, mfp, mesh ) )
 									g.drawLine( ma.toX( pt.x ), ma.toY( pt.y ), ma.toX( e.end.x ), ma.toY( e.end.y ) );
 
 								if ( mfp.selectedEdge != null ) {

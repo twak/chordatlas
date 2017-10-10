@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -31,6 +30,7 @@ import org.twak.tweed.Tweed;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.Colour;
 import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.collision.CollisionResult;
@@ -235,12 +235,12 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 				int d = (int)(dist * 256);
 				double r = dist*256 - d;
 				
-				Color c = new Color( 
+				int c = Colour.asInt(  
 						Mathz.clamp ( d + (r > 0.25 ? 1 : 0), 0, 255),
 						Mathz.clamp ( d + (r > 0.50 ? 1 : 0), 0, 255),
 						Mathz.clamp ( d + (r > 0.75 ? 1 : 0), 0, 255) );
 				
-				out.setRGB( x, y, c.getRGB() );
+				out.setRGB( x, y, c );
 			}
 			System.out.println( x + " / " + out.getWidth() );
 		}
@@ -358,14 +358,14 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 
 				float[] planeWorld = uvToWorld( x / (float) out.getWidth(), 1 - ( y / (float) out.getHeight() ) );
 				
-				Color c = new Color( 
+				int c =  
 						pano.castTo( 
 								planeWorld, 
 								source , 
 								worldPos, 
-								worldNormal ) );
+								worldNormal );
 				
-				out.setRGB( x, y, c.getRGB() );
+				out.setRGB( x, y, c );
 				
 				
 				if ( DO_MASK ) {

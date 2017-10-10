@@ -1,5 +1,6 @@
 package org.twak.tweed.gen;
 
-public interface ICanSave {
+import java.io.File;
 
+public interface ICanSave {
 }
