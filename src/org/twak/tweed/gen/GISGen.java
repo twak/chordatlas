@@ -160,6 +160,9 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 				TweedSettings.settings.toOrigin.transform( pair.first() );
 				
+				System.out.println( " >>> " + pair.first() );
+				
+				pair.first().y = 0;
 				points.add( pair.first() );
 
 				lines.add( new Line3d(pair.first(), pair.second()) );

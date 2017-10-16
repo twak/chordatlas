@@ -303,7 +303,6 @@ public class FacadeFinder {
 				
 				Line l = f.getExtent();
 				
-				count += panos.size();
 				
 				for ( Point2d p : panos.keySet() ) {
 					
@@ -365,6 +364,7 @@ public class FacadeFinder {
 						if ( left.distance( right ) > 3 ) {
 							out.toProject.add( panos.get( p ) );
 							megaResults.add( out );
+							count ++;
 						}
 					}
 				}

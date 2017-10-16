@@ -389,7 +389,7 @@ public class TweedFrame {
 				new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
 					public void heresTheFile( File obj ) throws Throwable {
 						removeGISSources();
-						addGen ( new GISGen( tweed.toAssetManager( obj ), tweed ), true );
+						addGen ( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
 					};
 				};
 			}
@@ -403,7 +403,7 @@ public class TweedFrame {
 				new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
 					public void heresTheFile( File gml ) throws Throwable {
 						removeGISSources();
-						tweed.addGML( tweed.toAssetManager( gml ), null );
+						tweed.addGML( gml, null );
 					};
 				};
 			}
@@ -416,7 +416,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
-							String f = tweed.toAssetManager( obj ).toString();
+							String f = tweed.makeWorkspaceRelative( obj ).toString();
 							addGen( new MeshGen( f, tweed ), true );
 						};
 					};
@@ -430,7 +430,7 @@ public class TweedFrame {
 						@Override
 						public void heresTheFile( File f ) throws Throwable {
 							//						removeMeshSources();
-							addGen( new MiniGen( tweed.toWorkspace( f.getParentFile() ), tweed ), true );
+							addGen( new MiniGen( tweed.makeWorkspaceRelative( f.getParentFile() ), tweed ), true );
 						}
 					};
 				}
@@ -442,7 +442,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
 						public void heresTheFile( File oneOfMany ) throws Throwable {
 							//						removeGens( PanoGen.class );
-							addGen( new PanoGen( tweed.toWorkspace( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
+							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
 						};
 					};
 				}

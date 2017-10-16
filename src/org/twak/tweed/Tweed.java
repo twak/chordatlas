@@ -321,7 +321,7 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.fromOrigin = new Matrix4d( TweedSettings.settings.toOrigin );
 		TweedSettings.settings.fromOrigin.invert();
 		
-		frame.addGen ( new GISGen( gmlFile.toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
+		frame.addGen ( new GISGen( toWorkspace( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
 	}
 
 	private void setCameraPerspective() {

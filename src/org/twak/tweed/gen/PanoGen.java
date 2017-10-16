@@ -86,8 +86,8 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		createPanoGens();
 		
-		
 		Iterator<Pano> pit = panos.iterator();
+		
 		while (pit.hasNext()) {
 			Pano p = pit.next();
 			if (p.rx == 0 && Math.abs ( p.rz - Mathz.TwoPI ) < 1e-6)
@@ -227,7 +227,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			
 			Vector3d location = new Vector3d( 
 					trans[ 0 ], 
-					trans[ 1 ] + 2.5f /* camera height above facade bottom */,
+					2.5f /* camera height above floor */,
 					trans[ 2 ] );
 			
 			
