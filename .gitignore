@@ -2,3 +2,4 @@
 *.so
 *.log
 /.metadata/
+/.settings/
