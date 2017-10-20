@@ -137,19 +137,29 @@ public class FeatureCache {
 		
 		public MegaFeatures (File folder) {
 			
-			megafacade = (Line) new XStream().fromXML( new File (folder, FacadeTool.LINE_XML ) );
-			File[] files = folder.listFiles();
-			Arrays.sort( files );
+			File lineFile = new File (folder, FacadeTool.LINE_XML );
+			File[] toProcess;
 			
-			for (File f : files)
-				if (f.isDirectory()) {
+			
+			if ( !lineFile.exists() )  { // a single image
+				lineFile = new File ( folder.getParentFile(), FacadeTool.LINE_XML );
+				toProcess = new File[] {folder};
+			}
+			else
+				toProcess = folder.listFiles(); // an entire megfacade
+
+			Arrays.sort( toProcess );
+			
+			megafacade = (Line) new XStream().fromXML( lineFile );
+
+			for ( File f : toProcess )
+				if ( f.isDirectory() ) {
 					try {
-					ImageFeatures imf = readFeatures( f, this );
-					if (imf != null)
-						features.add(imf);
-					}
-					catch (Throwable th ) {
-						System.out.println( "while reading features from "+f );
+						ImageFeatures imf = readFeatures( f, this );
+						if ( imf != null )
+							features.add( imf );
+					} catch ( Throwable th ) {
+						System.out.println( "while reading features from " + f );
 						th.printStackTrace();
 					}
 				}
@@ -269,11 +279,19 @@ public class FeatureCache {
 		double ppm = 40;
 		
 		{			
-			out.ortho = Paths.get( Tweed.DATA ).relativize( new File( fFolder, "orthographic.png" ).toPath() ).toFile();
+			if (Tweed.DATA == null)
+				out.ortho = new File( fFolder, "orthographic.png" ) ;
+			else
+				out.ortho = Paths.get( Tweed.DATA ).relativize( new File( fFolder, "orthographic.png" ).toPath() ).toFile();
 			
 			File rectFile = new File( fFolder, "rectified.png" );
-			if ( rectFile.exists() )
-				out.rectified = Paths.get( Tweed.DATA ).relativize( rectFile.toPath() ).toFile();
+			
+			if ( rectFile.exists() ) {
+				if ( Tweed.DATA == null )
+					out.rectified = rectFile;
+				else
+					out.rectified = Paths.get( Tweed.DATA ).relativize( rectFile.toPath() ).toFile();
+			}
 			else
 				out.rectified = out.ortho;
 		}

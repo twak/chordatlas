@@ -694,8 +694,11 @@ public class Tweed extends SimpleApplication {
 		return new File( DATA ).toPath().relativize( f.toPath() ).toFile();
 	}
 
-	public File toWorkspace( File f ) {
+	public static File toWorkspace( File f ) {
 
+		if (DATA == null)
+			return f;
+		
 		if ( !f.isAbsolute() ) {
 			f = new File( new File( DATA ), f.toString() );
 		}

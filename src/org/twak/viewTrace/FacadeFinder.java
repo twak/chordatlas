@@ -21,7 +21,6 @@ import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PlanesGen;
 import org.twak.tweed.gen.PlanesGen.Plane;
-import org.twak.tweed.gen.SkelGen.SimpleMass;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
@@ -61,7 +60,6 @@ public class FacadeFinder {
 		}
 		
 		public Line megafacade;
-		public List<SimpleMass> masses;
 	}
 	
 	public enum FacadeMode {
@@ -196,18 +194,6 @@ public class FacadeFinder {
 			}
 			
 			ToProjMega megaResults = new ToProjMega(f.getExtent().reverse());
-			
-			
-			if (blockGen != null &&
-					blockGen.profileGen != null &&
-					blockGen.profileGen.skelGen != null ) {
-				
-				megaResults.masses = blockGen.profileGen.skelGen.findMasses( megaResults.megafacade );
-				for ( SimpleMass sm : megaResults.masses )
-					sm.height = guessHeight( meshPoints, sm.line );
-			}
-			else
-				System.out.println("warning: no skelGen for masses");
 			
 			results.add( megaResults );
 			

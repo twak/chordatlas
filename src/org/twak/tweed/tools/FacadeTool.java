@@ -30,9 +30,9 @@ import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.ImagePlaneGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.ImagePlaneGen;
 import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
@@ -146,9 +146,6 @@ public class FacadeTool extends SelectTool {
 					megaFolder.mkdirs();
 
 					try {
-						if (tpm.masses != null)
-							new XStream().toXML( tpm.masses, new FileOutputStream( new File( megaFolder, "masses.xml" ) ) );
-						
 						new XStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
 
 					} catch ( FileNotFoundException e ) {
