@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.twak.utils.FileUtils;
+import org.twak.utils.Filez;
 
 public class Imagez {
 
@@ -36,7 +36,7 @@ public class Imagez {
 		
 		
 		try {
-			ImageIO.write( out,  FileUtils.getExtn( file.getName() ) , file );
+			ImageIO.write( out,  Filez.getExtn( file.getName() ) , file );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

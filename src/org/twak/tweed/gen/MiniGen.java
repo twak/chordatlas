@@ -37,7 +37,7 @@ import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.AlignTool;
-import org.twak.utils.FileUtils;
+import org.twak.utils.Filez;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
@@ -415,7 +415,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		int ind = 0;
 		String newName;
 		
-		while (new File (writeFolder, newName = String.format( "%05d."+FileUtils.getExtn(mat.filename), ind )).exists())
+		while (new File (writeFolder, newName = String.format( "%05d."+Filez.getExtn(mat.filename), ind )).exists())
 			ind++;
 		
 		out.filename = newName;
