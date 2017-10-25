@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import org.twak.mmg.MOgram;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Line;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
@@ -23,7 +22,6 @@ public class SuperEdge extends HalfEdge {
 	public List<MiniFacade> mini;
 	public MiniFacade toEdit;
 	public MegaFeatures proceduralFacade;
-	public MOgram mogram;
 	
 	public SuperEdge( Point2d s, Point2d e, HalfEdge parent ) {
 		super( s, e, parent );

@@ -78,12 +78,6 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>org.twak.mmg</groupId>
-			<artifactId>mmg</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>javax.vecmath</groupId>
 			<artifactId>vecmath</artifactId>
 			<version>1.5.2</version>

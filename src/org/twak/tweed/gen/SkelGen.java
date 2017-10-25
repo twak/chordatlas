@@ -2,17 +2,14 @@ package org.twak.tweed.gen;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -27,11 +24,6 @@ import org.twak.camp.Output;
 import org.twak.camp.Skeleton;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
-import org.twak.mmg.MOgram;
-import org.twak.mmg.media.Facade2d;
-import org.twak.mmg.media.Facade2d.RenderListener;
-import org.twak.mmg.media.MMGGreeble;
-import org.twak.mmg.ui.MOgramEditor;
 import org.twak.siteplan.campskeleton.Plan;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
@@ -39,14 +31,11 @@ import org.twak.siteplan.campskeleton.Siteplan;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
-import org.twak.utils.Pair;
 import org.twak.utils.WeakListener.Changed;
-import org.twak.utils.collections.ConsecutivePairs;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -57,7 +46,6 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.Greeble;
 import org.twak.viewTrace.facades.Greeble.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -272,7 +260,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	Map<SuperFace, Node> geometry = new IdentityHashMap<>();
-	MOgram mogram = null;
 	
 	public synchronized void setSkel( PlanSkeleton skel, Output output, SuperFace sf ) {
 		
@@ -287,7 +274,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			}
 		};
 		
-		Greeble greeble = mogram == null ? new Greeble( tweed ) : new MMGGreeble( tweed, mogram );
+		Greeble greeble = new Greeble( tweed );
 		
 		house = greeble.showSkeleton( output, onclick );
 			
@@ -436,21 +423,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		ui.add( camp );
 		
-		JButton mmg = new JButton("mmg");
-		mmg.addActionListener( new ActionListener() {
-			
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				
-				MOgram mg = buildMOGram (sf, se);
-				
-				MOgramEditor.quitOnLastClosed = false;
-				new MOgramEditor( mg ).setVisible( true );
-			}
-		} );
-		
-		ui.add( mmg );
-
 		JButton mini = new JButton("minis");
 		mini.addActionListener( e -> new MiniViewer( se ) );
 		if (sf != null)
@@ -518,31 +490,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 	}
 	
-	private MOgram buildMOGram( SuperFace sf, SuperEdge se ) {
-		
-		MOgram mg;
-		
-		if (se.mogram != null)
-			mg = se.mogram;
-		else 
-			mg = se.mogram = MMGGreeble.createTemplateMOgram();
-
-		((Facade2d) mg.medium).setRenderListener ( new RenderListener() {
-			
-			public void doRender( MOgram mogram ) {
-
-				SkelGen.this.mogram = mogram;
-
-				PlanSkeleton skel = calc( sf );
-				
-				if ( skel != null )
-					setSkel( skel, skel.output, sf );
-			}
-		} );
-		
-		return mg;
-	}
-
 	public static Profile tagWalls( Profile profile, float[] roofColor, SuperEdge se, Point2d s, Point2d e ) {
 
 		MiniFacade mini;
