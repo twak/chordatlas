@@ -379,50 +379,48 @@ public class SkelGen extends Gen implements IDumpObjs {
 								removeGeometryFor( workon );
 								tweed.frame.setGenUI(null); // current selection is invalid
 								
-								Loop<Bar> bars = skel.plan.points.get( 0 );
-								List<SuperEdge> ses = new ArrayList<>();
+//								Loop<Bar> bars = skel.plan.points.get( 0 );
+//								List<SuperEdge> ses = new ArrayList<>();
+//								
+//								workon  = new SuperFace(); // build a new SF with this new plan
+//								
+//								Set<MiniFacade> seen = new HashSet<>();
+//								
+//								for (Bar pl : bars) {
+//									
+//									SuperEdge se = new SuperEdge(pl.start , pl.end, null );
+//									
+//									Profile profile = skel.plan.profiles.get( pl );
+//									
+//									
+//									
+//									se.prof = toProf (profile);
+//									se.face = workon; 
+//									WallTag w = findWallMini (profile.points);
+//									
+//									System.out.println("tag " + profile.hashCode());
+//									
+//									if (seen.add (w.miniFacade) ) {
+//										se.toEdit = w.miniFacade;
+//									}
+//									else 
+//									{ // repeated minifacade -> instance
+//										
+//										Profile p2 = new Profile (profile, new AffineTransform(), (skel.plan));
+//										WallTag w2 = new WallTag( w, new MiniFacade(w.miniFacade));
+//										setWallTag ( p2.points, w2 );
+//										
+//										skel.plan.profiles.put( pl, p2 );
+//										se.toEdit = w2.miniFacade;
+//										seen.add (w2.miniFacade);
+//									}
+//									
+//									ses.add(se);
+//								}
+//								
+//								for (Pair<SuperEdge, SuperEdge> pair : new ConsecutivePairs<>( ses, true )) 
+//									pair.first().next = pair.second();
 								
-								workon  = new SuperFace(); // build a new SF with this new plan
-								
-								Set<MiniFacade> seen = new HashSet<>();
-								
-								for (Bar pl : bars) {
-									
-									SuperEdge se = new SuperEdge(pl.start , pl.end, null );
-									
-									Profile profile = skel.plan.profiles.get( pl );
-									
-									
-									
-									se.prof = toProf (profile);
-									se.face = workon; 
-									WallTag w = findWallMini (profile.points);
-									
-									System.out.println("tag " + profile.hashCode());
-									
-									if (seen.add (w.miniFacade) ) {
-										se.toEdit = w.miniFacade;
-									}
-									else 
-									{ // repeated minifacade -> instance
-										
-										Profile p2 = new Profile (profile, new AffineTransform(), (skel.plan));
-										WallTag w2 = new WallTag( w, new MiniFacade(w.miniFacade));
-										setWallTag ( p2.points, w2 );
-										
-										skel.plan.profiles.put( pl, p2 );
-										se.toEdit = w2.miniFacade;
-										seen.add (w2.miniFacade);
-									}
-									
-									ses.add(se);
-								}
-								
-								for (Pair<SuperEdge, SuperEdge> pair : new ConsecutivePairs<>( ses, true )) 
-									pair.first().next = pair.second();
-								
-//								workon.e = ses.get(0);
-//								skel.output = output;
 								setSkel( (PlanSkeleton)threadKey, output, workon);
 								
 							}
