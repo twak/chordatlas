@@ -193,7 +193,7 @@
 		<dependency>
 			<groupId>local_gurobi</groupId>
 			<artifactId>gurobi</artifactId>
-			<version>751</version>
+			<version>701</version>
 		</dependency>
 
 		<dependency>

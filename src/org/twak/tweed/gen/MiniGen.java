@@ -11,10 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,6 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.geom.ObjDump;
-import org.twak.utils.geom.ObjRead;
 import org.twak.utils.geom.ObjDump.Face;
 import org.twak.utils.ui.ListDownLayout;
 
