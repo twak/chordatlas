@@ -101,15 +101,7 @@ public class SkelFootprint {
 	public boolean exitA = false;
 	public static double exposedFaceFrac = TweedSettings.settings.exposedFaceThreshold;
 	
-//	exposed face kiler (higher, less removed)1.0
-//	megafacade area threshold 6.18
-//	gis inters (higher more outside)0.4
-//	height insdie/outside threshold 2.24
-//	MFPoint width invalidity 4.0
-//	profile over edge merge (higher, less merging)0.8
-//	exposed face kiler (higher, less removed)1.0
-	
-	static SolverState memcache = null;
+//	static SolverState memcache = null;
 	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
@@ -123,47 +115,25 @@ public class SkelFootprint {
 		PaintThing.debug.clear();
 		
 		SolverState SS;
-		
+
+		SS = buildFootprint( footprint, m, tweed.features, skelGen.blockGen );
+
+		dbgCountProfileEdges( SS );
+
+		if ( SS == null )
+			return null;
+
 		if ( FALSE ) {
-			
-			System.out.print("reading solver state..");
-			
-			if (memcache == null)
-				memcache  = (SolverState) new XStream().fromXML( new File("/home/twak/data/regent/blockSolver/734.6462874768212_-538.8632217153645/problem.xml" ) );
-//			memcache  = (SolverState) new XStream().fromXML( new File(Tweed.CONFIG+"/oviedo_tue/solver_state.xml" ) );
-			
-			System.out.print("..");
-			
-			SS = memcache.copy(false);
-			
-			new Plot (SS.globalProfs);
-			
-			globalProfs = SS.globalProfs;
-			System.out.println("done!");
 
-		} else {
-			
-			SS = buildFootprint( footprint, m, tweed.features, skelGen.blockGen );
-
-			dbgCountProfileEdges( SS );
-			
-			if (SS == null)
-				return null;
-			
-			if ( FALSE ) {
-				
-				PaintThing.debug.clear();
-				dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
-				SS.debugSolverResult();
-				m.close();
-				return SS.mesh;
-			}
-		
-			solve( SS, m, 
-					skelGen.blockGen.getSolutionFile(),
-					Long.MAX_VALUE );
+			PaintThing.debug.clear();
+			dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
+			SS.debugSolverResult();
+			m.close();
+			return SS.mesh;
 		}
-		
+
+		solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
+
 		if ( TRUE ) 
 			postProcesss(SS);
 		
@@ -192,10 +162,9 @@ public class SkelFootprint {
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
 		
-//		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
+		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
 		
 		Set<MegaFeatures> mfs = SS.minis.keySet();
-		
 
 		for (HalfFace f : SS.mesh)
 			for (HalfEdge e : f) {
@@ -217,18 +186,10 @@ public class SkelFootprint {
 		cleanFootprints         ( SS.mesh );
 		cleanFootprints         ( SS.mesh );
 		
-//		for (HalfFace f : SS.mesh)
-//			for (HalfEdge e : f) {
-//				SuperEdge se = (SuperEdge)e;
-//				
-//				if (se.wantsFacade != null && se.mini.isEmpty()) {
-//					
-//				}
-//			}
 		updateHeights           ( SS.mesh );
 		
-		
-//		findOcclusions          ( SS.mesh ); not needed if we're not doing fully procedural windows
+		if (FALSE) // not needed if we're not doing fully procedural windows
+			findOcclusions ( SS.mesh ); 
 	}
 
 	private static void mergeSmallFaces( SolverState SS ) {
@@ -288,8 +249,8 @@ public class SkelFootprint {
 		findProfiles( footprint, globalProfs, profFit );
 		calcProfFit( mesh, globalProfs, profFit, m );
 
-//		if ( profMergeTol > 0 ) 
-//			mergeOnProfiles (mesh, footprint);
+		if ( FALSE && profMergeTol > 0 ) 
+			mergeOnProfiles (mesh, footprint);
 		
 		if ( exitA )
 			return new SolverState( mesh, minis, globalProfs, profFit );
@@ -330,7 +291,6 @@ public class SkelFootprint {
 	public static void solve( SolverState SS, ProgressMonitor m, File output, long timeLimitSec ) {
 		
 		try {
-//			new GreedySkelSolver(SS, m, timeLimitSec ).solve();
 			new GurobiSkelSolver(SS, m, timeLimitSec ).solve();
 		}
 		catch (Throwable th) {
@@ -434,17 +394,6 @@ public class SkelFootprint {
 				int profI = -1;
 				Prof prof = null;
 				
-
-
-				// combine partial minifacades over all sides of a building
-//				for (HalfFace f : mesh.faces)
-//					for (List<HalfEdge> perp : f.parallelFaces(0.01)) {
-//						List<MiniFacade> mfs = new ArrayList(perp.stream().map( x -> ((SuperEdge)x).mini ).
-//								filter( x -> x != null ).
-//								flatMap( lm -> lm.stream() ).collect( Collectors.toSet() ));
-//						perp.forEach( x -> ((SuperEdge)x).mini = mfs );
-//					}
-				
 				Set<MiniFacade> allMinis = new HashSet<>();
 				
 				for ( HalfEdge e : le ) {
@@ -496,7 +445,6 @@ public class SkelFootprint {
 				probe.scale( 2 / dir.length() );
 				probe.add( pt );
 
-//				PaintThing.debug.put( 3, probe );
 				
 				for (Point2d avoid : pt.mega.megafacade.points())  // don't fracture near minifacade boundaries...we can't distinguish nice block bondaries
 					if (avoid.distanceSquared( pt ) < 4)
@@ -511,9 +459,6 @@ public class SkelFootprint {
 							if ( dist < bestDist ) 
 								bestDist = dist;
 						}
-			
-//				if ( bestEdge != null )
-//					PaintThing.debug( Color.red, 1, bestEdge.line() );
 
 				if ( bestDist > 0.3 ) {
 
@@ -526,8 +471,6 @@ public class SkelFootprint {
 					start.add( pt );
 
 					Line extra = new Line( new Point2d( start ), new Point2d( end ) );
-
-//					PaintThing.debug.put( 3, extra );
 
 					SkelFootprint.insert( mesh, extra, 2, false, false );
 				}
@@ -604,15 +547,6 @@ public class SkelFootprint {
 				return false;
 			}
 		};
-		
-		
-//		List<Line> bad= new ArrayList<>();
-//		for ( HalfFace f : new ArrayList<>( mesh.faces ) ) {
-//			for (HalfEdge e : f)
-//				if (badEdges.test( e ))
-//					bad.add(e.line());
-//		}
-//		new Plot(bad);
 		
 		f: for ( HalfFace f : new ArrayList<>( mesh.faces ) ) {
 
@@ -723,20 +657,12 @@ public class SkelFootprint {
 				
 				
 				if ( backwardsToo && softDistN > 0 && prev != null) {
-					
-//					Point2d tmp = new Point2d(prev.start);
-//					tmp.add(nDir);
-//					Line lt = new Line (prev.start, tmp);
-//					PaintThing.debug.put(">> ", prev.line());
-					
 					fracture( mesh, prev, nDir, 0, softDistN, null, setLine );
 				}
 				
 				return;
 			}
 		}
-
-//		throw new Error();
 	}
 
 	private static void fracture( HalfMesh2 mesh, HalfEdge previous, Vector2d dir, double remainingHard, double remainingSoft, Line line, boolean setLine ) {
@@ -777,9 +703,6 @@ public class SkelFootprint {
 				fracture( mesh, next, dir, remainingHard-l, remainingSoft, line, setLine );
 		else if (remainingSoft > l)
 			fracture( mesh, next, dir, 0, remainingSoft - l, line, setLine );
-		// else if (remainingSoft < l) // done!
-			
-
 	}
 
 	
@@ -1648,29 +1571,6 @@ public class SkelFootprint {
 		
 		Jme3z.removeAllChildren( n );
 
-//		{
-//			findProfiles(foo)
-//		}
-		
-//		List<Prof> clean = new ArrayList<>();
-//		
-//		for (HalfFace hf : mesh) 
-//			for (HalfEdge he : hf) {
-//				SuperEdge se = (SuperEdge)he;
-//		if (se.profLine != null) {
-//			
-//			SuperLine sl = ((SuperLine)se.profLine);
-//			
-//			MegaFacade mf = (MegaFacade) sl.properties.get( MegaFacade.class.getName() );
-//			
-//			List<Prof> profs = mf.getTween( se.start, se.end, 0.3 );
-//			
-//			if (!profs.isEmpty())
-//				clean.add( Prof.parameterize( sl,  profs ) );
-//				
-//		}
-//			}
-		
 		
 		int colI = 0;
 		
@@ -1707,22 +1607,6 @@ public class SkelFootprint {
 
 				SuperEdge se = (SuperEdge) e;
 
-//				if (se.mini != null) {
-//					for (MiniFacade mf : se.mini ) {
-//						
-//						MeshBuilder mb = new MeshBuilder();
-//						
-//						Line l = mf.imageFeatures.mega.megafacade;
-//						
-//						if (!mf.softLeft && ! mf.softRight) {
-//							
-//							
-//						}
-//						
-//						
-//					}
-//				}
-				
 				
 				Prof bestProf = null;
 
@@ -1821,97 +1705,6 @@ public class SkelFootprint {
 		
 	}
 
-//	private void dbgEdgeProfInteractive( HalfMesh2 mesh, List<Prof> globalProfs, Map<SuperEdge, double[]> profFit ) {
-//		
-//		JSlider face = new JSlider (0, mesh.faces.size()-1);
-//		JSlider edge = new JSlider (-1, 1);
-//		JButton go = new JButton("GO!");
-//		
-//		Plot plot = new Plot( face, edge, go);
-//
-//		face.addChangeListener( new ChangeListener() {
-//
-//			@Override
-//			public void stateChanged( ChangeEvent e ) {
-//				edge.setMaximum( mesh.faces.get( face.getValue() ).edgeCount() - 1 );
-////				edge.setValue( edge.getMaximum() );
-//				go.doClick();
-//			}
-//		} );
-//		
-//		edge.addChangeListener(  e -> go.doClick() );
-//
-//		go.addActionListener( new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed( ActionEvent ae ) {
-//
-//						HalfFace f = mesh.faces.get( face.getValue() );
-//						
-//						PaintThing.debug.clear();
-//						
-//						int i = 0;
-//						for (HalfEdge e : f)
-//						{
-//							if ( edge.getValue() == -1 || i == edge.getValue())
-//							{
-//								SuperEdge se = (SuperEdge) e;
-//								Prof bestProf = null;
-//								SuperLine sl = (SuperLine) se.profLine;
-//								
-//								if ( sl != null ) {
-//									
-//									List<Prof> profs = new ArrayList<>();
-//									MegaFacade mf = (MegaFacade) sl.properties.get( MegaFacade.class.getName() );
-//									
-//									int start = mf.getIndex( se.start ), end = mf.getIndex( se.end ) + 1;
-//									
-//									for ( int ii = start; ii <= end; ii++ ) {
-//										Prof p2 = mf.profiles.get( ii );
-//										if ( p2 != null ) {
-//											PaintThing.debug(new Color(0,0,0,60), 1, p2);
-//											profs.add( p2 );
-//										}
-//									}
-//									
-//									
-//
-//							double bestScore = Double.MAX_VALUE;
-////							for ( int ii = 0; ii < profFit.get( se ).length; ii++ ) {
-//								
-//							for (Prof p : globalProfs) {
-//								
-//								Double d=meanDistance( mf, mf.getIndex( se.start ), mf.getIndex( se.end ), p);
-//								
-////								double d = profFit.get( se )[ ii ];
-//								if ( d != null && d < bestScore ) {
-//									bestScore = d;
-//									bestProf = p;
-//								}
-//							}
-//							
-//							if ( bestProf != null ) {
-//								PaintThing.debug(Color.red, 1, bestProf);
-//							}
-//							
-//							PaintThing.debug.put( 1, "score "+bestScore);
-//
-//							}
-////							break;
-//						}
-//						i++;
-//						
-//					}
-//					plot.repaint();
-//					}
-//		} );
-//		
-//		go.doClick();
-//		
-////		PaintThing.debug.clear();
-////		PaintThing.debug( new Color(0,0,0,100), 1, globalProfs );
-//	}
-
 	public void debugCompareProfs (List<Prof> profs) {
 			
 			JSlider slider1 = new JSlider( SwingConstants.VERTICAL, -1, profs.size() - 1, 0 );
@@ -1948,18 +1741,6 @@ public class SkelFootprint {
 					);
 					
 					pot.repaint();
-					
-//					double dist = 0;
-//						
-//					for (Prof pp : profs)
-//						if ( pp != null ) {
-//							double d = c.distance( pp );
-//							if (d != Double.MAX_VALUE)
-//								dist += d; 
-//						}
-//					
-//					
-//					pot.repaint();
 				}
 			};
 			
