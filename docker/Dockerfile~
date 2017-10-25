@@ -1,0 +1,38 @@
+FROM jfemiani/segnet-facade:cuda8-cudnn3
+
+ENV VIRTUALGL_VERSION 2.5.2
+
+# install VirtualGL
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglu1-mesa-dev mesa-utils curl ca-certificates xterm && \
+    curl -sSL https://downloads.sourceforge.net/project/virtualgl/"${VIRTUALGL_VERSION}"/virtualgl_"${VIRTUALGL_VERSION}"_amd64.deb -o virtualgl_"${VIRTUALGL_VERSION}"_amd64.deb && \
+    dpkg -i virtualgl_*_amd64.deb && \
+    /opt/VirtualGL/bin/vglserver_config -config +s +f -t && \
+    rm virtualgl_*_amd64.deb && \
+    apt-get clean && \
+    apt-get remove -y curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# nvidia-docker links
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+ENV PATH /usr/local/nvidia/bin:/opt/VirtualGL/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
+
+# Install Java.
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /var/cache/oracle-jdk8-installer
+
+
+# Define working directory.
+WORKDIR /data
+
+# Define commonly used JAVA_HOME variable
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+# Define default command.
+CMD ["bash"]
