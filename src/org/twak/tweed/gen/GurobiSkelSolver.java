@@ -44,7 +44,7 @@ import gurobi.GRBModel;
 import gurobi.GRBQuadExpr;
 import gurobi.GRBVar;
 
-public class SkelSolver {
+public class GurobiSkelSolver {
 
 	Map<HalfEdge, EdgeVars> edgeInfo = new HashMap<>();
 	Map<HalfFace, FaceVars> faceInfo = new HashMap<>();
@@ -72,11 +72,11 @@ public class SkelSolver {
 	private SolverState ss;
 	private long maxTimeSecs = Long.MAX_VALUE;
 	
-	public SkelSolver( SolverState ss, ProgressMonitor m ) {
+	public GurobiSkelSolver( SolverState ss, ProgressMonitor m ) {
 		this (ss, m, Long.MAX_VALUE);
 	}
 	
-	public SkelSolver( SolverState ss, ProgressMonitor m, long maxTimeSecs ) {
+	public GurobiSkelSolver( SolverState ss, ProgressMonitor m, long maxTimeSecs ) {
 		this.ss = ss;
 		this.mesh = ss.mesh;
 		this.minis = ss.minis;

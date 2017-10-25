@@ -1,32 +1,23 @@
 package org.twak.viewTrace.facades;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
-import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
-import org.twak.tweed.gen.SkelGen.SimpleMass;
-import org.twak.utils.Line;
-import org.twak.utils.PaintThing;
-import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.utils.PanMouseAdaptor;
-
-import com.thoughtworks.xstream.XStream;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class MiniStandalone2d extends JPanel {
 	
@@ -35,7 +26,6 @@ public class MiniStandalone2d extends JPanel {
 	List<ImageFeatures> features;
 	JSlider mfSlider;
 	JCheckBox showOrig;
-	List<Known> known = new ArrayList<>();
 	JSlider ks, animate;
 	
 	public MiniStandalone2d( String folder ) {
@@ -46,145 +36,54 @@ public class MiniStandalone2d extends JPanel {
 		
 		add(plot, BorderLayout.CENTER);
 		
+		MegaFeatures mf = new MegaFeatures( new File (folder  ) );
+		
+		for (ImageFeatures i : mf.features)
+			for (MiniFacade m : i.miniFacades )
+				plot.add( m );
+		
 		JPanel controls = new JPanel(new ListDownLayout());
 		add(controls, BorderLayout.EAST);
 		
 		
-		JButton go = new JButton("go");
-		go.addActionListener( e -> updateDataset() );
+		JButton go = new JButton("render");
+		
+		go.addActionListener( e -> renderAll(mf) );
 		controls.add(go);
+	}
+	
+	private void renderAll( MegaFeatures mf ) {
 		
-		showOrig = new JCheckBox( "input" );
-		showOrig.addActionListener( e -> plot() );
-		controls.add(showOrig);
-		
-		known.add(new Known ("1", 0,2,1,2,2,0,3,0 ));
-		known.add(new Known ("0", 4,2,5,1  ));
-		known.add(new Known ("0", 3,3,4,1, 5,0  ));
-		
-		ks = new JSlider(0, known.size()-1);
-		ks.addChangeListener( e -> setFolder() );
-		controls.add(ks);
-		
-		mfSlider = new JSlider(-1, 3);
-		controls.add(new JLabel("image"));
-		controls.add(mfSlider);
-		mfSlider.addChangeListener( e -> plot() );
-		
-		animate = new JSlider(0, 1000, 1000);
-		controls.add(new JLabel("animate"));
-		controls.add(animate);
-		animate.addChangeListener( e -> plot() );
-		
-		setFolder();
+		int c = 0;
+		for (ImageFeatures i : mf.features)
+			for (MiniFacade m : i.miniFacades ) {
+				
+				if (m.width <  1)
+					continue;
+				
+				BufferedImage bi = m.render( 80, Feature.DOOR, Feature.WINDOW );
+				BufferedImage bi2 = m.render( 80 );
+				
+				try {
+					ImageIO.write( bi, "png", new File ("/home/twak/Desktop/features"+c+".png") );
+					ImageIO.write( bi2, "png", new File ("/home/twak/Desktop/rectified"+c+".png") );
+				} catch ( IOException e ) {
+					e.printStackTrace();
+				}
+				
+				c++;
+			}
 	}
 
-	private void setFolder() {
-		
-		Known k = known.get(ks.getValue());
-		File dir = new File ( folder, k.folder );
-		
-		MegaFeatures mf = new MegaFeatures ( (Line) new XStream().fromXML( new File (dir, "line.xml") ) );
-		
-		features = new ArrayList<>();
-		
-		
-		File[] files = dir.listFiles();
-		Arrays.sort( files );
-		
-		for (File f : files) 
-			if (f.isDirectory() )  {
-				System.out.println(features.size()+" :: " + f.getName());
-				ImageFeatures imf = FeatureCache.readFeatures (f, mf);
-				if (imf != null)
-					features.add( imf );
-			}
-		
-		mfSlider.setMaximum( k.fM.size() );
-		
-		updateDataset();
-	}
-	
-	private static class Known {
-		String folder;
-		List<int[]> fM = new ArrayList();
-		public Known (String folder, int... fms) {
-			this.folder = folder;
-			for (int i = 0; i < fms.length; i+=2) {
-				fM.add(new int[] {fms[i], fms[i+1]});
-			}
-		}
-	}
-	
-	List<MiniFacade> mfs, mfs2;
-	private void updateDataset() {
-		
-		Known k = known.get(ks.getValue());
-		
-		mfs = new ArrayList();
-		
-		for (int[] v : k.fM)
-			mfs.add ( features.get( v[0] ).miniFacades.get(v[1]) );
-		
-		mfs2 = new Regularizer().goDebug(mfs , animate.getValue() / (double) animate.getMaximum(), null );
-		
-		plot();
-	}
-	
-	private void plot() {
-		
-		plot.toPaint.clear();
-		
-		int toShow = mfSlider.getValue(); 
-		
-		
-		MiniFacade.PAINT_IMAGE = showOrig.isSelected() && toShow >= 0;
-		
-		if (showOrig.isSelected()){
-			for (int i = 0; i < mfs.size(); i++)
-				if ( toShow == -1 || toShow -1 ==  i ) 
-					plot.toPaint.add( mfs.get(i) );
-		}
-		else {
-			new Thread() {
-				public void run() {
-					
-					if (mfs2 != null)
-					for (int i = 0; i < mfs2.size(); i++)
-						if ( (toShow == -1 && i != 0 )|| toShow == i )
-							plot.toPaint.add( mfs2.get(i) );
-					plot.repaint();
-				};
-			}.start();
-		}
-				
-		plot.repaint();
-		
-	}
+
 
 
 	public static void main (String[] args) {
 		
-		PaintThing.lookup.put(SimpleMass.class, new ICanPaintU() {
-			@Override
-			public void paint( Object o_, Graphics2D g, PanMouseAdaptor ma ) {
-				SimpleMass o = (SimpleMass)o_;
-				
-				g.drawLine ( 0, ma.toY(0), 10000, ma.toY(0) );
-				g.setColor( new Color( 50, 50, 50, 200 ) );
-				g.fillRect( ma.toX( o.start ), ma.toY(0), -10 , 10 );
-				
-				int width = Math.abs ( ma.toZoom( o.start - o.end ) ), height = ma.toZoom( o.height );
-				double left = Math.min (o.start, o.end);
-				
-				g.fillRect( ma.toX( left ), ma.toY(0)-height, width, height );
-				g.drawRect( ma.toX( left ), ma.toY(0)-height, width, height );
-			}
-		});
 		
 		JFrame go = new JFrame("2D align");
-//		go.add( new AlignStandalone2d( "/home/twak/Downloads/locations_april_6/ny/") );
-		go.add( new MiniStandalone2d( "/home/twak/data/ny/features") );
+//		go.add( new MiniStandalone2d( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/georgian/features_rendered/1003.4428411375009_-17.44980132326505/0/0/") );
+		go.add( new MiniStandalone2d( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/georgian/features_rendered/-289.50965350676336_51.349370434170204/0/4") );
 		go.setExtendedState( go.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		go.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		go.pack();

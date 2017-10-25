@@ -43,6 +43,7 @@ import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
+import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -388,7 +389,7 @@ public class TweedFrame {
 				new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
 					public void heresTheFile( File obj ) throws Throwable {
 						removeGISSources();
-						addGen ( new GISGen( obj, tweed ), true );
+						addGen ( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
 					};
 				};
 			}
@@ -415,7 +416,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
-							String f = tweed.toAssetManager( obj );
+							String f = tweed.makeWorkspaceRelative( obj ).toString();
 							addGen( new MeshGen( f, tweed ), true );
 						};
 					};
@@ -429,7 +430,7 @@ public class TweedFrame {
 						@Override
 						public void heresTheFile( File f ) throws Throwable {
 							//						removeMeshSources();
-							addGen( new MiniGen( f.getParentFile(), tweed ), true );
+							addGen( new MiniGen( tweed.makeWorkspaceRelative( f.getParentFile() ), tweed ), true );
 						}
 					};
 				}
@@ -441,7 +442,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
 						public void heresTheFile( File oneOfMany ) throws Throwable {
 							//						removeGens( PanoGen.class );
-							addGen( new PanoGen( oneOfMany.getParentFile(), tweed, Tweed.LAT_LONG ), true );
+							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
 						};
 					};
 				}
@@ -628,6 +629,14 @@ public class TweedFrame {
 
 	public List<Gen> gens( Class<? extends Gen> klass ) {
 		return genList.stream().filter( g -> g.getClass() == klass ).collect( Collectors.toList() );
+	}
+
+	public <E extends Gen> E  getGenOf( Class<E> klass ) {
+		
+		List<Gen> gens = gens(klass);
+		if (gens.isEmpty())
+			return null;
+		return (E) gens.get(0);
 	}
 
 }

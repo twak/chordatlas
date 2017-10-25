@@ -18,7 +18,6 @@ import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.ObjDump;
-import org.twak.utils.ui.Rainbow;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -26,7 +25,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.VertexBuffer.Format;
+import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.VertexBuffer.Usage;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.util.BufferUtils;
+
+import jme3tools.optimize.LodGenerator;
 
 public abstract class LineGen3d extends Gen implements IDumpObjs{
 
@@ -82,7 +87,16 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 			gNode.attachChild( geom );
 		}
 		
-		int c = 0;
+//		int c = 0;
+		
+		
+		VertexBuffer emptyVB =  new VertexBuffer(Type.Index);
+		
+		emptyVB.setupData(Usage.Static,
+                    3,
+                    Format.UnsignedShort,
+                    BufferUtils.createShortBuffer( 0 ) );
+		
 		{
 			Geometry geom;
 			Random randy = new Random();
@@ -132,11 +146,26 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 					} } );
 					
 					geom.setUserData( Gen.class.getSimpleName(), new Object[] { this } );
-
 					geom.setMaterial( mat );
-
 					geom.setLocalTranslation( 0, 0, 0 );
 
+					LodGenerator lod = new LodGenerator(geom);
+					lod.bakeLods(LodGenerator.TriangleReductionMethod.COLLAPSE_COST, 10, 100 );
+					
+//					int ll = geom.getMesh().getNumLodLevels() ;
+//					
+//					VertexBuffer[] vb = new VertexBuffer[ll+1];
+//					for (int i = 0; i < ll; i++) 
+//						vb[i] = geom.getMesh().getLodLevel( i );
+//					
+//					vb[ll] = emptyVB;
+//					
+//					geom.getMesh().setLodLevels( vb );
+					
+	                GISLodControl lc = new GISLodControl();
+	                lc.setTrisPerPixel( 0.000001f );
+	                geom.addControl(lc);
+					
 					gNode.attachChild( geom );
 				
 			}

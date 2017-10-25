@@ -42,6 +42,8 @@ public class HandleTool extends Tool {
 	@Override
 	public void clickedOn( Spatial target, Vector3f vector3f, Vector2f cursorPosition ) {		
 		
+		clear();
+		
 		currentHandles.setLocalTranslation(new Vector3f());
 		currentHandles.attachChild ( new MoveHandle (tweed, 0, target ) );
 		currentHandles.attachChild ( new MoveHandle (tweed, 1, target ) );
@@ -51,12 +53,12 @@ public class HandleTool extends Tool {
 	}
 	
 	@Override
-	public void dragging( Vector2f screen ) {
+	public void dragging( Vector2f screen, Vector3f d3) {
 		currentDraggingHandle.dragging( screen );
 	}
 	
 	@Override
-	public void dragStart( Geometry target, Vector2f screen ) {
+	public void dragStart( Geometry target, Vector2f screen, Vector3f world ) {
 		currentDraggingHandle = (Handle) target.getUserData(Tweed.CLICK);
 		currentDraggingHandle.dragStart( screen );
 	}

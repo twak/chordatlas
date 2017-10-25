@@ -22,9 +22,9 @@ public class Tool {
 
 	public void clickedOn( Spatial target, Vector3f vector3f, Vector2f cursorPosition ) {}
 
-	public void dragStart( Geometry geometry, Vector2f cursorPosition ) {}
+	public void dragStart( Geometry geometry, Vector2f cursorPosition, Vector3f world ) {}
 
-	public void dragging( Vector2f vector2f ) {}
+	public void dragging( Vector2f vector2f, Vector3f vector3f ) {}
 
 	public void dragEnd() {}
 	

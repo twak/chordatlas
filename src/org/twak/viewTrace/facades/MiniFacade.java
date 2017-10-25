@@ -6,6 +6,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -49,8 +50,10 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	
 	public enum Feature {
 		
-		BALCONY (new Color (170,0,255)), CORNICE (Color.blue), DOOR (new Color (170,255,0)), 
-		SHOP (new Color (255,0,170)), SILL (new Color (255,170,0)), WINDOW ( new Color (0,255,170) ), MOULDING ( new Color (0,255,170) ),
+		BALCONY (new Color (170,0,255)), CORNICE (Color.blue), 
+//		DOOR (new Color (170,255,0)), WINDOW ( new Color (0,255,170) ), // BigSUR paper colors
+		DOOR (Color.blue), WINDOW ( Color.green ), // classification colors
+		SHOP (new Color (255,0,170)), SILL (new Color (255,170,0)),  MOULDING ( new Color (0,255,170) ),
 		GRID (Color.black);
 		
 		Color color;
@@ -347,7 +350,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		return out;
 	}
 
-	public static boolean PAINT_IMAGE = false;
+	public static boolean PAINT_IMAGE = true;
 
 	@Override
 	public void paint( Graphics2D g, PanMouseAdaptor ma ) {
@@ -449,8 +452,6 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		g.setStroke( new BasicStroke( 1 ) );
 		g.drawLine( ma.toX( left ), ma.toY( -height ), ma.toX( left + width ), ma.toY( -height ) );
 		g.drawLine( ma.toX( left ), ma.toY( -groundFloorHeight ), ma.toX( left + width ), ma.toY( -groundFloorHeight ) );
-			
-
 	}
 
 	public void paintImage( Graphics2D g, PanMouseAdaptor ma, double x1, double y1, double x2, double y2 ) {
@@ -461,7 +462,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		if (source == null)
 			return;
 		
-		g.drawImage( source, 
+		g.drawImage( source,  
 			
 				ma.toX( x1), ma.toY(y1),  ma.toX( x2), ma.toY(y2),
 			
@@ -471,7 +472,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 			 source.getHeight(),
 			null );
 	}
-
+	
 	private Point2d getRectPoint( FRect w, Dir dir ) {
 		
 		switch (dir) {
@@ -487,7 +488,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		}
 		
 	}
-
+	
 	public List<FRect> getRects( Feature ... feats ) {
 		
 		if (feats.length == 0)
@@ -664,5 +665,42 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	
 	public double center() {
 		return left + width/2;
+	}
+
+	public BufferedImage render( double res, Feature... fs ) {
+		BufferedImage bi = new BufferedImage( (int) ( res * width ), (int) ( res * height ), BufferedImage.TYPE_3BYTE_BGR );
+
+		Graphics g = bi.getGraphics();
+
+		g.setColor( Color.black );
+		g.fillRect( 0, 0,  bi.getWidth(),  bi.getHeight() );
+		
+		if ( fs.length == 0 ) 
+		{
+			BufferedImage source = imageFeatures.getRectified();
+
+			if ( source != null ) {
+				g.drawImage( source,
+						0, 0, bi.getWidth(), bi.getHeight(),
+						(int) ( ( left - imageXM ) * scale ), source.getHeight() - (int) ( ( height ) * scale ), (int) ( ( left + width - imageXM ) * scale ), source.getHeight(), null );
+			}
+		}
+		else
+		{
+			for ( Feature f : fs ) {
+
+				g.setColor( f.color );
+
+				for ( FRect w : rects.get( f ) ) {
+					if ( w.width * w.height > 0.2 ) {
+						g.fillRect( (int) ( res * ( w.x - left ) ), bi.getHeight() - (int)( res * ( w.y + w.height) ), (int) ( res * w.width ), (int) ( res * w.height ) );
+					}
+				}
+			}
+		}
+
+		g.dispose();
+
+		return bi;
 	}
 }

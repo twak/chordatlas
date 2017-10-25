@@ -36,6 +36,9 @@ import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.Line;
 import org.twak.utils.Pair;
+import org.twak.utils.Parallel;
+import org.twak.utils.Parallel.Work;
+import org.twak.utils.Parallel.Complete;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
@@ -61,7 +64,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 	File objFile;
 	String gmlFile;
-	Matrix4d toOrigin;
+	@Deprecated transient Matrix4d toOrigin;
 	String crs;
 	
 	public GISGen() {}
@@ -78,7 +81,6 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		super( "gis(g) " + new File( gmlFile ).getName(), tweed );
 		this.filename = gmlFile;
 		this.gmlFile = gmlFile;
-		this.toOrigin = toOrigin;
 		this.crs = crs;
 
 		initGML();
@@ -96,7 +98,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	
 	public void initObj() {
 		
-		ObjRead gObj = new ObjRead( objFile );
+		ObjRead gObj = new ObjRead( tweed.toWorkspace( objFile ) );
 		
 		LoopL<Point3d> fromOBJ = new LoopL<>();
 		Closer<Point3d> closer = new Closer<>();
@@ -129,7 +131,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	
 		LoopL<Point3d> polies = null;
 		try {
-			polies = GMLReader.readGML3d( new File( gmlFile ), 
+			polies = GMLReader.readGML3d( tweed.toWorkspace( new File( gmlFile ) ), 
 					DefaultGeocentricCRS.CARTESIAN,
 					CRS.decode( crs ) );
 		} catch ( NoSuchAuthorityCodeException e ) {
@@ -156,8 +158,11 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			
 			for ( Pair<Point3d, Point3d> pair : poly.pairs() ) {
 
-				toOrigin.transform( pair.first() );
+				TweedSettings.settings.toOrigin.transform( pair.first() );
 				
+				System.out.println( " >>> " + pair.first() );
+				
+				pair.first().y = 0;
 				points.add( pair.first() );
 
 				lines.add( new Line3d(pair.first(), pair.second()) );
@@ -213,7 +218,12 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	}
 	
 	public enum Mode {
-		RENDER_ALL_FACADES, RENDER_SELECTED_FACADE, RENDER_SAT
+		RENDER_ALL_FACADES, RENDER_SELECTED_FACADE, RENDER_SAT;
+		
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase().replaceAll( "_", " " );
+		}
 	}
 	public static Mode mode = Mode.RENDER_SELECTED_FACADE;
 	
@@ -232,33 +242,50 @@ public class GISGen  extends LineGen3d implements ICanSave {
 				( (FacadeTool) tweed.tool ).facadeSelected( blocks.get( callbackI ), lastMesh.get( callbackI ) );
 				
 			} else if ( mode == Mode.RENDER_ALL_FACADES ) {
-				Set<LoopL<Point3d>> togo = new HashSet( blocks.values() );
+				
+				FacadeFinder.count = 0;
+				
+				new Parallel<LoopL<Point3d>, Integer>( new ArrayList(blocks.values()), new Work<LoopL<Point3d>, Integer>() {
+					public Integer work(LoopL<Point3d> out) {
+						System.out.println("rendering... ("+ FacadeFinder.count + " images written)");
+						( (FacadeTool) tweed.tool ).facadeSelected( out, null );
+						return 1;
+					}
+				}, new Complete<Integer>() {
 
-				for ( int i = 0; i < 4; i++ )
-					new Thread() {
+					@Override
+					public void complete( Set<Integer> dones ) {
+						System.out.println("finished rendering "+ FacadeFinder.count + " images");
+					}
+				}, false );
 
-						private synchronized LoopL<Point3d> getNext() {
-							
-							try {
-								LoopL<Point3d> out = togo.iterator().next();
-
-								togo.remove( out );
-
-								System.out.println( "********************************* remaining:" + togo.size() );
-
-								return out;
-							} catch ( NoSuchElementException e ) {
-								return new LoopL<>();
-							}
-						}
-
-						public void run() {
-
-							LoopL<Point3d> ll = null;
-							while ( null != ( ll = getNext() ) )
-								( (FacadeTool) tweed.tool ).facadeSelected( ll, null );
-						};
-					}.start();
+//				Set<LoopL<Point3d>> togo = new HashSet( blocks.values() );
+//
+//				for ( int i = 0; i < 4; i++ )
+//					new Thread() {
+//
+//						private synchronized LoopL<Point3d> getNext() {
+//							
+//							try {
+//								LoopL<Point3d> out = togo.iterator().next();
+//
+//								togo.remove( out );
+//
+//								System.out.println( "********************************* remaining:" + togo.size() );
+//
+//								return out;
+//							} catch ( NoSuchElementException e ) {
+//								return new LoopL<>();
+//							}
+//						}
+//
+//						public void run() {
+//
+//							LoopL<Point3d> ll = null;
+//							while ( null != ( ll = getNext() ) )
+//								( (FacadeTool) tweed.tool ).facadeSelected( ll, null );
+//						};
+//					}.start();
 					
 			} else if ( mode == Mode.RENDER_SAT ) {
 				SatUtils.render( tweed, blocks.get( callbackI ) );

@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.vecmath.Matrix4d;
 
-import org.eclipse.xsd.XSDTerm;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
 
@@ -111,6 +110,9 @@ public class TweedSettings {
 	}
 
 	public static void save(boolean backup) {
+		
+			
+		
 		if (folder != null) {
 			
 			settings.genList = TweedFrame.instance.genList.stream().filter( g -> g instanceof ICanSave ).collect( Collectors.toList() );

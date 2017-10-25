@@ -37,7 +37,7 @@ import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.AlignTool;
-import org.twak.utils.FileUtils;
+import org.twak.utils.Filez;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
@@ -83,7 +83,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	}
 	
 	public void init() {
-		trans = (MiniTransform) new XStream ().fromXML ( new File (root, "index.xml") );
+		trans = (MiniTransform) new XStream ().fromXML ( tweed.toWorkspace( new File (root, "index.xml") ) );
 	}
 
 	@Override
@@ -106,8 +106,10 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			if ( !inBounds( e.getValue(), bounds ) )
 				continue;
 			
-			System.out.println("loading mesh " + e.getKey() +" from " + root);
-			File f = new File (root, e.getKey() +"/model.obj" );
+			File absRoot = tweed.toWorkspace( MiniGen.this.root );
+			
+			System.out.println("loading mesh " + e.getKey() +" from " + absRoot);
+			File f = new File (absRoot, e.getKey() +"/model.obj" );
 			
 			Spatial mesh = tweed.getAssetManager().loadModel(f.getAbsolutePath().substring( Tweed.JME.length() ));
 			
@@ -165,7 +167,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			public void run() {
 
 				try {
-					new XStream().toXML( trans, new FileOutputStream( new File( root, "index.xml" ) ) );
+					new XStream().toXML( trans, new FileOutputStream( tweed.toWorkspace( new File( root, "index.xml" ) ) ) );
 					System.out.println("index file written");
 				} catch ( FileNotFoundException e ) {
 					e.printStackTrace();
@@ -306,14 +308,14 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		for ( Map.Entry<Integer, Matrix4d> e : trans.index.entrySet() ) {
 
-//			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
-//				continue;
-//			else
+			if ( !inBounds( e.getValue(), Collections.singletonList( bounds ) ) )
+				continue;
+			else
 			{
 				Matrix4d m = new Matrix4d();
 				m.mul( Jme3z.fromMatrix( trans.offset ), e.getValue() );
 
-				File readFolder = new File( root, e.getKey() + "" );
+				File readFolder = new File( tweed.toWorkspace( root ), e.getKey() + "" );
 				ObjDump or = new ObjDump( new File( readFolder, "model.obj" ) );
 
 				
@@ -328,8 +330,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 							
 							m.transform( pt );
 
-//							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
-//								if ( inside( pt, halfPlanes ) ) 
+							if ( pt.x > bounds[ 0 ] && pt.x < bounds[ 1 ] && pt.z > bounds[ 2 ] && pt.z < bounds[ 3 ] )
+								if ( inside( pt, halfPlanes ) ) 
 								{
 
 									if ( IMPORT_TEXTURES && ! (
@@ -413,7 +415,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		int ind = 0;
 		String newName;
 		
-		while (new File (writeFolder, newName = String.format( "%05d."+FileUtils.getExtn(mat.filename), ind )).exists())
+		while (new File (writeFolder, newName = String.format( "%05d."+Filez.getExtn(mat.filename), ind )).exists())
 			ind++;
 		
 		out.filename = newName;

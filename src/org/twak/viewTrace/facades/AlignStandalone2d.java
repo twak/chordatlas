@@ -1,8 +1,6 @@
 package org.twak.viewTrace.facades;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -24,13 +22,9 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
-import org.twak.tweed.gen.SkelGen.SimpleMass;
 import org.twak.utils.Line;
-import org.twak.utils.PaintThing;
-import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.utils.PanMouseAdaptor;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -174,25 +168,6 @@ public class AlignStandalone2d extends JPanel {
 
 
 	public static void main (String[] args) {
-		
-		PaintThing.lookup.put(SimpleMass.class, new ICanPaintU() {
-			@Override
-			public void paint( Object o_, Graphics2D g, PanMouseAdaptor ma ) {
-				SimpleMass o = (SimpleMass)o_;
-				
-				g.drawLine ( 0, ma.toY(0), 10000, ma.toY(0) );
-				g.setColor( new Color( 50, 50, 50, 200 ) );
-				g.fillRect( ma.toX( o.start ), ma.toY(0), -10 , 10 );
-				
-				int width = Math.abs ( ma.toZoom( o.start - o.end ) ), height = ma.toZoom( o.height );
-				double left = Math.min (o.start, o.end);
-				
-				g.fillRect( ma.toX( left ), ma.toY(0)-height, width, height );
-				g.drawRect( ma.toX( left ), ma.toY(0)-height, width, height );
-			}
-		});
-		
-		
 		
 		JFrame go = new JFrame("2D align");
 //		go.add( new AlignStandalone2d( "/home/twak/Downloads/locations_april_6/madrid/") );

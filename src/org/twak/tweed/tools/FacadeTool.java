@@ -30,9 +30,10 @@ import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.ImagePlaneGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.PlaneGen;
+import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.ObjRead;
@@ -107,7 +108,7 @@ public class FacadeTool extends SelectTool {
 			objPoints = new ObjRead( block.getCroppedFile() ).points();
 		}
 
-		FacadeFinder ff = new FacadeFinder( Loopz.toXZLoop( list ), panos, objPoints, block );
+		FacadeFinder ff = new FacadeFinder( Loopz.toXZLoop( list ), panos, objPoints, block, tweed.frame.getGenOf( PlanesGen.class ) );
 
 		Point2d cen = Loopz.average( Loopz.to2dLoop( list, 1, null ) );
 		
@@ -116,17 +117,9 @@ public class FacadeTool extends SelectTool {
 
 //	private static String FACADE_FOLDER = ;
 
-	private static final float pixelsPerMeter = 40f;
+	private static final float pixelsPerMeter = 80f;
 	
 	private void renderFacades(Node gNode, String blockName, FacadeFinder ff) {
-
-//		if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE )
-//			tweed.enqueue( new Runnable() {
-//				@Override
-//				public void run() {
-//					tweed.frame.removeGens(PlaneGen.class);
-//				}
-//			} );
 
 		Thread thread = new Thread() {
 			@Override
@@ -140,19 +133,19 @@ public class FacadeTool extends SelectTool {
 					} catch ( IOException e1 ) {
 						e1.printStackTrace();
 					}
-
 				
 				for ( int mfi = 0; mfi < ff.results.size(); mfi++ ) {
 
+					
 					ToProjMega tpm = ff.results.get( mfi );
 
+					if (tpm.size() == 0 || tpm.stream().mapToInt( x -> tpm.size()  ).sum() == 0)
+						continue;
+					
 					File megaFolder = new File( blockFile, ""+ mfi );
 					megaFolder.mkdirs();
 
 					try {
-						if (tpm.masses != null)
-							new XStream().toXML( tpm.masses, new FileOutputStream( new File( megaFolder, "masses.xml" ) ) );
-						
 						new XStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
 
 					} catch ( FileNotFoundException e ) {
@@ -162,19 +155,18 @@ public class FacadeTool extends SelectTool {
 					// print a list of panoramas on this side.
 
 
-					List<Double> rots = new ArrayList();
-					
-					for (ToProject tp : tpm)
-					for ( Pano pano : tp.toProject ) {
-						PlaneGen pg = new PlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
-						pg.fudgeToDepth( pixelsPerMeter, pano, rots );
-					}
-					
+//					List<Double> rots = new ArrayList();
+//					
+//					for (ToProject tp : tpm)
+//					for ( Pano pano : tp.toProject ) {
+//						ImagePlaneGen pg = new ImagePlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
+//						pg.fudgeToDepth( pixelsPerMeter, pano, rots );
+//					}
+//					
 					double rot = 0;
-					if (!rots.isEmpty())
-						rot = biggestClusterMean(rots);// rots.stream().mapToDouble( x -> x ).average().getAsDouble();
-					
-					System.out.println ( "avg rot was "+rot );
+//					if (!rots.isEmpty())
+//						rot = biggestClusterMean(rots);// rots.stream().mapToDouble( x -> x ).average().getAsDouble();
+//					System.out.println ( "avg rot was "+rot );
 
 					List<BufferedImage> images = new ArrayList<>();
 					
@@ -192,20 +184,22 @@ public class FacadeTool extends SelectTool {
 						File imageFolder;
 						String imageFilename = null;
 
-						if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE ) {
+//						if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE ) {
 							imageFolder = new File( megaFolder, "" + fc );
 							imageFilename = "orthographic";
-						}
-						else
-							imageFolder = new File( blockName );
+//						}
+//						else
+//							imageFolder = new File( blockName );
 
 						imageFolder.mkdirs();
 
 						if ( tp.toProject.size() != 1 )
 							throw new Error();
 
-						PlaneGen pg = new PlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
-						tweed.frame.addGen( pg, true );
+						ImagePlaneGen pg = new ImagePlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
+
+						if ( GISGen.mode != Mode.RENDER_ALL_FACADES ) 
+							tweed.frame.addGen( pg, true );
 						
 						for ( Pano pano_ : tp.toProject ) {
 
@@ -215,16 +209,15 @@ public class FacadeTool extends SelectTool {
 							if (imageFilename == null)
 								imageFilename = new File (pano.name).getName() + "_" + tpm.megafacade.start + "_" + tpm.megafacade.end;
 							
-							images.add ( pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename ) );
+							BufferedImage bi = pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
+							if (GISGen.mode == Mode.RENDER_SELECTED_FACADE)
+								images.add ( bi );
 
 							try {
-
-								
 								FileWriter out = new FileWriter( new File( imageFolder, "meta.txt" ) );
 
 								out.write( pixelsPerMeter * 10 + " " + ( tp.s.distance( tp.e ) * pixelsPerMeter - pixelsPerMeter * 20 ) + " " + ( tp.maxHeight - tp.minHeight ) * pixelsPerMeter + "\n" );
 								out.write( pg.toString() + "\n" );
-								//							out.write ( fudged.toString()+"\n" );
 								out.write( pano.orig.getName() + "\n" );
 								
 								Point2d cen = tpm.megafacade.project( new Point2d (pano.location.x, pano.location.z ) , false );
@@ -313,6 +306,7 @@ public class FacadeTool extends SelectTool {
 		granularity.addItem( FacadeMode.PER_GIS         );
 		granularity.addItem( FacadeMode.PER_MEGA        );
 		granularity.addItem( FacadeMode.PER_CAMERA      );
+		granularity.addItem( FacadeMode.PER_CAMERA_CROPPED      );
 		granularity.setSelectedItem( FacadeFinder.facadeMode );
 		granularity.addActionListener( new ActionListener() {
 			

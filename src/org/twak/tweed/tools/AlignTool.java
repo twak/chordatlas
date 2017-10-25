@@ -245,7 +245,7 @@ public class AlignTool extends Tool {
 	}
 	
 	@Override
-	public void dragStart( Geometry target, Vector2f cursorPosition ) {
+	public void dragStart( Geometry target, Vector2f cursorPosition, Vector3f world ) {
 		dragging = true;
 	}
 	
