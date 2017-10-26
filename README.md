@@ -7,7 +7,7 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 ## run
 
 1. install and license [Gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-2. download the [binary]()
+2. download the [chordatlas binary](https://drive.google.com/open?id=0B6r_mUgXfBLdUXhndkR0ZFYxNzA)
 3. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 ## data
