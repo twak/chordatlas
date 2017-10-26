@@ -25,15 +25,14 @@ RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi751/linux64/lib/gurobi.jar
 
 WORKDIR /tmp
 
-#siteplan chordatlas
 # clone, build and install each of the projects
 
-RUN for r in jutils campskeleton  ; \
+RUN for r in jutils campskeleton siteplan chordatlas; \
     do \
 		git clone --branch bigsur_docker "https://github.com/twak/$r.git"; \
     	cd $r; \
 		mvn install package; \
 		cd ..; \
     done
-    
 
+ENV PATH /tmp/chordatlas/target/:$PATH
