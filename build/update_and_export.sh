@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd /tmp
 for r in jutils campskeleton siteplan chordatlas;
    do 
