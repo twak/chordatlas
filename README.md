@@ -11,7 +11,7 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 3. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
-alpha "academic grad" software: use at your own risk...
+code is alpha "academic grade": use at your own risk...
 
 ## data
 
