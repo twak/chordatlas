@@ -21,7 +21,7 @@
 		<configuration>
 			<archive>
 				<manifest>
-					<mainClass>org.twak.tweed.gen.SkelFootprintConsole</mainClass>
+					<mainClass>org.twak.tweed.gen.TweedFrame</mainClass>
 				</manifest>
 			</archive>
 			<descriptorRefs>

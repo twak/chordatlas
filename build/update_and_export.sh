@@ -1,3 +1,4 @@
+cd /tmp
 for r in jutils campskeleton siteplan chordatlas;
    do 
        git clone --branch bigsur_docker "https://github.com/twak/$r.git"; \

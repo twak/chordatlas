@@ -31,8 +31,8 @@ RUN for r in jutils campskeleton siteplan chordatlas; \
     do \
 		git clone --branch bigsur_docker "https://github.com/twak/$r.git"; \
     	cd $r; \
-		mvn install package; \
+		mvn install; \
 		cd ..; \
     done
 
-ENV PATH /tmp/chordatlas/target/:$PATH
+ENV PATH /tmp/chordatlas/build/:$PATH
