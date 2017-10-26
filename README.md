@@ -10,6 +10,9 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 2. download the [chordatlas binary](https://drive.google.com/open?id=0B6r_mUgXfBLdUXhndkR0ZFYxNzA)
 3. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
+it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
+alpha "academic grad" software: use at your own risk...
+
 ## data
 
 we don't have a license to distrubte the data used in the paper. [here]() is a small project that you can unzip and run. [a video]() might help with the interface.
