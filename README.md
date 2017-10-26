@@ -23,7 +23,7 @@ docker run -v ${PWD}:/output twak/chordatlas update_and_export.sh
 
 A more complex way is to install the deps:
 - [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer)
-- run `mvn install` for [jutils](), [siteplan](), [campskeleton]()
+- run `mvn install` for [jutils](https://github.com/twak/jutils), [campskeleton](https://github.com/twak/campskeleton), [siteplan](https://github.com/twak/siteplan)
 - run `mvn package` for [chordatlas]()
 
 ## if you use it, cite it
