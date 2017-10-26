@@ -8,7 +8,7 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 
 1. install and license [Gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
 2. download the [binary]()
-3. run with `java -jar chordatlas-0.0.1-SNAPSHOT.jar`
+3. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 ## data
 
@@ -25,7 +25,7 @@ A more complex way is to install the deps:
 - [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer)
 - [maven](https://maven.apache.org/)
 - run `mvn install` for [jutils](https://github.com/twak/jutils), [campskeleton](https://github.com/twak/campskeleton), [siteplan](https://github.com/twak/siteplan)
-- run `mvn package` for [chordatlas]()
+- run `mvn assembly:single` for [chordatlas]()
 
 ## cite
 
