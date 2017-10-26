@@ -21,7 +21,9 @@
 		<configuration>
 			<archive>
 				<manifest>
-					<mainClass>org.twak.tweed.gen.TweedFrame</mainClass>
+					<mainClass>org.twak.tweed.TweedFrame</mainClass>
+		            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>		            
 				</manifest>
 			</archive>
 			<descriptorRefs>
@@ -39,7 +41,7 @@
 		<repository>
 			<id>maven2-repository.dev.java.net</id>
 			<name>Java.net repository</name>
-			<url>http://download.java.net/maven/2</url>
+			<url>http://dow	nload.java.net/maven/2</url>
 		</repository>
 
 		<repository>
@@ -204,4 +206,10 @@
 		</dependency>
 	</dependencies>
 
+	<organization>
+		<name>chordatlas</name>
+		<url>http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/</url>
+	</organization>
+	<name>chordatlas</name>
+	<url>http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/</url>
 </project>

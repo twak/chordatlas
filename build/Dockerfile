@@ -27,7 +27,7 @@ WORKDIR /tmp
 
 # clone, build and install each of the projects
 
-RUN for r in jutils campskeleton siteplan chordatlas; \
+RUN for r in  jutils campskeleton siteplan chordatlas; \
     do \
 		git clone --branch bigsur_docker "https://github.com/twak/$r.git"; \
     	cd $r; \
@@ -36,3 +36,4 @@ RUN for r in jutils campskeleton siteplan chordatlas; \
     done
 
 ENV PATH /tmp/chordatlas/build/:$PATH
+RUN chmod +x /tmp/chordatlas/build/*.sh
