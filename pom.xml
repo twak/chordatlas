@@ -16,23 +16,23 @@
 				</configuration>
 			</plugin>
 
-	<plugin>
-		<artifactId>maven-assembly-plugin</artifactId>
-		<configuration>
-			<archive>
-				<manifest>
-					<mainClass>org.twak.tweed.TweedFrame</mainClass>
-		            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>		            
-				</manifest>
-			</archive>
-			<descriptorRefs>
-				<descriptorRef>jar-with-dependencies</descriptorRef>
-			</descriptorRefs>
-		</configuration>
-	</plugin>
-			
-			
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.twak.tweed.TweedFrame</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+
+
 		</plugins>
 	</build>
 
@@ -78,7 +78,7 @@
 			<artifactId>siteplan</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.vecmath</groupId>
 			<artifactId>vecmath</artifactId>
@@ -162,22 +162,22 @@
 			<version>${jme3_v}</version>
 		</dependency>
 
-	<dependency>
-		<groupId>org.apache.xmlgraphics</groupId>
-		<artifactId>batik-svg-dom</artifactId>
-		<version>1.8</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.xmlgraphics</groupId>
-		<artifactId>batik-svggen</artifactId>
-		<version>1.8</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.xmlgraphics</groupId>
-		<artifactId>batik-codec</artifactId>
-		<version>1.8</version>
-	</dependency>
-		
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-svg-dom</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-svggen</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-codec</artifactId>
+			<version>1.8</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
