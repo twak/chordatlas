@@ -150,7 +150,10 @@ public class FeatureCache {
 
 			Arrays.sort( toProcess );
 			
-			megafacade = (Line) new XStream().fromXML( lineFile );
+			if (lineFile.exists())
+				megafacade = (Line) new XStream().fromXML( lineFile );
+			else
+				megafacade = new Line( 0, 0, 1, 0 );
 
 			for ( File f : toProcess )
 				if ( f.isDirectory() ) {
@@ -308,21 +311,21 @@ public class FeatureCache {
 			try {
 				lines = Files.readAllLines( new File( fFolder, "meta.txt" ).toPath() );
 			} catch ( IOException e ) {
-				e.printStackTrace();
-			}
-			
-			if (lines == null) {
-				System.out.println("warning, failed to read input files in " + fFolder);
-				return null;
+				System.err.println( "failed to read metafile" );
 			}
 
-			String plane = lines.get( 1 );
-			String[] pVals = plane.split( " " );
+			if ( lines == null ) {
+				System.out.println( "warning, failed to read input files in " + fFolder );
+				imageL = new Line (0,0, out.getRectified().getWidth() / ppm, 0 );
+			} else {
+				String plane = lines.get( 1 );
+				String[] pVals = plane.split( " " );
 
-			Point2d a = new Point2d( Float.parseFloat( pVals[ 0 ] ), Float.parseFloat( pVals[ 1 ] ) );
-			Point2d b = new Point2d( Float.parseFloat( pVals[ 2 ] ), Float.parseFloat( pVals[ 3 ] ) );
-			
-			imageL = new Line( a, b );
+				Point2d a = new Point2d( Float.parseFloat( pVals[ 0 ] ), Float.parseFloat( pVals[ 1 ] ) );
+				Point2d b = new Point2d( Float.parseFloat( pVals[ 2 ] ), Float.parseFloat( pVals[ 3 ] ) );
+
+				imageL = new Line( a, b );
+			}
 		}
 
 		out.start = mega.findPPram( imageL.start ) * mega.length();
