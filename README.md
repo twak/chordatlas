@@ -25,7 +25,7 @@ A more complex way is to install the deps:
 - [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer)
 - [maven](https://maven.apache.org/)
 - run `mvn install` for [jutils](https://github.com/twak/jutils), [campskeleton](https://github.com/twak/campskeleton), [siteplan](https://github.com/twak/siteplan)
-- run `mvn assembly:single` for [chordatlas]()
+- run `mvn package assembly:single` for [chordatlas]()
 
 ## cite
 
