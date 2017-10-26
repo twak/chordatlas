@@ -8,7 +8,7 @@ for r in jutils campskeleton siteplan chordatlas;
 done
 
 cd /tmp/chordatlas
-mvn assembly:single
+mvn package assembly:single
 
 mkdir -p /output
 cp /tmp/chordatlas/target/*with-dependencies.jar /output
