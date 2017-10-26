@@ -16,7 +16,7 @@ we don't have a license to distrubte the data used in the paper. [here]() is a s
 
 ## build
 
-A simple way to build the binary (jar) is to use docker, this will dump the output jar into the current directory:
+A simple way to build the binary (jar) is to use the [docker container](https://hub.docker.com/r/twak/chordatlas/), this will dump the output jar into the current directory:
 ```
 docker run -v ${PWD}:/output twak/chordatlas update_and_export.sh
 ```
