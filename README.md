@@ -16,16 +16,17 @@ we don't have a license to distrubte the data used in the paper. [here]() is a s
 
 ## build
 
-A simple way to build the binary (jar) is to use docker, this will dump the output jar into the current directory:
+A simple way to build the binary (jar) is to use the [docker container](https://hub.docker.com/r/twak/chordatlas/), this will dump the output jar into the current directory:
 ```
 docker run -v ${PWD}:/output twak/chordatlas update_and_export.sh
 ```
 
 A more complex way is to install the deps:
 - [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer)
+- [java 1.8](http://openjdk.java.net/install/)
 - [maven](https://maven.apache.org/)
 - run `mvn install` for [jutils](https://github.com/twak/jutils), [campskeleton](https://github.com/twak/campskeleton), [siteplan](https://github.com/twak/siteplan)
-- run `mvn assembly:single` for [chordatlas]()
+- run `mvn package assembly:single` for [chordatlas]()
 
 ## cite
 
