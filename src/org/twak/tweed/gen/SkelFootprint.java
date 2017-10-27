@@ -101,8 +101,6 @@ public class SkelFootprint {
 	public boolean exitA = false;
 	public static double exposedFaceFrac = TweedSettings.settings.exposedFaceThreshold;
 	
-//	static SolverState memcache = null;
-	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
 
@@ -140,9 +138,11 @@ public class SkelFootprint {
 		dbgCountProfileEdges( SS );
 		dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
 		
-//		dbgShowProfiles( SS.mesh, null, SS.profFit, "postprocess" );
-//		PaintThing.debug.put( 1, footprint );
-//		SS.debugSolverResult();
+		if (FALSE) {
+			dbgShowProfiles( SS.mesh, null, SS.profFit, "postprocess" );
+			PaintThing.debug.put( 1, footprint );
+			SS.debugSolverResult();
+		}
 		
 		return SS.mesh;
 	}

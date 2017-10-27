@@ -32,6 +32,15 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		
+		    <resources>
+        <resource>
+            <directory>src/org/twak/tweed/resources</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </resource>
+    </resources>
 	</build>
 
 	<repositories>
