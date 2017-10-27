@@ -37,7 +37,7 @@
         <resource>
             <directory>src/org/twak/tweed/resources</directory>
             <includes>
-                <include>**/*</include>
+                <include>*</include>
             </includes>
         </resource>
     </resources>
