@@ -686,10 +686,6 @@ public class Tweed extends SimpleApplication {
 			}
 	}
 
-	public File toAssetManager( File file ) {
-		return new File( Tweed.JME ).toPath().relativize( file.toPath() ).toFile();
-	}
-	
 	public File makeWorkspaceRelative( File f ) {
 		return new File( DATA ).toPath().relativize( f.toPath() ).toFile();
 	}

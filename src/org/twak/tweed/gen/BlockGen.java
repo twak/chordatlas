@@ -106,7 +106,7 @@ public class BlockGen extends ObjGen {
 						}
 						
 						tweed.frame.addGen( new ObjGen( 
-								tweed.toAssetManager( fs ).toString(),
+								tweed.makeWorkspaceRelative( fs ).toString(),
 								tweed ), true); 
 					}
 

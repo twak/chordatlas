@@ -37,6 +37,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
+import org.twak.readTrace.MiniTransform;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
@@ -382,33 +383,6 @@ public class TweedFrame {
 
 		SimplePopup2 sp = new SimplePopup2( evt );
 
-		
-		sp.add( "+ gis (obj)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
-					public void heresTheFile( File obj ) throws Throwable {
-						removeGISSources();
-						addGen ( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
-					};
-				};
-			}
-		} );
-		
-		sp.add( "+ gis (gml)", new Runnable() {
-			@Override
-			public void run() {
-				
-				
-				new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
-					public void heresTheFile( File gml ) throws Throwable {
-						removeGISSources();
-						tweed.addGML( gml, null );
-					};
-				};
-			}
-		} );
-		
 		if ( hasGIS() ) {
 			sp.add( "+ mesh (obj)", new Runnable() {
 				@Override
@@ -416,6 +390,14 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
+							
+							if ( obj.length() > 10 * 1024 * 1024 )
+								if ( JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog( TweedFrame.this.frame, "Large OBJ! create minimesh?" ) ) {
+									MiniTransform.importTo( obj, new File( Tweed.DATA + "/minimesh" ) );
+									addGen( new MiniGen( new File( "minimesh/" + MiniTransform.INDEX ), tweed ), true );
+									return;
+								}
+
 							String f = tweed.makeWorkspaceRelative( obj ).toString();
 							addGen( new MeshGen( f, tweed ), true );
 						};
@@ -447,11 +429,46 @@ public class TweedFrame {
 					};
 				}
 			} );
+		} else {
+
+			sp.add( "+ gis (2d obj)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
+						public void heresTheFile( File obj ) throws Throwable {
+							removeGISSources();
+							addGen( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
+						};
+					};
+				}
+			} );
+			
+//			sp.add( "+ gis (3d obj)", new Runnable() {
+//				@Override
+//				public void run() {
+//					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
+//						public void heresTheFile( File obj ) throws Throwable {
+//							
+//						};
+//					};
+//				}
+//			} );
+
+			sp.add( "+ gis (gml)", new Runnable() {
+				@Override
+				public void run() {
+
+					new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
+						public void heresTheFile( File gml ) throws Throwable {
+							removeGISSources();
+							tweed.addGML( gml, null );
+						};
+					};
+				}
+			} );
 		}
 
-		
 		sp.show();
-
 	}
 
 	private boolean hasGIS() {
@@ -464,6 +481,7 @@ public class TweedFrame {
 	}
 	
 	protected void removeGISSources() {
+		TweedSettings.settings.resetTrans();
 		removeGens( GISGen.class );
 	}
 

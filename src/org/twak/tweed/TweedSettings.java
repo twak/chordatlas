@@ -46,8 +46,8 @@ public class TweedSettings {
 
 	public double trans[] = null; // edit this to set GIS offset before creating new workspace (above are twak's custom offsets!) 
 	public String gmlCoordSystem = null;
-	
-	
+	public Matrix4d toOrigin, fromOrigin;
+
 	public boolean flipFootprints = true;
 	public double ambient = 0.5;
 	public boolean ortho = false;
@@ -75,7 +75,6 @@ public class TweedSettings {
 	public double megafacacadeClusterGradient = 3;
 	
 
-	public Matrix4d toOrigin, fromOrigin;
 	
 	public List<Gen> genList = new ArrayList<>();
 	
@@ -185,7 +184,16 @@ public class TweedSettings {
 				recentFiles.f.remove( 0 );
 			}
 		}
-		
 	}
+
+	public void resetTrans() {
+		this.trans = new double[] {0,0};
+		this.gmlCoordSystem = null;
+		this.toOrigin = new Matrix4d();
+		this.toOrigin.setIdentity();
+		this.fromOrigin = new Matrix4d();
+		this.fromOrigin.setIdentity();
+	}
+	
 
 }
