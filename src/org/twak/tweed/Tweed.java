@@ -499,9 +499,6 @@ public class Tweed extends SimpleApplication {
 	
 	private AnalogListener analogListener = new AnalogListener() {
 		public void onAnalog( String name, float intensity, float tpf ) {
-
-			
-			System.out.println(">>");
 			
 			if ( name.equals( CLICK ) ) {
 
@@ -609,7 +606,7 @@ public class Tweed extends SimpleApplication {
 		panel.setLayout( new ListDownLayout() );
 		ButtonGroup bg = new ButtonGroup();
 
-		panel.add( new JLabel("tools") );
+		panel.add( new JLabel("tools:") );
 		
 		for ( Tool t : tools ) {
 

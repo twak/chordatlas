@@ -53,7 +53,9 @@ public class TweedSettings {
 
 	public boolean flipFootprints = true;
 	public double ambient = 0.5;
+	@Auto.Ignore
 	public boolean ortho = false;
+	@Auto.Ignore
 	public int fov = 0;
 
 	public boolean calculateFootprintNormals = true;
@@ -76,14 +78,6 @@ public class TweedSettings {
 	public double heightThreshold = 4;
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
-	
-
-	
-	public static void main (String[] args) {
-		
-		new Auto( new TweedSettings() ).frame();
-		
-	}
 	
 	public List<Gen> genList = new ArrayList<>();
 	

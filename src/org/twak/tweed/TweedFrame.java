@@ -55,6 +55,7 @@ import org.twak.utils.ui.ListRightLayout;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.SimplePopup2;
 import org.twak.utils.ui.WindowManager;
+import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.SuperMeshPainter;
 
 import com.jme3.scene.Node;
@@ -274,6 +275,16 @@ public class TweedFrame {
 			};
 		} );
 		
+		JMenuItem settings = new JMenuItem( "settings...", KeyEvent.VK_R );
+		settings.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_E, ActionEvent.CTRL_MASK ) );
+		menu.add( settings );
+		settings.addActionListener( new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				new Auto( TweedSettings.settings ).frame();
+			};
+		} );
+		
 		JMenuItem resetBG = new JMenuItem( "reset background", KeyEvent.VK_MINUS );
 		resetBG.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
 		menu.add( resetBG );
@@ -318,7 +329,7 @@ public class TweedFrame {
 
 		JPanel layers = new JPanel();
 		layers.setLayout( new BorderLayout() );
-		layers.add( new JLabel( "layers" ), BorderLayout.NORTH );
+		layers.add( new JLabel( "layers:" ), BorderLayout.NORTH );
 
 		JScrollPane listScroll = new JScrollPane( layerList );
 		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
@@ -345,7 +356,7 @@ public class TweedFrame {
 
 		JPanel options = new JPanel( new BorderLayout() );
 		{
-			options.add( new JLabel( "options" ), BorderLayout.NORTH );
+			options.add( new JLabel( "options:" ), BorderLayout.NORTH );
 			options.add( genUI, BorderLayout.CENTER );
 		}
 
@@ -391,13 +402,6 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
-							
-							if ( obj.length() > 10 * 1024 * 1024 )
-								if ( JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog( TweedFrame.this.frame, "Large OBJ! create minimesh?" ) ) {
-									MiniTransform.importTo( obj, new File( Tweed.DATA + "/minimesh" ) );
-									addGen( new MiniGen( new File( "minimesh" ), tweed ), true );
-									return;
-								}
 
 							String f = tweed.makeWorkspaceRelative( obj ).toString();
 							addGen( new MeshGen( f, tweed ), true );
@@ -409,9 +413,16 @@ public class TweedFrame {
 			sp.add( "+ mesh (minimesh)", new Runnable() {
 				@Override
 				public void run() {
-					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "index.xml" ) {
+					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml), or obj to convert", new File( Tweed.JME ), null ) {
 						@Override
 						public void heresTheFile( File f ) throws Throwable {
+							
+							if ( !f.getName().equals( MiniTransform.INDEX ) ) {
+								MiniTransform.convertToMini( f, new File( Tweed.DATA + "/minimesh" ),
+										() -> addGen( new MiniGen( new File( "minimesh" ), tweed ), true ) );
+								return;
+							}
+							
 							//						removeMeshSources();
 							addGen( new MiniGen( tweed.makeWorkspaceRelative( f.getParentFile() ), tweed ), true );
 						}
@@ -537,14 +548,18 @@ public class TweedFrame {
 			JOptionPane.showMessageDialog( frame, "no layer selected" );
 			return;
 		}
+		
 
 		tweed.enqueue( new Runnable() {
 			@Override
 			public void run() {
 				gen.gNode.removeFromParent();
+				gen.kill();
 			}
 		} );
 
+		
+		
 		genList.remove( gen );
 
 		Component togo = null;
@@ -553,8 +568,10 @@ public class TweedFrame {
 				togo = c;
 		}
 
-		if ( selectedGen == gen )
+		if ( selectedGen == gen ) {
 			selectedGen = null;
+			setGenUI( null );
+		}
 
 		if ( togo != null )
 			layerList.remove( togo );

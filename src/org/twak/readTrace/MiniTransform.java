@@ -18,6 +18,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjDump.Face;
 import org.twak.utils.geom.ObjDump.Material;
 import org.twak.utils.streams.InaxPoint3dCollector;
+import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Matrix4f;
 import com.thoughtworks.xstream.XStream;
@@ -28,24 +29,86 @@ public class MiniTransform {
 	public Map<Integer, Matrix4d> index = new HashMap(); // folder name to offset
 	public Matrix4f offset = new Matrix4f(); // additional offset applied to all via ui
 
-	public static void importTo( File oneOfManyObj, File outputDir ) {
+	public enum Orientation {
+		
+		X_UP (new Matrix4d(
+				0, 0, 1, 0,
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 0, 1
+				)),
+		
+		Y_UP (new Matrix4d(
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+				)), 
+		
+		Z_UP (new Matrix4d(
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				1, 0, 0, 0,
+				0, 0, 0, 1
+				));
+		
+		Matrix4d m;
+		
+		Orientation(Matrix4d m) {
+			this.m = m;
+		}
+	}
+	
+	public static class MiniOptions {
+		
+		public Orientation orientation = Orientation.Y_UP;
+		public boolean importAllInDirectory = true;
+		protected File output;
+		
+		public MiniOptions( File output ) {
+			this.output = output;
+		}
+	}
+	
+	public static void convertToMini( File oneOfManyObj, File outputDir, Runnable onDone ) {
+		
+		MiniOptions options =  new MiniOptions(outputDir);
+		
+		new Auto( options ) {
+			public void apply() {
+				
+				super.apply();
+				
+				List<File> files = new ArrayList();
 
-		List<File> files = new ArrayList();
-
-		for ( File f : oneOfManyObj.getParentFile().listFiles() )
-			if ( f.getName().toLowerCase().endsWith( ".obj" ) )
-				files.add( f );
-
-		importTo( files, outputDir );
+				if ( options.importAllInDirectory ) {
+					for ( File f : oneOfManyObj.getParentFile().listFiles() )
+						if ( f.getName().toLowerCase().endsWith( ".obj" ) )
+							files.add( f );
+				} else {
+					files.add( oneOfManyObj );
+				}
+				
+				convertToMini( files, options.output, options.orientation.m );
+				
+				onDone.run();
+			}
+			
+			public void updateOkayCancel() {
+				okay.setEnabled( true );
+			}
+			
+		}.frame();
 	}
 
-	public static void importTo( Iterable<File> bigObj, File outfile ) {
+	public static void convertToMini( Iterable<File> bigObj, File outfile, Matrix4d transform ) {
 
 		outfile.mkdirs();
 
-		ObjDump src = new ObjDump( bigObj.iterator().next() );
-
+		ObjDump src = new ObjDump( bigObj );//.iterator().next() );
+		
 		src.centerVerts();
+		src.transform (transform);
 		
 		//		ObjDump src = new ObjDump( new File( "/home/twak/Downloads/bath_andy_hoskins/Bath_2017_Sample/OBJ/Tile-3-2-1-1.obj" ) );
 
@@ -57,7 +120,10 @@ public class MiniTransform {
 
 		double edgeLength = Math.pow( volume / ( count / targetCount ), 0.3333 );
 
-		int xc = (int) Math.ceil( ( bounds[ 1 ] - bounds[ 0 ] ) / edgeLength ), yc = (int) Math.ceil( ( bounds[ 3 ] - bounds[ 2 ] ) / edgeLength ), zc = (int) Math.ceil( ( bounds[ 5 ] - bounds[ 4 ] ) / edgeLength );
+		int 
+				xc = (int) Math.ceil( ( bounds[ 1 ] - bounds[ 0 ] ) / edgeLength ), 
+				yc = (int) Math.ceil( ( bounds[ 3 ] - bounds[ 2 ] ) / edgeLength ), 
+				zc = (int) Math.ceil( ( bounds[ 5 ] - bounds[ 4 ] ) / edgeLength );
 
 		Set<Face>[][][] faces = new Set[xc][yc][zc];
 
