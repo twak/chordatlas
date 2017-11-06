@@ -302,11 +302,11 @@ public class Tweed extends SimpleApplication {
 			return;
 		}
 		
-		if (TweedSettings.settings.trans != null) {
-			lastOffset[0] = TweedSettings.settings.trans[0];
-			lastOffset[1] = TweedSettings.settings.trans[1];
-		}
-		else 
+//		if (TweedSettings.settings.trans != null) {
+//			lastOffset[0] = TweedSettings.settings.trans[0];
+//			lastOffset[1] = TweedSettings.settings.trans[1];
+//		}
+//		else 
 			TweedSettings.settings.trans = lastOffset;
 		
 		TweedSettings.settings.gmlCoordSystem = guessCRS;

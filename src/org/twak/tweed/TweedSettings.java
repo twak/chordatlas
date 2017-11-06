@@ -13,6 +13,7 @@ import javax.vecmath.Matrix4d;
 
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -27,6 +28,7 @@ public class TweedSettings {
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
+	@Auto.Ignore
 	public int cameraSpeed = 0;
 
 //	public double trans[] = new double[] { 982744.4803613932, 201433.17395506793 };  // ny
@@ -45,6 +47,7 @@ public class TweedSettings {
 //	public String gmlCoordSystem = "EPSG:2253"; 
 
 	public double trans[] = null; // edit this to set GIS offset before creating new workspace (above are twak's custom offsets!) 
+	@Auto.Ignore
 	public String gmlCoordSystem = null;
 	public Matrix4d toOrigin, fromOrigin;
 
@@ -75,6 +78,12 @@ public class TweedSettings {
 	public double megafacacadeClusterGradient = 3;
 	
 
+	
+	public static void main (String[] args) {
+		
+		new Auto( new TweedSettings() ).frame();
+		
+	}
 	
 	public List<Gen> genList = new ArrayList<>();
 	

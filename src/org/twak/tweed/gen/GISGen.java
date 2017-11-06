@@ -131,7 +131,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	
 		LoopL<Point3d> polies = null;
 		try {
-			polies = GMLReader.readGML3d( tweed.toWorkspace( new File( gmlFile ) ), 
+			polies = GMLReader.readGML3d( Tweed.toWorkspace( new File( gmlFile ) ), 
 					DefaultGeocentricCRS.CARTESIAN,
 					CRS.decode( crs ) );
 		} catch ( NoSuchAuthorityCodeException e ) {

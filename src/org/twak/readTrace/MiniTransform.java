@@ -39,12 +39,14 @@ public class MiniTransform {
 		importTo( files, outputDir );
 	}
 
-	public static void importTo( Iterable<File> bigObj, File outputDir ) {
+	public static void importTo( Iterable<File> bigObj, File outfile ) {
 
-		outputDir.mkdirs();
+		outfile.mkdirs();
 
-		ObjDump src = new ObjDump( bigObj );
+		ObjDump src = new ObjDump( bigObj.iterator().next() );
 
+		src.centerVerts();
+		
 		//		ObjDump src = new ObjDump( new File( "/home/twak/Downloads/bath_andy_hoskins/Bath_2017_Sample/OBJ/Tile-3-2-1-1.obj" ) );
 
 		long count = src.material2Face.entrySet().stream().mapToInt( x -> x.getValue().size() ).sum();
@@ -73,8 +75,6 @@ public class MiniTransform {
 
 				faces[ ix ][ iy ][ iz ].add( f );
 			}
-
-		File outfile = new File( "/home/twak/Desktop/minimesh" );
 
 		int dir = 0;
 		MiniTransform mt = new MiniTransform();

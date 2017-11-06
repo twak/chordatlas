@@ -264,6 +264,16 @@ public class TweedFrame {
 //			};
 //		} );
 
+		JMenuItem resetCam = new JMenuItem( "reset view", KeyEvent.VK_R );
+		resetCam.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK ) );
+		menu.add( resetCam );
+		resetCam.addActionListener( new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				tweed.resetCamera();
+			};
+		} );
+		
 		JMenuItem resetBG = new JMenuItem( "reset background", KeyEvent.VK_MINUS );
 		resetBG.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
 		menu.add( resetBG );
@@ -303,15 +313,6 @@ public class TweedFrame {
 			};
 		} );
 
-		JMenuItem resetCam = new JMenuItem( "reset view", KeyEvent.VK_R );
-		resetCam.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK ) );
-		menu.add( resetCam );
-		resetCam.addActionListener( new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				tweed.resetCamera();
-			};
-		} );
 
 		layerList = new JPanel( new ListDownLayout() );
 
@@ -394,7 +395,7 @@ public class TweedFrame {
 							if ( obj.length() > 10 * 1024 * 1024 )
 								if ( JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog( TweedFrame.this.frame, "Large OBJ! create minimesh?" ) ) {
 									MiniTransform.importTo( obj, new File( Tweed.DATA + "/minimesh" ) );
-									addGen( new MiniGen( new File( "minimesh/" + MiniTransform.INDEX ), tweed ), true );
+									addGen( new MiniGen( new File( "minimesh" ), tweed ), true );
 									return;
 								}
 
