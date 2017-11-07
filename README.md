@@ -17,6 +17,8 @@ code is alpha "academic grade": use at your own risk...
 
 we don't have a license to distrubte the data used in the paper. [here]() is a small project that you can unzip and run. [a video]() might help with the interface.
 
+[here is a tool](https://github.com/twak/panoscraper) that might help you download panoramas.
+
 ## build
 
 A simple way to build the binary (jar) is to use the [docker container](https://hub.docker.com/r/twak/chordatlas/), this will dump the output jar into the current directory:
