@@ -59,6 +59,9 @@ public class FeatureCache {
 
 		public BufferedImage getRectified() {
 
+			if (rectified == null)
+				return null;
+			
 			if ( loadedRectified == null )
 				try {
 					loadedRectified = ImageIO.read( fixAbsPath(rectified) );
@@ -83,6 +86,10 @@ public class FeatureCache {
 		}
 		
 		public static File fixAbsPath(File f) {
+			
+			if (f == null)
+				return null;
+			
 			if (f.exists())
 				return f;
 			else

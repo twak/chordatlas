@@ -40,6 +40,8 @@ public class ObjGen extends Gen implements IDumpObjs {
 
 	transient Geometry geometry;
 	
+	boolean hasTextures = false;
+	
 	public ObjGen() {}
 	public ObjGen(String filename, Tweed tweed) {
 		super("obj " + new File(filename).getName(), tweed);
@@ -61,6 +63,8 @@ public class ObjGen extends Gen implements IDumpObjs {
 
 		Spatial mesh = tweed.getAssetManager().loadModel(filename);
 
+
+		
 		Material mat = null;
 		
 		ColorRGBA genCol = new ColorRGBA( 
@@ -85,7 +89,7 @@ public class ObjGen extends Gen implements IDumpObjs {
 			mat = null;
 		else {
 			mat = new Material(tweed.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-			mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+			mat.getAdditionalRenderState().setBlendMode(BlendMode.PremultAlpha);
 			mat.setColor("Color", genCol );
 		}
 		
@@ -103,8 +107,10 @@ public class ObjGen extends Gen implements IDumpObjs {
 				((Geometry)s).getMesh().setMode( mode );
 		}
 
-		if (mat != null)
+		hasTextures = mat == null;
+		if (mat != null) 
 			mesh.setMaterial(mat);
+			
 
 		if (oldTransform != null)
 			mesh.setLocalTransform( oldTransform );

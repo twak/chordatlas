@@ -44,6 +44,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjDump.Face;
 import org.twak.utils.ui.ListDownLayout;
 
+import com.jme3.asset.ModelKey;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -80,7 +81,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	}
 	
 	public void init() {
-		trans = (MiniTransform) new XStream ().fromXML ( tweed.toWorkspace( new File (root, "index.xml") ) );
+		trans = (MiniTransform) new XStream ().fromXML ( Tweed.toWorkspace( new File (root, "index.xml") ) );
 	}
 
 	@Override
@@ -103,12 +104,12 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			if ( !inBounds( e.getValue(), bounds ) )
 				continue;
 			
-			File absRoot = tweed.toWorkspace( MiniGen.this.root );
+			File absRoot = Tweed.toWorkspace( MiniGen.this.root );
 			
 			System.out.println("loading mesh " + e.getKey() +" from " + absRoot);
 			File f = new File (absRoot, e.getKey() +"/model.obj" );
 			
-			Spatial mesh = tweed.getAssetManager().loadModel(f.getAbsolutePath().substring( Tweed.JME.length() ));
+			Spatial mesh = tweed.getAssetManager().loadModel( tweed.makeWorkspaceRelative( f ).toString() );
 			
 			mesh.setLocalTransform( Jme3z.toJmeTransform( e.getValue() ) );
 			
@@ -154,7 +155,6 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		super.calculate( );
 	}
 
-
 	public void save() {
 		
 		trans.offset = gNode.getLocalTransform().toTransformMatrix();
@@ -164,7 +164,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			public void run() {
 
 				try {
-					new XStream().toXML( trans, new FileOutputStream( tweed.toWorkspace( new File( root, "index.xml" ) ) ) );
+					new XStream().toXML( trans, new FileOutputStream( Tweed.toWorkspace( new File( root, "index.xml" ) ) ) );
 					System.out.println("index file written");
 				} catch ( FileNotFoundException e ) {
 					e.printStackTrace();
@@ -182,7 +182,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 
-		JButton clear = new JButton("remove all");
+		JButton clear = new JButton("hide all");
 		clear.addActionListener( new ActionListener() {
 			
 			@Override
@@ -196,7 +196,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			}
 		} );
 		
-		JButton all = new JButton("load all meshes");
+		JButton all = new JButton("load all");
 		all.addActionListener( new ActionListener() {
 			
 			@Override
@@ -245,8 +245,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		JButton align = new JButton("align tool");
 		align.addActionListener( e -> tweed.setTool(new AlignTool(tweed)) );
 		
-		out.add(clear);
 		out.add(all);
+		out.add(clear);
 		out.add(renderLines);
 		out.add(renderTransparent);
 		out.add(align);
@@ -464,4 +464,21 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		return false;
 	}
+
+	@Override
+	public void kill() {
+		for ( Map.Entry<Integer, Matrix4d> e : trans.index.entrySet() ) {
+
+			if ( !inBounds( e.getValue(), bounds ) )
+				continue;
+
+			File absRoot = Tweed.toWorkspace( MiniGen.this.root );
+
+			System.out.println( "loading mesh " + e.getKey() + " from " + absRoot );
+			File f = new File( absRoot, e.getKey() + "/model.obj" );
+
+			tweed.getAssetManager().deleteFromCache( new ModelKey ( tweed.makeWorkspaceRelative( f ).toString() ) );
+		}
+	}
+
 }

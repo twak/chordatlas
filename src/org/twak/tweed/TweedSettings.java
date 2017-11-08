@@ -13,6 +13,7 @@ import javax.vecmath.Matrix4d;
 
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -27,6 +28,7 @@ public class TweedSettings {
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
+	@Auto.Ignore
 	public int cameraSpeed = 0;
 
 //	public double trans[] = new double[] { 982744.4803613932, 201433.17395506793 };  // ny
@@ -45,12 +47,15 @@ public class TweedSettings {
 //	public String gmlCoordSystem = "EPSG:2253"; 
 
 	public double trans[] = null; // edit this to set GIS offset before creating new workspace (above are twak's custom offsets!) 
+	@Auto.Ignore
 	public String gmlCoordSystem = null;
-	
-	
+	public Matrix4d toOrigin, fromOrigin;
+
 	public boolean flipFootprints = true;
 	public double ambient = 0.5;
+	@Auto.Ignore
 	public boolean ortho = false;
+	@Auto.Ignore
 	public int fov = 0;
 
 	public boolean calculateFootprintNormals = true;
@@ -73,9 +78,8 @@ public class TweedSettings {
 	public double heightThreshold = 4;
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
-	
 
-	public Matrix4d toOrigin, fromOrigin;
+	public static boolean roofColours = true;
 	
 	public List<Gen> genList = new ArrayList<>();
 	
@@ -185,7 +189,16 @@ public class TweedSettings {
 				recentFiles.f.remove( 0 );
 			}
 		}
-		
 	}
+
+	public void resetTrans() {
+		this.trans = new double[] {0,0};
+		this.gmlCoordSystem = null;
+		this.toOrigin = new Matrix4d();
+		this.toOrigin.setIdentity();
+		this.fromOrigin = new Matrix4d();
+		this.fromOrigin.setIdentity();
+	}
+	
 
 }

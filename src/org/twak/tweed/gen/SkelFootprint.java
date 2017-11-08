@@ -258,15 +258,19 @@ public class SkelFootprint {
 		System.out.println("sampling...");
 		for ( HalfFace f : mesh ) {
 			
-			if ( TRUE ) { //color roofs
-				
-				if (blockGen.transparency != 1) {
-					JOptionPane.showMessageDialog( tweed.frame(), "Error sampling colors..I'll fix that: try again!" );
+			if ( TweedSettings.roofColours ) { //color roofs
+
+				if ( blockGen.hasTextures && blockGen.transparency != 1 ) {
+					JOptionPane.showMessageDialog( tweed.frame(), "Error sampling roof colors!\nI'll fix that; try again!" );
 					m.close();
 					blockGen.transparency = 1;
 					blockGen.calculateOnJmeThread();
 
 					return null;
+				} else if ( !blockGen.hasTextures ) {
+					JOptionPane.showMessageDialog( tweed.frame(), "No texture for roof colours;\nI'll disable that for you!" );
+					TweedSettings.roofColours = false;
+					break;
 				}
 				
 				((SuperFace)f ).colors = new ArrayList<>();

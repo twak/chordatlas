@@ -302,11 +302,11 @@ public class Tweed extends SimpleApplication {
 			return;
 		}
 		
-		if (TweedSettings.settings.trans != null) {
-			lastOffset[0] = TweedSettings.settings.trans[0];
-			lastOffset[1] = TweedSettings.settings.trans[1];
-		}
-		else 
+//		if (TweedSettings.settings.trans != null) {
+//			lastOffset[0] = TweedSettings.settings.trans[0];
+//			lastOffset[1] = TweedSettings.settings.trans[1];
+//		}
+//		else 
 			TweedSettings.settings.trans = lastOffset;
 		
 		TweedSettings.settings.gmlCoordSystem = guessCRS;
@@ -499,9 +499,6 @@ public class Tweed extends SimpleApplication {
 	
 	private AnalogListener analogListener = new AnalogListener() {
 		public void onAnalog( String name, float intensity, float tpf ) {
-
-			
-			System.out.println(">>");
 			
 			if ( name.equals( CLICK ) ) {
 
@@ -609,7 +606,7 @@ public class Tweed extends SimpleApplication {
 		panel.setLayout( new ListDownLayout() );
 		ButtonGroup bg = new ButtonGroup();
 
-		panel.add( new JLabel("tools") );
+		panel.add( new JLabel("tools:") );
 		
 		for ( Tool t : tools ) {
 
@@ -686,10 +683,6 @@ public class Tweed extends SimpleApplication {
 			}
 	}
 
-	public File toAssetManager( File file ) {
-		return new File( Tweed.JME ).toPath().relativize( file.toPath() ).toFile();
-	}
-	
 	public File makeWorkspaceRelative( File f ) {
 		return new File( DATA ).toPath().relativize( f.toPath() ).toFile();
 	}

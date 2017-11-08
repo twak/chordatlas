@@ -95,6 +95,8 @@ public class PlanesGen extends Gen implements ICanSave {
 		for ( Plane p : planes ) {
 
 			
+			p.color = color;
+			
 			Spatial s = p.render( tweed );
 
 			if (s == null)

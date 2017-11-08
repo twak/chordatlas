@@ -652,12 +652,6 @@ public class Regularizer {
 
 			out.stream().forEach( mf -> mf.scaleX( lp, rp ) );
 
-
-			for (MiniFacade mf : out) 
-				for (FRect r : mf.getRects() )
-					if ( Double.isNaN( r.x ) )
-						System.out.println(">>>>");
-			
 			return;
 		}
 

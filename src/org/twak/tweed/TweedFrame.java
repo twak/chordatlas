@@ -5,6 +5,7 @@ import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -37,6 +38,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
+import org.twak.readTrace.MiniTransform;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
@@ -54,6 +56,7 @@ import org.twak.utils.ui.ListRightLayout;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.SimplePopup2;
 import org.twak.utils.ui.WindowManager;
+import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.SuperMeshPainter;
 
 import com.jme3.scene.Node;
@@ -263,6 +266,26 @@ public class TweedFrame {
 //			};
 //		} );
 
+		JMenuItem resetCam = new JMenuItem( "reset view", KeyEvent.VK_R );
+		resetCam.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK ) );
+		menu.add( resetCam );
+		resetCam.addActionListener( new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				tweed.resetCamera();
+			};
+		} );
+		
+		JMenuItem settings = new JMenuItem( "settings...", KeyEvent.VK_R );
+		settings.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_E, ActionEvent.CTRL_MASK ) );
+		menu.add( settings );
+		settings.addActionListener( new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				new Auto( TweedSettings.settings ).frame();
+			};
+		} );
+		
 		JMenuItem resetBG = new JMenuItem( "reset background", KeyEvent.VK_MINUS );
 		resetBG.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_MINUS, ActionEvent.CTRL_MASK ) );
 		menu.add( resetBG );
@@ -302,21 +325,12 @@ public class TweedFrame {
 			};
 		} );
 
-		JMenuItem resetCam = new JMenuItem( "reset view", KeyEvent.VK_R );
-		resetCam.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK ) );
-		menu.add( resetCam );
-		resetCam.addActionListener( new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				tweed.resetCamera();
-			};
-		} );
 
 		layerList = new JPanel( new ListDownLayout() );
 
 		JPanel layers = new JPanel();
 		layers.setLayout( new BorderLayout() );
-		layers.add( new JLabel( "layers" ), BorderLayout.NORTH );
+		layers.add( new JLabel( "layers:" ), BorderLayout.NORTH );
 
 		JScrollPane listScroll = new JScrollPane( layerList );
 		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
@@ -325,7 +339,7 @@ public class TweedFrame {
 
 		JPanel addRemoveLayer = new JPanel();
 		{
-			addRemoveLayer.setLayout( new FlowLayout( FlowLayout.RIGHT ) );
+			addRemoveLayer.setLayout( new GridLayout( 1, 2 ) );
 			layers.add( addRemoveLayer, BorderLayout.SOUTH );
 
 			JButton addLayer = new JButton( "+" );
@@ -343,7 +357,7 @@ public class TweedFrame {
 
 		JPanel options = new JPanel( new BorderLayout() );
 		{
-			options.add( new JLabel( "options" ), BorderLayout.NORTH );
+			options.add( new JLabel( "options:" ), BorderLayout.NORTH );
 			options.add( genUI, BorderLayout.CENTER );
 		}
 
@@ -382,33 +396,6 @@ public class TweedFrame {
 
 		SimplePopup2 sp = new SimplePopup2( evt );
 
-		
-		sp.add( "+ gis (obj)", new Runnable() {
-			@Override
-			public void run() {
-				new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
-					public void heresTheFile( File obj ) throws Throwable {
-						removeGISSources();
-						addGen ( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
-					};
-				};
-			}
-		} );
-		
-		sp.add( "+ gis (gml)", new Runnable() {
-			@Override
-			public void run() {
-				
-				
-				new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
-					public void heresTheFile( File gml ) throws Throwable {
-						removeGISSources();
-						tweed.addGML( gml, null );
-					};
-				};
-			}
-		} );
-		
 		if ( hasGIS() ) {
 			sp.add( "+ mesh (obj)", new Runnable() {
 				@Override
@@ -416,6 +403,7 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
+
 							String f = tweed.makeWorkspaceRelative( obj ).toString();
 							addGen( new MeshGen( f, tweed ), true );
 						};
@@ -426,9 +414,16 @@ public class TweedFrame {
 			sp.add( "+ mesh (minimesh)", new Runnable() {
 				@Override
 				public void run() {
-					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml)", new File( Tweed.JME ), "index.xml" ) {
+					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml), or obj to convert", new File( Tweed.JME ), null ) {
 						@Override
 						public void heresTheFile( File f ) throws Throwable {
+							
+							if ( !f.getName().equals( MiniTransform.INDEX ) ) {
+								MiniTransform.convertToMini( f, new File( Tweed.DATA + "/minimesh" ),
+										() -> addGen( new MiniGen( new File( "minimesh" ), tweed ), true ) );
+								return;
+							}
+							
 							//						removeMeshSources();
 							addGen( new MiniGen( tweed.makeWorkspaceRelative( f.getParentFile() ), tweed ), true );
 						}
@@ -447,11 +442,46 @@ public class TweedFrame {
 					};
 				}
 			} );
+		} else {
+
+			sp.add( "+ gis (2d obj)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
+						public void heresTheFile( File obj ) throws Throwable {
+							removeGISSources();
+							addGen( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
+						};
+					};
+				}
+			} );
+			
+//			sp.add( "+ gis (3d obj)", new Runnable() {
+//				@Override
+//				public void run() {
+//					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
+//						public void heresTheFile( File obj ) throws Throwable {
+//							
+//						};
+//					};
+//				}
+//			} );
+
+			sp.add( "+ gis (gml)", new Runnable() {
+				@Override
+				public void run() {
+
+					new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
+						public void heresTheFile( File gml ) throws Throwable {
+							removeGISSources();
+							tweed.addGML( gml, null );
+						};
+					};
+				}
+			} );
 		}
 
-		
 		sp.show();
-
 	}
 
 	private boolean hasGIS() {
@@ -464,6 +494,7 @@ public class TweedFrame {
 	}
 	
 	protected void removeGISSources() {
+		TweedSettings.settings.resetTrans();
 		removeGens( GISGen.class );
 	}
 
@@ -518,14 +549,18 @@ public class TweedFrame {
 			JOptionPane.showMessageDialog( frame, "no layer selected" );
 			return;
 		}
+		
 
 		tweed.enqueue( new Runnable() {
 			@Override
 			public void run() {
 				gen.gNode.removeFromParent();
+				gen.kill();
 			}
 		} );
 
+		
+		
 		genList.remove( gen );
 
 		Component togo = null;
@@ -534,8 +569,10 @@ public class TweedFrame {
 				togo = c;
 		}
 
-		if ( selectedGen == gen )
+		if ( selectedGen == gen ) {
 			selectedGen = null;
+			setGenUI( null );
+		}
 
 		if ( togo != null )
 			layerList.remove( togo );

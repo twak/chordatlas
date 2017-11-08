@@ -92,4 +92,7 @@ public abstract class Gen {
 			}
 		});
 	}
+
+	public void kill() {
+	}
 }
