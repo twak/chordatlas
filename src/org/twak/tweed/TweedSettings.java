@@ -78,6 +78,8 @@ public class TweedSettings {
 	public double heightThreshold = 4;
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
+
+	public static boolean roofColours = true;
 	
 	public List<Gen> genList = new ArrayList<>();
 	

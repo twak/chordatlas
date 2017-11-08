@@ -182,7 +182,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 
-		JButton clear = new JButton("remove all");
+		JButton clear = new JButton("hide all");
 		clear.addActionListener( new ActionListener() {
 			
 			@Override
@@ -196,7 +196,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			}
 		} );
 		
-		JButton all = new JButton("load all meshes");
+		JButton all = new JButton("load all");
 		all.addActionListener( new ActionListener() {
 			
 			@Override
@@ -245,8 +245,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		JButton align = new JButton("align tool");
 		align.addActionListener( e -> tweed.setTool(new AlignTool(tweed)) );
 		
-		out.add(clear);
 		out.add(all);
+		out.add(clear);
 		out.add(renderLines);
 		out.add(renderTransparent);
 		out.add(align);

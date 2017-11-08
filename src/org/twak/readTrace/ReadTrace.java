@@ -32,6 +32,15 @@ import org.twak.utils.geom.ObjDump;
 
 import com.thoughtworks.xstream.XStream;
 
+/**
+ * $ apitrace trace --o dbg.txt --api gl chromium-browser --tmp-profile --ignore-gpu-blacklist https://www.google.co.uk/maps/@51.515444,-0.1249868,249a,35y,347.1h,56.93t/data=\!3m1\!1e3
+ * $ apitrace dump --blobs dbg.txt > blah
+ * 
+ * (some buffer indicies in the below will need tweaking...)
+ * 
+ * @author twak
+ */
+
 public class ReadTrace {
 
 	private static File CACHE_FILE =  new File("/home/twak/Desktop/frames.xml");

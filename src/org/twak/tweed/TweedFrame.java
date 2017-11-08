@@ -5,6 +5,7 @@ import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -338,7 +339,7 @@ public class TweedFrame {
 
 		JPanel addRemoveLayer = new JPanel();
 		{
-			addRemoveLayer.setLayout( new FlowLayout( FlowLayout.RIGHT ) );
+			addRemoveLayer.setLayout( new GridLayout( 1, 2 ) );
 			layers.add( addRemoveLayer, BorderLayout.SOUTH );
 
 			JButton addLayer = new JButton( "+" );

@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
 
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjDump.Face;
@@ -110,8 +111,6 @@ public class MiniTransform {
 		src.centerVerts();
 		src.transform (transform);
 		
-		//		ObjDump src = new ObjDump( new File( "/home/twak/Downloads/bath_andy_hoskins/Bath_2017_Sample/OBJ/Tile-3-2-1-1.obj" ) );
-
 		long count = src.material2Face.entrySet().stream().mapToInt( x -> x.getValue().size() ).sum();
 		double[] bounds = src.orderVert.stream().collect( new InaxPoint3dCollector() );
 		long targetCount = 5000;
@@ -153,15 +152,24 @@ public class MiniTransform {
 					if ( miniF == null )
 						continue;
 
-					Matrix4d loc = new Matrix4d();
-					loc.setIdentity();
-
-					mt.index.put( dir, loc );
-
+					Matrix4d trans = new Matrix4d();
+					trans.setIdentity();
+					trans.setScale( edgeLength / 255 );
+					trans.setTranslation( new Vector3d(
+							x * edgeLength + bounds[0],
+							y * edgeLength + bounds[2],
+							z * edgeLength + bounds[4]
+							) );
+					
+					Matrix4d pack = new Matrix4d( trans );
+					pack.invert();
+					
 					ObjDump mini = new ObjDump();
-
 					miniF.stream().forEach( f -> mini.addFaceFrom( f, src ) );
+					mini.transform( pack );
+					
 					mini.dump( new File( new File( outfile, "" + dir ), OBJ ) );
+					mt.index.put( dir, trans );
 
 					dir++;
 				}

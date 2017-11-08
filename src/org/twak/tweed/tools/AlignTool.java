@@ -5,12 +5,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
+import javax.swing.JTextArea;
 import javax.swing.text.NumberFormatter;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
@@ -269,7 +268,7 @@ public class AlignTool extends Tool {
 		
 		p.setLayout( new ListDownLayout() );
 		
-		JButton w = new JButton( "write to index.xml");
+		JButton w = new JButton( "save alignment");
 		w.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
