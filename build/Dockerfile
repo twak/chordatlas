@@ -29,7 +29,7 @@ WORKDIR /tmp
 
 RUN for r in   jutils campskeleton siteplan chordatlas; \
     do \
-		git clone --branch bigsur_docker "https://github.com/twak/$r.git"; \
+		git clone --branch master "https://github.com/twak/$r.git"; \
     	cd $r; \
 		mvn install; \
 		cd ..; \
