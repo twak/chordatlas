@@ -646,7 +646,7 @@ public class Prof extends ArrayList<Point2d> {
 		double A = 0.4; // simple = 0.4
 		double B = 0.1; // simple = 1;
 		
-		double busHeight = 2;
+		double firstFloorHeight = 2;
 		
 		P.MIN_LINES = Math.max(1, in.size() * A );
 		
@@ -673,15 +673,15 @@ public class Prof extends ArrayList<Point2d> {
 			}
 			
 			protected double getTolNearLine(Point2d p) {
-				return P.FL_NEAR_LINE * (p.y < avgMinY + busHeight ? 5 : B);
+				return P.FL_NEAR_LINE * (p.y < avgMinY + firstFloorHeight ? 5 : B);
 			};
 			
 			protected double getTolNearLine2(Point2d p) {
-				return P.FL_NEAR_LINE_2 * (p.y < avgMinY + busHeight ? 10 : B);
+				return P.FL_NEAR_LINE_2 * (p.y < avgMinY + firstFloorHeight ? 10 : B);
 			};
 			
 			protected double getTolRemoveAngle(Line l) {
-				return l.start.y < avgMinY + busHeight ? Math.PI * 0.5 : Math.PI * 0.2;
+				return l.start.y < avgMinY + firstFloorHeight ? Math.PI * 0.5 : Math.PI * 0.2;
 			};
 			
 		}.result.all;
