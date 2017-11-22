@@ -70,7 +70,7 @@ public class SSBuilder {
 
 	private SkelFootprint updateVars() {
 		
-		SkelFootprint sf = new SkelFootprint();
+		SkelFootprint sf = new SkelFootprint(profileGen.tweed);
 
 		sf.megaFacadeAreaThreshold = megaArea.getValue() * 60 / 1000.;
 		SkelFootprint.gisInterior  = gisInterior.getValue() / 1000.;
@@ -105,8 +105,9 @@ public class SSBuilder {
 			@Override
 			public void run() {
 				
-				SkelFootprint.solve( solverState, new ProgressMonitor( null, "optimising", "result.getName()", 0, 100 ), 
-						new File (Tweed.SCRATCH+"solver_state.xml"), Long.MAX_VALUE );
+				File result = new File (Tweed.SCRATCH+"solver_state.xml");
+				SkelFootprint.solve( solverState, new ProgressMonitor( null, "optimising", result.getName(), 0, 100 ), 
+						result, Long.MAX_VALUE );
 
 				profileGen.tweed.frame.removeGens( SkelGen.class );
 				profileGen.tweed.frame.addGen( new SkelGen( solverState.mesh, profileGen.tweed, profileGen.blockGen ), true );
@@ -136,6 +137,7 @@ public class SSBuilder {
 		}
 
 		if (SS != null) {
+			System.out.println("done");
 			plot.toPaint.add( profileGen.blockGen.nameCoords() );
 			plot.toPaint.add( SS.mesh );
 			plot.toPaint.add( SS.miniPainter() );

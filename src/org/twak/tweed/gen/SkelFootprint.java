@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,36 +105,57 @@ public class SkelFootprint {
 	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
+	public boolean greedyProfiles = true;
+	
+	public SkelFootprint (Tweed tweed) {
+		this.tweed = tweed;
+	}
+	
+	public SkelFootprint () {
+		this(null); // headless
+	}
 
-	public HalfMesh2 go(List<Line> footprint, SkelGen skelGen, ProgressMonitor m, Tweed tweed ) {
+	public HalfMesh2 go(List<Line> footprint, SkelGen skelGen, ProgressMonitor m ) {
 		
 		this.skelGen = skelGen;
-		this.tweed = tweed;
 		
 		PaintThing.lookup.put( ColorRGBA.class, new ColorRGBAPainter() );
 		PaintThing.debug.clear();
 		
 		SolverState SS;
 
-		SS = buildFootprint( footprint, m, tweed.features, skelGen.blockGen );
-
-		dbgCountProfileEdges( SS );
-
-		if ( SS == null )
-			return null;
-
 		if ( FALSE ) {
+			try {
+				SS = (SolverState) new XStream().fromXML( new FileReader( new File( "/home/twak/data/bath/solver_state.xml" ) ) );
+			} catch ( FileNotFoundException e ) {
+				e.printStackTrace();
+				SS = null;
+			}
+		} else {
 
-			PaintThing.debug.clear();
-			dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
-			SS.debugSolverResult();
-			m.close();
-			return SS.mesh;
+			SS = buildFootprint( footprint, m, tweed.features, skelGen.blockGen );
+
+			dbgCountProfileEdges( SS );
+
+			if ( SS == null )
+				return null;
+
+			if ( FALSE ) {
+
+				PaintThing.debug.clear();
+				dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
+				SS.debugSolverResult();
+				m.close();
+				return SS.mesh;
+			}
+
+			solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
 		}
-
-		solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
-
-		if ( TRUE ) 
+		
+		if (greedyProfiles)
+			assignGreedyProfiles( SS );
+		
+		if ( TRUE )
 			postProcesss(SS);
 		
 		dbgCountProfileEdges( SS );
@@ -162,7 +185,7 @@ public class SkelFootprint {
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
 		
-		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
+//		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
 		
 		Set<MegaFeatures> mfs = SS.minis.keySet();
 
@@ -182,6 +205,7 @@ public class SkelFootprint {
 			}
 
 		findRoofColor           ( SS.mesh );
+		
 		propogateProfilesMinis  ( SS.mesh );
 		cleanFootprints         ( SS.mesh );
 		cleanFootprints         ( SS.mesh );
@@ -225,8 +249,8 @@ public class SkelFootprint {
 		MultiMap<MegaFeatures, MFPoint> minis = features == null ? null : features.createMinis(blockGen);
 		Map<SuperEdge, double[]> profFit  = new HashMap(); 
 		HalfMesh2 mesh = boundMesh( footprint );
-		globalProfs = new ArrayList();
-
+		globalProfs = null;
+		
 		Collections.sort( footprint, megaAreaComparator );
 
 		for ( Line l : footprint ) {
@@ -246,8 +270,12 @@ public class SkelFootprint {
 
 		m.setProgress( 2 );
 
-		findProfiles( footprint, globalProfs, profFit );
-		calcProfFit( mesh, globalProfs, profFit, m );
+		if (!greedyProfiles)  {
+			globalProfs = new ArrayList();
+			findProfiles( footprint, globalProfs );
+			calcProfFit( mesh, globalProfs, profFit, m );
+		}
+		
 
 		if ( FALSE && profMergeTol > 0 ) 
 			mergeOnProfiles (mesh, footprint);
@@ -261,14 +289,16 @@ public class SkelFootprint {
 			if ( TweedSettings.roofColours ) { //color roofs
 
 				if ( blockGen.hasTextures && blockGen.transparency != 1 ) {
-					JOptionPane.showMessageDialog( tweed.frame(), "Error sampling roof colors!\nI'll fix that; try again!" );
+					if (tweed != null)
+						JOptionPane.showMessageDialog( tweed.frame(), "Error sampling roof colors!\nI'll fix that; try again!" );
 					m.close();
 					blockGen.transparency = 1;
 					blockGen.calculateOnJmeThread();
 
 					return null;
 				} else if ( !blockGen.hasTextures ) {
-					JOptionPane.showMessageDialog( tweed.frame(), "No texture for roof colours;\nI'll disable that for you!" );
+					if (tweed != null)
+						JOptionPane.showMessageDialog( tweed.frame(), "No texture for roof colours;\nI'll disable that for you!" );
 					TweedSettings.roofColours = false;
 					break;
 				}
@@ -340,7 +370,7 @@ public class SkelFootprint {
 							if ( se2.profLine == null && (se2.over == null || ((SuperEdge)se2.over).profLine == null ) && 
 									e2.over != null && e2.line().intersects(proj) != null && 
 									Mathz.inRange( e2.line().absAngle( proj ), 0.25 * Math.PI, 0.75 * Math .PI)) {
-								crossedBy.get(e2).d += ProfileGen.HORIZ_SAMPLE_DIST;
+								crossedBy.get(e2).d += TweedSettings.settings.profileHSampleDist;
 							}
 						}
 					}
@@ -964,7 +994,7 @@ public class SkelFootprint {
 			}
 		
 
-		if ( sf.heights.size() < 5 )
+		if ( sf.heights.size() < 2 )
 			sf.height = -Double.MAX_VALUE;
 		else if ( TweedSettings.settings.useGis &&  insideGIS  <  gisInterior * outsideGIS )
 			sf.height = -missCost;
@@ -1168,7 +1198,39 @@ public class SkelFootprint {
 	}
 
 
-	private void findProfiles( List<Line> footprint, List<Prof> globalProfs, Map<SuperEdge, double[]> profFit ) {
+	private void assignGreedyProfiles( SolverState SS ) {
+
+		Prof defaultProf = defaultProf( null );
+
+		for ( HalfFace f : SS.mesh )
+			for ( List<HalfEdge> le : f.parallelFaces( 0.1 ) ) {
+
+				List<Prof> profs = new ArrayList();
+
+				SuperLine sl = null;
+
+				for ( HalfEdge he : le ) {
+					sl = ( (SuperEdge) he ).profLine;
+					if ( sl != null ) {
+						MegaFacade mf = sl.getMega();
+						if (mf != null)
+							profs.addAll( mf.getTween( he.start, he.end, 0 ) );
+					}
+				}
+
+				Prof p = null;
+
+				if ( sl != null && !profs.isEmpty() )
+					p = Prof.parameterize( sl, profs );
+				else
+					p = defaultProf;
+
+				for ( HalfEdge he : le )
+					( (SuperEdge) he ).prof = p;
+			}
+	}
+
+	private void findProfiles( List<Line> footprint, List<Prof> globalProfs ) {
 		
 		MultiMap<SuperLine,List<Prof>> profSets = new MultiMap<>();
 
@@ -1178,20 +1240,6 @@ public class SkelFootprint {
 			profileRuns( (SuperLine) l, profSets );
 
 		Prof example = null;
-		
-		if ( false ) {
-			Node dbg = new Node();
-			for ( SuperLine sl : profSets.keySet() ) {
-
-				for ( List<Prof> lp : profSets.get( sl ) ) {
-					ColorRGBA color = new ColorRGBA( (float) Math.random(), (float) Math.random(), (float) Math.random(), 1 );
-
-					for ( Prof p : lp )
-						p.render( tweed, dbg, color, 1 );
-				}
-			}
-			tweed.frame.addGen( new JmeGen( "global src", tweed, dbg ), true );
-		}
 		
 		System.out.println("cleaning "+ profSets.values().stream().flatMap( c -> c.stream() ).count() +" profiles...");
 		
@@ -1208,6 +1256,8 @@ public class SkelFootprint {
 
 		Iterator<Prof> git = globalProfs.iterator();
 		int c = 0;
+		
+		// remove trivial
 		while (git.hasNext()) {
 			Prof p = git.next();
 			if (p.size() < 2)
@@ -1227,21 +1277,29 @@ public class SkelFootprint {
 		
 
 		System.out.println( "found " + globalProfs.size() + " interesting profiles" +" from " + profSets.size() +" runs" );
-//		removeSimilar( globalProfs, 40 );// TweedSettings.settings.profileCount );
-		removeSimilarOld( globalProfs, TweedSettings.settings.profilePrune );
-		
+		removeSimilarB( globalProfs, TweedSettings.settings.profilePrune );
 		System.out.println( "after remove similar " + globalProfs.size() );
+		
+		// insert single vertical profile
 		{
-			Prof vertical = new Prof( example ); 
-			vertical.clear();
-			vertical.add( new Point2d() );
-			vertical.add( new Point2d( 0, 20 ) );
+			Prof vertical = defaultProf( example );
 			globalProfs.add( 0, vertical );
 		}
 		
 	}
+
+	private static Prof defaultProf( Prof example ) {
+		
+		Prof vertical = example == null ? new Prof() : new Prof( example ); 
+		vertical.clear();
+		vertical.add( new Point2d() );
+		vertical.add( new Point2d( 0, 20 ) );
+		return vertical;
+	}
 	
-	private void removeSimilar( List<Prof> globalProfs, int count ) {
+	
+	@SuppressWarnings( "unused" )
+	private void removeSimilarA( List<Prof> globalProfs, int count ) {
 
 		class PPS implements Comparable<PPS>{
 			Prof a, b;
@@ -1283,7 +1341,7 @@ public class SkelFootprint {
 		
 	}
 	
-	private void removeSimilarOld( List<Prof> globalProfs, double tol ) {
+	private void removeSimilarB( List<Prof> globalProfs, double tol ) {
 
 		Iterator<Prof> pit = globalProfs.iterator();
 		
@@ -1332,7 +1390,7 @@ public class SkelFootprint {
 			{
 				
 //				if ( (Math.random() > 0.95 || i == mf.hExtentMax - 1)  ){//0.5 / ProfileGen.HORIZ_SAMPLE_DIST) {
-					if (i - start > 0.5 / ProfileGen.HORIZ_SAMPLE_DIST) {
+					if (i - start > 0.5 / TweedSettings.settings.profileHSampleDist ) {
 					
 					List<Prof> lp = IntStream.range( start, i+1 ).
 							mapToObj( p -> mf.profiles.get(p) ).
@@ -1535,7 +1593,7 @@ public class SkelFootprint {
 
 								//							p = p.moveToX0();
 
-								p.render( tweed, tweed.debug, ColorRGBA.Blue, (float) ProfileGen.HORIZ_SAMPLE_DIST );
+								p.render( tweed, tweed.debug, ColorRGBA.Blue, (float) TweedSettings.settings.profileHSampleDist );
 							}
 
 							Point3d pt = mid.to3d( mid.get( 0 ) );

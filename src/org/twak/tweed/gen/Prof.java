@@ -1,6 +1,5 @@
 package org.twak.tweed.gen;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,18 +29,17 @@ import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaintU;
+import org.twak.utils.Pair;
+import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.ConsecutiveItPairs;
 import org.twak.utils.collections.ConsecutivePairs;
-import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.streams.InAxDoubleArray;
 import org.twak.utils.ui.Rainbow;
-import org.twak.utils.Pair;
-import org.twak.utils.PanMouseAdaptor;
 import org.twak.viewTrace.Bin;
 import org.twak.viewTrace.FindLines;
 import org.twak.viewTrace.ObjSlice;
@@ -718,8 +716,8 @@ public class Prof extends ArrayList<Point2d> {
 		} ); 
 		
 		
-		for (Line l : llines)
-			PaintThing.debug( new Color(170,0,255), 2f, new Line( l.start.x+5, -l.start.y, l.end.x+5, -l.end.y ) );
+//		for (Line l : llines)
+//			PaintThing.debug( new Color(170,0,255), 2f, new Line( l.start.x+5, -l.start.y, l.end.x+5, -l.end.y ) );
 
 		
 		Line lastL = null;
@@ -1252,7 +1250,7 @@ public class Prof extends ArrayList<Point2d> {
 
 			while ( cit.hasNext() ) {
 				Cluster<Wrapper> cw = cit.next();
-				if ( cw.getPoints().size() < 2 / ProfileGen.HORIZ_SAMPLE_DIST ) {
+				if ( cw.getPoints().size() < 2 / TweedSettings.settings.profileHSampleDist ) {
 					cit.remove();
 					double cMeanY = cw.getPoints().stream().mapToDouble( x -> x.pt[ 1 ] ).average().getAsDouble();
 

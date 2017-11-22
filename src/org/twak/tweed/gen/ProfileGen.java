@@ -81,16 +81,11 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 	
 	double totalPlanLineLength = 0;
 	
-	static double HORIZ_SAMPLE_DIST = 0.2; // sensible defaults, now overwritten by tweedSettings
-	static double HEIGHT_DELTA = 0.5;
 	
 	public ProfileGen( BlockGen blockGen, LoopL<Point2d> gis, Tweed tweed ) {
 
 		super( "profiles", tweed );
 
-		HORIZ_SAMPLE_DIST = 1;//TweedSettings.settings.profileHSampleDist;
-		HEIGHT_DELTA = 0.5;//TweedSettings.settings.profileVSampleDist;
-		
 		tweed.frame.removeGens( ProfileGen.class );
 		tweed.frame.removeGens( JmeGen.class );
 		
@@ -104,12 +99,13 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		this.extent = blockGen.getCroppedMesh().findExtent();
 		this.gisBias = new GBias ( Loopz.toGraph( this.gis ), 1 );
 		
-		new Thread(() -> faces = findMegaFaces( HEIGHT_DELTA ) ).start();
+		new Thread(() -> faces = findMegaFaces( TweedSettings.settings.profileVSampleDist ) ).start();
 	}
 
 	public double getHeight (int i) {
-		return this.extent[2] + i * HEIGHT_DELTA;
+		return this.extent[2] + i * TweedSettings.settings.profileVSampleDist;
 	}
+	
 	
 	private static class LineAtHeight {
 		
@@ -130,8 +126,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			this.goodLength = line.length();
 			for (Line l2 : others ) { 
 				double dist = line.distance( l2 ); // subtract from length lines moving in other direction
-				if (line.absAngle( l2 ) > 0.7 * Math.PI && dist < 5 ) // fucking bus
-					goodLength -= l2.length() *   ( 5-dist ) / 5;
+				if (line.absAngle( l2 ) > 0.7 * Math.PI && dist < TweedSettings.settings.lowOccluderFilter ) // fucking bus
+					goodLength -= l2.length() *   ( TweedSettings.settings.lowOccluderFilter-dist ) / TweedSettings.settings.lowOccluderFilter;
 			}
 			
 		}
@@ -157,9 +153,10 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		@Override
 		public int compare( LineAtHeight o1, LineAtHeight o2 ) {
 
+			
 			return Double.compare ( 
-					( getHeight ( o2.height ) < 4 ? 0.1 : 1 ) * o2.goodLength,
-					( getHeight ( o1.height ) < 4 ? 0.1 : 1 ) * o1.goodLength
+					( getHeight ( o2.height ) < TweedSettings.settings.lowOccluderFilter ? 0.1 : 1 ) * o2.goodLength,
+					( getHeight ( o1.height ) < TweedSettings.settings.lowOccluderFilter ? 0.1 : 1 ) * o1.goodLength
 					);
 		}
 		
@@ -197,7 +194,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			this.origin = origin;
 			this.oLen = origin.line.length();
 			
-			pCount = (int) Math.max (2, origin.line.length() / HORIZ_SAMPLE_DIST );
+			pCount = (int) Math.max (2, origin.line.length() /  TweedSettings.settings.profileHSampleDist );
 			pLength = oLen / pCount;
 			
 			normal = origin.line.dir();
@@ -304,7 +301,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 				Point3d start3 = new Point3d(start2.x, hd, start2.y);
 				
 				Prof prof = Prof.buildProfile( pg.blockGen.getCroppedMesh(), oLine, start3,  
-						pg.getHeight( hExtent[MIN] ) - HEIGHT_DELTA, pg.getHeight ( hExtent[MAX] ) +HEIGHT_DELTA,
+						pg.getHeight( hExtent[MIN] ) - TweedSettings.settings.profileVSampleDist,
+						pg.getHeight( hExtent[MAX] ) + TweedSettings.settings.profileVSampleDist,
 						dRange.get(i)[MIN], dRange.get(i)[MAX],
 						pg.tweed, pg.gNode );
 				
@@ -402,8 +400,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 				try {
 					LineSoup soup = new LineSoup ( ObjSlice.sliceTri(blockGen.getCroppedMesh(), getHeight( hi ), majorAxis ) );
 					FindLines foundLines = new FindLines(soup, 
-								null,
-//									TweedSettings.settings.useGis ? gisBias : null,
+									TweedSettings.settings.useGis ? gisBias : null,
 							-1, null, P);
 					foundLines.result.all.stream().forEach( x -> lines.add(new LineAtHeight( _i, delta, x, foundLines.result.all)) );
 					slices.put( hi, foundLines.result );
@@ -749,7 +746,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		JButton writeProfiles = new JButton("dump profs");
 		writeProfiles.addActionListener( ae -> writeProfiles() );
 		
-		JButton stateBuilder = new JButton("preview results");
+		JButton stateBuilder = new JButton("segmenter ui");
 		stateBuilder.addActionListener( ae -> new SSBuilder(this, tweed.features) );
 		
 		JPanel out = new JPanel( new ListDownLayout() );
@@ -806,7 +803,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		
 		for (Prof p : ofs) {
 			Geometry g = new Geometry();
-			g.setMesh( p.renderStrip( HORIZ_SAMPLE_DIST/2, null ) );
+			g.setMesh( p.renderStrip(  TweedSettings.settings.profileHSampleDist/2, null ) );
 			g.setMaterial( mat );
 			n.attachChild( g );
 		}

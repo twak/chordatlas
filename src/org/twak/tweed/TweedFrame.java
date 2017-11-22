@@ -301,7 +301,7 @@ public class TweedFrame {
 			};
 		} );
 
-		JMenuItem obj = new JMenuItem( "export obj", KeyEvent.VK_E );
+		JMenuItem obj = new JMenuItem( "export obj...", KeyEvent.VK_E );
 		obj.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_E, ActionEvent.CTRL_MASK ) );
 		menu.add( obj );
 		obj.addActionListener( new java.awt.event.ActionListener() {

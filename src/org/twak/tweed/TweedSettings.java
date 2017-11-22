@@ -82,6 +82,7 @@ public class TweedSettings {
 	public static boolean roofColours = true;
 	
 	public List<Gen> genList = new ArrayList<>();
+	public double lowOccluderFilter = 4; // "bus filter"
 	
 	public TweedSettings() {
 	}

@@ -211,40 +211,37 @@ public class GurobiSkelSolver {
 				}
 			}
 			
-			if (false)
-			for (HalfEdge he : edges) {
-				if ( he.over != null && he.next.over == null ) { // face comes to boundary
-					
-					boolean viz = false;
-					EdgeVars ei = edgeInfo.get( he );
-					if (ei.edgeNoMini != null) {
-//						if ( ei.edgeNoMini.get( DoubleAttr.X ) > 0.5 )
+			if ( false )
+				for ( HalfEdge he : edges ) {
+					if ( he.over != null && he.next.over == null ) { // face comes to boundary
+
+						boolean viz = false;
+						EdgeVars ei = edgeInfo.get( he );
+						if ( ei.edgeNoMini != null ) {
 							viz = true;
+						}
+
+						if ( viz )
+							PaintThing.debug.put( "dd", new Point2d( he.end ) );
+
 					}
-//					else if ( ei.isEdge.get( DoubleAttr.X ) > 0.5  ) {
-//						viz = true;
-//					}
-					
-					if (viz)
-						PaintThing.debug.put("dd", new Point2d(he.end));
-						
 				}
-			}
-			
-			for (HalfEdge e : edges) {
-				
-				EdgeVars ei = edgeInfo.get(e);
-				GRBVar plot = ei.debug;
-				
-				if (plot != null) {// && plot.get(GRB.DoubleAttr.X) > 0.5 ) { 
-					Point2d o = new Point2d (e.end);
-					PaintThing.debug.put( 1, o );
+
+			if ( globalProfs != null )
+				for ( HalfEdge e : edges ) {
+
+					EdgeVars ei = edgeInfo.get( e );
+					GRBVar plot = ei.debug;
+
+					if ( plot != null ) {// && plot.get(GRB.DoubleAttr.X) > 0.5 ) { 
+						Point2d o = new Point2d( e.end );
+						PaintThing.debug.put( 1, o );
+					}
+
+					int p = index( ei.profile );
+					( (SuperEdge) e ).profI = p;
+					( (SuperEdge) e ).prof = p < 0 ? null : globalProfs.get( p );
 				}
-				
-				int p = index( ei.profile );
-				((SuperEdge)e).profI = p;
-				((SuperEdge)e).prof = p < 0 ? null : globalProfs.get(p);
-			}
 
 			dumpModelStats(edges);
 			
@@ -268,7 +265,8 @@ public class GurobiSkelSolver {
 		buildIsEdge();
 		buildBadGeom( false );
 		
-		buildProfiles();
+		if (globalProfs != null)
+			buildProfiles();
 		
 		if (minis != null && !minis.isEmpty())
 			buildMini();
@@ -1035,7 +1033,7 @@ public class GurobiSkelSolver {
 
 	private void dumpModelStats(List<HalfEdge> edges) throws GRBException {
 
-		print ("profile count " + globalProfs.size());
+		print ("profile count " + (globalProfs == null ? 0 : globalProfs.size()));
 		print ("acute corner constraints " + countBadCorners);
 		print ("parallel edge constraints " + countBadEdges);
 		print ("nearby profile terms " + countNearbyProfiles);

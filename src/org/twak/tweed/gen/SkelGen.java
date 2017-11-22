@@ -31,6 +31,7 @@ import org.twak.siteplan.campskeleton.Siteplan;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -62,21 +63,24 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public HalfMesh2 toRender = null;
 
-	public SkelFootprint skelFootprint = new SkelFootprint();
+	public SkelFootprint skelFootprint;
 	protected List<Line> footprint;
 	
 	public SkelGen() {
 		super("headless", null);
+		skelFootprint = new SkelFootprint();
 	}
 	
 	public SkelGen( Tweed tweed ) {
 		super( "house", tweed );
+		skelFootprint = new SkelFootprint(tweed);
 	}
 	
 	public SkelGen( List<Line> footprint, Tweed tweed, BlockGen blockGen ) {
 		super( "model", tweed );
 		this.footprint = footprint;
 		this.blockGen = blockGen;
+		skelFootprint = new SkelFootprint(tweed);
 		
 		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
 
@@ -101,7 +105,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 	
 	private void doCalc(ProgressMonitor m) {
-		toRender = skelFootprint.go(footprint, this, m, tweed);
+		toRender = skelFootprint.go(footprint, this, m);
 	}
 
 	@Override
@@ -178,7 +182,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		Collections.sort( sf.maxProfHeights );
 		
-		return sf.maxProfHeights.get( ( int ) (sf.maxProfHeights.size() * 0.9 ) ) + ProfileGen.HEIGHT_DELTA;
+		return sf.maxProfHeights.get( ( int ) (sf.maxProfHeights.size() * 0.9 ) ) + TweedSettings.settings.profileVSampleDist;
 	}
 
 	private static PlanSkeleton buildCamp( SuperFace sf, Double cap ) {
