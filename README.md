@@ -1,5 +1,3 @@
-# !! this is a work in progress, it should be easier to build/use by the end of November !!
-
 # chordatlas: BigSUR implementation
 
 chordatlas is an urban data fusion research platform from UCL, in particular it contains an implementation of [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/).
@@ -16,7 +14,7 @@ code is alpha "academic grade": use at your own risk...
 
 ## data
 
-we don't have a license to distrubte the data used in the paper. [here]() is a small project that you can unzip and run. [a video]() might help with the interface.
+we don't have a license to distrubte the data used in the paper. eventually you'll be able to download a synthetic demo project [here](), and view [a video]() that might help with the interface.
 
 for the adventurous hacker: 
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))
@@ -33,10 +31,10 @@ docker run -v ${PWD}:/output twak/chordatlas update_and_export.sh
 ```
 
 A more complex way is to install the deps:
-- [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer)
 - [java 1.8](http://openjdk.java.net/install/)
 - [maven](https://maven.apache.org/)
 - run `mvn install` for [jutils](https://github.com/twak/jutils), [campskeleton](https://github.com/twak/campskeleton), [siteplan](https://github.com/twak/siteplan)
+- [gurobi 7.5](http://www.gurobi.com/downloads/gurobi-optimizer), installed into maven (` mvn install:install-file -Dfile=/opt/gurobi/gurobi751/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=751 -Dpackaging=jar`)
 - run `mvn package assembly:single` for [chordatlas]()
 
 ## cite
