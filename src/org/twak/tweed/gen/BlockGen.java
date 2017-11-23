@@ -256,7 +256,7 @@ public class BlockGen extends ObjGen {
 		
 		ProcessBuilder pb = new ProcessBuilder( 
 				"nvidia-docker", "run", "-v", r+":/output",
-				"jfemiani/segnet-facade:cuda8-cudnn3", "bash", "-c", "source inference /output/files.txt" );
+				"twak/segnet-facade", "bash", "-c", "source inference /output/files.txt" );
 		
 		Process p;
 		
