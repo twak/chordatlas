@@ -3,6 +3,9 @@ package org.twak.tweed.tools;
 import java.awt.Color;
 import java.util.List;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Gen;
@@ -116,6 +119,11 @@ public class PlaneTool extends Tool {
 	@Override
 	public String getName() {
 		return "draw planes";
+	}
+	
+	@Override
+	public void getUI( JPanel genUI ) {
+		genUI.add( new JLabel("planes filter the rendered panoramas") );
 	}
 
 }

@@ -97,11 +97,11 @@ public class Tweed extends SimpleApplication {
 
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
-			new HouseTool(this), 
+			new HouseTool(this) 
 //			new HandleTool(this), 
 //			new AlignTool(this), 
 //			new FacadeTool(this),
-			new PlaneTool(this) 
+//			new PlaneTool(this) 
 };
 	
 	public Tool tool;

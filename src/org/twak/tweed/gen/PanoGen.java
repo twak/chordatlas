@@ -37,6 +37,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.AlignTool;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.tweed.tools.PlaneTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
@@ -268,6 +269,10 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		align.addActionListener( e -> tweed.setTool(new FacadeTool(tweed)) );
 		ui.add( align );
 		
+		JButton plane = new JButton("plane tool");
+		plane.addActionListener( e -> tweed.setTool(new PlaneTool(tweed)) );
+		ui.add( plane );
+				
 		return ui;
 	}
 
