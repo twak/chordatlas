@@ -11,4 +11,4 @@ cd /tmp/chordatlas
 mvn package
 
 mkdir -p /output
-cp /tmp/chordatlas/target/*with-dependencies.jar /output
+cp /tmp/chordatlas/target/*.jar /output
