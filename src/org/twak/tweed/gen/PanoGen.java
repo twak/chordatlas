@@ -38,6 +38,7 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.AlignTool;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.PlaneTool;
+import org.twak.utils.Filez;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
@@ -157,9 +158,11 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 			panos.clear();
 			
-			for ( File f : tweed.toWorkspace( folder).listFiles() )
-				if ( f.getName().endsWith( ".jpg" ) )
+			for ( File f : tweed.toWorkspace( folder).listFiles() ) {
+				String extn = Filez.getExtn( f.getName() );
+				if ( extn.equals( "jpg" ) || extn.equals( "png" ) )
 					createPanoGen( f, panos );
+			}
 			
 			try {
 				new XStream().toXML( panos, new FileOutputStream( meta ) );
