@@ -35,6 +35,8 @@ import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.tools.AlignTool;
+import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
@@ -262,23 +264,9 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.removeAll();
 		
-		JButton reset = new JButton( "decache" );
-		reset.addActionListener( new ActionListener() {
-			
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				
-				getMetaFile().delete();
-				calculateOnJmeThread();
-				
-				tweed.enqueue( new Runnable() {
-					public void run() {
-						
-					};
-				});
-				
-			}
-		} );
+		JButton align = new JButton("facade tool");
+		align.addActionListener( e -> tweed.setTool(new FacadeTool(tweed)) );
+		ui.add( align );
 		
 		return ui;
 	}

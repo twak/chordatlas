@@ -409,7 +409,7 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 
 				int c = 0;
 				for ( Pano pg : nearby )
-					render( new File( Tweed.DATA + "facades/0/" + ( c++ ) ), 40f, pg, null, "orthographic" );
+					render( new File( Tweed.DATA + "facades/0/" + ( c++ ) ), 40f, pg, null, FeatureCache.RENDERED_IMAGE );
 			}
 
 		} );

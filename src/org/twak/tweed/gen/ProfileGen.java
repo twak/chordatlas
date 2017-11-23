@@ -760,7 +760,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		return out;
 	}
 	
-	private void doSkel() {
+	public void doSkel() {
 		tweed.frame.removeGens(SkelGen.class);
 		tweed.frame.addGen ( this.skelGen = new SkelGen( footprint, tweed, blockGen ), true );
 	}

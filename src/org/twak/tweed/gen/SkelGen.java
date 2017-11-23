@@ -88,7 +88,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		m.setMillisToPopup( 0 );
 		
 		new Thread( () -> { 
-			doCalc(m);
+			optimize(m);
 			SkelGen.this.calculateOnJmeThread(); } ).start();
 	}
 	
@@ -104,7 +104,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		m.setMillisToPopup( 0 );
 	}
 	
-	private void doCalc(ProgressMonitor m) {
+	private void optimize(ProgressMonitor m) {
 		toRender = skelFootprint.go(footprint, this, m);
 	}
 

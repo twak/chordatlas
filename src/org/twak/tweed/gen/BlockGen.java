@@ -4,9 +4,18 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -15,15 +24,21 @@ import javax.vecmath.Point3d;
 
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.GISGen.Mode;
+import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
-import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.viewTrace.FacadeFinder;
+import org.twak.viewTrace.FacadeFinder.FacadeMode;
+import org.twak.viewTrace.facades.AlignStandalone2d;
 import org.twak.viewTrace.Slice;
 import org.twak.viewTrace.SliceParameters;
 import org.twak.viewTrace.SliceSolver;
 
+import com.google.common.io.FileWriteMode;
 import com.jme3.asset.ModelKey;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
@@ -84,8 +99,20 @@ public class BlockGen extends ObjGen {
 		
 		JPanel panel = (JPanel) super.getUI();
 
-		JButton profiles = new JButton ("profiles");
+		JButton profiles = new JButton ("find profiles");
 		profiles.addActionListener( e -> doProfile() );
+		
+		JButton panos = new JButton ("render panoramas");
+		panos.addActionListener( e -> renderPanos() );
+		
+		JButton features = new JButton ("find image features");
+		features.addActionListener( e -> segnetFacade() );
+		
+		JButton optimize = new JButton ("run optimizer");
+		optimize.addActionListener( e -> optimize() );
+		
+		JButton viewFeatures = new JButton ("view features");
+		viewFeatures.addActionListener( e -> viewFeatures() );
 		
 		JButton slice = new JButton ("slice");
 		slice.addActionListener( new ActionListener() {
@@ -140,13 +167,122 @@ public class BlockGen extends ObjGen {
 		
 		JTextArea name = new JTextArea( nameCoords() );
 		
-		panel.add(profiles,0 );
-		panel.add( slice, 1 );
+		panel.add(profiles, 0 );
+		panel.add(panos, 1 );
+		panel.add(features, 2 );
+		panel.add(optimize, 3 );
+		panel.add(new JLabel("other:"), 4 );
+		panel.add( slice );
+		panel.add( viewFeatures );
 		panel.add( tooD );
 		panel.add( loadSln );
+		panel.add(new JLabel("name:") );
 		panel.add( name );
 		
 		return panel;
+	}
+
+	private void viewFeatures() {
+		AlignStandalone2d.show( getInputFolder( FeatureCache.FEATURE_FOLDER ).toString() );
+	}
+
+	private void optimize() {
+		
+		if (profileGen == null) {
+			JOptionPane.showMessageDialog( tweed.frame(), "compute profiles first!" );
+			return;
+		}
+		
+		profileGen.doSkel();
+	}
+
+	private void segnetFacade() {
+		
+		File r = getInputFolder( FeatureCache.FEATURE_FOLDER );
+		
+		if (!r.exists()) {
+			JOptionPane.showMessageDialog( tweed.frame(), "no facade images found - have they been rendered?" );
+			return;
+		}
+			
+		
+		File toProcess = new File (r, "files.txt");
+		
+		if (toProcess.exists())
+			toProcess.delete();
+		
+		boolean[] seenResult = new boolean[] {false};
+		
+		StringBuffer sb = new StringBuffer();
+		
+		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException {
+				File f = file.toFile();
+				File result = new File ( f.getParentFile(), FeatureCache.PARAMETERS_YML );
+				
+				if (f.getName().equals( FeatureCache.RENDERED_IMAGE_PNG ) && !result.exists() ) {
+					
+					Path fileR = r.toPath().relativize( file ),
+							resultR = r.toPath().relativize( result.toPath() );
+					
+					
+					seenResult[0] |= resultR.toFile().exists();
+					
+					sb.append ( "/output/" + fileR +"\t"+
+							"/output/" +resultR +"\n" );
+				}
+				
+				return FileVisitResult.CONTINUE;
+			}
+		};
+
+		
+		try {
+			Files.walkFileTree( r.toPath(), fv );
+			FileWriter fw = new FileWriter( toProcess );
+			fw.append( sb );
+			fw.close();
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		
+		if (sb.length() == 0) {
+			JOptionPane.showMessageDialog( tweed.frame(), "all features already computed. nothing to do here!" );
+			return;
+		}
+		
+		System.out.println( "running CNN to find features..." );
+		
+		ProcessBuilder pb = new ProcessBuilder( 
+				"nvidia-docker", "run", "-v", r+":/output",
+				"jfemiani/segnet-facade:cuda8-cudnn3", "bash", "-c", "source inference /output/files.txt" );
+		
+		Process p;
+		
+		try {
+			p = pb.start();
+			Streamz.inheritIO(p.getInputStream(), System.out);
+			Streamz.inheritIO(p.getErrorStream(), System.err);
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	private void renderPanos() {
+		
+		if (getInputFolder( FeatureCache.FEATURE_FOLDER ).exists()) {
+			int result = JOptionPane.showConfirmDialog(tweed.frame(), "feature folder already exists. really re-render?",
+			        "alert", JOptionPane.OK_CANCEL_OPTION);
+			if (result == JOptionPane.CANCEL_OPTION)
+				return;
+		}
+		
+		GISGen.mode = Mode.RENDER_SELECTED_FACADE;
+		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
+		
+		new FacadeTool(tweed).facadeSelected( polies, this );
 	}
 
 	public String nameCoords() {
@@ -216,7 +352,7 @@ public class BlockGen extends ObjGen {
 	public File getInputFolder( String dir ) {
 		return new File (Tweed.DATA, dir+File.separator+nameCoords() );
 	}
-
+	
 	public File getSolutionFile() {
 		return new File (getInputFolder(ResultsGen.SOLUTIONS),ResultsGen.SOLVER_FILE);
 	}

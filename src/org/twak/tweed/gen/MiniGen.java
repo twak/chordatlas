@@ -294,7 +294,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			norm = new Vector3d( -norm.z, 0, norm.x);
 			norm.normalize();
 			
-//			halfPlanes.add ( new LinearForm3D( norm, p.first() ) );
+			halfPlanes.add ( new LinearForm3D( norm, p.first() ) );
 		}
 		
 		Map<File,File> copied = new HashMap<>();
@@ -312,10 +312,9 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 				Matrix4d m = new Matrix4d();
 				m.mul( Jme3z.fromMatrix( trans.offset ), e.getValue() );
 
-				File readFolder = new File( tweed.toWorkspace( root ), e.getKey() + "" );
+				File readFolder = new File( Tweed.toWorkspace( root ), e.getKey() + "" );
 				ObjDump or = new ObjDump( new File( readFolder, "model.obj" ) );
 
-				
 				for ( ObjDump.Material mat : or.material2Face.keySet() ) {
 
 					f:

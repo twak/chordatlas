@@ -98,10 +98,11 @@ public class Tweed extends SimpleApplication {
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
 			new HouseTool(this), 
-			new HandleTool(this), 
+//			new HandleTool(this), 
 //			new AlignTool(this), 
-			new PlaneTool(this), 
-			new FacadeTool(this) };
+//			new FacadeTool(this),
+			new PlaneTool(this) 
+};
 	
 	public Tool tool;
 	
@@ -321,7 +322,7 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.fromOrigin = new Matrix4d( TweedSettings.settings.toOrigin );
 		TweedSettings.settings.fromOrigin.invert();
 		
-		frame.addGen ( new GISGen( toWorkspace( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
+		frame.addGen ( new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
 	}
 
 	private void setCameraPerspective() {
@@ -664,7 +665,7 @@ public class Tweed extends SimpleApplication {
 
 		assetManager.registerLocator(Tweed.JME, FileLocator.class);
 		
-		features = new FeatureCache( new File ( dataDir, "features" ), this );
+		features = new FeatureCache( new File ( dataDir, FeatureCache.FEATURE_FOLDER ), this );
 		
 		setFov( 0 );
 		setCameraSpeed( 0 );

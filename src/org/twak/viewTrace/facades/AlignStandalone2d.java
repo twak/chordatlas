@@ -25,6 +25,7 @@ import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Line;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.utils.ui.WindowManager;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -71,25 +72,25 @@ public class AlignStandalone2d extends JPanel {
 			}
 		} );
 		
-		JButton dump = new JButton("dump");
-		controls.add(dump);
-		dump.addActionListener( new ActionListener() {
-			
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				for (int i = facadeSlide.getMinimum(); i <= facadeSlide.getMaximum(); i++) {
-					facadeSlide.setValue( i );
-					
-					for (int j = imageSlide.getMinimum(); j < imageSlide.getMaximum(); j++) {
-						imageSlide.setValue( j );
-						plot();
-						plot.writeImage(Tweed.SCRATCH+i+"_"+(j==-1? "all":("image_"+j) )+"_align");
-					}
-				}
-			}
-		} );
-		
-		setFolder( facadeFolders.get ( facadeSlide.getValue() ));	
+//		JButton dump = new JButton("dump");
+//		controls.add(dump);
+//		dump.addActionListener( new ActionListener() {
+//			
+//			@Override
+//			public void actionPerformed( ActionEvent e ) {
+//				for (int i = facadeSlide.getMinimum(); i <= facadeSlide.getMaximum(); i++) {
+//					facadeSlide.setValue( i );
+//					
+//					for (int j = imageSlide.getMinimum(); j < imageSlide.getMaximum(); j++) {
+//						imageSlide.setValue( j );
+//						plot();
+//						plot.writeImage(Tweed.SCRATCH+i+"_"+(j==-1? "all":("image_"+j) )+"_align");
+//					}
+//				}
+//			}
+//		} );
+//		
+//		setFolder( facadeFolders.get ( facadeSlide.getValue() ));	
 	}
 
 	private void setFolder( File folder ) {
@@ -132,7 +133,7 @@ public class AlignStandalone2d extends JPanel {
 				
 				ImageFeatures f = features.get(i);
 				
-				plot.toPaint.add( f );
+//				plot.toPaint.add( f );
 			}
 		
 		for (int i = 0; i < features.size(); i++) 
@@ -166,26 +167,24 @@ public class AlignStandalone2d extends JPanel {
 		}
 	};
 
-
-	public static void main (String[] args) {
-		
+	
+	public static JFrame show (String file ) {
 		JFrame go = new JFrame("2D align");
-//		go.add( new AlignStandalone2d( "/home/twak/Downloads/locations_april_6/madrid/") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/regent/features/") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/oviedo/euromaster") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/oviedo/features") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/oviedo/features/12.633729738662927_-21.125014753917988/") );
-		go.add( new AlignStandalone2d( "/home/twak/data/regent/features/652.9836272423689_-455.4482046683377") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/ny/features") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/regent/March_30/congo/") );
-//		go.add( new AlignStandalone2d( "/home/twak/Downloads/media/femianjc/My Book/facade-output/location_11_April/detroit-masks") );
-//		go.add( new AlignStandalone2d( "/home/twak/Downloads/media/femianjc/My Book/facade-output/location_11_April/glasgow-masks-2") );
-//		go.add( new AlignStandalone2d( "/home/twak/Downloads/media/femianjc/My Book/facade-output/location_11_April/madrid-masks-2") );
-//		go.add( new AlignStandalone2d( "/home/twak/data/regent/May_4/cock") );
+		
+		go.add( new AlignStandalone2d( file ) );
 		go.setExtendedState( go.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-		go.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		
 		go.pack();
 		go.setVisible( true );
+		
+		WindowManager.register( go );
+		
+		return go;
+	}
+
+	public static void main (String[] args) {
+		show ( "/home/twak/data/regent/features/652.9836272423689_-455.4482046683377").setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		
 	}
 	
 	 

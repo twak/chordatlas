@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -27,6 +28,7 @@ import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.dbg.Imagez;
 import org.twak.tweed.gen.BlockGen;
+import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.Gen;
@@ -37,6 +39,7 @@ import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.ObjRead;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.FacadeFinder.ToProjMega;
@@ -125,7 +128,7 @@ public class FacadeTool extends SelectTool {
 			@Override
 			public void run() {
 
-				File blockFile = new File (Tweed.DATA + File.separator + "features_rendered"+File.separator+blockName );
+				File blockFile = new File (Tweed.DATA + File.separator + FeatureCache.FEATURE_FOLDER +File.separator+blockName );
 						
 				if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE )
 					try {
@@ -186,7 +189,7 @@ public class FacadeTool extends SelectTool {
 
 //						if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE ) {
 							imageFolder = new File( megaFolder, "" + fc );
-							imageFilename = "orthographic";
+							imageFilename =  FeatureCache.RENDERED_IMAGE;
 //						}
 //						else
 //							imageFolder = new File( blockName );
@@ -287,11 +290,13 @@ public class FacadeTool extends SelectTool {
 	@Override
 	public void getUI( JPanel panel ) {
 
+		panel.setLayout( new ListDownLayout() );
+		
 		JComboBox<GISGen.Mode> allOne = new JComboBox<>();
 
 		allOne.addItem( GISGen.Mode.RENDER_ALL_FACADES );
 		allOne.addItem( GISGen.Mode.RENDER_SELECTED_FACADE );
-		allOne.addItem( GISGen.Mode.RENDER_SAT );
+//		allOne.addItem( GISGen.Mode.RENDER_SAT );
 		allOne.setSelectedItem( GISGen.mode );
 		allOne.addActionListener( new ActionListener() {
 			
@@ -328,5 +333,6 @@ public class FacadeTool extends SelectTool {
 
 		panel.add(allOne);
 		panel.add(granularity);
+		panel.add(new JLabel("click on any block to start"));
 	}
 }

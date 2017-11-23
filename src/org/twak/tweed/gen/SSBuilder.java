@@ -105,7 +105,7 @@ public class SSBuilder {
 			@Override
 			public void run() {
 				
-				File result = new File (Tweed.SCRATCH+"solver_state.xml");
+				File result = new File (Tweed.SCRATCH + "solver_state.xml");
 				SkelFootprint.solve( solverState, new ProgressMonitor( null, "optimising", result.getName(), 0, 100 ), 
 						result, Long.MAX_VALUE );
 

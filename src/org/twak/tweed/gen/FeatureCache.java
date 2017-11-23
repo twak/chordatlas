@@ -44,6 +44,11 @@ import com.thoughtworks.xstream.XStream;
 
 public class FeatureCache {
 
+	public static final String PARAMETERS_YML = "parameters.yml";
+	public static final String RENDERED_IMAGE = "orthographic";
+	public static final String RENDERED_IMAGE_PNG = RENDERED_IMAGE + ".png";
+	public static final String FEATURE_FOLDER = "features";
+	
 	public static class ImageFeatures implements ICanPaint {
 		
 		public File rectified, ortho;
@@ -290,9 +295,9 @@ public class FeatureCache {
 		
 		{			
 			if (Tweed.DATA == null)
-				out.ortho = new File( fFolder, "orthographic.png" ) ;
+				out.ortho = new File( fFolder, RENDERED_IMAGE_PNG ) ;
 			else
-				out.ortho = Paths.get( Tweed.DATA ).relativize( new File( fFolder, "orthographic.png" ).toPath() ).toFile();
+				out.ortho = Paths.get( Tweed.DATA ).relativize( new File( fFolder, RENDERED_IMAGE_PNG ).toPath() ).toFile();
 			
 			File rectFile = new File( fFolder, "rectified.png" );
 			
@@ -344,7 +349,7 @@ public class FeatureCache {
 		
 		try {
 
-			File yFile = new File( fFolder, "parameters.yml" );
+			File yFile = new File( fFolder, PARAMETERS_YML );
 			
 			if ( yFile.exists() ) {
 

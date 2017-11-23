@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.twak.tweed.gen.FeatureCache;
 
 public class FixPython {
 
@@ -19,7 +20,7 @@ public class FixPython {
 
 			@Override
 			public boolean accept( File arg0 ) {
-				if ( arg0.getName().equals("parameters.yml") ) {
+				if ( arg0.getName().equals( FeatureCache.PARAMETERS_YML) ) {
 					try {
 						doit( arg0 );
 					} catch ( Throwable e ) {

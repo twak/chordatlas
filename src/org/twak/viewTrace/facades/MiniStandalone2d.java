@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
+import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Parallel;
@@ -99,7 +100,7 @@ public class MiniStandalone2d extends JPanel {
 			
 			List<File> togo = Files.walk( parentFile.toPath() ).
 				map( p -> p.toFile() ).
-				filter( f -> f.isDirectory() && new File (f, "parameters.yml").exists() ).
+				filter( f -> f.isDirectory() && new File (f, FeatureCache.PARAMETERS_YML).exists() ).
 				collect( Collectors.toList() );
 			
 			new Parallel<File, Integer>( togo, new Work<File, Integer>() {
