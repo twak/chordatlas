@@ -6,7 +6,7 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. download the [chordatlas binary](https://drive.google.com/open?id=0B6r_mUgXfBLdUXhndkR0ZFYxNzA)
+1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
