@@ -2,7 +2,7 @@
 
 chordatlas is an urban data fusion research platform from UCL, in particular it contains an implementation of [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/).
 
-![interface pic which melts your eyes](https://github.com/twak/chordatlas/blob/master/wiki/pic.jpg?raw=true)
+![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
 ## run
 
