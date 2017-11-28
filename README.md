@@ -13,9 +13,9 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 1. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
-code is alpha "academic grade": use at your own risk. Hints:
+code is alpha / academic-grade: use at your own risk. hints:
 
-1. look at the command line for feedback
+1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
 1. use left mouse drag + WASD keys to navigate
 2. arrow keys change brightness and camera speed
 1. left mouse button controls view, right mouse button selects
