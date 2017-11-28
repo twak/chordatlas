@@ -8,7 +8,7 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. if you want to run the optimisation step, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
+1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). you will also need a 8gb nvidia card.
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
