@@ -47,8 +47,8 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.viewTrace.facades.Greeble;
-import org.twak.viewTrace.facades.Greeble.OnClick;
+import org.twak.viewTrace.facades.GreebleSkel;
+import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.RoofTag;
@@ -278,7 +278,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 			}
 		};
 		
-		Greeble greeble = new Greeble( tweed );
+		
+		GreebleSkel greeble = new GreebleSkel( tweed );
+		
 		
 		house = greeble.showSkeleton( output, onclick );
 			

@@ -67,6 +67,8 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	public List<Outer> outers = new ArrayList<>();
 	public ImageFeatures imageFeatures;
 	
+	public String texture = null;
+	
 	public List<Double> 
 			hMargin = new ArrayList<>(), 
 			vMargin = new ArrayList<>();
@@ -533,7 +535,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		return dist;
 	}
 
-	FRect dragging = null;
+	transient FRect dragging = null;
 	
 	@Override
 	public void mouseDown( MouseEvent e, PanMouseAdaptor ma ) {

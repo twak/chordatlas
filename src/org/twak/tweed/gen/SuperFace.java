@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.viewTrace.facades.MiniFacade;
 
 public class SuperFace extends HalfFace {
 
@@ -78,5 +79,16 @@ public class SuperFace extends HalfFace {
 			Collections.sort(heights);
 			height = heights.get( heights.size() / 2 );
 		}
+	}
+
+	public MiniFacade findMiniFacade() {
+		
+		for (HalfEdge e : this) {
+			SuperEdge se = (SuperEdge)e;
+			if (se.mini != null && !se.mini.isEmpty())
+				return se.mini.get( 0 );
+		}
+		
+		return null;
 	}
 }

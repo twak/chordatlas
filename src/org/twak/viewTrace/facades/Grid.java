@@ -21,8 +21,8 @@ public class Grid implements ICanPaint {
 
 	double tol = 0.1;
 	
-	public Id x, y;
 
+	public Id x, y;
 	public Grid (double tol) {
 		this.tol = tol;
 	}
