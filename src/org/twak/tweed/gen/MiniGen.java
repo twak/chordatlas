@@ -130,7 +130,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 				
 				m.setMode( mode );
 
-//				mesh.setMaterial( mat );
+				if (geometry.getMaterial().getName() == null)
+					mesh.setMaterial( mat );
 
 				gNode.attachChild( geometry );
 				
@@ -315,6 +316,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 				File readFolder = new File( Tweed.toWorkspace( root ), e.getKey() + "" );
 				ObjDump or = new ObjDump( new File( readFolder, "model.obj" ) );
 
+				or.computeMissingNormals();
+				
 				for ( ObjDump.Material mat : or.material2Face.keySet() ) {
 
 					f:
@@ -451,7 +454,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 				Point3d tmp = new Point3d();
 				m.transform( c, tmp );
 				return new Point2d(tmp.x, tmp.z);
-			}).collect( Collectors.toList() ) ) {
+			}).collect( Collectors.toList() ) ) { 
 		
 				for (double[] bound : bounds) {
 					 if ( 

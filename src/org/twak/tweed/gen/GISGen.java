@@ -21,6 +21,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
@@ -311,7 +312,22 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			return new Vector2D( l.start.x, l.start.z );
 		} ).collect( Collectors.toList() );
 
-		ConvexHull2D chull = new MonotoneChain( false, 0.0001 ).generate( verts );
+		double tol = 0.0001;
+		ConvexHull2D chull = null;
+		
+		while ( tol < 10 ) {
+			try {
+				chull = new MonotoneChain( false, tol ).generate( verts );
+				tol = 1000;
+			} catch ( ConvergenceException e ) {
+				tol *= 10;
+			}
+		}
+		
+		if (chull == null) {
+			System.out.println( "unable to find hull" );
+			return;
+		}
 
 		Loop<Point3d> hull = new Loop<Point3d>( ( Arrays.stream( chull.getLineSegments() ).map( x -> new Point3d( x.getStart().getX(), 0, x.getStart().getY() ) ).collect( Collectors.toList() ) ) );
 

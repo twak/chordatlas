@@ -123,6 +123,8 @@ public class SkelFootprint {
 		PaintThing.debug.clear();
 		
 		SolverState SS;
+		
+		greedyProfiles = false;
 
 		if ( FALSE ) {
 			try {

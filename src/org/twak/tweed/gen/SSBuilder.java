@@ -109,7 +109,9 @@ public class SSBuilder {
 				SkelFootprint.solve( solverState, new ProgressMonitor( null, "optimising", result.getName(), 0, 100 ), 
 						result, Long.MAX_VALUE );
 
-				profileGen.tweed.frame.removeGens( SkelGen.class );
+				SkelFootprint.postProcesss( solverState );
+				
+//				profileGen.tweed.frame.removeGens( SkelGen.class );
 				profileGen.tweed.frame.addGen( new SkelGen( solverState.mesh, profileGen.tweed, profileGen.blockGen ), true );
 			}
 		}.start();
