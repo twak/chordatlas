@@ -105,7 +105,7 @@ public class SkelFootprint {
 	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
-	public boolean greedyProfiles = true;
+	public boolean greedyProfiles = false;
 	
 	public SkelFootprint (Tweed tweed) {
 		this.tweed = tweed;
