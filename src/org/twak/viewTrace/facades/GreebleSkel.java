@@ -478,38 +478,35 @@ public class GreebleSkel {
 					}
 				}
 			}
-		
-		if (wallTag == null || forFace == null || floorRect == null) {
-			m.add (flat.singleton(), to3d);
-			return;
-		}
-		
-		List<DRectangle> occlusions = new ArrayList<>();
-		for (LineHeight lh : wallTag.occlusions) {
 
-			Point3d s = new Point3d( lh.start.x, lh.start.y, lh.min ), 
-					e = new Point3d( lh.end  .x, lh.end  .y, lh.max );
-			
-			to2dXY.transform( s );
-			to2dXY.transform( e );
+			if ( wallTag == null || forFace == null || floorRect == null ) {
+				m.add( flat.singleton(), to3d );
+				return;
+			}
 
-			occlusions.add( new DRectangle( Math.min( s.x, e.x ), s.z, Math.abs( e.x - s.x ), Math.abs ( e.z - s.z)  ) );
-		}
+			List<DRectangle> occlusions = new ArrayList<>();
+			for ( LineHeight lh : wallTag.occlusions ) {
 
-		if (mf.texture == null)	
-			greebleGrid.buildGrid (
-				floorRect,
-				to3d,
-				forFace,
-				m,
-				wallTag );
-		else
-			greebleGrid.textureGrid (
+				Point3d s = new Point3d( lh.start.x, lh.start.y, lh.min ), e = new Point3d( lh.end.x, lh.end.y, lh.max );
+
+				to2dXY.transform( s );
+				to2dXY.transform( e );
+
+				occlusions.add( new DRectangle( Math.min( s.x, e.x ), s.z, Math.abs( e.x - s.x ), Math.abs( e.z - s.z ) ) );
+			}
+
+			if ( mf.texture == null )
+				greebleGrid.buildGrid (
 					floorRect,
 					to3d,
 					forFace,
 					m,
 					wallTag );
+			else
+				greebleGrid.textureGrid (
+					floorRect,
+					to3d,
+					forFace );
 		
 		}
 	}
