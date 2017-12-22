@@ -67,7 +67,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	public List<Outer> outers = new ArrayList<>();
 	public ImageFeatures imageFeatures;
 	
-	public String texture = null;
+	public String texture = null, normal = null, spec = null;
 	
 	public List<Double> 
 			hMargin = new ArrayList<>(), 
@@ -87,6 +87,9 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
+		this.texture = m.texture;
+		this.normal= m.normal;
+		this.spec = m.spec;
 		
 		Arrays.stream( Feature.values() ).forEach( f -> m.rects.get(f).stream().forEach( r -> rects.put(f, new FRect(r)) ) ); 
 		

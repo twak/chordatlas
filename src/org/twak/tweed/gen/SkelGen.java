@@ -1,7 +1,14 @@
 package org.twak.tweed.gen;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -41,19 +49,23 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.RoofTag;
 import org.twak.viewTrace.facades.WallTag;
 
+import com.google.common.io.Files;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -330,11 +342,19 @@ public class SkelGen extends Gen implements IDumpObjs {
 					@Override
 					public void changed() {
 						PaintThing.debug.clear();
+						
+						setSkel( skel, skel.output , sf);
+						
 						tweed.enqueue( new Runnable() {
 							@Override
 							public void run() {
-//								PlanSkeleton skel = calc (sf);
-								setSkel( skel, skel.output , sf);
+								
+								new Thread( new Runnable() {
+									@Override
+									public void run() {
+										cmpRender(se.toEdit, skel, skel.output, sf);
+									}
+								} ).start();
 							}
 						} );
 					}
@@ -460,6 +480,69 @@ public class SkelGen extends Gen implements IDumpObjs {
 		ui.add(c);
 		
 		tweed.frame.setGenUI(ui);
+	}
+
+	private void cmpRender( MiniFacade toEdit, PlanSkeleton skel, Output output, SuperFace sf ) {
+		
+		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D g = (Graphics2D ) bi.getGraphics();
+		
+		DRectangle bounds = new DRectangle (256,0,256, 256);
+		
+		g.setColor( new Color (0, 48, 255 ) );
+		g.fillRect( 0, 0, 255, 255 );
+		
+		g.setColor( new Color (0,129,250) );
+		for (FRect r : toEdit.getRects( Feature.WINDOW )) {
+			
+			DRectangle w = bounds.normalize( r );
+			
+			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
+		}
+		
+		try {
+			ImageIO.write (bi, "png", new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/input/test/1.png"));
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		
+		do {
+			
+			try {
+				Thread.sleep( 100 );
+			} catch ( InterruptedException e ) {
+				e.printStackTrace();
+			}
+			
+			File[] fz = new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/output/").listFiles();
+			if (fz.length > 0) {
+				
+				for (File f : fz) {
+				
+					String dest;
+					try {
+						java.nio.file.Files.copy( new File (f, "images/1_fake_B.png") .toPath(), new FileOutputStream( tweed.DATA + (dest = "scratch/" + Math.random()+".png ") ) );
+						java.nio.file.Files.delete( f.toPath() );
+						
+						toEdit.texture = dest;
+						
+					} catch ( Throwable e ) {
+						e.printStackTrace();
+					}
+				}
+					
+				break;
+			}
+			
+		}
+		while (true);
+		
+		tweed.enqueue( new Runnable() {
+			@Override
+			public void run() {
+				setSkel( skel, skel.output , sf);
+			}
+		} );
 	}
 	
 	private WallTag findWallMini( LoopL<Bar> points ) {

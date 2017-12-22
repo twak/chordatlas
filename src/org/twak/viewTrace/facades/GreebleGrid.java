@@ -53,6 +53,51 @@ public class GreebleGrid {
 		for ( String mName : mbs.cache.keySet() )
 			for (float[] mCol : mbs.cache.get( mName ).keySet() )		
 				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe ) );
+		
+		for (String textName : mbs.textures.cache.keySet())
+			for (String texture : mbs.textures.cache.get( textName ).keySet() ) {
+				
+				node.attachChild( mb2Tex( output, chain, textName, texture, node, clickMe ) );
+			}
+			
+		
+	}
+	
+	private Geometry mb2Tex( Output output, List<Face> chain, String name, String texture, Node node, ClickMe clickMe ) {
+		Geometry geom;
+		{
+			MatMeshBuilder builder =  mbs.get( name, texture );
+			
+			geom = new Geometry( "material_" +texture, builder.getMesh() );
+			geom.setUserData( Jme3z.MAT_KEY, name );
+			
+			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			mat.setTexture( "DiffuseMap", tweed.getAssetManager().loadTexture( texture ) );
+			
+			if (builder.normal != null)
+				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( builder.normal ) );
+			
+//			mat.setColor( "Ambient", ColorRGBA.Gray );
+			mat.setColor( "Diffuse", ColorRGBA.White );
+//			mat.setColor( "Abient", ColorRGBA.Gray );
+			
+			if (builder.spec != null)
+				mat.setTexture( "SpecularMap", tweed.getAssetManager().loadTexture( builder.spec ) );
+			else
+				mat.setColor( "Specular", ColorRGBA.White );
+			
+//			mat.setFloat("Shininess", 64f); 
+			mat.setBoolean( "UseMaterialColors", true );
+
+			geom.setMaterial( mat );
+			geom.updateGeometricState();
+			geom.updateModelBound();
+
+			if ( chain != null )
+				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
+
+		}
+		return geom;
 	}
 
 	private Geometry mb2Geom( Output output, List<Face> chain, String name, float[] col, Node node, ClickMe clickMe ) {
@@ -120,7 +165,7 @@ public class GreebleGrid {
 		Vector3f u = Jme3z.to(up), o = Jme3z.to( out );
 		
 		wall.addInsideRect( Jme3z.to ( ptt[0] ), o, Jme3z.to(along), u,  
-				 (float)depth, (float)winPanel.width,(float) winPanel.height  );
+				 (float)depth, (float)winPanel.width,(float) winPanel.height, null  );
 		
 		if (sillDepth > 0 && sillHeight > 0)
 			window.addCube( Jme3z.to ( ptt[0] ).add( u.mult( -sillHeight + 0.01f ) ).add( o.mult( -sillDepth) ),
@@ -298,7 +343,7 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void createInnie( DRectangle rect, Matrix4d to3d, MeshBuilder mat, double depth ) {
+	protected void createInnie( DRectangle rect, DRectangle uvs, Matrix4d to3d, MeshBuilder mat, double depth ) {
 		
 		Vector3f[] jpts = findWorldBox( rect, to3d, depth );
 		
@@ -308,8 +353,10 @@ public class GreebleGrid {
 				 u  = jpts[3],
 				 p  = jpts[4];
 		
-		mat.addInsideRect( p, ou, al, u, -(float)depth, (float)rect.width, (float) rect.height  );
-		mat.addCube( lo, u, al, ou, (float) rect.height, (float) rect.width, 0.1f );
+		mat.addInsideRect( p, ou, al, u, -(float)depth, (float)rect.width, (float) rect.height, 
+				new float[][] { 
+			{ (float) uvs.x, (float)uvs.y},
+			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }  );
 	}
 	
 	protected void createDoor( DRectangle door, Matrix4d to3d, MeshBuilder woof, MeshBuilder wood, double depth ) {
@@ -322,7 +369,7 @@ public class GreebleGrid {
 				 u  = jpts[3],
 				 p  = jpts[4];
 		
-		woof.addInsideRect( p, ou, al, u, -(float)depth, (float)door.width, (float) door.height  );
+		woof.addInsideRect( p, ou, al, u, -(float)depth, (float)door.width, (float) door.height, null  );
 		
 		float height = (float)door.height;
 		float width = (float)door.width;
@@ -504,30 +551,62 @@ public class GreebleGrid {
 		if ( mf != null && mf.texture != null ) {
 			
 			Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
-			MatMeshBuilder mmb = mbs.get( "texture", mf.texture );
+			MatMeshBuilder mmb = mbs.get( "texture_"+mf.texture , mf.texture );
+			mmb.spec = mf.spec;
+			mmb.normal = mf.normal;
 
-//			for ( FRect w : mf.rects.get( Feature.WINDOW ) ) {
-//
-//				if ( all.contains( w ) )
-//					g.insert( w, new Griddable() {
-//						@Override
-//						public void instance( DRectangle rect ) {
-//
-//						}
-//					} );
-//			}
+			for ( FRect w : mf.rects.get( Feature.WINDOW ) ) {
+
+				if ( all.contains( w ) )
+					g.insert( w, new Griddable() {
+						@Override
+						public void instance( DRectangle rect ) {
+							createInnie( rect, all.normalize( rect ), to3d, mmb, 0.2f );
+						}
+					} );
+			}
+			
+			for ( FRect w : mf.rects.get( Feature.DOOR ) ) {
+				
+				if ( all.contains( w ) )
+					g.insert( w, new Griddable() {
+						@Override
+						public void instance( DRectangle rect ) {
+							createInnie( rect, all.normalize( rect ), to3d, mmb, 0.5f );
+						}
+					} );
+			}
+			
+			for ( FRect w : mf.rects.get( Feature.MOULDING ) ) {
+				
+				if ( all.contains( w ) )
+					g.insert( w, new Griddable() {
+						@Override
+						public void instance( DRectangle rect ) {
+							createInnie( rect, all.normalize( rect ), to3d, mmb, -0.2f );
+						}
+					} );
+			}
+			
+			for ( DRectangle b : mf.rects.get( Feature.BALCONY ) ) {
+				if ( all.contains( b ) )
+					g.insert( b, new Griddable() {
+						@Override
+						public void instance( DRectangle rect ) {
+							createBalcony( rect, to3d, mbs.BALCONY,0.3 );
+						}
+
+						@Override
+						public boolean noneBehind() {
+							return true;
+						}
+					} );
+			}
 			
 			g.instance( new Griddable() {
 				@Override
 				public void instance( DRectangle rect ) {
-					
-					DRectangle uvs = new DRectangle( rect );
-					
-					uvs.x = uvs.y = 0;
-					uvs.height /= all.height;
-					uvs.width /= all.width;
-
-					mmb.add( rect, uvs, to3d );
+					mmb.add( rect, all.normalize(rect), to3d );
 				}
 			} );
 		}

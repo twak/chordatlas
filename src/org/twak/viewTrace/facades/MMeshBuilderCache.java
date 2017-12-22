@@ -4,6 +4,8 @@ import org.twak.utils.Cach2;
 
 public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 	
+	
+	
 	public MMeshBuilderCache() {
 		super ( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
 	}
@@ -12,7 +14,8 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		return textures.get( name, texture );
 	}
 
-	Cach2<String, String, MatMeshBuilder> textures = new Cach2<String, String, MatMeshBuilder>( (a,b ) -> new MatMeshBuilder( (String)a, (String)b ) );
+	Cach2<String, String, MatMeshBuilder> textures = new Cach2<String, String, MatMeshBuilder>( (a,b ) -> 
+		new MatMeshBuilder( (String)a, (String)b ).ensureUVs() );
 	
 
 	final static float[] 
