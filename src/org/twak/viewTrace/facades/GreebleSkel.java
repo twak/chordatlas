@@ -144,7 +144,7 @@ public class GreebleSkel {
 				
 				// move/scale mf horizontally from mean-image-location to mesh-facade-location 
 				double[] meshSE = findSE ( wt.miniFacade, facadeLine, chain );
-				mf2.scaleX( meshSE[0], meshSE[1] );
+//				mf2.scaleX( meshSE[0], meshSE[1] );
 				
 				// find window locations in 3 space
 				mf2.rects.values().stream()
@@ -506,7 +506,7 @@ public class GreebleSkel {
 				greebleGrid.textureGrid (
 					floorRect,
 					to3d,
-					forFace );
+					mf );
 		
 		}
 	}

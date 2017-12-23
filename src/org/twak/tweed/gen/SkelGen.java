@@ -6,9 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,11 +61,9 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.RoofTag;
 import org.twak.viewTrace.facades.WallTag;
 
-import com.google.common.io.Files;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -293,7 +291,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		GreebleSkel greeble = new GreebleSkel( tweed );
 		
-		
 		house = greeble.showSkeleton( output, onclick );
 			
 		gNode.attachChild( house );
@@ -316,53 +313,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JPanel ui = new JPanel();
 		ui.setLayout( new ListDownLayout() );
 		
-
 		JButton fac = new JButton("edit facade");
-		
-		fac.addActionListener( new ActionListener() {
-			
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				
-				closeSitePlan();
-				
-				if (se.toEdit == null) {
-					se.toEdit = new MiniFacade();
-					se.toEdit.left = 0;
-					se.toEdit.width = se.length();
-					se.toEdit.height = 30;
-					se.toEdit.groundFloorHeight = 2;
-				}
-				
-				Plot p = new Plot (se.toEdit);
-								
-				PaintThing.debug.clear();
-				
-				p.addEditListener( new Changed() {
-					@Override
-					public void changed() {
-						PaintThing.debug.clear();
-						
-						setSkel( skel, skel.output , sf);
-						
-						tweed.enqueue( new Runnable() {
-							@Override
-							public void run() {
-								
-								new Thread( new Runnable() {
-									@Override
-									public void run() {
-										cmpRender(se.toEdit, skel, skel.output, sf);
-									}
-								} ).start();
-							}
-						} );
-					}
-				} );
-			}
-		} );
-		
+		fac.addActionListener( e -> editFacade( skel, sf, se, false ) );
 		ui.add( fac );
+		
+		JButton tex = new JButton("texture facade");
+		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
+		ui.add( tex );
 		
 		
 		JButton camp = new JButton("siteplan");
@@ -489,60 +446,102 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		DRectangle bounds = new DRectangle (256,0,256, 256);
 		
-		g.setColor( new Color (0, 48, 255 ) );
-		g.fillRect( 0, 0, 255, 255 );
+//		g.setColor( new Color (0, 0, 255 ) );
+//		g.fillRect( 255, 0, 255, 255 );
 		
-		g.setColor( new Color (0,129,250) );
-		for (FRect r : toEdit.getRects( Feature.WINDOW )) {
-			
-			DRectangle w = bounds.normalize( r );
-			
-			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
-		}
+		g.setColor( new Color (0, 48, 255 ) );
+		g.fillRect( 256, 0, 256, 255 );
+		
+		DRectangle mini = toEdit.getAsRect();
+		
+		cmpRects( toEdit, g, bounds, mini,new Color (0,207,255) , Feature.DOOR );
+		cmpRects( toEdit, g, bounds, mini,new Color (0,129,250) , Feature.WINDOW );
+		cmpRects( toEdit, g, bounds, mini,new Color (255,80,0) , Feature.MOULDING );
+		cmpRects( toEdit, g, bounds, mini,new Color (32, 255, 224) , Feature.CORNICE );
+		cmpRects( toEdit, g, bounds, mini,new Color (109, 254, 149) , Feature.SILL );
+		cmpRects( toEdit, g, bounds, mini,new Color (175, 0, 0) , Feature.SHOP );
+		
+		String name = System.nanoTime()+"";
 		
 		try {
-			ImageIO.write (bi, "png", new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/input/test/1.png"));
+			
+			
+			ImageIO.write (bi, "png", new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/input/test/"+name+".png"));
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
 		
+		long startTime = System.currentTimeMillis();
+		
 		do {
 			
 			try {
-				Thread.sleep( 100 );
+				Thread.sleep( 50 );
 			} catch ( InterruptedException e ) {
 				e.printStackTrace();
 			}
 			
+			
 			File[] fz = new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/output/").listFiles();
+			
 			if (fz.length > 0) {
 				
 				for (File f : fz) {
 				
 					String dest;
 					try {
-						java.nio.file.Files.copy( new File (f, "images/1_fake_B.png") .toPath(), new FileOutputStream( tweed.DATA + (dest = "scratch/" + Math.random()+".png ") ) );
-						java.nio.file.Files.delete( f.toPath() );
 						
-						toEdit.texture = dest;
+						new File (Tweed.SCRATCH).mkdirs();
 						
+						
+//						File texture = new File (f, "images/"+name+"_real_A.png");
+						File texture = new File (f, "images/"+name+"_fake_B.png");
+						
+						if (texture.exists() && texture.length() > 0) {
+							
+							FileOutputStream fos = new FileOutputStream( Tweed.DATA + 
+									"/"+(dest = "scratch/" + name+".png") );
+							
+							Files.copy( texture.toPath(), fos );
+							
+							fos.flush();
+							fos.close();
+						
+							if (dest != null)
+								toEdit.texture = dest;
+							
+							texture.delete();
+							break;
+						}
 					} catch ( Throwable e ) {
 						e.printStackTrace();
 					}
-				}
 					
-				break;
+				}
 			}
 			
 		}
-		while (true);
+		while ( System.currentTimeMillis() - startTime < 1000 );
 		
 		tweed.enqueue( new Runnable() {
 			@Override
 			public void run() {
 				setSkel( skel, skel.output , sf);
+				tweed.getRootNode().updateGeometricState();
 			}
 		} );
+	}
+
+	public void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, Feature...features ) {
+		for (FRect r : toEdit.getRects(features)) {
+			
+			DRectangle w = bounds.scale ( mini.normalize( r ) );
+			
+			w.y = bounds.getMaxY() - w.y - w.height;
+			
+			g.setColor( col);
+			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
+		}
 	}
 	
 	private WallTag findWallMini( LoopL<Bar> points ) {
@@ -583,21 +582,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		MiniFacade mini;
 		
-		if (se.toEdit == null) { // first time through, use regularizer 
-			 
-			if ( se.mini == null || ( se.mini.isEmpty() && se.proceduralFacade == null ) )
-				mini = null;
-			else {
-				
-				double[] range = findRange( se, s, e, se.proceduralFacade == null ? null : se.proceduralFacade.megafacade );
-				
-				if (range == null)
-					mini = null;
-				else
-					mini = new Regularizer().go( se.mini, range[0], range[1], se.proceduralFacade );
-			}
-		}
-		else // second time through, use the edited results
+//		if (se.toEdit == null) { // first time through, use regularizer 
+//			 
+//			if ( se.mini == null || ( se.mini.isEmpty() && se.proceduralFacade == null ) )
+//				mini = null;
+//			else {
+//				
+//				double[] range = findRange( se, s, e, se.proceduralFacade == null ? null : se.proceduralFacade.megafacade );
+//				
+//				if (range == null)
+//					mini = null;
+//				else
+//					mini = new Regularizer().go( se.mini, range[0], range[1], se.proceduralFacade );
+//			}
+//		}
+//		else // second time through, use the edited results
 			mini = se.toEdit;
 		
 		Tag wall = new WallTag ( se.profLine, se.occlusions, mini ), 
@@ -715,5 +714,49 @@ public class SkelGen extends Gen implements IDumpObjs {
 	@Override
 	public void dumpObj( ObjDump dump ) {
 		Jme3z.dump( dump, gNode, 0 );
+	}
+
+	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se, boolean texture ) {
+		closeSitePlan();
+		
+		if (se.toEdit == null) {
+			se.toEdit = new MiniFacade();
+			se.toEdit.left = 0;
+			se.toEdit.width = se.length();
+			se.toEdit.height = se.mini.get( 0 ).height;
+			if (!texture)
+				se.toEdit.groundFloorHeight = 2;
+		}
+		
+		if (texture)
+			se.toEdit.width = se.length();
+		else
+			se.toEdit.texture = se.toEdit.spec = se.toEdit.normal = null;
+		
+		Plot p = new Plot (se.toEdit);
+						
+		p.addEditListener( new Changed() {
+			
+			@Override
+			public void changed() {
+				
+				PaintThing.debug.clear();
+				
+				if ( texture )
+					new Thread( new Runnable() {
+						@Override
+						public void run() {
+							cmpRender( se.toEdit, skel, skel.output, sf );
+						}
+					} ).start();
+				else
+					tweed.enqueue( new Runnable() {
+						@Override
+						public void run() {
+							setSkel( skel, skel.output, sf );
+						}
+					} );
+			}
+		} );
 	}
 }

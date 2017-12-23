@@ -59,7 +59,7 @@ public class HouseTool extends Tool {
 				SuperEdge se = (SuperEdge)e;
 				
 				se.prof = p;
-				MiniFacade mini = newMini(imf);
+				MiniFacade mini = newMini(imf, se.length());
 				se.addMini( mini );
 				se.proceduralFacade = mf;
 				
@@ -81,18 +81,18 @@ public class HouseTool extends Tool {
 		tweed.frame.addGen( sg, true );
 	}
 	
-	private MiniFacade newMini(ImageFeatures imf) {
+	private MiniFacade newMini(ImageFeatures imf, double length) {
 		
 		MiniFacade mini = new MiniFacade();
 		mini = new MiniFacade();
-		mini.width = 30;
+		mini.width = length;
 		mini.height = 20;
 		mini.rects.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
 		mini.color = new double[] {0.8,0.8,0.3,1};
 		mini.imageFeatures = imf;
-		mini.texture = "tex.jpg";
-		mini.normal = "normal.jpg";
-		mini.spec = "spec.jpg";
+		mini.texture = null;//"tex.jpg";
+//		mini.normal = "normal.jpg";
+//		mini.spec = "spec.jpg";
 		return mini;
 	}
 	

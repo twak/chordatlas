@@ -539,6 +539,7 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	}
 
 	transient FRect dragging = null;
+	transient int mouseLastDown = -1;
 	
 	@Override
 	public void mouseDown( MouseEvent e, PanMouseAdaptor ma ) {
@@ -546,6 +547,9 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 		Point2d pt = flip ( ma.from( e ) );
 		
 		double bestDist = ma.fromZoom( 10 );
+		
+		dragging = null;
+		mouseLastDown = e.getButton();
 		
 		for (FRect f: getRects()) {
 			
@@ -557,21 +561,21 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 			}
 		}
 		
-		if (dragging != null)
+		if (dragging != null && e.getButton() == 3)
 			dragging.mouseDown( e, ma );
 	}
 
 
 	@Override
 	public void mouseDragged( MouseEvent e, PanMouseAdaptor ma ) {
-		if (dragging != null)
+		if (dragging != null && mouseLastDown == 3 )
 			dragging.mouseDragged( e, ma );
 	}
 
 
 	@Override
 	public void mouseReleased( MouseEvent e, PanMouseAdaptor ma ) {
-		if (dragging != null)
+		if (dragging != null && e.getButton() == 3)
 			dragging.mouseReleased( e, ma );
 	}
 

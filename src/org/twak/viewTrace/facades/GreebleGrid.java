@@ -1,5 +1,6 @@
-package org.twak.viewTrace.facades;
+package org.	twak.viewTrace.facades;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +73,15 @@ public class GreebleGrid {
 			geom.setUserData( Jme3z.MAT_KEY, name );
 			
 			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-			mat.setTexture( "DiffuseMap", tweed.getAssetManager().loadTexture( texture ) );
+			
+			if (new File( tweed.DATA +"/" +texture ).exists())
+				mat.setTexture( "DiffuseMap", tweed.getAssetManager().loadTexture( texture ) );
+			else
+			{
+				System.out.println( this.getClass().getSimpleName() + " can't find "+ tweed.SCRATCH+texture );
+				mat.setColor( "Diffuse", ColorRGBA.Red );
+			}
+			mat.setColor( "Ambient", ColorRGBA.White );
 			
 			if (builder.normal != null)
 				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( builder.normal ) );
@@ -86,7 +95,7 @@ public class GreebleGrid {
 			else
 				mat.setColor( "Specular", ColorRGBA.White );
 			
-//			mat.setFloat("Shininess", 64f); 
+//			mat.setFloat("Shininess", 6f); 
 			mat.setBoolean( "UseMaterialColors", true );
 
 			geom.setMaterial( mat );
@@ -577,7 +586,7 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( FRect w : mf.rects.get( Feature.MOULDING ) ) {
+			for ( FRect w : mf.getRects( Feature.MOULDING, Feature.CORNICE, Feature.SILL ) ) {
 				
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
