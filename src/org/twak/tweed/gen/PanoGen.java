@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -293,10 +295,25 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	}
 	
 	public void downloadPanos() {
-		new Mosaic( 
-				panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
-				tweed.toWorkspace( folder ) );
+		
+		File indexFile =  new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD);
+		
+		try {
+			List<String> lines = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
+			new Mosaic( 
+//					panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
+					lines,
+					Tweed.toWorkspace( folder ) );
+			
+			indexFile.renameTo( new File (Tweed.toWorkspace( folder ), DOWNLOADED ) );
+			
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		
 	}
+	
+	static final String TO_DOWNLOAD = "todo.list", DOWNLOADED = "done.list";
 	
 	@Override
 	public JComponent getUI() {
@@ -305,7 +322,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.setLayout( new ListDownLayout() );
 		
-		if (!downloaded()) {
+		if (!new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
 			JButton download = new JButton("download");
 			download.addActionListener( e -> downloadPanos() );
 			ui.add( download );

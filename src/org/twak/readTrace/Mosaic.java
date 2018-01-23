@@ -52,12 +52,12 @@ public class Mosaic {
 		lines.stream().forEach( s -> System.out.println( s ) );
 		System.out.println( lines.size() + " lines found" );
 
-		for (String s : lines) {
-			System.out.println( "downloading " + s );
-			tile (s, result);
-		}
+//		for (String s : lines) {
+//			System.out.println( "downloading " + s );
+//			tile (s, result);
+//		}
 		
-//		new Parallel<String, Integer>( lines, s -> tile( s, result ), s -> System.out.println( "complete " + s.stream().mapToInt( x -> x ).sum() ), true );
+		new Parallel<String, Integer>( lines, s -> tile( s, result ), s -> System.out.println( "complete " + s.stream().mapToInt( x -> x ).sum() ), true );
 	}
 
 	Pattern p = Pattern.compile( "[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_(.*)" );
@@ -76,26 +76,8 @@ public class Mosaic {
 				for ( int y = 0; y <= 12; y++ ) {
 					URL url;
 					try {
-						
-//						int server = 0;
 						url = new URL( "http://cbk0.google.com/cbk?output=tile&panoid=" + panoid + "&zoom=5&x=" + x + "&y=" + y );
-//										http://cbk0.google.com/cbk?output=tile&panoid=IQ-D9TjXbY4xA3lNyFsdcg&zoom=5&x=25&y=2
-//						https://geo1.ggpht.com/cbk?cb_client=apiv3&panoid=cN9xDztcLMyKpquQerqUFQ&output=tile&x=3&y=2&zoom=3&nbt&fover=2
-							
-						BufferedImage img = null;
-//						while ( server < 4 ) {
-//							url = new URL( "https://geo" + server + ".ggpht.com/cbk?output=tile&panoid=" + panoid + "&zoom=5&x=" + x + "&y=" + y );
-//							try {
-								img = ImageIO.read( url );
-//							} catch ( IIOException e ) {
-//								server++;
-//								System.out.println("trying geo"+server);
-//							}
-//						}
-
-						if (img != null)
-							g.drawImage( img, x * 512, y * 512, null );
-						
+						g.drawImage( ImageIO.read( url ), x * 512, y * 512, null );
 					} catch ( Throwable th ) {
 						th.printStackTrace();
 					}
