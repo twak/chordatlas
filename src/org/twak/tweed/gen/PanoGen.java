@@ -29,13 +29,13 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.twak.readTrace.Mosaic;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.tools.AlignTool;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.utils.Filez;
@@ -55,7 +55,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
-import com.jme3.util.SkyFactory;
 import com.thoughtworks.xstream.XStream;
 
 public class PanoGen extends Gen implements IDumpObjs, ICanSave {
@@ -151,21 +150,45 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 		File meta = getMetaFile();
 
-//		if ( meta.exists() )
-//			panos = (List<Pano>) new XStream().fromXML( meta );
-//		else 
+		if ( meta.exists() ) {
+			panos = (List<Pano>) new XStream().fromXML( meta );
+		}
+		else 
 		{
 
 			panos.clear();
 			
-			for ( File f : tweed.toWorkspace( folder).listFiles() ) {
+			for ( File f : Tweed.toWorkspace( folder).listFiles() ) {
 				String extn = Filez.getExtn( f.getName() );
 				if ( extn.equals( "jpg" ) || extn.equals( "png" ) )
 					createPanoGen( f, panos );
 			}
 			
 			try {
+				
+				
+				for ( Pano p : panos ) {
+					if (p.orig.isAbsolute())
+						p.orig = tweed.makeWorkspaceRelative( p.orig );
+				}
+				
 				new XStream().toXML( panos, new FileOutputStream( meta ) );
+				 
+				
+//				try {
+//					StringBuilder sb = new StringBuilder();
+//
+//					for ( Pano p : panos ) {
+//						sb.append( Filez.stripExtn( p.orig.getName() ) + "\n" );
+//					}
+//
+//					FileWriter fw = new FileWriter( new File( tweed.DATA + File.separator + "panos" + File.separator + "toFetch.data" ) );
+//					fw.write( sb.toString() );
+//					fw.close();
+//				} catch ( Throwable th ) {
+//					th.printStackTrace();
+//				}
+				
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 			}
@@ -245,7 +268,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			
 			System.out.println( "pano@ " + location );
 		
-			results.add ( new Pano ( f.getParent()+File.separator+name, location, 
+			results.add ( new Pano ( name, location, 
 				   (pos.get( 3 ).floatValue()+180),// + 360 - (toNorth * 180 /FastMath.PI ) ) % 360, 
 					pos.get( 4 ).floatValue(), 
 					pos.get( 5 ).floatValue() ) );
@@ -263,10 +286,30 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		}
 	}
 	
+	private boolean downloaded() {
+		File absFolder = Tweed.toWorkspace( PanoGen.this.folder );
+		
+		return panos.size() < absFolder.list().length;
+	}
+	
+	public void downloadPanos() {
+		new Mosaic( 
+				panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
+				tweed.toWorkspace( folder ) );
+	}
+	
 	@Override
 	public JComponent getUI() {
 		
 		ui.removeAll();
+		
+		ui.setLayout( new ListDownLayout() );
+		
+		if (!downloaded()) {
+			JButton download = new JButton("download");
+			download.addActionListener( e -> downloadPanos() );
+			ui.add( download );
+		}
 		
 		JButton align = new JButton("facade tool");
 		align.addActionListener( e -> tweed.setTool(new FacadeTool(tweed)) );
