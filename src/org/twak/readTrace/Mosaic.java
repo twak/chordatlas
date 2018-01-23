@@ -121,12 +121,12 @@ public class Mosaic {
 		return 1;
 	}
 
-	public static void main( String[] args ) {
-		try {
-			new Mosaic( new File( args[ 0 ] ) );
-		} catch ( ArrayIndexOutOfBoundsException e ) {
-			System.out.println( "usage: mosaic directory" );
-		}
-	}
+//	public static void main( String[] args ) {
+//		try {
+//			new Mosaic( new File( args[ 0 ] ) );
+//		} catch ( ArrayIndexOutOfBoundsException e ) {
+//			System.out.println( "usage: mosaic directory" );
+//		}
+//	}
 
 }
