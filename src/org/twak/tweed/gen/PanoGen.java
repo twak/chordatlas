@@ -79,7 +79,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	@Override
 	public void calculate( ) {
 		
-		File absFolder = tweed.toWorkspace( PanoGen.this.folder );
+		File absFolder = Tweed.toWorkspace( PanoGen.this.folder );
 		
 		if (!absFolder.exists())
 			throw new Error("File not found " + this.folder);
@@ -174,22 +174,8 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 						p.orig = tweed.makeWorkspaceRelative( p.orig );
 				}
 				
-				new XStream().toXML( panos, new FileOutputStream( meta ) );
-				 
-				
-//				try {
-//					StringBuilder sb = new StringBuilder();
-//
-//					for ( Pano p : panos ) {
-//						sb.append( Filez.stripExtn( p.orig.getName() ) + "\n" );
-//					}
-//
-//					FileWriter fw = new FileWriter( new File( tweed.DATA + File.separator + "panos" + File.separator + "toFetch.data" ) );
-//					fw.write( sb.toString() );
-//					fw.close();
-//				} catch ( Throwable th ) {
-//					th.printStackTrace();
-//				}
+				if (!panos.isEmpty())
+					new XStream().toXML( panos, new FileOutputStream( meta ) );
 				
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
@@ -198,7 +184,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	}
 
 	private File getMetaFile() {
-		return tweed.toWorkspace( new File( folder, "panos.xml" ) );
+		return Tweed.toWorkspace( new File( folder, "panos.xml" ) );
 	}
 
 	private void createPanoGen( File f, List<Pano> results ) {
@@ -288,24 +274,21 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		}
 	}
 	
-	private boolean downloaded() {
-		File absFolder = Tweed.toWorkspace( PanoGen.this.folder );
-		
-		return panos.size() < absFolder.list().length;
-	}
-	
 	public void downloadPanos() {
 		
 		File indexFile =  new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD);
 		
 		try {
 			List<String> lines = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
+			
 			new Mosaic( 
 //					panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
 					lines,
 					Tweed.toWorkspace( folder ) );
 			
 			indexFile.renameTo( new File (Tweed.toWorkspace( folder ), DOWNLOADED ) );
+			
+			calculateOnJmeThread();
 			
 		} catch ( IOException e ) {
 			e.printStackTrace();
@@ -322,7 +305,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.setLayout( new ListDownLayout() );
 		
-		if (!new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
+		if (new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
 			JButton download = new JButton("download");
 			download.addActionListener( e -> downloadPanos() );
 			ui.add( download );
