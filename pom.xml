@@ -24,6 +24,9 @@
 					<filters>
 						<filter>
 							<artifact>*:*</artifact>
+							<includes>
+								<include>org/twak/tweed/resources/**</include>
+							</includes>
 							<excludes>
 								<exclude>META-INF/*.SF</exclude>
 								<exclude>META-INF/*.DSA</exclude>
@@ -102,7 +105,7 @@
 		<repository>
 			<id>maven2-repository.dev.java.net</id>
 			<name>Java.net repository</name>
-			<url>http://dow	nload.java.net/maven/2</url>
+			<url>http://download.java.net/maven/2</url>
 		</repository>
 
 		<repository>
