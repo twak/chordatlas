@@ -25,7 +25,7 @@
 						<filter>
 							<artifact>*:*</artifact>
 							<includes>
-								<include>org/twak/tweed/resources/**</include>
+								<include>**</include>
 							</includes>
 							<excludes>
 								<exclude>META-INF/*.SF</exclude>
