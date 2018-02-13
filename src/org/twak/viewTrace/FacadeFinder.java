@@ -288,7 +288,7 @@ public class FacadeFinder {
 			} else if (facadeMode == FacadeMode.PER_CAMERA || facadeMode == FacadeMode.PER_CAMERA_CROPPED ){
 				
 				Line l = f.getExtent();
-				
+				double lLength = l.length();
 				
 				for ( Point2d p : panos.keySet() ) {
 					
@@ -301,11 +301,10 @@ public class FacadeFinder {
 						
 						double dist = cen.distance( p ), frac = l.findPPram( cen );
 						
-						if (dist > 20 || frac < 0 || frac > 1)
+						if (dist > 20 || !Mathz.inRange( frac * lLength, -2, lLength + 2) )
 							continue;
 						
-						double 
-								xLen = dist * Math.tan(fovX2);
+						double xLen = dist * Math.tan(fovX2);
 						
 						Vector2d dirX = l.dir();
 						dirX.normalize();
@@ -319,7 +318,9 @@ public class FacadeFinder {
 						
 						if ( facadeMode == FacadeMode.PER_CAMERA_CROPPED ) {
 							
-							double min = -2 / l.length(), max = 1 + ( 2 / l.length() );
+							double beyond = 6;
+							
+							double min = -beyond / l.length(), max = 1 + ( beyond / l.length() );
 							
 							if (drawnPlane != null) {
 

@@ -7,10 +7,10 @@ chordatlas is an urban data fusion research platform from UCL, in particular it 
 ## run
 
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-1. if you want to run the optimisation step, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). you will also need a 8gb nvidia card.
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar chordatlas-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
+1. if you want to run the optimisation step, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
+1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). you will also need a 8gb nvidia card.
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
 code is alpha / academic-grade: use at your own risk. hints:
@@ -25,7 +25,11 @@ code is alpha / academic-grade: use at your own risk. hints:
 
 ## data
 
-we don't have a license to distrubte the data used in the paper. soon you'll be able to download a synthetic demo project [here](), and view [a video]() that might help with the interface.
+we don't have a license to distrubte the complete data used in the paper. as we reprocess the data, the datasets will appear [in this folder](https://drive.google.com/drive/u/0/folders/1Mj4samNAeQIA_l7UieE2O01PO18PnFt-). 
+1. unzip the data
+1. start chordatlas
+1. select: file, open..., then select the tweed.xml in the root of the unzipped data
+
 
 for the adventurous hacker: 
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))

@@ -236,8 +236,14 @@ public class Pano {
 	
 	public BufferedImage getRenderPano() {
 		try {
+			
+			File toRead = orig;
+			
+			if (!toRead.isAbsolute())
+				toRead = Tweed.toWorkspace( new File ( "panos" , toRead.getName() ) ) ; 
+			
 			System.out.println( "reading big " + orig.getName() );
-			BufferedImage out = ImageIO.read( orig );
+			BufferedImage out = ImageIO.read( toRead );
 			System.out.println( "done" );
 			return out;
 		} catch ( IOException e ) {

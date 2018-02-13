@@ -102,7 +102,7 @@ public class Tube {
 		}
 		
 		for (Map.Entry<LinearForm3D, List<Point3d>> e : faces.map.entrySet()) 
-			out.add ( new Loop<Point3d> ( e.getValue() ).singleton(), reverse );
+			out.add ( new Loop<Point3d> ( e.getValue() ).singleton(), null, reverse );
 	}
 
 	private static Point3d clip( Point3d pt, Vector3d dir, Collection<LinearForm3D> after, List<LinearForm3D> hit ) {

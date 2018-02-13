@@ -21,8 +21,8 @@ public class Grid implements ICanPaint {
 
 	double tol = 0.1;
 	
-	public Id x, y;
 
+	public Id x, y;
 	public Grid (double tol) {
 		this.tol = tol;
 	}
@@ -42,8 +42,10 @@ public class Grid implements ICanPaint {
 	
 	private void insert( double xp, double yp, double width, double height, Griddable gr ) {
 
-		if (width < 0 || height < 0)
-			throw new Error();
+		if ( width < 0 || height < 0 ) {
+			System.out.println( "bad dimenaion in " + this.getClass() );
+			return;
+		}
 		
 		if (x == null)
 			x = new Id(xp);

@@ -36,9 +36,7 @@ public class HouseTool extends Tool {
 		ImageFeatures imf = new ImageFeatures();// FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
 		imf.mega = mf;	
 		
-
-		
-		double[] minMax = new double[] {0, 20, 0, 20};
+		double[] minMax = new double[] {0, 15, 0, 25};
 		HalfMesh2.Builder builder = new HalfMesh2.Builder( SuperEdge.class, SuperFace.class );
 		builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
 		builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
@@ -54,7 +52,6 @@ public class HouseTool extends Tool {
 		p.add( new Point2d (0,20) );
 		p.add( new Point2d (-5,25) );
 		
-		
 		boolean first = true;
 		
 		for (HalfFace f : mesh) {
@@ -62,7 +59,7 @@ public class HouseTool extends Tool {
 				SuperEdge se = (SuperEdge)e;
 				
 				se.prof = p;
-				MiniFacade mini = newMini(imf);
+				MiniFacade mini = newMini(imf, se.length());
 				se.addMini( mini );
 				se.proceduralFacade = mf;
 				
@@ -84,15 +81,18 @@ public class HouseTool extends Tool {
 		tweed.frame.addGen( sg, true );
 	}
 	
-	private MiniFacade newMini(ImageFeatures imf) {
+	private MiniFacade newMini(ImageFeatures imf, double length) {
 		
 		MiniFacade mini = new MiniFacade();
 		mini = new MiniFacade();
-		mini.width = 30;
+		mini.width = length;
 		mini.height = 20;
 		mini.rects.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
 		mini.color = new double[] {0.8,0.8,0.3,1};
 		mini.imageFeatures = imf;
+		mini.texture = null;//"tex.jpg";
+//		mini.normal = "normal.jpg";
+//		mini.spec = "spec.jpg";
 		return mini;
 	}
 	

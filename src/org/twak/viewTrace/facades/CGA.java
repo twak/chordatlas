@@ -20,7 +20,7 @@ import org.twak.utils.geom.DRectangle.RectDir;
  * @author twak
  *
  */
-public class CGA extends Greeble {
+public class CGA extends GreebleSkel {
 
 	public CGA( Tweed tweed ) {
 		super( tweed );
@@ -149,51 +149,6 @@ public class CGA extends Greeble {
 		return out;
 	}
 
-	private void windowStrip( Matrix4d to3d, WallTag wallTag,   MeshBuilder windowColor, 
-			MeshBuilder glassColor, MeshBuilder wall, DRectangle cen, 
-			boolean makeBalcony, List<DRectangle> occlusions ) {
-		
-		if ( cen.width < 0.7 ) {
-			wall.add( cen, to3d );
-			return;
-		}
-		
-		List<DRectangle> fPanels = cen.splitX( r -> stripe( r, 1.5, 0.8 ) );
-
-		for ( int p = 0; p < fPanels.size(); p++ ) {
-			if ( p % 2 == 0 ) {
-
-				List<DRectangle> winPanel = fPanels.get( p ).splitY( r -> split3Y( r, 1, 0.2 ) );
-
-				if ( winPanel.size() == 3 ) {
-
-					wall.add( winPanel.get( 0 ), to3d );
-					wall.add( winPanel.get( 2 ), to3d );
-
-					
-					if (visible (winPanel.get(1), occlusions)) {
-						createWindow( winPanel.get( 1 ), to3d, wall, windowColor, glassColor, wallTag.windowDepth, 
-								(float) wallTag.sillDepth, (float) wallTag.sillHeight, -1, 0.6, 0.9 );
-						if ( makeBalcony ) {
-							DRectangle balcony = new DRectangle( winPanel.get( 1 ) );
-							balcony.height = wallTag.balconyHeight;
-							balcony.x -= 0.15;
-							balcony.width += 0.3;
-							createBalcony( balcony, to3d, glassColor, wallTag.balconyDepth );
-						}
-					}
-					else
-						wall.add (winPanel.get(1), to3d );
-					
-					
-					
-				} else
-					wall.add( fPanels.get( p ), to3d );
-			} else {
-				wall.add( fPanels.get( p ), to3d );
-			}
-		}
-	}
 	
 	protected double cga ( Loop<Point2d> rect, Matrix4d to3d, WallTag wallTag, 
 			MeshBuilder normalWall, MeshBuilder ground, 
@@ -201,6 +156,8 @@ public class CGA extends Greeble {
 			List<DRectangle> occlusions ) {
 
 		double[] bounds = Loopz.minMax2d( rect );
+		
+		GreebleGrid gg = new GreebleGrid( tweed, new MMeshBuilderCache() );
 		
 		DRectangle all = new DRectangle(
 				bounds[0], 
@@ -259,7 +216,7 @@ public class CGA extends Greeble {
 							List<DRectangle> doorHeight = groundPanel.get( 0 ).splitY( r -> split1( r, 2.2 ) );
 
 							if (visible(  doorHeight.get( 0 ), occlusions ))
-								createDoor( doorHeight.get( 0 ), to3d, wall, mbs.get( windowColor ), wallTag.doorDepth );
+								greebleGrid.createDoor( doorHeight.get( 0 ), to3d, wall, mbs.get( windowColor ), wallTag.doorDepth );
 							else
 								wall.add (doorHeight.get(0), to3d);
 
@@ -278,7 +235,7 @@ public class CGA extends Greeble {
 										wall.add( gWindowPanelV.get( 2 ), to3d );
 										
 										if (visible( gWindowPanelV.get(1), occlusions ))
-											createWindow( gWindowPanelV.get( 1 ), to3d, wall, 
+											greebleGrid.createWindow( gWindowPanelV.get( 1 ), to3d, wall, 
 													mbs.get( windowColor ), 
 													mbs.get( glassColor ), 
 													wallTag.windowDepth,
@@ -297,16 +254,16 @@ public class CGA extends Greeble {
 							
 						}
 						else
-							windowStrip( to3d, wallTag, mbs .get( windowColor), mbs.get( glassColor ), wall, cen, false, occlusions );
+							windowStrip( to3d, wallTag, mbs .get( windowColor), mbs.get( glassColor ), wall, cen, false, occlusions, greebleGrid );
 
 
 					} else {
 
 						windowStrip( to3d, wallTag, mbs .get( windowColor), mbs.get( glassColor ), wall, cen, 
-								f > 0 && f < floors.size() - 1 && wallTag.makeBalcony, occlusions );
+								f > 0 && f < floors.size() - 1 && wallTag.makeBalcony, occlusions, greebleGrid );
 						
 						if (f == 1 && wallTag.isGroundFloor)
-							moulding ( to3d,  new DRectangle (floor.x, floor.y,  floor.width, 0.5 ), mbs.get(mouldingColor));
+							greebleGrid.moulding ( to3d,  new DRectangle (floor.x, floor.y,  floor.width, 0.5 ), mbs.get(mouldingColor));
 						
 					}
 				}
@@ -316,4 +273,49 @@ public class CGA extends Greeble {
 		return groundFloorHeight;
 	}
 
+	private void windowStrip( Matrix4d to3d, WallTag wallTag,   MeshBuilder windowColor, 
+			MeshBuilder glassColor, MeshBuilder wall, DRectangle cen, 
+			boolean makeBalcony, List<DRectangle> occlusions, GreebleGrid gg ) {
+		
+		if ( cen.width < 0.7 ) {
+			wall.add( cen, to3d );
+			return;
+		}
+		
+		List<DRectangle> fPanels = cen.splitX( r -> stripe( r, 1.5, 0.8 ) );
+
+		for ( int p = 0; p < fPanels.size(); p++ ) {
+			if ( p % 2 == 0 ) {
+
+				List<DRectangle> winPanel = fPanels.get( p ).splitY( r -> split3Y( r, 1, 0.2 ) );
+
+				if ( winPanel.size() == 3 ) {
+
+					wall.add( winPanel.get( 0 ), to3d );
+					wall.add( winPanel.get( 2 ), to3d );
+
+					
+					if (visible (winPanel.get(1), occlusions)) {
+						gg.createWindow( winPanel.get( 1 ), to3d, wall, windowColor, glassColor, wallTag.windowDepth, 
+								(float) wallTag.sillDepth, (float) wallTag.sillHeight, -1, 0.6, 0.9 );
+						if ( makeBalcony ) {
+							DRectangle balcony = new DRectangle( winPanel.get( 1 ) );
+							balcony.height = wallTag.balconyHeight;
+							balcony.x -= 0.15;
+							balcony.width += 0.3;
+							gg.createBalcony( balcony, to3d, glassColor, wallTag.balconyDepth );
+						}
+					}
+					else
+						wall.add (winPanel.get(1), to3d );
+					
+					
+					
+				} else
+					wall.add( fPanels.get( p ), to3d );
+			} else {
+				wall.add( fPanels.get( p ), to3d );
+			}
+		}
+	}
 }

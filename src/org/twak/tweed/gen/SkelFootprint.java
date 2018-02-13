@@ -1656,7 +1656,7 @@ public class SkelFootprint {
 					loop.append( new Point3d (e.start.x, 0, e.start.y) );
 				
 				MeshBuilder mb = new MeshBuilder();
-				mb.add(loop.singleton(), false);
+				mb.add(loop.singleton(), null, false);
 				
 				Geometry g = new Geometry("floorplan", mb.getMesh());
 

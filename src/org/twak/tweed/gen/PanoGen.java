@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -29,13 +31,13 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.twak.readTrace.Mosaic;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.tools.AlignTool;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.utils.Filez;
@@ -55,7 +57,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
-import com.jme3.util.SkyFactory;
 import com.thoughtworks.xstream.XStream;
 
 public class PanoGen extends Gen implements IDumpObjs, ICanSave {
@@ -78,7 +79,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	@Override
 	public void calculate( ) {
 		
-		File absFolder = tweed.toWorkspace( PanoGen.this.folder );
+		File absFolder = Tweed.toWorkspace( PanoGen.this.folder );
 		
 		if (!absFolder.exists())
 			throw new Error("File not found " + this.folder);
@@ -151,21 +152,31 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 		File meta = getMetaFile();
 
-//		if ( meta.exists() )
-//			panos = (List<Pano>) new XStream().fromXML( meta );
-//		else 
+		if ( meta.exists() ) {
+			panos = (List<Pano>) new XStream().fromXML( meta );
+		}
+		else 
 		{
 
 			panos.clear();
 			
-			for ( File f : tweed.toWorkspace( folder).listFiles() ) {
+			for ( File f : Tweed.toWorkspace( folder).listFiles() ) {
 				String extn = Filez.getExtn( f.getName() );
 				if ( extn.equals( "jpg" ) || extn.equals( "png" ) )
 					createPanoGen( f, panos );
 			}
 			
 			try {
-				new XStream().toXML( panos, new FileOutputStream( meta ) );
+				
+				
+				for ( Pano p : panos ) {
+					if (p.orig.isAbsolute())
+						p.orig = tweed.makeWorkspaceRelative( p.orig );
+				}
+				
+				if (!panos.isEmpty())
+					new XStream().toXML( panos, new FileOutputStream( meta ) );
+				
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 			}
@@ -173,7 +184,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	}
 
 	private File getMetaFile() {
-		return tweed.toWorkspace( new File( folder, "panos.xml" ) );
+		return Tweed.toWorkspace( new File( folder, "panos.xml" ) );
 	}
 
 	private void createPanoGen( File f, List<Pano> results ) {
@@ -245,7 +256,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			
 			System.out.println( "pano@ " + location );
 		
-			results.add ( new Pano ( f.getParent()+File.separator+name, location, 
+			results.add ( new Pano ( name, location, 
 				   (pos.get( 3 ).floatValue()+180),// + 360 - (toNorth * 180 /FastMath.PI ) ) % 360, 
 					pos.get( 4 ).floatValue(), 
 					pos.get( 5 ).floatValue() ) );
@@ -263,10 +274,42 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		}
 	}
 	
+	public void downloadPanos() {
+		
+		File indexFile =  new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD);
+		
+		try {
+			List<String> lines = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
+			
+			new Mosaic( 
+//					panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
+					lines,
+					Tweed.toWorkspace( folder ) );
+			
+			indexFile.renameTo( new File (Tweed.toWorkspace( folder ), DOWNLOADED ) );
+			
+			calculateOnJmeThread();
+			
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	static final String TO_DOWNLOAD = "todo.list", DOWNLOADED = "done.list";
+	
 	@Override
 	public JComponent getUI() {
 		
 		ui.removeAll();
+		
+		ui.setLayout( new ListDownLayout() );
+		
+		if (new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
+			JButton download = new JButton("download");
+			download.addActionListener( e -> downloadPanos() );
+			ui.add( download );
+		}
 		
 		JButton align = new JButton("facade tool");
 		align.addActionListener( e -> tweed.setTool(new FacadeTool(tweed)) );
