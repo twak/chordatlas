@@ -26,6 +26,10 @@ code is alpha / academic-grade: use at your own risk. hints:
 ## data
 
 we don't have a license to distrubte the complete data used in the paper. as we reprocess the data, the datasets will appear [in this folder](https://drive.google.com/drive/u/0/folders/1Mj4samNAeQIA_l7UieE2O01PO18PnFt-). 
+1. unzip the data
+1. start chordatlas
+1. select: file, open..., then select the tweed.xml in the root of the unzipped data
+
 
 for the adventurous hacker: 
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))
