@@ -121,14 +121,14 @@ public class Pano {
 	}
 
 	private void convert( String f, int i ) {
-		File downSampled = new File( orig.getParentFile(), f );
+		File downSampled = new File (  Tweed.SCRATCH, f );
 		if ( !downSampled.exists() ) {
 			try {
 
 				System.out.println( "downscaling " + orig.getPath() + " to " + i + "x" + i );
 				
-				ProcessBuilder pb = new ProcessBuilder( "convert", orig.getPath(), "-resize", 
-						i + "x" + i /*+"!" square images */, Tweed.SCRATCH + File.separator + f  );
+				ProcessBuilder pb = new ProcessBuilder( "convert", Tweed.DATA + File.separator + "panos" + File.separator + orig.getPath(), "-resize", 
+						i + "x" + i /*+"!" square images */, Tweed.SCRATCH + f  );
 				
 				Process p = pb.start();
 				

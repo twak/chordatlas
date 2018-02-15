@@ -44,6 +44,7 @@ import com.google.common.io.LineProcessor;
 import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetKey;
 import com.jme3.asset.TextureKey;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.audio.AudioListenerState;
@@ -149,6 +150,7 @@ public class Tweed extends SimpleApplication {
 		setDisplayFps(false);
 		setDisplayStatView(false);
 		
+		clearBackground();
 		buildBackground();
 		
 		getFlyByCamera().setDragToRotate(true);
@@ -173,7 +175,7 @@ public class Tweed extends SimpleApplication {
 		setFov(0);
 		setCameraSpeed( 0 );
 		
-		if ( true ) {//TweedSettings.settings.SSAO ) {
+		if ( false ) {//TweedSettings.settings.SSAO ) {
 			
 			FilterPostProcessor fpp = new FilterPostProcessor( assetManager );
 			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
@@ -535,6 +537,9 @@ public class Tweed extends SimpleApplication {
 	};
 
 	public void clearBackground() {
+		if (background == null) {
+			background = new Picture( "background" );
+		}
 		Material mat1 = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat1.setColor("Color", ColorRGBA.Black);
 		background.setMaterial(null);
@@ -542,20 +547,28 @@ public class Tweed extends SimpleApplication {
 	}
 	
 	final static String BG_LOC = "scratch/bg.jpg";
-	public void setBackground (BufferedImage bi ) {
-		
+
+	public void setBackground( BufferedImage bi ) {
+
 		try {
-			ImageIO.write(bi, "jpg", new File ( JME + BG_LOC ) );
-			TextureKey key = new TextureKey(BG_LOC);
-			getAssetManager().deleteFromCache(key);
-			background.setMaterial(null);
-			
-			background.setImage(assetManager, BG_LOC, false);
+
+			long hack = System.currentTimeMillis();
+
+			ImageIO.write( bi, "jpg", new File( JME + BG_LOC + hack + ".jpg" ) );
+			background.setMaterial( null );
+			getAssetManager().deleteFromCache( new AssetKey<>( BG_LOC ) );
+
+			Material mat = new Material( getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
+			mat.setTexture( "ColorMap", getAssetManager().loadTexture( BG_LOC + hack + ".jpg" ) );
+			//					mat.setColor("Color", ColorRGBA.Red); 
+			background.setMaterial( mat );
+
+			//					background.setImage(assetManager, BG_LOC, false);
 			background.updateGeometricState();
-			
+
 			gainFocus();
-			
-		} catch (IOException e) {
+
+		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
 	}
@@ -564,9 +577,7 @@ public class Tweed extends SimpleApplication {
 		
 		String bgKey = "background";
 		
-		background = new Picture( "background" );
-
-		clearBackground();
+//		clearBackground();
 		
 		background.setWidth( cam.getWidth() );
 		background.setHeight( cam.getHeight() );
@@ -576,6 +587,9 @@ public class Tweed extends SimpleApplication {
 		ViewPort pv = renderManager.createPreView( bgKey, cam );
 		pv.setClearFlags( true, true, true );
 		pv.attachScene( background );
+		
+		viewPort.setClearFlags( false, true, true );
+		
 		background.updateGeometricState();
 
 	}
@@ -657,6 +671,9 @@ public class Tweed extends SimpleApplication {
 		
 		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
+		
+		new File (SCRATCH).mkdirs();
+		
 		JME = DATA + File.separator;
 
 		cam.setLocation( TweedSettings.settings.cameraLocation );

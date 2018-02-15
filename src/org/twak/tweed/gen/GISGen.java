@@ -217,14 +217,14 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	}
 	
 	public enum Mode {
-		RENDER_ALL_FACADES, RENDER_SELECTED_FACADE, RENDER_SAT;
+		RENDER_ALL_BLOCKS, RENDER_SELECTED_BLOCK, RENDER_SAT;
 		
 		@Override
 		public String toString() {
 			return super.toString().toLowerCase().replaceAll( "_", " " );
 		}
 	}
-	public static Mode mode = Mode.RENDER_SELECTED_FACADE;
+	public static Mode mode = Mode.RENDER_SELECTED_BLOCK;
 	
 	@Override
 	protected void polyClicked( int callbackI ) {
@@ -237,10 +237,10 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			importMesh( callbackI );
 		else if ( tweed.tool.getClass() == FacadeTool.class ) {
 
-			if ( mode == Mode.RENDER_SELECTED_FACADE ) {
+			if ( mode == Mode.RENDER_SELECTED_BLOCK ) {
 				( (FacadeTool) tweed.tool ).facadeSelected( blocks.get( callbackI ), lastMesh.get( callbackI ) );
 				
-			} else if ( mode == Mode.RENDER_ALL_FACADES ) {
+			} else if ( mode == Mode.RENDER_ALL_BLOCKS ) {
 				
 				FacadeFinder.count = 0;
 				

@@ -130,7 +130,7 @@ public class FacadeTool extends SelectTool {
 
 				File blockFile = new File (Tweed.DATA + File.separator + FeatureCache.FEATURE_FOLDER +File.separator+blockName );
 						
-				if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE )
+				if ( GISGen.mode == Mode.RENDER_SELECTED_BLOCK )
 					try {
 						FileUtils.deleteDirectory( blockFile );
 					} catch ( IOException e1 ) {
@@ -201,7 +201,7 @@ public class FacadeTool extends SelectTool {
 
 						ImagePlaneGen pg = new ImagePlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
 
-						if ( GISGen.mode != Mode.RENDER_ALL_FACADES ) 
+						if ( GISGen.mode != Mode.RENDER_ALL_BLOCKS ) 
 							tweed.frame.addGen( pg, true );
 						
 						for ( Pano pano_ : tp.toProject ) {
@@ -213,7 +213,7 @@ public class FacadeTool extends SelectTool {
 								imageFilename = new File (pano.name).getName() + "_" + tpm.megafacade.start + "_" + tpm.megafacade.end;
 							
 							BufferedImage bi = pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
-							if (GISGen.mode == Mode.RENDER_SELECTED_FACADE)
+							if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK)
 								images.add ( bi );
 
 							try {
@@ -241,7 +241,7 @@ public class FacadeTool extends SelectTool {
 						}
 					}
 					
-					if (GISGen.mode == Mode.RENDER_SELECTED_FACADE)
+					if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK)
 						Imagez.writeSummary (new File (megaFolder, "summary.png"), images);
 				}
 			}
@@ -250,7 +250,7 @@ public class FacadeTool extends SelectTool {
 
 		};
 
-		if ( GISGen.mode == Mode.RENDER_SELECTED_FACADE )
+		if ( GISGen.mode == Mode.RENDER_SELECTED_BLOCK )
 			thread.start();
 		else
 			thread.run();
@@ -294,8 +294,8 @@ public class FacadeTool extends SelectTool {
 		
 		JComboBox<GISGen.Mode> allOne = new JComboBox<>();
 
-		allOne.addItem( GISGen.Mode.RENDER_ALL_FACADES );
-		allOne.addItem( GISGen.Mode.RENDER_SELECTED_FACADE );
+		allOne.addItem( GISGen.Mode.RENDER_ALL_BLOCKS );
+		allOne.addItem( GISGen.Mode.RENDER_SELECTED_BLOCK );
 //		allOne.addItem( GISGen.Mode.RENDER_SAT );
 		allOne.setSelectedItem( GISGen.mode );
 		allOne.addActionListener( new ActionListener() {

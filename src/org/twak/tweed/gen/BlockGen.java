@@ -78,7 +78,7 @@ public class BlockGen extends ObjGen {
 		s.setUserData( ClickMe.class.getSimpleName(), new Object[] { new ClickMe() {
 			@Override
 			public void clicked( Object data ) {
-				doProfile();
+				tweed.frame.setSelected( BlockGen.this );
 			}
 		} } );
 	}
@@ -279,7 +279,7 @@ public class BlockGen extends ObjGen {
 				return;
 		}
 		
-		GISGen.mode = Mode.RENDER_SELECTED_FACADE;
+		GISGen.mode = Mode.RENDER_SELECTED_BLOCK;
 		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
 		
 		new FacadeTool(tweed).facadeSelected( polies, this );

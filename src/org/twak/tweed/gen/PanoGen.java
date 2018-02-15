@@ -138,6 +138,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			p.geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { new ClickMe() {
 				@Override
 				public void clicked( Object data ) {
+					tweed.frame.setSelected( PanoGen.this );
 					selected(p);
 				}
 			} } );
@@ -406,7 +407,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			}
 		});
 		
-		JButton background = new JButton("setBG");
+		JButton background = new JButton("set background");
 		background.addActionListener(new ActionListener() {
 			
 			@Override
@@ -417,23 +418,25 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 						
 						System.out.println("rendering from "+p.orig.getPath() );
 						
-						int w = tweed.getCamera().getWidth(),
-							h = tweed.getCamera().getHeight();
+						int wS = tweed.getCamera().getWidth(),
+							hS = tweed.getCamera().getHeight(),
+							wC = 1024,
+							hC = 1024;//
 						
-						BufferedImage target = new BufferedImage( w, h, BufferedImage.TYPE_3BYTE_BGR);
+						BufferedImage target = new BufferedImage( wC, hC, BufferedImage.TYPE_3BYTE_BGR);
 						p.ensurePano();
 						
-						for (int x = 0; x < w; x++)
-							for (int y = 0; y < h; y++) {
-								com.jme3.math.Vector3f loc = tweed.getCamera().getWorldCoordinates(new Vector2f(x, y), 1);
-								target.setRGB(x, h-y-1, 
+						for (int x = 0; x < wC; x++)
+							for (int y = 0; y < hC; y++) {
+								com.jme3.math.Vector3f loc = tweed.getCamera().getWorldCoordinates(new Vector2f(x * wS / wC, y * hS / hC), 1);
+								target.setRGB(x, hC-y-1, 
 										p.castTo ( new float[] {loc.x, loc.y, loc.z}, p.panoMedium, null, null ) );
 							}
 						
-						Graphics2D g2 = (Graphics2D) target.getGraphics();
-						g2.setColor (Color.blue);
-						g2.drawLine( target.getWidth()/2, 0, target.getWidth()/2, target.getHeight() );
-						g2.dispose();
+//						Graphics2D g2 = (Graphics2D) target.getGraphics();
+//						g2.setColor (Color.blue);
+//						g2.drawLine( target.getWidth()/2, 0, target.getWidth()/2, target.getHeight() );
+//						g2.dispose();
 						
 						tweed.setBackground(target);
 					}
@@ -443,9 +446,9 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.add(name);
 		ui.add(view);
-		ui.add(recalc);
+//		ui.add(recalc);
 		ui.add(background);
-		ui.add(depth);
+//		ui.add(depth);
 		
 		tweed.frame.setGenUI( ui );
 		
