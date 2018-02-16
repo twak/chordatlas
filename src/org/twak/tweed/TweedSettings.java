@@ -186,7 +186,7 @@ public class TweedSettings {
 			if (last.exists())
 				load( last );
 			else {
-				JOptionPane.showMessageDialog( null, "Can't find last project " + last.getName() );
+				JOptionPane.showMessageDialog( null, "Can't find last project: \"" + last.getName()+"\"" );
 				recentFiles.f.remove( 0 );
 			}
 		}

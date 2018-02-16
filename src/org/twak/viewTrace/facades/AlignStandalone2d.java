@@ -42,7 +42,7 @@ public class AlignStandalone2d extends JPanel {
 		
 		super (new BorderLayout());
 		
-		TweedSettings.load( new File(folder).getParentFile() );
+//		TweedSettings.load( new File(folder).getParentFile() );
 		
 		this.folder = folder;
 		
@@ -90,7 +90,7 @@ public class AlignStandalone2d extends JPanel {
 //			}
 //		} );
 //		
-//		setFolder( facadeFolders.get ( facadeSlide.getValue() ));	
+		setFolder( facadeFolders.get ( facadeSlide.getValue() ));	
 	}
 
 	private void setFolder( File folder ) {

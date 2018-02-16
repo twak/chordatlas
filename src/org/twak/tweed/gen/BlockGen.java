@@ -111,7 +111,7 @@ public class BlockGen extends ObjGen {
 		JButton optimize = new JButton ("run optimizer");
 		optimize.addActionListener( e -> optimize() );
 		
-		JButton viewFeatures = new JButton ("view features");
+		JButton viewFeatures = new JButton ("features viewer");
 		viewFeatures.addActionListener( e -> viewFeatures() );
 		
 		JButton slice = new JButton ("slice");

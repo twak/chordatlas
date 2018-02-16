@@ -442,6 +442,7 @@ public class Tweed extends SimpleApplication {
 		
 		if (oldWidth != cam.getWidth() || oldHeight != cam.getHeight()) {
 			buildBackground();
+			clearBackground();
 			oldWidth = cam.getWidth();
 			oldHeight = cam.getHeight();
 		}

@@ -111,7 +111,7 @@ public class FeatureCache {
 
 				// draw rectified image at the width of the ortho image...
 				
-				double height = getRectified().getHeight() / 40.;
+				double height = getRectified().getHeight() / FacadeTool.pixelsPerMeter;
 
 				g.drawImage( getRectified(), 
 						ma.toX( Math.min( start, end ) ), 
@@ -291,8 +291,6 @@ public class FeatureCache {
 		
 		out.miniFacades = new ArrayList();
 
-		double ppm = 40;
-		
 		{			
 			if (Tweed.DATA == null)
 				out.ortho = new File( fFolder, RENDERED_IMAGE_PNG ) ;
@@ -328,7 +326,7 @@ public class FeatureCache {
 
 			if ( lines == null ) {
 				System.out.println( "warning, failed to read input files in " + fFolder );
-				imageL = new Line (0,0, out.getRectified().getWidth() / ppm, 0 );
+				imageL = new Line (0,0, out.getRectified().getWidth() / FacadeTool.pixelsPerMeter, 0 );
 			} else {
 				String plane = lines.get( 1 );
 				String[] pVals = plane.split( " " );
@@ -368,9 +366,9 @@ public class FeatureCache {
 							MiniFacade mf = new MiniFacade( 
 									out, 
 									(Map) o, 
-									imageWidth  / (rectifiedToOrtho * ppm ), 
-									imageHeight / ppm, 
-									rectifiedToOrtho * ppm, 
+									imageWidth  / (rectifiedToOrtho * FacadeTool.pixelsPerMeter ), 
+									imageHeight / FacadeTool.pixelsPerMeter, 
+									rectifiedToOrtho * FacadeTool.pixelsPerMeter, 
 									out.start ) ;
 							
 							if (!mf.invalid())

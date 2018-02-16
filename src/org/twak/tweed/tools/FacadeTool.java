@@ -120,7 +120,7 @@ public class FacadeTool extends SelectTool {
 
 //	private static String FACADE_FOLDER = ;
 
-	private static final float pixelsPerMeter = 80f;
+	public static final float pixelsPerMeter = 40f;
 	
 	private void renderFacades(Node gNode, String blockName, FacadeFinder ff) {
 

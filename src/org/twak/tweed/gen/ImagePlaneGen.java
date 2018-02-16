@@ -27,11 +27,13 @@ import javax.vecmath.Vector3d;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.Colour;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.FacadeFinder;
 
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -409,7 +411,7 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 
 				int c = 0;
 				for ( Pano pg : nearby )
-					render( new File( Tweed.DATA + "facades/0/" + ( c++ ) ), 40f, pg, null, FeatureCache.RENDERED_IMAGE );
+					render( new File( Tweed.DATA + "facades/0/" + ( c++ ) ), FacadeTool.pixelsPerMeter, pg, null, FeatureCache.RENDERED_IMAGE );
 			}
 
 		} );
@@ -454,15 +456,13 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 								if (line.startsWith( "top" ))
 									return;
 								
-								double ppm = 40;
-								
 								String[] vals = line.split( "," );
 								try{
 									windows.add (new Window(
-											30 - Double.parseDouble( vals[0] ) / ppm,
-											Double.parseDouble( vals[1] ) / ppm,
-											30 - Double.parseDouble( vals[2] ) / ppm,
-											Double.parseDouble( vals[3] ) / ppm
+											30 - Double.parseDouble( vals[0] ) / FacadeTool.pixelsPerMeter,
+											Double.parseDouble( vals[1] ) / FacadeTool.pixelsPerMeter,
+											30 - Double.parseDouble( vals[2] ) / FacadeTool.pixelsPerMeter,
+											Double.parseDouble( vals[3] ) / FacadeTool.pixelsPerMeter
 										));
 								}
 								catch (Throwable th) {
