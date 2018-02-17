@@ -18,10 +18,11 @@ code is alpha / academic-grade: use at your own risk. hints:
 1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
 1. use left mouse drag + WASD keys to navigate
 2. arrow keys change brightness and camera speed
-1. left mouse button controls view, right mouse button selects
+1. right mouse button selects things in the 3D view
 1. right click on a building footprint to import a mesh
-1. right click on that mesh (or select it in the layer list) to show a list of operations
-1. intermediate results (meshes, rendered images, and detected features) are written to the data directory
+1. right click on that mesh (or select it in the layer list) to show a list of operations...
+1. ...one of which is "find profiles". the profiles object gives you access to several optimization options.
+1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory
 
 ## data
 
