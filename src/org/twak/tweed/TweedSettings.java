@@ -79,6 +79,7 @@ public class TweedSettings {
 	public double gisThreshold = 0.8;
 	public double megafacacadeClusterGradient = 3;
 	public double lowOccluderFilter = 4; // "bus filter"
+	public boolean snapFacadeWidth = true;
 
 	public static boolean roofColours = true;
 	

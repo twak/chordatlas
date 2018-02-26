@@ -56,11 +56,13 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.viewTrace.facades.CMPz;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.RoofTag;
 import org.twak.viewTrace.facades.WallTag;
 
@@ -151,13 +153,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		super.calculate();
 	}
-
-//	private List<Debug> debug = new ArrayList();
-//	static class Debug {
-//		List<Prof> profs = new ArrayList();
-//		List<Prof> cleans = new ArrayList();	
-//		Prof clean;
-//	}
 	
 	protected static PlanSkeleton calc( SuperFace sf ) {
 		
@@ -349,48 +344,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 								removeGeometryFor( workon );
 								tweed.frame.setGenUI(null); // current selection is invalid
 								
-//								Loop<Bar> bars = skel.plan.points.get( 0 );
-//								List<SuperEdge> ses = new ArrayList<>();
-//								
-//								workon  = new SuperFace(); // build a new SF with this new plan
-//								
-//								Set<MiniFacade> seen = new HashSet<>();
-//								
-//								for (Bar pl : bars) {
-//									
-//									SuperEdge se = new SuperEdge(pl.start , pl.end, null );
-//									
-//									Profile profile = skel.plan.profiles.get( pl );
-//									
-//									
-//									
-//									se.prof = toProf (profile);
-//									se.face = workon; 
-//									WallTag w = findWallMini (profile.points);
-//									
-//									System.out.println("tag " + profile.hashCode());
-//									
-//									if (seen.add (w.miniFacade) ) {
-//										se.toEdit = w.miniFacade;
-//									}
-//									else 
-//									{ // repeated minifacade -> instance
-//										
-//										Profile p2 = new Profile (profile, new AffineTransform(), (skel.plan));
-//										WallTag w2 = new WallTag( w, new MiniFacade(w.miniFacade));
-//										setWallTag ( p2.points, w2 );
-//										
-//										skel.plan.profiles.put( pl, p2 );
-//										se.toEdit = w2.miniFacade;
-//										seen.add (w2.miniFacade);
-//									}
-//									
-//									ses.add(se);
-//								}
-//								
-//								for (Pair<SuperEdge, SuperEdge> pair : new ConsecutivePairs<>( ses, true )) 
-//									pair.first().next = pair.second();
-								
 								setSkel( (PlanSkeleton)threadKey, output, workon);
 								
 							}
@@ -439,111 +392,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.frame.setGenUI(ui);
 	}
 
-	private void cmpRender( MiniFacade toEdit, PlanSkeleton skel, Output output, SuperFace sf ) {
-		
-		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D g = (Graphics2D ) bi.getGraphics();
-		
-		DRectangle bounds = new DRectangle (256,0,256, 256);
-		
-//		g.setColor( new Color (0, 0, 255 ) );
-//		g.fillRect( 255, 0, 255, 255 );
-		
-		g.setColor( new Color (0, 48, 255 ) );
-		g.fillRect( 256, 0, 256, 255 );
-		
-		DRectangle mini = toEdit.getAsRect();
-		
-		cmpRects( toEdit, g, bounds, mini,new Color (0,207,255) , Feature.DOOR );
-		cmpRects( toEdit, g, bounds, mini,new Color (0,129,250) , Feature.WINDOW );
-		cmpRects( toEdit, g, bounds, mini,new Color (255,80,0) , Feature.MOULDING );
-		cmpRects( toEdit, g, bounds, mini,new Color (32, 255, 224) , Feature.CORNICE );
-		cmpRects( toEdit, g, bounds, mini,new Color (109, 254, 149) , Feature.SILL );
-		cmpRects( toEdit, g, bounds, mini,new Color (175, 0, 0) , Feature.SHOP );
-		
-		String name = System.nanoTime()+"";
-		
-		try {
-			
-			
-			ImageIO.write (bi, "png", new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/input/test/"+name+".png"));
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-		
-		long startTime = System.currentTimeMillis();
-		
-		do {
-			
-			try {
-				Thread.sleep( 50 );
-			} catch ( InterruptedException e ) {
-				e.printStackTrace();
-			}
-			
-			
-			File[] fz = new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/output/").listFiles();
-			
-			if (fz.length > 0) {
-				
-				for (File f : fz) {
-				
-					String dest;
-					try {
-						
-						new File (Tweed.SCRATCH).mkdirs();
-						
-						
-//						File texture = new File (f, "images/"+name+"_real_A.png");
-						File texture = new File (f, "images/"+name+"_fake_B.png");
-						
-						if (texture.exists() && texture.length() > 0) {
-							
-							FileOutputStream fos = new FileOutputStream( Tweed.DATA + 
-									"/"+(dest = "scratch/" + name+".png") );
-							
-							Files.copy( texture.toPath(), fos );
-							
-							fos.flush();
-							fos.close();
-						
-							if (dest != null)
-								toEdit.texture = dest;
-							
-							texture.delete();
-							break;
-						}
-					} catch ( Throwable e ) {
-						e.printStackTrace();
-					}
-					
-				}
-			}
-			
-		}
-		while ( System.currentTimeMillis() - startTime < 1000 );
-		
-		tweed.enqueue( new Runnable() {
-			@Override
-			public void run() {
-				setSkel( skel, skel.output , sf);
-				tweed.getRootNode().updateGeometricState();
-			}
-		} );
-	}
-
-	public void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, Feature...features ) {
-		for (FRect r : toEdit.getRects(features)) {
-			
-			DRectangle w = bounds.scale ( mini.normalize( r ) );
-			
-			w.y = bounds.getMaxY() - w.y - w.height;
-			
-			g.setColor( col);
-			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
-		}
-	}
-	
 	private WallTag findWallMini( LoopL<Bar> points ) {
 		
 		Optional<Tag> wall = points.streamE().flatMap( b -> b.tags.stream() ).filter( t -> t instanceof WallTag ).findAny();
@@ -582,21 +430,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		MiniFacade mini;
 		
-//		if (se.toEdit == null) { // first time through, use regularizer 
-//			 
-//			if ( se.mini == null || ( se.mini.isEmpty() && se.proceduralFacade == null ) )
-//				mini = null;
-//			else {
-//				
-//				double[] range = findRange( se, s, e, se.proceduralFacade == null ? null : se.proceduralFacade.megafacade );
-//				
-//				if (range == null)
-//					mini = null;
-//				else
-//					mini = new Regularizer().go( se.mini, range[0], range[1], se.proceduralFacade );
-//			}
-//		}
-//		else // second time through, use the edited results
+		if (se.toEdit == null) { // first time through, use regularizer 
+			 
+			if ( se.mini == null || ( se.mini.isEmpty() && se.proceduralFacade == null ) )
+				mini = null;
+			else {
+				
+				double[] range = findRange( se, s, e, se.proceduralFacade == null ? null : se.proceduralFacade.megafacade );
+				
+				if (range == null)
+					mini = null;
+				else
+					mini = new Regularizer().go( se.mini, range[0], range[1], se.proceduralFacade );
+			}
+		}
+		else // second time through, use the edited results
 			mini = se.toEdit;
 		
 		Tag wall = new WallTag ( se.profLine, se.occlusions, mini ), 
@@ -734,19 +582,29 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.texture = se.toEdit.spec = se.toEdit.normal = null;
 		
 		Plot p = new Plot (se.toEdit);
-						
+
 		p.addEditListener( new Changed() {
-			
+
 			@Override
 			public void changed() {
-				
+
 				PaintThing.debug.clear();
-				
 				if ( texture )
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							cmpRender( se.toEdit, skel, skel.output, sf );
+							CMPz.cmpRender( se.toEdit, skel, skel.output, sf, new Runnable() {
+								
+								public void run() {
+									tweed.enqueue( new Runnable() {
+										@Override
+										public void run() {
+											setSkel( skel, skel.output, sf );
+											tweed.getRootNode().updateGeometricState();
+										}
+									} );
+								}
+							} );
 						}
 					} ).start();
 				else

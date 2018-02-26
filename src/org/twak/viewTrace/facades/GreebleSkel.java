@@ -1,9 +1,6 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,49 +12,34 @@ import javax.swing.SwingUtilities;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Edge;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
-import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
-import org.twak.siteplan.jme.Jme3z;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SETag;
 import org.twak.tweed.gen.SuperEdge;
-import org.twak.tweed.gen.WindowGen;
-import org.twak.tweed.gen.WindowGen.Window;
-import org.twak.utils.Cach2;
-import org.twak.utils.Cache2;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
-import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
-import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.Tube.CrossGen;
 
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
 public class GreebleSkel {
@@ -142,9 +124,11 @@ public class GreebleSkel {
 					facadeLine = new Line ( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
 				}
 				
-				// move/scale mf horizontally from mean-image-location to mesh-facade-location 
-				double[] meshSE = findSE ( wt.miniFacade, facadeLine, chain );
-//				mf2.scaleX( meshSE[0], meshSE[1] );
+				if (TweedSettings.settings.snapFacadeWidth) {
+					// move/scale mf horizontally from mean-image-location to mesh-facade-location
+					double[] meshSE = findSE ( wt.miniFacade, facadeLine, chain );
+					mf2.scaleX( meshSE[0], meshSE[1] );
+				}
 				
 				// find window locations in 3 space
 				mf2.rects.values().stream()
