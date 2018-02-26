@@ -105,7 +105,7 @@ public class SkelFootprint {
 	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
-	public boolean greedyProfiles = false;
+	public boolean GREEDY_PROFILES = false;
 	
 	public SkelFootprint (Tweed tweed) {
 		this.tweed = tweed;
@@ -124,8 +124,6 @@ public class SkelFootprint {
 		
 		SolverState SS;
 		
-		greedyProfiles = false;
-
 		if ( FALSE ) {
 			try {
 				SS = (SolverState) new XStream().fromXML( new FileReader( new File( "/home/twak/data/bath/solver_state.xml" ) ) );
@@ -154,7 +152,7 @@ public class SkelFootprint {
 			solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
 		}
 		
-		if (greedyProfiles)
+		if (GREEDY_PROFILES)
 			assignGreedyProfiles( SS );
 		
 		if ( TRUE )
@@ -272,7 +270,7 @@ public class SkelFootprint {
 
 		m.setProgress( 2 );
 
-		if (!greedyProfiles)  {
+		if (!GREEDY_PROFILES)  {
 			globalProfs = new ArrayList();
 			findProfiles( footprint, globalProfs );
 			calcProfFit( mesh, globalProfs, profFit, m );
