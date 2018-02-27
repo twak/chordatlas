@@ -461,6 +461,8 @@ public class SkelFootprint {
 			SuperFace sf = (SuperFace)hf;
 			sf.height = sf.heights.stream().
 					sorted().collect( new ModeCollector( 0.5 ) );
+			if (Double.isNaN( sf.height ) )
+				sf.height = 0;
 		}
 	}
 

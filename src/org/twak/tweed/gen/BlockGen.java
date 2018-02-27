@@ -108,9 +108,6 @@ public class BlockGen extends ObjGen {
 		JButton features = new JButton ("find image features");
 		features.addActionListener( e -> segnetFacade() );
 		
-		JButton optimize = new JButton ("run optimizer");
-		optimize.addActionListener( e -> optimize() );
-		
 		JButton viewFeatures = new JButton ("features viewer");
 		viewFeatures.addActionListener( e -> viewFeatures() );
 		
@@ -166,11 +163,11 @@ public class BlockGen extends ObjGen {
 		} );
 		
 		JTextArea name = new JTextArea( nameCoords() );
+		name.setEditable( false );
 		
 		panel.add(profiles, 0 );
 		panel.add(panos, 1 );
 		panel.add(features, 2 );
-		panel.add(optimize, 3 );
 		panel.add(new JLabel("other:"), 4 );
 		panel.add( slice );
 		panel.add( viewFeatures );
@@ -185,16 +182,6 @@ public class BlockGen extends ObjGen {
 
 	private void viewFeatures() {
 		AlignStandalone2d.show( getInputFolder( FeatureCache.FEATURE_FOLDER ).toString() );
-	}
-
-	private void optimize() {
-		
-		if (profileGen == null) {
-			JOptionPane.showMessageDialog( tweed.frame(), "compute profiles first!" );
-			return;
-		}
-		
-		profileGen.doSkel();
 	}
 
 	private void segnetFacade() {
@@ -295,6 +282,7 @@ public class BlockGen extends ObjGen {
 			@Override
 			public void run() {
 				tweed.frame.addGen( profileGen = new ProfileGen(BlockGen.this, Loopz.toXZLoop( polies ), tweed), true);
+				tweed.frame.setSelected( profileGen );
 			}
 		}.start();
 	}

@@ -750,9 +750,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		stateBuilder.addActionListener( ae -> new SSBuilder(this, tweed.features) );
 		
 		JPanel out = new JPanel( new ListDownLayout() );
+		out.add( skel );
 		out.add( new JLabel("profiles rendered:") );
 		out.add( slider );
-		out.add( skel );
 		out.add( new JLabel("viz:") );
 		out.add( vizMode );
 		out.add( writeProfiles );

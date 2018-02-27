@@ -391,6 +391,9 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			lastMesh.put( index, bg );
 
 			tweed.frame.addGen( bg, true );
+			
+			tweed.frame.setSelected( bg );
+			
 		} else
 			JOptionPane.showMessageDialog( tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
 		
