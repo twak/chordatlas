@@ -20,6 +20,7 @@ import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
+import org.twak.siteplan.campskeleton.PlanSkeleton.ColumnProperties;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
@@ -185,7 +186,11 @@ public class GreebleSkel {
 	}
 	
 	private SuperEdge findSuperEdge( Output output, List<Face> chain ) {
-		Bar bar = ((PlanSkeleton)output.skeleton).getDefiningColumn( chain.get( 0 ).edge ).defBar;
+		
+		ColumnProperties col = ((PlanSkeleton)output.skeleton).getDefiningColumn( chain.get( 0 ).edge );
+		if (col == null)
+			return null;
+		Bar bar = col.defBar;
 		SETag set = ((SETag) GreebleSkel.getTag( bar.tags, SETag.class ));
 		
 		return set == null ? null : set.se;

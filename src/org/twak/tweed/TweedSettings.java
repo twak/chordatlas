@@ -80,10 +80,11 @@ public class TweedSettings {
 	public double megafacacadeClusterGradient = 3;
 	public double lowOccluderFilter = 4; // "bus filter"
 	public boolean snapFacadeWidth = true;
-
-	public static boolean roofColours = true;
+	public boolean useGreedyProfiles = false;
+	public boolean roofColours = true;
 	
 	public List<Gen> genList = new ArrayList<>();
+	
 	
 	public TweedSettings() {
 	}

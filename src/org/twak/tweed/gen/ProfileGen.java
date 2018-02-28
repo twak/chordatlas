@@ -555,7 +555,6 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 //				mfNode.attachChild( Jme3z.lines( tweed.getAssetManager(), Collections.singletonList( oLine ), dispCol, 0.5f, true ) );
 			}
 		
-//			if ( mf.area > TweedSettings.settings.megaFacadeAreaThreshold )
 			{
 				Line l3 = mf.origin.line;
 				

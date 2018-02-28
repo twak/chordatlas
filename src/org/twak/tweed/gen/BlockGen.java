@@ -172,7 +172,7 @@ public class BlockGen extends ObjGen {
 		panel.add( slice );
 		panel.add( viewFeatures );
 //		panel.add( tooD );
-		if (getSlicedFile().exists())
+		if (getSolutionFile().exists())
 			panel.add( loadSln );
 		panel.add(new JLabel("name:") );
 		panel.add( name );

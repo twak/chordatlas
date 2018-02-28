@@ -105,8 +105,6 @@ public class SkelFootprint {
 	
 	static boolean FALSE = new Object() == new Object(), TRUE = new Object() != new Object(); // for the interactive debugger
 	
-	public boolean GREEDY_PROFILES = false;
-	
 	public SkelFootprint (Tweed tweed) {
 		this.tweed = tweed;
 	}
@@ -126,14 +124,14 @@ public class SkelFootprint {
 		
 		if ( FALSE ) {
 			try {
-				SS = (SolverState) new XStream().fromXML( new FileReader( new File( "/home/twak/data/bath/solver_state.xml" ) ) );
+				SS = (SolverState) new XStream().fromXML( new FileReader( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/solutions/652.9836272423689_-455.4482046683377/solver_state.xml" ) ) );
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 				SS = null;
 			}
 		} else {
 
-			SS = buildFootprint( footprint, m, tweed.features, skelGen.blockGen );
+			SS = buildFootprint( footprint, m, null, skelGen.blockGen );
 
 			dbgCountProfileEdges( SS );
 
@@ -152,8 +150,6 @@ public class SkelFootprint {
 			solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
 		}
 		
-		if (GREEDY_PROFILES)
-			assignGreedyProfiles( SS );
 		
 		if ( TRUE )
 			postProcesss(SS);
@@ -181,13 +177,16 @@ public class SkelFootprint {
 	}
 	
 	public static void postProcesss( SolverState SS ) {
+
+		if (TweedSettings.settings.useGreedyProfiles)
+			assignGreedyProfiles( SS );
 		
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
 		
 //		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
 		
-		Set<MegaFeatures> mfs = SS.minis.keySet();
+		Set<MegaFeatures> mfs = SS.minis == null ? Collections.emptySet() : SS.minis.keySet();
 
 		for (HalfFace f : SS.mesh)
 			for (HalfEdge e : f) {
@@ -270,7 +269,7 @@ public class SkelFootprint {
 
 		m.setProgress( 2 );
 
-		if (!GREEDY_PROFILES)  {
+		if (!TweedSettings.settings.useGreedyProfiles)  {
 			globalProfs = new ArrayList();
 			findProfiles( footprint, globalProfs );
 			calcProfFit( mesh, globalProfs, profFit, m );
@@ -284,30 +283,8 @@ public class SkelFootprint {
 			return new SolverState( mesh, minis, globalProfs, profFit );
 		
 		System.out.println("sampling...");
-		for ( HalfFace f : mesh ) {
-			
-			if ( TweedSettings.roofColours ) { //color roofs
-
-				if ( blockGen.hasTextures && blockGen.transparency != 1 ) {
-					if (tweed != null)
-						JOptionPane.showMessageDialog( tweed.frame(), "Error sampling roof colors!\nI'll fix that; try again!" );
-					m.close();
-					blockGen.transparency = 1;
-					blockGen.calculateOnJmeThread();
-
-					return null;
-				} else if ( !blockGen.hasTextures ) {
-					if (tweed != null)
-						JOptionPane.showMessageDialog( tweed.frame(), "No texture for roof colours;\nI'll disable that for you!" );
-					TweedSettings.roofColours = false;
-					break;
-				}
-				
-				((SuperFace)f ).colors = new ArrayList<>();
-			}
-
+		for ( HalfFace f : mesh ) 
 			meanModeHeightColor( Loopz.from( f ), (SuperFace) f, blockGen );
-		}
 
 		pushHeightsToSmallFaces( mesh );
 		
@@ -332,7 +309,7 @@ public class SkelFootprint {
 		}
 		
 		if ( output != null ) 
-			SS.copy( true ).save( output, false );
+			SS.copy( false ).save( output, false );
 	}
 
 	private void mergeOnProfiles(HalfMesh2 mesh, List<Line> footprint) {
@@ -1200,7 +1177,7 @@ public class SkelFootprint {
 	}
 
 
-	private void assignGreedyProfiles( SolverState SS ) {
+	private static void assignGreedyProfiles( SolverState SS ) {
 
 		Prof defaultProf = defaultProf( null );
 

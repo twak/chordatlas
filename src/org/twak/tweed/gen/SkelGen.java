@@ -37,6 +37,7 @@ import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
 import org.twak.siteplan.campskeleton.Siteplan;
 import org.twak.siteplan.jme.Jme3z;
+import org.twak.tweed.CompareGens;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
@@ -553,8 +554,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public JComponent getUI() {
 
 		JPanel ui = new JPanel(new ListDownLayout());		
+		ui.add(new JLabel("To edit: use select tool, right click on buildings"));
 		
-		ui.add(new JLabel("To edit: use select tool"));
+		JButton error = new JButton ("Compare to mesh");
+		error.addActionListener( l -> new CompareGens(this, blockGen)  );
+		ui.add( error );
 		
 		return ui;
 	}
