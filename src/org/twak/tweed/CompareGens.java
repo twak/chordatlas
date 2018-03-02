@@ -12,6 +12,7 @@ import javax.vecmath.Point2d;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.SkelGen;
+import org.twak.utils.Cache;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.ui.Show;
@@ -38,7 +39,13 @@ public class CompareGens {
 		
 		double[] minMax = Loopz.minMax2d( pts );
 
-		double sample = 1;
+		double skirt = 20;
+		minMax[0] -= skirt;
+		minMax[1] += skirt;
+		minMax[2] -= skirt;
+		minMax[3] += skirt;
+		
+		double sample = 0.5;
 
 		int xMin = (int) (minMax[0] / sample),
 			yMin = (int) (minMax[2] / sample),
@@ -47,11 +54,6 @@ public class CompareGens {
 		
 		double[][] dists = new double[xRange][yRange];
 		
-		LoopL<Point2d> gis = blockGen.profileGen.gis;
-		gis = Loopz.removeInnerEdges( gis );
-		gis = Loopz.removeNegativeArea( gis, -1 );
-		gis = Loopz.mergeAdjacentEdges( gis, 1, 0.05 );
-		
 		double 
 				minD = Double.MAX_VALUE, 
 				maxD = -Double.MAX_VALUE;
@@ -59,7 +61,8 @@ public class CompareGens {
 		double mse = 0;
 		int ptCount = 0;
 		
-		for (int xi = 0; xi < xRange; xi++)
+		for (int xi = 0; xi < xRange; xi++) {
+			System.out.println( xi + "/" + xRange );
 			for (int yi = 0; yi < yRange; yi++) {
 		
 				double x = ( xi + xMin ) * sample;
@@ -67,7 +70,7 @@ public class CompareGens {
 				
 				Point2d p2d = new Point2d( x, y );
 				
-				if ( Loopz.inside( p2d, pts ) ) {
+//				if ( Loopz.inside( p2d, pts ) ) {
 
 					CollisionResults resultsB = new CollisionResults();
 					blockGen.gNode.collideWith( new Ray( Jme3z.toJmeV( x, 0, y ), Jme3z.UP ), resultsB );
@@ -79,7 +82,7 @@ public class CompareGens {
 
 					if ( crB != null && crS != null ) {
 						
-						double dist = crB.getDistance()-crS.getDistance();
+						double dist = Math.abs( crB.getDistance()-crS.getDistance() );
 						minD = Math.min( minD, dist );
 						maxD = Math.max( maxD, dist );
 						dists[xi][yi] = dist;
@@ -89,9 +92,6 @@ public class CompareGens {
 						
 					} else
 						dists[xi][yi] = Double.NaN;
-
-					if ( Loopz.inside( p2d, gis ) ) { 
-					}
 				}
 			}
 		
@@ -109,23 +109,33 @@ public class CompareGens {
 				}
 			}
 		
+		double range = 150;
+		for (int y = 0; y < range; y++) {
+			for (int x = 0; x < 5; x++) 
+				raster.setPixel( x, y, colourMap( y / range ) );
+		}
+		
 		try {
 			ImageIO.write( render, "png", new File( Tweed.SCRATCH + "distanceMap" ) );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
 		
+		
+		
 		System.out.println ( "min : " + minD + "max : " + maxD + " mse: " + (mse/ptCount) );
 		
 		new Show( render );
 	}
-
+	
 	private int[] colourMap( double d ) {
-		return new int[] { 
-				(int) ( 100 ),
-				(int) ( 100 ),
-				(int) ( d * 255)
-		};
+		
+		int c = Color.HSBtoRGB( (float)( d * 0.8 ), 1, 1f );
+		
+		int r = c & 0xFF;
+		int g = (c & 0xFF00) >> 8;
+		int b = (c & 0xFF0000) >> 16;
+		
+		return new int[] {r,g,b};
 	}
-
 }

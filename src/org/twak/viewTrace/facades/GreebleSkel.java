@@ -100,7 +100,7 @@ public class GreebleSkel {
 		greebleGrid = new GreebleGrid(tweed, mbs = new MMeshBuilderCache());
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
-		edges( output, roofColor );
+//		edges( output, roofColor );
 		
 		for (List<Face> chain : Campz.findChains( output )) {
 			

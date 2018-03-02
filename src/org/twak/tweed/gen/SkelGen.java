@@ -110,6 +110,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		super( "skel", tweed );
 		
 		this.toRender = mesh;
+		this.blockGen = blockGen;
 		
 		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
 		
@@ -556,7 +557,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JPanel ui = new JPanel(new ListDownLayout());		
 		ui.add(new JLabel("To edit: use select tool, right click on buildings"));
 		
-		JButton error = new JButton ("Compare to mesh");
+		JButton error = new JButton ("compare to mesh");
 		error.addActionListener( l -> new CompareGens(this, blockGen)  );
 		ui.add( error );
 		
