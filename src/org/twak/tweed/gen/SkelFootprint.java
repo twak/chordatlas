@@ -178,11 +178,12 @@ public class SkelFootprint {
 	
 	public static void postProcesss( SolverState SS ) {
 
-		if (TweedSettings.settings.useGreedyProfiles)
-			assignGreedyProfiles( SS );
 		
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
+		
+		if (TweedSettings.settings.useGreedyProfiles)
+			assignGreedyProfiles( SS );
 		
 //		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
 		

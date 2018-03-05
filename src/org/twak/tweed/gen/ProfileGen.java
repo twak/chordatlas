@@ -734,7 +734,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 					}
 				} );
 			}
-		} );
+		});
 		
 		JButton skel = new JButton("optimize");
 		skel.addActionListener( ae -> doSkel() );
@@ -742,11 +742,14 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		JComboBox<Mode> vizMode = new JComboBox<>(Mode.values());
 		vizMode.addActionListener(e -> doViz( (Mode) vizMode.getSelectedItem() ) );
 		
-		JButton writeProfiles = new JButton("dump profs");
-		writeProfiles.addActionListener( ae -> writeProfiles() );
+//		JButton writeProfiles = new JButton("dump profs");
+//		writeProfiles.addActionListener( ae -> writeProfiles() );
 		
 		JButton stateBuilder = new JButton("segmenter ui");
 		stateBuilder.addActionListener( ae -> new SSBuilder(this, tweed.features) );
+		
+		JButton profs = new JButton("2d profiles");
+		profs.addActionListener( ae -> new ProfileAssignmentViewer( faces ));
 		
 		JPanel out = new JPanel( new ListDownLayout() );
 		out.add( skel );
@@ -754,8 +757,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		out.add( slider );
 		out.add( new JLabel("viz:") );
 		out.add( vizMode );
-		out.add( writeProfiles );
+//		out.add( writeProfiles );
 		out.add( stateBuilder );
+		out.add( profs );
 		return out;
 	}
 	

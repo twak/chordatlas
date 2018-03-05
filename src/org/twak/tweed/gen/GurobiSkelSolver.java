@@ -1,6 +1,7 @@
 package org.twak.tweed.gen;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,13 +27,13 @@ import org.twak.utils.Cache;
 import org.twak.utils.Cache2;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.Line;
-import org.twak.utils.collections.MultiMap;
-import org.twak.utils.geom.HalfMesh2;
-import org.twak.utils.geom.LinearForm;
-import org.twak.utils.geom.HalfMesh2.HalfEdge;
-import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.Mathz;
 import org.twak.utils.PaintThing;
+import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.HalfMesh2;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.geom.LinearForm;
 
 import gurobi.GRB;
 import gurobi.GRB.DoubleAttr;
@@ -147,7 +148,9 @@ public class GurobiSkelSolver {
 			}).start();
 			
 			try {
-  			    model.write( Tweed.SCRATCH + "problem_"+System.currentTimeMillis()+".mps");
+				String file = Tweed.SCRATCH + "problem_"+System.currentTimeMillis()+".mps";
+				new File (file).getParentFile().mkdirs();
+  			    model.write( file );
 				model.optimize();
 			} finally {
 				gurobiDone = true;				

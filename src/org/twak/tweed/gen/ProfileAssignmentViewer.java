@@ -13,12 +13,32 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
 import org.twak.utils.PaintThing;
+import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.SuperLine;
 
 public class ProfileAssignmentViewer {
 
+	public ProfileAssignmentViewer( List<MegaFacade> faces ) {
+		
+		Plot plot = new Plot(new Object[0]);
+		
+		PaintThing.debug.clear();
+		
+		Color col = new Color( 0, 0, 0, 10 );
+		
+		int count = 0;
+		for (MegaFacade f : faces)
+			for (Prof p : f.profiles.values()) {
+				PaintThing.debug( col, 1, p );
+				count ++;
+			}
+		
+		PaintThing.debug.put( 1, "no profiles: " + count );
+	}
+	
 	public ProfileAssignmentViewer( SuperFace sf, List<Prof> globalProfs ) {
 
 		JSlider edge = new JSlider (-1, sf.edgeCount()-1);
@@ -59,10 +79,15 @@ public class ProfileAssignmentViewer {
 									profs.add( p2 );
 								}
 							}
-									
+								
+							Prof clean = Prof.parameterize( sl, profs );
+							PaintThing.debug( new Color( 100, 100, 255, 255 ), 1, clean );
+							
+							
 							double bestScore = Double.MAX_VALUE;
 							//							for ( int ii = 0; ii < profFit.get( se ).length; ii++ ) {
 
+							if (globalProfs != null)
 							for ( Prof p : globalProfs ) {
 
 								Double d = SkelFootprint.meanDistance( mf, mf.getIndex( se.start ), mf.getIndex( se.end ), p );
@@ -90,6 +115,8 @@ public class ProfileAssignmentViewer {
 								PaintThing.debug.put( 1, "count " + profs.size() );
 							
 						}
+						else
+						PaintThing.debug.put( 1, "no profiles" );
 						PaintThing.debug( Color.black, 3, e.line() );
 //							break;
 						}
