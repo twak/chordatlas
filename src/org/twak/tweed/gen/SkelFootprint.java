@@ -158,7 +158,7 @@ public class SkelFootprint {
 		dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
 		
 		if (FALSE) {
-			dbgShowProfiles( SS.mesh, null, SS.profFit, "postprocess" );
+			PaintThing.debug.clear();
 			PaintThing.debug.put( 1, footprint );
 			SS.debugSolverResult();
 		}
@@ -213,7 +213,7 @@ public class SkelFootprint {
 		updateHeights           ( SS.mesh );
 		
 		if (FALSE) // not needed if we're not doing fully procedural windows
-			findOcclusions ( SS.mesh ); 
+			findOcclusions ( SS.mesh ); 		
 	}
 
 	private static void mergeSmallFaces( SolverState SS ) {
@@ -281,7 +281,7 @@ public class SkelFootprint {
 			mergeOnProfiles (mesh, footprint);
 		
 		if ( exitA )
-			return new SolverState( mesh, minis, globalProfs, profFit );
+			return new SolverState( mesh, minis, globalProfs, profFit, footprint );
 		
 		System.out.println("sampling...");
 		for ( HalfFace f : mesh ) 
@@ -297,7 +297,7 @@ public class SkelFootprint {
 		
 		removeExposedFaces      ( mesh );
 		
-		return new SolverState( mesh, minis, globalProfs, profFit );
+		return new SolverState( mesh, minis, globalProfs, profFit, footprint );
 	}
 
 	public static void solve( SolverState SS, ProgressMonitor m, File output, long timeLimitSec ) {
@@ -921,7 +921,7 @@ public class SkelFootprint {
 		
 		double[] minMax = Loopz.minMax2d( pts );
 
-		double sample = 2;
+		double sample = 1;
 
 		double missCost = 30;
 		
@@ -939,6 +939,9 @@ public class SkelFootprint {
 		
 		for ( double x = minMax[ 0 ]; x < minMax[ 1 ]; x += sample )
 			for ( double y = minMax[ 2 ]; y < minMax[ 3 ]; y += sample ) {
+				
+				x += Math.random() * sample - sample/2;
+				y += Math.random() * sample - sample/2;
 				
 				Point2d p2d = new Point2d( x, y );
 				

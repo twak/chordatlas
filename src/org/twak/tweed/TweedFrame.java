@@ -190,7 +190,7 @@ public class TweedFrame {
 		load.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-					new SimpleFileChooser(frame, false, "select a workspace", Tweed.DATA == null ? null : new File ( Tweed.DATA ), TWEED_XML) {
+					new SimpleFileChooser(frame, false, "select a tweed.xml", Tweed.DATA == null ? null : new File ( Tweed.DATA ), TWEED_XML) {
 						
 						@Override
 						public void heresTheFile( File f ) throws Throwable {

@@ -275,11 +275,11 @@ public class GurobiSkelSolver {
 			buildMini();
 		
 		for (HalfEdge he : edges) {
-			target.addTerm( 10  * he.length(), edgeInfo.get(he).edgeNoProfile );
-			target.addTerm( 20 * he.length(), edgeInfo.get(he).profileNoEdge );
-//			target.addTerm( 50 * he.length(), edgeInfo.get(he).isEdge );
+			target.addTerm( 20 * he.length(), edgeInfo.get(he).edgeNoProfile );
+			target.addTerm( 40 * he.length(), edgeInfo.get(he).profileNoEdge );
 		}
 		
+//			target.addTerm( 50 * he.length(), edgeInfo.get(he).isEdge );
 		double isEdgeHeight = 0, isNotEdgeHeight = 0;
 		
 		for ( HalfEdge e : edges ) {

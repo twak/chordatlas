@@ -618,9 +618,10 @@ public class Prof extends ArrayList<Point2d> {
 
 //		double A = 0.4; // simple = 0.4
 //		double B = 0.1; // simple = 1;
-		double A = 0.1; // simple = 0.4
-		double B = 0.1; // simple = 1;
-		double C = 0.1; // rotate threshold, radians
+		
+		double A = 0.2; // simple = 0.4
+		double B = 0.3; // simple = 0.1;
+		double C = 0.1; // simple = 0.1; rotate threshold, radians
 
 		double firstFloorHeight = 2;
 

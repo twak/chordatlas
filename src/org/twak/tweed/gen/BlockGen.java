@@ -1,6 +1,8 @@
 package org.twak.tweed.gen;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,19 +28,23 @@ import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.utils.Line;
+import org.twak.utils.PaintThing;
+import org.twak.utils.PaintThing.ICanPaint;
+import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
-import org.twak.viewTrace.facades.AlignStandalone2d;
 import org.twak.viewTrace.Slice;
 import org.twak.viewTrace.SliceParameters;
 import org.twak.viewTrace.SliceSolver;
+import org.twak.viewTrace.facades.AlignStandalone2d;
 
-import com.google.common.io.FileWriteMode;
 import com.jme3.asset.ModelKey;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
@@ -146,7 +152,7 @@ public class BlockGen extends ObjGen {
 			}
 		} );
 		
-		JButton loadSln = new JButton( "load sln" );
+		JButton loadSln = new JButton( "load last solution" );
 		loadSln.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
@@ -155,6 +161,28 @@ public class BlockGen extends ObjGen {
 
 					SolverState SS = (SolverState) new XStream().fromXML( f );
 					SkelFootprint.postProcesss( SS );
+					
+//					PaintThing.debug.clear();
+//					new Plot(SS.mesh).add( new ICanPaint() {
+//
+//						@Override
+//						public void paint( Graphics2D g, PanMouseAdaptor ma ) {
+//
+//							g.setColor( Color.black );
+//							g.setStroke( new BasicStroke( 2 ) );
+//							
+//							if (SS.footprint != null)
+//							for (Line l : SS.footprint) {
+//								g.drawLine( 
+//										ma.toX( l.start.x ), 
+//										ma.toY( l.start.y ), 
+//										ma.toX( l.end.x ), 
+//										ma.toY( l.end.y ) ); 
+//							}
+//							
+//						}
+//					});
+					
 					tweed.frame.addGen( new SkelGen( SS.mesh, tweed, BlockGen.this ), true );
 				} else {
 					JOptionPane.showMessageDialog( tweed.frame(), "Unable to find pre-computed solution.\n" + f );

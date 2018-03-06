@@ -462,7 +462,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 
 							double angle = l.absAngle( start.line );
 
-							if ( overlap > 0.8 && angle < 0.3 || overlap > 0.5 /* 0.1 for aggressive clustering */ && angle < 0.1 ) {
+							if ( overlap > 0.8 && angle < 0.3 || overlap > 0.1 /* 0.1 for aggressive clustering */ && angle < 0.1 ) {
 //								if (overlap > 0.1 && angle < 0.5 ) {
 									if ( l.distance( lah.line ) < delta * TweedSettings.settings.megafacacadeClusterGradient ) {
 										LineAtHeight toProc = new LineAtHeight( hi, l );

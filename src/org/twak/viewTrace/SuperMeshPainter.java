@@ -23,6 +23,7 @@ public class SuperMeshPainter implements ICanPaintU {
 		@Override
 		public void paint( Object oa, Graphics2D g2, PanMouseAdaptor ma ) {
 
+			
 			HalfMesh2 o = (HalfMesh2) oa;
 
 			double scatterRadius = 0.0;
@@ -120,7 +121,7 @@ public class SuperMeshPainter implements ICanPaintU {
 //						g2.setColor( Color.black );
 //					}
 //					g2.setColor( ((SuperEdge)e).profLine == null? Color.green : Color.magenta);
-						PaintThing.paint ( e.line(), g2, ma );
+//						PaintThing.paint ( e.line(), g2, ma );
 //					}
 				}
 				}

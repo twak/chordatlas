@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,22 +17,21 @@ import java.util.Set;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.MFPoint;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.CloneSerializable;
 import org.twak.utils.DumbCluster1D;
-import org.twak.utils.Line;
 import org.twak.utils.DumbCluster1D.Cluster;
+import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
+import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
-import org.twak.utils.PanMouseAdaptor;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.MiniFacade;
 
@@ -45,6 +43,7 @@ public class SolverState implements Serializable
 	MultiMap<MegaFeatures, MFPoint> minis; 
 	List<Prof> globalProfs;
 	Map<SuperEdge, double[]> profFit;
+	List<Line> footprint;
 	
 	public StringBuilder dbgInfo = new StringBuilder(); 
 	
@@ -52,12 +51,13 @@ public class SolverState implements Serializable
 			HalfMesh2 mesh, 
 			MultiMap<MegaFeatures, MFPoint> minis, 
 			List<Prof> globalProfs, 
-			Map<SuperEdge, double[]> profFit ) {
+			Map<SuperEdge, double[]> profFit, List<Line> footprint ) {
 
 		this.mesh = mesh;
 		this.minis = minis;
 		this.globalProfs = globalProfs;
 		this.profFit = profFit;
+		this.footprint = footprint;
 	}
 
 	public SolverState copy( boolean removeMegaFacades ) {
