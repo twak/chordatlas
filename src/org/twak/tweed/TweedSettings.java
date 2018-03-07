@@ -84,6 +84,7 @@ public class TweedSettings {
 	public boolean roofColours = true;
 	
 	public List<Gen> genList = new ArrayList<>();
+	public boolean LOD = true;
 	
 	
 	public TweedSettings() {

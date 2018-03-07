@@ -181,39 +181,26 @@ public class SkelFootprint {
 		
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
+
+		
+
+		if (TweedSettings.settings.roofColours)
+			findRoofColor           ( SS.mesh );
+		
+		if (SS.minis != null)
+			propogateProfilesMinis  ( SS.mesh );
 		
 		if (TweedSettings.settings.useGreedyProfiles)
 			assignGreedyProfiles( SS );
 		
-//		mergeSmallFaces( SS ); // delme: causes infinite loops on 561.3527225284143_-555.7857439917622 			513.502095354607_-868.5858135006866 		613.198274125487_-929.9412937312637			707.5912053692705_-736.3628596400993
-		
-		Set<MegaFeatures> mfs = SS.minis == null ? Collections.emptySet() : SS.minis.keySet();
-
-		for (HalfFace f : SS.mesh)
-			for (HalfEdge e : f) {
-				
-				double bestDist = 3;
-				SuperEdge se = (SuperEdge)e;
-				
-				for (MegaFeatures mf : mfs)  {
-					double dist = se.line().distance( mf.megafacade ) ;
-					if (dist < bestDist && se.line().absAngle(mf.megafacade) < 0.3 ) {
-						dist = bestDist;
-						se.proceduralFacade = mf;
-					}
-				}
-			}
-
-		findRoofColor           ( SS.mesh );
-		
-		propogateProfilesMinis  ( SS.mesh );
 		cleanFootprints         ( SS.mesh );
 		cleanFootprints         ( SS.mesh );
 		
 		updateHeights           ( SS.mesh );
 		
 		if (FALSE) // not needed if we're not doing fully procedural windows
-			findOcclusions ( SS.mesh ); 		
+			findOcclusions ( SS.mesh );
+
 	}
 
 	private static void mergeSmallFaces( SolverState SS ) {
@@ -1184,16 +1171,17 @@ public class SkelFootprint {
 	private static void assignGreedyProfiles( SolverState SS ) {
 
 		Prof defaultProf = defaultProf( null );
-
+		
 		for ( HalfFace f : SS.mesh )
 			for ( List<HalfEdge> le : f.parallelFaces( 0.1 ) ) {
 
 				List<Prof> profs = new ArrayList();
 
-				SuperLine sl = null;
 
 				for ( HalfEdge he : le ) {
-					sl = ( (SuperEdge) he ).profLine;
+					
+					SuperLine sl = ( (SuperEdge) he ).profLine;
+					
 					if ( sl != null ) {
 						MegaFacade mf = sl.getMega();
 						if (mf != null)
@@ -1203,8 +1191,8 @@ public class SkelFootprint {
 
 				Prof p = null;
 
-				if ( sl != null && !profs.isEmpty() )
-					p = Prof.parameterize( sl, profs );
+				if ( !profs.isEmpty() )
+					p = Prof.parameterize( profs );
 				else
 					p = defaultProf;
 
@@ -1232,7 +1220,7 @@ public class SkelFootprint {
 				if (example == null)
 					example = lp.get( 0 );
 				
-				Prof p = Prof.parameterize( sl, lp );
+				Prof p = Prof.parameterize( lp );
 				if (p != null && p.size() > 1)
 					globalProfs.add( SkelGen.moveToX0( p ) );
 			}
@@ -1556,7 +1544,7 @@ public class SkelFootprint {
 
 					PaintThing.debug( new Color( 0, 0, 0, 50 ), 1, ps );
 
-					Prof clean = Prof.parameterize( sl, ps );
+					Prof clean = Prof.parameterize( ps );
 
 					Prof c2 = new Prof( clean );
 					for ( Point2d p : c2 )

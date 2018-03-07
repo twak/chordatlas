@@ -14,6 +14,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.Line3d;
@@ -149,22 +150,14 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 					geom.setMaterial( mat );
 					geom.setLocalTranslation( 0, 0, 0 );
 
-					LodGenerator lod = new LodGenerator(geom);
-					lod.bakeLods(LodGenerator.TriangleReductionMethod.COLLAPSE_COST, 10, 100 );
-					
-//					int ll = geom.getMesh().getNumLodLevels() ;
-//					
-//					VertexBuffer[] vb = new VertexBuffer[ll+1];
-//					for (int i = 0; i < ll; i++) 
-//						vb[i] = geom.getMesh().getLodLevel( i );
-//					
-//					vb[ll] = emptyVB;
-//					
-//					geom.getMesh().setLodLevels( vb );
-					
-	                GISLodControl lc = new GISLodControl();
-	                lc.setTrisPerPixel( 0.000001f );
-	                geom.addControl(lc);
+				if ( TweedSettings.settings.LOD ) {
+					LodGenerator lod = new LodGenerator( geom );
+					lod.bakeLods( LodGenerator.TriangleReductionMethod.COLLAPSE_COST, 10, 100 );
+
+					GISLodControl lc = new GISLodControl();
+					lc.setTrisPerPixel( 0.000001f );
+					geom.addControl( lc );
+				}
 					
 					gNode.attachChild( geom );
 				

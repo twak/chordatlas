@@ -98,7 +98,7 @@ public class CompareGens {
 		BufferedImage render = new BufferedImage( xRange, yRange, BufferedImage.TYPE_3BYTE_BGR );
 		WritableRaster raster = render.getRaster();
 		
-		minD = 0; maxD = 28;
+//		minD = 0; maxD = 28;
 		
 		for (int xi = 0; xi < xRange; xi++)
 			for (int yi = 0; yi < yRange; yi++) {

@@ -593,8 +593,7 @@ public class Prof extends ArrayList<Point2d> {
 		return clean;
 	}
 
-	public static Prof parameterize( SuperLine profileEdge, // we do not allow profiles to go beyond each profile edge. note than x=0 in a raw profile isn't relative to this edge!
-			List<Prof> in // all profs from a single profile-edge are in the same 2D space, with strange x-origin
+	public static Prof parameterize( List<Prof> in // all profs from a single profile-edge are in the same 2D space, with strange x-origin
 	) {
 
 		//		double toProfileEdge;

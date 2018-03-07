@@ -144,7 +144,7 @@ public class VizSkelGen extends SkelGen {
 		if (ps.isEmpty())
 			return null;
 		
-		return Prof.parameterize(sl, ps);
+		return Prof.parameterize(ps);
 	}
 
 }

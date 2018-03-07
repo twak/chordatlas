@@ -80,7 +80,7 @@ public class ProfileAssignmentViewer {
 								}
 							}
 								
-							Prof clean = Prof.parameterize( sl, profs );
+							Prof clean = Prof.parameterize( profs );
 							PaintThing.debug( new Color( 100, 100, 255, 255 ), 1, clean );
 							
 							

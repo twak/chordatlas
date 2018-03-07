@@ -315,7 +315,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
 		ui.add( tex );
 
-		JButton camp = new JButton( "siteplan" );
+		JButton camp = new JButton( "procedural extrusions" );
 		camp.addActionListener( new ActionListener() {
 
 			@Override
@@ -356,12 +356,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		ui.add( camp );
 
-		JButton mini = new JButton( "minis" );
+		JButton mini = new JButton( "street-view" );
 		mini.addActionListener( e -> new MiniViewer( se ) );
 		if ( sf != null )
 			ui.add( mini );
 
-		JButton prof = new JButton( "prof" );
+		JButton prof = new JButton( "profiles" );
 		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
 		ui.add( prof );
 		
