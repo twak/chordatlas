@@ -230,8 +230,7 @@ public class SkelFootprint {
 		}
 	}
 	
-	public  SolverState buildFootprint( List<Line> footprint, ProgressMonitor m, FeatureCache features, 
-			BlockGen blockGen ) {
+	public  SolverState buildFootprint( List<Line> footprint, ProgressMonitor m, FeatureCache features, BlockGen blockGen ) {
 		
 		MultiMap<MegaFeatures, MFPoint> minis = features == null ? null : features.createMinis(blockGen);
 		Map<SuperEdge, double[]> profFit  = new HashMap(); 
