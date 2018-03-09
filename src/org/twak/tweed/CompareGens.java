@@ -64,35 +64,33 @@ public class CompareGens {
 		for (int xi = 0; xi < xRange; xi++) {
 			System.out.println( xi + "/" + xRange );
 			for (int yi = 0; yi < yRange; yi++) {
-		
+
 				double x = ( xi + xMin ) * sample;
 				double y = ( yi + yMin ) * sample;
-				
+
 				Point2d p2d = new Point2d( x, y );
-				
-//				if ( Loopz.inside( p2d, pts ) ) {
 
-					CollisionResults resultsB = new CollisionResults();
-					blockGen.gNode.collideWith( new Ray( Jme3z.toJmeV( x, 0, y ), Jme3z.UP ), resultsB );
-					CollisionResult crB = resultsB.getFarthestCollision();
-					
-					CollisionResults resultsS = new CollisionResults();
-					skelGen.gNode.collideWith( new Ray( Jme3z.toJmeV( x, 0, y ), Jme3z.UP ), resultsS );
-					CollisionResult crS = resultsS.getFarthestCollision();
+				CollisionResults resultsB = new CollisionResults();
+				blockGen.gNode.collideWith( new Ray( Jme3z.toJmeV( x, 0, y ), Jme3z.UP ), resultsB );
+				CollisionResult crB = resultsB.getFarthestCollision();
 
-					if ( crB != null && crS != null ) {
-						
-						double dist = Math.abs( crB.getDistance()-crS.getDistance() );
-						minD = Math.min( minD, dist );
-						maxD = Math.max( maxD, dist );
-						dists[xi][yi] = dist;
-						
-						mse += dist * dist;
-						ptCount ++;
-						
-					} else
-						dists[xi][yi] = Double.NaN;
-				}
+				CollisionResults resultsS = new CollisionResults();
+				skelGen.gNode.collideWith( new Ray( Jme3z.toJmeV( x, 0, y ), Jme3z.UP ), resultsS );
+				CollisionResult crS = resultsS.getFarthestCollision();
+
+				if ( crB != null && crS != null ) {
+
+					double dist = Math.abs( crB.getDistance() - crS.getDistance() );
+					minD = Math.min( minD, dist );
+					maxD = Math.max( maxD, dist );
+					dists[ xi ][ yi ] = dist;
+
+					mse += dist * dist;
+					ptCount++;
+
+				} else
+					dists[ xi ][ yi ] = Double.NaN;
+			}
 			}
 		
 		BufferedImage render = new BufferedImage( xRange, yRange, BufferedImage.TYPE_3BYTE_BGR );
