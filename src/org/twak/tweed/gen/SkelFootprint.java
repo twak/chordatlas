@@ -907,7 +907,7 @@ public class SkelFootprint {
 		
 		double[] minMax = Loopz.minMax2d( pts );
 
-		double sample = 1;
+		double sample = 2;
 
 		double missCost = 30;
 		
