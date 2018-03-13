@@ -60,14 +60,16 @@ public class HouseTool extends Tool {
 				
 				se.prof = p;
 				MiniFacade mini = newMini(imf, se.length());
-				se.addMini( mini );
-				se.proceduralFacade = mf;
 				
-				se.toEdit = mini;
-				
-				if ( first )
+				if ( false ) {
 					se.addMini( mini );
-				
+					se.proceduralFacade = mf;
+
+					se.toEdit = mini;
+
+					if ( first )
+						se.addMini( mini );
+				}
 				first = false;
 				
 			}
