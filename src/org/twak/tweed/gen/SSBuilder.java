@@ -10,6 +10,7 @@ import javax.swing.JSlider;
 import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.ui.Plot;

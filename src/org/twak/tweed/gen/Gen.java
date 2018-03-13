@@ -24,7 +24,7 @@ public abstract class Gen {
 	public transient Node gNode;
 	public transient Tweed tweed;
 	
-	transient Node parentNode;
+	protected transient Node parentNode;
 	
 	public Gen() {}
 	

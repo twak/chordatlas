@@ -5,6 +5,7 @@ import java.io.File;
 import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.TweedFrame;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.geom.ObjDump;
 
 import com.thoughtworks.xstream.XStream;

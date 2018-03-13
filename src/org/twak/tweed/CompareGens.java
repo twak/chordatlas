@@ -11,7 +11,7 @@ import javax.vecmath.Point2d;
 
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.BlockGen;
-import org.twak.tweed.gen.SkelGen;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Cache;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;

@@ -23,6 +23,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.GenHandlesSelect;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.HalfMesh2;

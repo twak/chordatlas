@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;

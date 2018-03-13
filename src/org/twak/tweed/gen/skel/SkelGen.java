@@ -1,14 +1,7 @@
-package org.twak.tweed.gen;
+package org.twak.tweed.gen.skel;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -32,6 +24,9 @@ import org.twak.camp.Output;
 import org.twak.camp.Skeleton;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
+import org.twak.camp.ui.Marker;
+import org.twak.siteplan.anchors.Ship;
+import org.twak.siteplan.anchors.Ship.Instance;
 import org.twak.siteplan.campskeleton.Plan;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
@@ -41,6 +36,15 @@ import org.twak.tweed.CompareGens;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.BlockGen;
+import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.JmeGen;
+import org.twak.tweed.gen.MiniViewer;
+import org.twak.tweed.gen.Prof;
+import org.twak.tweed.gen.ProfileAssignmentViewer;
+import org.twak.tweed.gen.SkelFootprint;
+import org.twak.tweed.gen.SuperEdge;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -50,19 +54,16 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
-import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.viewTrace.facades.CMPz;
-import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.RoofTag;
 import org.twak.viewTrace.facades.WallTag;
@@ -72,7 +73,7 @@ import com.jme3.scene.Spatial;
 
 public class SkelGen extends Gen implements IDumpObjs {
 
-	BlockGen blockGen;
+	public BlockGen blockGen;
 
 	public HalfMesh2 toRender = null;
 
@@ -258,13 +259,37 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		plan.points = loopl;
 
+		if ( cap != null ) {
+			
+			// skel.capAt( cap, a -> skel.capArea = a ); simple...but doesn't show in the siteplan ui
+			
+			Ship s = new FlatRoofShip( cap, plan) ;
+			
+			for ( Profile prof : plan.profiles.values() ) {
+				for ( Loop<Bar> lb : prof.points ) {
+					boolean addedMarker = false;
+					for ( Bar b : lb ) {
+
+						if ( -b.start.y < cap && -b.end.y > cap || ( !addedMarker && b == lb.start.getPrev().get() ) ) {
+
+							Marker m = new Marker();
+							m.set( b.toLine().xAtY( -cap ), -cap );
+							m.bar = b;
+							m.bar.mould.create( m, null );
+
+							Instance i = s.newInstance();
+							i.anchors[ 0 ].setProfileGen( m.generator );
+							addedMarker = true;
+						}
+					}
+				}
+			}
+			
+	        plan.ships.add( s );
+		}
+
 		PlanSkeleton skel = new PlanSkeleton( plan );
-
-		if ( cap != null )
-			skel.capAt( cap, a -> skel.capArea = a );
-
 		skel.skeleton();
-
 		return skel;
 	}
 
@@ -569,7 +594,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit = new MiniFacade();
 			se.toEdit.left = 0;
 			se.toEdit.width = se.length();
-			se.toEdit.height = se.mini.get( 0 ).height;
+			if (se.mini != null && !se.mini.isEmpty())
+				se.toEdit.height = se.mini.get( 0 ).height;
+			else
+				se.toEdit.height = sf.height;
+			
 			if ( !texture )
 				se.toEdit.groundFloorHeight = 2;
 		}
@@ -591,7 +620,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							CMPz.cmpRender( se.toEdit, skel, skel.output, sf, new Runnable() {
+							Pix2Pix.pix2pix( se.toEdit, skel, skel.output, sf, new Runnable() {
 
 								public void run() {
 									tweed.enqueue( new Runnable() {

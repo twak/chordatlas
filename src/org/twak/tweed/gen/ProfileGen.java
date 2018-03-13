@@ -34,6 +34,7 @@ import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.VizSkelGen.Mode;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;

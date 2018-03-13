@@ -47,6 +47,7 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache.MFPoint;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.tweed.gen.ProfileGen.MegaFacade;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
@@ -94,7 +95,7 @@ public class SkelFootprint {
 	
 	SkelGen skelGen;
 	Tweed tweed;
-	List<Prof> globalProfs;
+	public List<Prof> globalProfs;
 	
 	public double megaFacadeAreaThreshold = TweedSettings.settings.megaFacadeAreaThreshold;
 	public static double gisInterior = TweedSettings.settings.gisThreshold;;
@@ -295,7 +296,7 @@ public class SkelFootprint {
 			th.printStackTrace();
 		}
 		
-		if ( output != null ) 
+		if ( false && output != null ) 
 			SS.copy( false ).save( output, false );
 	}
 

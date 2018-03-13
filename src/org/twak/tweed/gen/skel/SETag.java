@@ -1,6 +1,7 @@
-package org.twak.tweed.gen;
+package org.twak.tweed.gen.skel;
 
 import org.twak.camp.Tag;
+import org.twak.tweed.gen.SuperEdge;
 
 public class SETag extends Tag {
 

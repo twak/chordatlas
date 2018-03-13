@@ -20,10 +20,10 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 /**
  * Utilties to synthesize facade using Pix2Pix network
  */
-public class CMPz {
+public class Pix2Pix {
 	
 
-	public static void cmpRender( MiniFacade toEdit, PlanSkeleton skel, Output output, SuperFace sf, Runnable update ) {
+	public static void pix2pix( MiniFacade toEdit, PlanSkeleton skel, Output output, SuperFace sf, Runnable update ) {
 		
 		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
@@ -50,7 +50,7 @@ public class CMPz {
 		try {
 			
 			
-			ImageIO.write (bi, "png", new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/input/test/"+name+".png"));
+			ImageIO.write (bi, "png", new File ("/home/twak/code/pix2pix-interactive/input/test/"+name+".png"));
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
@@ -66,7 +66,7 @@ public class CMPz {
 			}
 			
 			
-			File[] fz = new File ("/home/twak/code/pytorch-CycleGAN-and-pix2pix/output/").listFiles();
+			File[] fz = new File ("/home/twak/code/pix2pix-interactive/output/").listFiles();
 			
 			if (fz.length > 0) {
 				
@@ -83,8 +83,7 @@ public class CMPz {
 						
 						if (texture.exists() && texture.length() > 0) {
 							
-							FileOutputStream fos = new FileOutputStream( Tweed.DATA + 
-									"/"+(dest = "scratch/" + name+".png") );
+							FileOutputStream fos = new FileOutputStream( Tweed.DATA + "/"+(dest = "scratch/" + name+".png") );
 							
 							Files.copy( texture.toPath(), fos );
 							

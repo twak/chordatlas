@@ -27,6 +27,7 @@ import javax.vecmath.Point3d;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.GISGen.Mode;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
