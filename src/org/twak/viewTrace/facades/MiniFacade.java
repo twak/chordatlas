@@ -712,4 +712,11 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 
 		return bi;
 	}
+
+
+	public void add( Feature feat, DRectangle rect ) {
+		FRect f = new FRect( rect );
+		f.f = feat;
+		rects.put( feat, f );
+	}
 }

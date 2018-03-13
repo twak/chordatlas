@@ -512,18 +512,6 @@ public class GreebleSkel {
 		return all;
 	}
 	
-	
-	
-	protected boolean visible( DRectangle dRectangle, List<DRectangle> occlusions ) {
-		
-		for (Point2d p : dRectangle.points()) 
-			for (DRectangle d : occlusions)
-				if (d.contains( p ))
-					return false;
-		
-		return true;
-	}
-	
 	protected LoopL<Point2d> findRectagle( Loop<LPoint2d> flat, Point2d s, Point2d e ) {
 
 //		new Plot(flat);

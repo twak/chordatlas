@@ -77,7 +77,6 @@ public class Pix2Pix {
 						
 						new File (Tweed.SCRATCH).mkdirs();
 						
-						
 //						File texture = new File (f, "images/"+name+"_real_A.png");
 						File texture = new File (f, "images/"+name+"_fake_B.png");
 						

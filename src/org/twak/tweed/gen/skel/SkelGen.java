@@ -60,6 +60,7 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -339,6 +340,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JButton tex = new JButton( "texture facade" );
 		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
 		ui.add( tex );
+		
+		JButton proc = new JButton( "procedural facade" );
+		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
+		ui.add( proc );
 
 		JButton camp = new JButton( "procedural extrusions" );
 		camp.addActionListener( new ActionListener() {
@@ -414,6 +419,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		tweed.frame.setGenUI( ui );
 	}
+
 
 	private WallTag findWallMini( LoopL<Bar> points ) {
 
@@ -575,9 +581,15 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JPanel ui = new JPanel( new ListDownLayout() );
 		ui.add( new JLabel( "To edit: use select tool, right click on buildings" ) );
 
-		JButton error = new JButton( "compare to mesh" );
-		error.addActionListener( l -> new CompareGens( this, blockGen ) );
-		ui.add( error );
+		JButton compare = new JButton( "compare to mesh" );
+		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
+		ui.add( compare );
+		
+		JButton pf = new JButton( "all procedural facades" );
+		pf.addActionListener( l -> cgaAll() );
+		ui.add( pf );
+		
+		JButton proc = new JButton("CGA facades");
 
 		return ui;
 	}
@@ -591,26 +603,22 @@ public class SkelGen extends Gen implements IDumpObjs {
 		closeSitePlan();
 
 		if ( se.toEdit == null ) {
-			se.toEdit = new MiniFacade();
-			se.toEdit.left = 0;
-			se.toEdit.width = se.length();
-			if (se.mini != null && !se.mini.isEmpty())
-				se.toEdit.height = se.mini.get( 0 ).height;
-			else
-				se.toEdit.height = sf.height;
-			
+			ensureMF( sf, se );
 			if ( !texture )
 				se.toEdit.groundFloorHeight = 2;
 		}
 
-		if ( texture )
+		if ( texture )  {
+			patchWallTag (skel, se, se.toEdit);
 			se.toEdit.width = se.length();
+		}
 		else
 			se.toEdit.texture = se.toEdit.spec = se.toEdit.normal = null;
-
+		
+		
 		Plot p = new Plot( se.toEdit );
 
-		p.addEditListener( new Changed() {
+		Changed c = new Changed() {
 
 			@Override
 			public void changed() {
@@ -642,6 +650,46 @@ public class SkelGen extends Gen implements IDumpObjs {
 						}
 					} );
 			}
-		} );
+		};
+		
+		c.changed();
+		p.addEditListener( c );
+	}
+
+	private static void ensureMF( SuperFace sf, SuperEdge se ) {
+		se.toEdit = new MiniFacade();
+		se.toEdit.left = 0;
+		se.toEdit.width = se.length();
+		
+		if (se.mini != null && !se.mini.isEmpty())
+			se.toEdit.height = se.mini.get( 0 ).height;
+		else
+			se.toEdit.height = sf.height;
+	}
+
+	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
+		
+		ensureMF(sf, se);
+		new CGAMini( se.toEdit ).cga();
+		patchWallTag( skel, se, se.toEdit);
+	}
+	
+
+	private void cgaAll() {
+	}
+
+
+	private void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
+		
+		for (Bar b : skel.plan.profiles.keySet()) {
+			if (b.end.equals( se.start ) && b.start.equals( se.end )) {
+				skel.plan.profiles.get( b ) // simple one-liner thank you streams
+				.points.streamE()
+				.flatMap( bar -> bar.tags.stream() )
+				.filter( tag -> tag instanceof WallTag )
+				.map( tag -> (WallTag) tag )
+				.forEach( t -> t.miniFacade = mf );
+			}
+		}
 	}
 }
