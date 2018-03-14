@@ -1,6 +1,6 @@
 # chordatlas: BigSUR implementation
 
-chordatlas is an urban data fusion research platform from UCL, in particular it contains an implementation of [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/). [video](https://youtu.be/FMCp-D9rEgI?t=6m28s).
+chordatlas is an urban data fusion research platform from UCL, in particular it contains an implementation of [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/). this [video](https://youtu.be/FMCp-D9rEgI?t=6m28s) shows the system in use.
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
