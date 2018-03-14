@@ -585,12 +585,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
 		ui.add( compare );
 		
-		JButton pf = new JButton( "all procedural facades" );
+		JButton pf = new JButton( "procedural facades" );
 		pf.addActionListener( l -> cgaAll() );
 		ui.add( pf );
 		
-		JButton proc = new JButton("CGA facades");
-
 		return ui;
 	}
 
@@ -628,7 +626,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							Pix2Pix.pix2pix( se.toEdit, skel, skel.output, sf, new Runnable() {
+							Pix2Pix.pix2pix( Collections.singletonList( se.toEdit ), new Runnable() {
 
 								public void run() {
 									tweed.enqueue( new Runnable() {
@@ -663,6 +661,14 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		if (se.mini != null && !se.mini.isEmpty())
 			se.toEdit.height = se.mini.get( 0 ).height;
+		else if (se.prof != null) {
+
+			if (se.prof.size() > 2)
+				se.toEdit.height = se.prof.get( 1 ).y;
+			
+			if (se.toEdit.height < 1.5)
+				se.toEdit.height = sf.height;
+		}
 		else
 			se.toEdit.height = sf.height;
 	}
@@ -676,6 +682,35 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 
 	private void cgaAll() {
+		
+		List<MiniFacade> mfs = new ArrayList<>();
+		
+		for (HalfFace hf : toRender )
+			for (HalfEdge he : hf) {
+				SuperEdge se = (SuperEdge) he;
+				
+				mfs.add( se.toEdit );
+				
+				ensureMF((SuperFace)hf, se);
+				new CGAMini( se.toEdit ).cga();
+			}
+		
+		new Thread( new Runnable() {
+			@Override
+			public void run() {
+				Pix2Pix.pix2pix( mfs, new Runnable() {
+					public void run() {
+						tweed.enqueue( new Runnable() {
+							@Override
+							public void run() {
+								calculateOnJmeThread();
+							}
+						} );
+					}
+				} );
+			}
+		} ).start();
+		
 	}
 
 

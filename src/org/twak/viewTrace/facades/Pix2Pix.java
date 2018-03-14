@@ -7,13 +7,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import org.twak.camp.Output;
-import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
@@ -23,38 +23,44 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 public class Pix2Pix {
 	
 
-	public static void pix2pix( MiniFacade toEdit, PlanSkeleton skel, Output output, SuperFace sf, Runnable update ) {
+	
+	
+	public static void pix2pix( List<MiniFacade> minis, Runnable update ) {
 		
 		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
 		
+		Map<String, MiniFacade> index = new HashMap<>();
 		
-		
-		DRectangle bounds = new DRectangle (256,0,256, 256);
-		
-//		g.setColor( new Color (0, 0, 255 ) );
-//		g.fillRect( 255, 0, 255, 255 );
-		
-		g.setColor( new Color (0, 48, 255 ) );
-		g.fillRect( 256, 0, 256, 255 );
-		
-		DRectangle mini = toEdit.getAsRect();
-		
-		cmpRects( toEdit, g, bounds, mini,new Color (0,207,255) , Feature.DOOR );
-		cmpRects( toEdit, g, bounds, mini,new Color (0,129,250) , Feature.WINDOW );
-		cmpRects( toEdit, g, bounds, mini,new Color (255,80,0) , Feature.MOULDING );
-		cmpRects( toEdit, g, bounds, mini,new Color (32, 255, 224) , Feature.CORNICE );
-		cmpRects( toEdit, g, bounds, mini,new Color (109, 254, 149) , Feature.SILL );
-		cmpRects( toEdit, g, bounds, mini,new Color (175, 0, 0) , Feature.SHOP );
-		
-		String name = System.nanoTime()+"";
-		
-		try {
+		for ( MiniFacade toEdit : minis ) {
+
+			DRectangle bounds = new DRectangle( 256, 0, 256, 256 );
+
+			//		g.setColor( new Color (0, 0, 255 ) );
+			//		g.fillRect( 255, 0, 255, 255 );
+
+			g.setColor( new Color( 0, 48, 255 ) );
+			g.fillRect( 256, 0, 256, 255 );
+
+			DRectangle mini = toEdit.getAsRect();
+
+			cmpRects( toEdit, g, bounds, mini, new Color( 0, 207, 255 ), Feature.DOOR );
+			cmpRects( toEdit, g, bounds, mini, new Color( 0, 129, 250 ), Feature.WINDOW );
+			cmpRects( toEdit, g, bounds, mini, new Color( 255, 80, 0 ), Feature.MOULDING );
+			cmpRects( toEdit, g, bounds, mini, new Color( 32, 255, 224 ), Feature.CORNICE );
+			cmpRects( toEdit, g, bounds, mini, new Color( 109, 254, 149 ), Feature.SILL );
+			cmpRects( toEdit, g, bounds, mini, new Color( 175, 0, 0 ), Feature.SHOP );
+
+			String name = System.nanoTime() + "_" + index.size();
+
+			index.put ( name, toEdit );
 			
-			
-			ImageIO.write (bi, "png", new File ("/home/twak/code/pix2pix-interactive/input/test/"+name+".png"));
-		} catch ( IOException e ) {
-			e.printStackTrace();
+			try {
+
+				ImageIO.write( bi, "png", new File( "/home/twak/code/pix2pix-interactive/input/test/" + name + ".png" ) );
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
 		}
 		
 		long startTime = System.currentTimeMillis();
@@ -67,10 +73,11 @@ public class Pix2Pix {
 				e.printStackTrace();
 			}
 			
-			
 			File[] fz = new File ("/home/twak/code/pix2pix-interactive/output/").listFiles();
 			
 			if (fz.length > 0) {
+				
+				boolean found = false;
 				
 				for (File f : fz) {
 				
@@ -79,24 +86,34 @@ public class Pix2Pix {
 						
 						new File (Tweed.SCRATCH).mkdirs();
 						
-//						File texture = new File (f, "images/"+name+"_real_A.png");
-						File texture = new File (f, "images/"+name+"_fake_B.png");
-						
-						if (texture.exists() && texture.length() > 0) {
-							
-							FileOutputStream fos = new FileOutputStream( Tweed.DATA + "/"+(dest = "scratch/" + name+".png") );
-							
-							Files.copy( texture.toPath(), fos );
-							
-							fos.flush();
-							fos.close();
-						
-							if (dest != null)
-								toEdit.texture = dest;
-							
-							texture.delete();
-							break;
+						for ( Map.Entry<String, MiniFacade> e : index.entrySet() ) {
+
+							String name = e.getKey();
+							//						File texture = new File (f, "images/"+name+"_real_A.png");
+							File texture = new File( f, "images/" + name + "_fake_B.png" );
+
+							if ( texture.exists() && texture.length() > 0 ) {
+
+								FileOutputStream fos = new FileOutputStream( Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" ) );
+
+								Files.copy( texture.toPath(), fos );
+
+								fos.flush();
+								fos.close();
+
+								if ( dest != null )
+									e.getValue().texture = dest;
+
+								texture.delete();
+//								index.remove( name );
+								
+								found = true;
+							}
 						}
+						
+						if (found)
+							f.delete();
+						
 					} catch ( Throwable e ) {
 						e.printStackTrace();
 					}
@@ -105,7 +122,7 @@ public class Pix2Pix {
 			}
 			
 		}
-		while ( System.currentTimeMillis() - startTime < 1000 );
+		while ( System.currentTimeMillis() - startTime < 3000 );
 		
 		update.run();
 	}

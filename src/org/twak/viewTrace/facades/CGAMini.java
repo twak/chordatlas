@@ -168,6 +168,8 @@ public class CGAMini {
 
 		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
 
+		mf.color = new double[] {0.8,0.8,0.3,1}; 
+		
 		for ( int f = 0; f < floors.size(); f++ ) {
 
 			boolean isGround = f == 0;

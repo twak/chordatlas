@@ -1,8 +1,6 @@
 package org.twak.tweed.gen;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -29,16 +27,11 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.utils.Line;
-import org.twak.utils.PaintThing;
-import org.twak.utils.PaintThing.ICanPaint;
-import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.Slice;
