@@ -20,9 +20,8 @@ code is alpha / academic-grade: use at your own risk. hints:
 2. arrow keys change brightness and camera speed
 1. right mouse button selects things in the 3D view
 1. right click on a building footprint to import a mesh
-1. right click on that mesh (or select it in the layer list) to show a list of operations...
-1. ...one of which is "find profiles". the profiles object gives you access to several optimization options.
-1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory
+1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the scratch folder) are deleted when you quit.
+1. you can edit the visiblity of different layers with the layer-list check boxes
 
 ## data
 
@@ -30,14 +29,21 @@ we don't have a license to distrubte the complete data used in the paper. as we 
 1. unzip the data
 1. start chordatlas
 1. select: file, open..., then select the tweed.xml in the root of the unzipped data
-1. select the layer "panos", then click "download" to fetch the panoramas from google
-1. 
-
+1. select the layer "panos", then click "download" to fetch the panoramas from google. watch the command line for progress.
+1. find the block surrounded by panoramas; right click on it to create a block mesh layer
+1. select "block" in the layer-list, and click "render panoramas" to create the 2d street-side images
+1. select "block" in the layer-list, and click "find image features" to detect windows etc... with a CNN. this is slow, with limited feedback on the commandline.
+1. select "block" in the layer-list, and click "find profiles". wait for the profiles to become visible in 3d.
+1. select the profiles and click "optimize" to run the optimization, and create the resulting mesh.
+1. the "file -> export obj" option will export all visible polygons
 
 for the adventurous hacker: 
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))
-1. [QGIS](http://www.qgis.org) is an easy way to process filter different GIS data sources to create GML building footprints.
+1. [qgis](http://www.qgis.org) is an easy way to process filter different GIS data sources to create GML building footprints.
+..*. [instructions for osm import to qgis](http://learnosm.org/en/osm-data/osm-in-qgis/)
+..*. right click on the layer in qgis and use the filter option to remove non-building objects
 1. [a tool to that might help you download panoramas](https://github.com/twak/panoscraper) from google streetview.
+..*. if you save the results as "panos/todo.list" in a project directory, create a panorama layer in the sam eplace an option to download panoramas appears in the block layer options in chordatlas.
 1. [Segnet-Facade](https://github.com/jfemiani/facade-segmentation) is our CNN for finding features in street view images.
 1. [here's some hacky code](https://github.com/twak/chordatlas/blob/master/src/org/twak/readTrace/ReadTrace.java) that might help you download meshes from online 3D services.
 
