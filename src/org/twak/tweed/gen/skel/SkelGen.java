@@ -337,9 +337,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 		fac.addActionListener( e -> editFacade( skel, sf, se, false ) );
 		ui.add( fac );
 
-		JButton tex = new JButton( "texture facade" );
-		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
-		ui.add( tex );
+//		JButton tex = new JButton( "texture facade" );
+//		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
+//		ui.add( tex );
 		
 		JButton proc = new JButton( "procedural facade" );
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
