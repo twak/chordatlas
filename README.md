@@ -30,6 +30,8 @@ we don't have a license to distrubte the complete data used in the paper. as we 
 1. unzip the data
 1. start chordatlas
 1. select: file, open..., then select the tweed.xml in the root of the unzipped data
+1. select the layer "panos", then click "download" to fetch the panoramas from google
+1. 
 
 
 for the adventurous hacker: 
