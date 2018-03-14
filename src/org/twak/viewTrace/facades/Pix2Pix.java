@@ -28,6 +28,8 @@ public class Pix2Pix {
 		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
 		
+		
+		
 		DRectangle bounds = new DRectangle (256,0,256, 256);
 		
 //		g.setColor( new Color (0, 0, 255 ) );

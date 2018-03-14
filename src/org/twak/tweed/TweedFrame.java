@@ -317,11 +317,9 @@ public class TweedFrame {
 				new SimpleFileChooser(frame, true, "save all as obj", new File (Tweed.SCRATCH, "all.obj"), "obj") {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
-						dump.dump( f );
+						dump.dump( f, new File ( Tweed.DATA ) );
 					}
 				}; 
-				
-
 			};
 		} );
 

@@ -564,7 +564,7 @@ public class GreebleGrid {
 			mmb.spec = mf.spec;
 			mmb.normal = mf.normal;
 
-			for ( FRect w : mf.rects.get( Feature.WINDOW ) ) {
+			for ( FRect w : mf.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
