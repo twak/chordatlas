@@ -45,6 +45,7 @@ import com.jme3.scene.Node;
 
 public class GreebleSkel {
 
+	private static final String TILE_JPG = "tile.jpg";
 	Tweed tweed;
 	Node node = new Node();
 	
@@ -53,6 +54,11 @@ public class GreebleSkel {
 	GreebleGrid greebleGrid;
 	
 	MMeshBuilderCache mbs;
+	
+	boolean isTextured = false;
+	
+	public static float[] BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
+			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	
 	public GreebleSkel( Tweed tweed ) {
 		this.tweed = tweed;
@@ -67,17 +73,15 @@ public class GreebleSkel {
 
 	public void createMesh( Output output ) {
 		
-		
-		float[] roofColor = new float[] {0.3f, 0.3f, 0.3f, 1 },
-				wallColor = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
-		
-//		tweed.frame.removeGens( JmeGen.class );
+		float[] roofColor = BLANK_ROOF,
+				wallColor = BLANK_WALL;
 		
 		if ( output.faces == null )
 			return;
 		
 		double bestWallArea = 0, bestRoofArea = 0;
 		
+		isTextured = false;
 		
 		for ( Face f : output.faces.values() )  {
 			
@@ -91,11 +95,24 @@ public class GreebleSkel {
 			
 			t = getTag( f.profile, WallTag.class );
 			
-			if (t != null && area > bestWallArea && ((WallTag)t).color != null ) {
-				wallColor = ((WallTag)t).color;
+			WallTag wt = ((WallTag)t);
+			if (t != null && area > bestWallArea && wt != null ) {
+				wallColor = wt.color;
 				bestWallArea = area;
+				
+				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 			}
 		}
+		
+//		if (isTextured) {
+//			File tileTextureFile = tweed.toWorkspace( new File (TILE_JPG) );
+//			if (!tileTextureFile.exists()) {
+//				ImageIO.write( ImageU.cacheResource.get( " /org/twak/tweed/resources/tile.jpg" ),
+//						"jpg", tileTextureFile );
+//						
+//			}
+//		}
+			
 		
 		greebleGrid = new GreebleGrid(tweed, mbs = new MMeshBuilderCache());
 		
@@ -250,7 +267,11 @@ public class GreebleSkel {
 			} else if ( t instanceof RoofTag ) {
 				
 				RoofTag rt = (RoofTag)t;
-				faceColor = greebleGrid.mbs.get("tile", rt.color != null ? rt.color : roofColor );
+				
+				if (isTextured)
+					faceColor = greebleGrid.mbs.get("tile_textured", TILE_JPG ); 
+				else
+					faceColor = greebleGrid.mbs.get("tile", rt.color != null ? rt.color : roofColor );
 			}
 		}
 
@@ -417,7 +438,7 @@ public class GreebleSkel {
 		}
 		
 		List<DRectangle> floors = new ArrayList();
-		List<MeshBuilder> materials = new ArrayList();
+		List<MatMeshBuilder> materials = new ArrayList();
 		
 		if (wallTag != null && facadeRect != null && mf != null && 
 				wallTag.isGroundFloor && mf.groundFloorHeight > 0 && wallTag.groundFloorColor != null &&
@@ -448,7 +469,7 @@ public class GreebleSkel {
 		for ( int j = 0; j < floors.size(); j++ ) {
 			
 			DRectangle floorRect = floors.get( j );
-			MeshBuilder m = materials.get( j );
+			MatMeshBuilder m = materials.get( j );
 			
 			Iterator<QuadF> quit = features.iterator();
 			while ( quit.hasNext() ) {
@@ -469,7 +490,8 @@ public class GreebleSkel {
 			}
 
 			if ( wallTag == null || forFace == null || floorRect == null ) {
-				m.add( flat.singleton(), to3d );
+				LoopL<LPoint2d> loop = flat.singleton();
+				m.add( loop, m.texture == null ? null :  roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), 0.2 ), to3d );
 				return;
 			}
 
@@ -500,6 +522,23 @@ public class GreebleSkel {
 		}
 	}
 	
+	private LoopL<Point2d> roofUVs( LoopL<LPoint2d> coords, Point2d s, Point2d e, double d ) {
+		
+		Line l = new Line (s, e);
+		double ll =  l.length();
+		
+		return coords.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<LPoint2d> input ) {
+				
+				Point2d x = l.project( input.get(), false );
+				
+				return new Point2d ( l.findPPram( x ) * ll * d, input.get().distance( x ) * d);
+			}
+		}.run();
+		
+	}
+
 	protected DRectangle findRect( Loop<Point2d> rect ) {
 		double[] bounds = Loopz.minMax2d( rect );
 		

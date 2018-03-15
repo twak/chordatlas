@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -168,7 +169,7 @@ public class CGAMini {
 
 		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
 
-		mf.color = new double[] {1,1,213./255,1}; 
+		mf.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ); 
 		
 		for ( int f = 0; f < floors.size(); f++ ) {
 

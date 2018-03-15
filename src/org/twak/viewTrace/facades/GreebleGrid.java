@@ -37,6 +37,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture.WrapMode;
 
 public class GreebleGrid {
 
@@ -74,8 +76,11 @@ public class GreebleGrid {
 			
 			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 			
-			if (new File( tweed.DATA +"/" +texture ).exists())
-				mat.setTexture( "DiffuseMap", tweed.getAssetManager().loadTexture( texture ) );
+			if (new File( tweed.DATA +"/" +texture ).exists()) {
+				Texture t = tweed.getAssetManager().loadTexture( texture );
+				t.setWrap( WrapMode.Repeat );
+				mat.setTexture( "DiffuseMap", t );
+			}
 			else
 			{
 				System.out.println( this.getClass().getSimpleName() + " can't find "+ tweed.SCRATCH+texture );
