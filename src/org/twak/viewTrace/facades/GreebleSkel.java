@@ -45,6 +45,8 @@ import com.jme3.scene.Node;
 
 public class GreebleSkel {
 
+	private static final String TILE = "tile";
+	private static final String BRICK = "brick";
 	private static final String TILE_JPG = "tile.jpg";
 	Tweed tweed;
 	Node node = new Node();
@@ -97,7 +99,9 @@ public class GreebleSkel {
 			
 			WallTag wt = ((WallTag)t);
 			if (t != null && area > bestWallArea && wt != null ) {
-				wallColor = wt.color;
+				
+				if (wt.color != null)
+					wallColor = wt.color;
 				bestWallArea = area;
 				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
@@ -262,7 +266,7 @@ public class GreebleSkel {
 			if ( t instanceof WallTag ) {
 				
 				wallTag = ( (WallTag) t );
-				faceColor = greebleGrid.mbs.get( "brick", wallTag.color != null ? wallTag.color : wallColor );
+				faceColor = greebleGrid.mbs.get( BRICK, wallTag.color != null ? wallTag.color : wallColor );
 
 			} else if ( t instanceof RoofTag ) {
 				
@@ -271,7 +275,7 @@ public class GreebleSkel {
 				if (isTextured)
 					faceColor = greebleGrid.mbs.get("tile_textured", TILE_JPG ); 
 				else
-					faceColor = greebleGrid.mbs.get("tile", rt.color != null ? rt.color : roofColor );
+					faceColor = greebleGrid.mbs.get(TILE, rt.color != null ? rt.color : roofColor );
 			}
 		}
 
@@ -447,7 +451,7 @@ public class GreebleSkel {
 			
 			floors.addAll ( facadeRect.splitY( mf.groundFloorHeight ) );
 			
-			MatMeshBuilder gfm = greebleGrid.mbs.get( "brick", wallTag.groundFloorColor ); 
+			MatMeshBuilder gfm = greebleGrid.mbs.get( BRICK, wallTag.groundFloorColor ); 
 			
 			for ( Loop<Point2d> loop : sides ) {
 				
@@ -743,9 +747,9 @@ public class GreebleSkel {
 
 	public void edges( Output output, float[] roofColor ) {
 
-		GreebleEdge.roowWallGreeble( output, mbs.get( "tile", roofColor ), mbs.get( "brick", new float[] { 1, 0, 0, 1 } ) );
+		GreebleEdge.roowWallGreeble( output, mbs.get( TILE, roofColor ), mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ) );
 
 		for ( Face f : output.faces.values() )
-			GreebleEdge.roofGreeble( f, mbs.get( "tile", roofColor ) );
+			GreebleEdge.roofGreeble( f, mbs.get( TILE, roofColor ) );
 	}
 }

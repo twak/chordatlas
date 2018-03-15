@@ -303,7 +303,7 @@ public class BlockGen extends ObjGen {
 		new Thread() {
 			@Override
 			public void run() {
-				new ProfileGen(BlockGen.this, Loopz.toXZLoop( polies ), tweed);
+				profileGen = new ProfileGen(BlockGen.this, Loopz.toXZLoop( polies ), tweed);
 			}
 		}.start();
 	}
