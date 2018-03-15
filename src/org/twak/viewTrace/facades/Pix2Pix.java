@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -63,7 +65,26 @@ public class Pix2Pix {
 			}
 		}
 		
+		File go =  new File( "/home/twak/code/pix2pix-interactive/input/test/go" );
+		
+		try {
+			new FileOutputStream( go  ).close();
+		} catch ( Throwable e1 ) {
+			e1.printStackTrace();
+		}
+
 		long startTime = System.currentTimeMillis();
+		
+		do {
+			try {
+				Thread.sleep( 50 );
+			} catch ( InterruptedException e ) {
+				e.printStackTrace();
+			}
+		} while ( go.exists() && startTime - System.currentTimeMillis() < 2e4 );
+		
+		
+		startTime = System.currentTimeMillis();
 		
 		do {
 			
@@ -101,8 +122,7 @@ public class Pix2Pix {
 								fos.flush();
 								fos.close();
 
-								if ( dest != null )
-									e.getValue().texture = dest;
+								e.getValue().texture = dest;
 
 								texture.delete();
 //								index.remove( name );
@@ -111,8 +131,11 @@ public class Pix2Pix {
 							}
 						}
 						
-						if (found)
-							f.delete();
+						if (found) {
+							FileUtils.deleteDirectory(f);
+							update.run();
+							return;
+						}
 						
 					} catch ( Throwable e ) {
 						e.printStackTrace();

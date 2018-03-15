@@ -644,6 +644,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 			tweed.frame.addGen( new JmeGen( "horizontal lines", tweed, mfNode  ), false );
 //			tweed.frame.addGen( new JmeGen( "clean profiles", tweed, cProfileNode ), false );
 		
+		tweed.frame.addGen( this, true);
+		tweed.frame.setSelected( this );
+		
 		calculateOnJmeThread();
 		
 	}

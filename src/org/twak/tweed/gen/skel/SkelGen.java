@@ -655,9 +655,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	private static void ensureMF( SuperFace sf, SuperEdge se ) {
+
+		if (se.toEdit == null) {
 		se.toEdit = new MiniFacade();
 		se.toEdit.left = 0;
 		se.toEdit.width = se.length();
+		}
 		
 		if (se.mini != null && !se.mini.isEmpty())
 			se.toEdit.height = se.mini.get( 0 ).height;
@@ -689,9 +692,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
 				
-				mfs.add( se.toEdit );
 				
 				ensureMF((SuperFace)hf, se);
+				mfs.add( se.toEdit );
 				new CGAMini( se.toEdit ).cga();
 			}
 		

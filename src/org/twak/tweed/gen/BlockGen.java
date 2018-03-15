@@ -303,8 +303,7 @@ public class BlockGen extends ObjGen {
 		new Thread() {
 			@Override
 			public void run() {
-				tweed.frame.addGen( profileGen = new ProfileGen(BlockGen.this, Loopz.toXZLoop( polies ), tweed), true);
-				tweed.frame.setSelected( profileGen );
+				new ProfileGen(BlockGen.this, Loopz.toXZLoop( polies ), tweed);
 			}
 		}.start();
 	}
