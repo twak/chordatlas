@@ -16,10 +16,9 @@ it will write a file `.tweed_config` into your home directory; this is the only 
 code is alpha / academic-grade: use at your own risk. hints:
 
 1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
-1. use left mouse drag + WASD keys to navigate
-2. arrow keys change brightness and camera speed
+1. use left mouse drag + WASD keys to navigate the 3D view
+2. arrow keys change brightness and camera speed, page up and page down control fov
 1. right mouse button selects things in the 3D view
-1. right click on a building footprint to import a mesh
 1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the scratch folder) are deleted when you quit.
 1. you can edit the visiblity of different layers with the layer-list check boxes
 
@@ -30,7 +29,8 @@ we don't have a license to distrubte the complete data used in the paper. as we 
 1. start chordatlas
 1. select: file, open..., then select the tweed.xml in the root of the unzipped data
 1. select the layer "panos", then click "download" to fetch the panoramas from google. watch the command line for progress.
-1. find the block surrounded by panoramas; right click on it to create a block mesh layer
+1. (the mesh and gis data may cover different areas. you can select the "minimesh" layer and select "load all" to show all the mesh data; and "hide all" to hide it.)
+1. find the block surrounded by panoramas; use the select tool, and right click on it to create a block mesh layer
 1. select "block" in the layer-list, and click "render panoramas" to create the 2d street-side images
 1. select "block" in the layer-list, and click "find image features" to detect windows etc... with a CNN. this is slow, with limited feedback on the commandline.
 1. select "block" in the layer-list, and click "find profiles". wait for the profiles to become visible in 3d.
