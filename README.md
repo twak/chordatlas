@@ -40,10 +40,10 @@ we don't have a license to distrubte the complete data used in the paper. as we 
 for the adventurous hacker: 
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))
 1. [qgis](http://www.qgis.org) is an easy way to process filter different GIS data sources to create GML building footprints.
-  * [instructions for osm import to qgis](http://learnosm.org/en/osm-data/osm-in-qgis/)
-  * right click on the layer in qgis and use the filter option to remove non-building objects
+    * [instructions for osm import to qgis](http://learnosm.org/en/osm-data/osm-in-qgis/)
+    * right click on the layer in qgis and use the filter option to remove non-building objects
 1. [a tool to that might help you download panoramas](https://github.com/twak/panoscraper) from google streetview.
-  * if you save the results as "panos/todo.list" in a project directory, create a panorama layer in the sam eplace an option
+    * if you save the results as "panos/todo.list" in a project directory, create a panorama layer in the sam eplace an option
 to download panoramas appears in the block layer options in chordatlas
 1. [Segnet-Facade](https://github.com/jfemiani/facade-segmentation) is our CNN for finding features in street view images.
 1. [here's some hacky code](https://github.com/twak/chordatlas/blob/master/src/org/twak/readTrace/ReadTrace.java) that might help you download meshes from online 3D services.
