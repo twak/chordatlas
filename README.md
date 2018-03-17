@@ -37,7 +37,8 @@ we don't have a license to distrubte the complete data used in the paper. as we 
 1. select the profiles and click "optimize" to run the optimization, and create the resulting mesh.
 1. the "file -> export obj" option will export all visible polygons
 
-for the adventurous hacker: 
+the adventurous hacker might try to compile their own datasets: 
+
 1. [OpenStreetMap](wiki.openstreetmap.org) is a great source of building footprints, you'll need them in the GML format. (we also used [OS's Mastermap](https://www.ordnancesurvey.co.uk/business-and-government/products/mastermap-products.html))
 1. [qgis](http://www.qgis.org) is an easy way to process filter different GIS data sources to create GML building footprints.
     * [instructions for osm import to qgis](http://learnosm.org/en/osm-data/osm-in-qgis/)
