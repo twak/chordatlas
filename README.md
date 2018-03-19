@@ -24,18 +24,18 @@ code is alpha / academic-grade: use at your own risk. hints:
 
 ## data
 
-we don't have a license to distrubte the complete data used in the paper. as we reprocess the data, the datasets will appear [in this folder](https://drive.google.com/drive/u/0/folders/1Mj4samNAeQIA_l7UieE2O01PO18PnFt-). 
+several datasets are available [here](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/data/). we don't have a license to distrubte the original data used in the paper, so the GIS data has been replaced by openstreetmap, and streetview photos have been udpated.
 1. unzip the data
 1. start chordatlas
-1. select: file, open..., then select the tweed.xml in the root of the unzipped data
-1. select the layer "panos", then click "download" to fetch the panoramas from google. watch the command line for progress.
-1. (the mesh and gis data may cover different areas. you can select the "minimesh" layer and select "load all" to show all the mesh data; and "hide all" to hide it.)
-1. find the block surrounded by panoramas; use the select tool, and right click on it to create a block mesh layer
-1. select "block" in the layer-list, and click "render panoramas" to create the 2d street-side images
-1. select "block" in the layer-list, and click "find image features" to detect windows etc... with a CNN. this is slow, with limited feedback on the commandline.
-1. select "block" in the layer-list, and click "find profiles". wait for the profiles to become visible in 3d.
-1. select the profiles and click "optimize" to run the optimization, and create the resulting mesh.
-1. the "file -> export obj" option will export all visible polygons
+1. select: `file, open...`, then select the tweed.xml in the root of the unzipped data
+1. select the layer `panos`, then click `download` to fetch the panoramas from google. watch the command line for progress. this will take up a bunch of disk space (5mb per image).
+1. (the mesh and gis data may cover different areas. you can select the `minimesh` layer and select `load all` to show all the mesh data; and "hide all" to hide it.)
+1. find a block surrounded by panorama with mesh data; use the select tool, and right click on it to create a block mesh layer.
+1. select `block` in the layer-list, and click `render panoramas` to create the 2d street-side images
+1. select `block` in the layer-list, and click `find image features` to detect windows etc... with a CNN. this is slow, with limited feedback on the commandline.
+1. select `block` in the layer-list, and click `find profiles`. wait for the profiles to become visible in 3d.
+1. select the `profiles` layer and click `optimize` to run the optimization, and create the resulting mesh. cancelling the optimization in the pop-up will create the mesh using the current best-solution (if any).
+1. the `file -> export obj` menu option will export all visible polygons
 
 the adventurous hacker might try to compile their own datasets: 
 
