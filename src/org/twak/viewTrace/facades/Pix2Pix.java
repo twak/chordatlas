@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -115,12 +116,19 @@ public class Pix2Pix {
 
 							if ( texture.exists() && texture.length() > 0 ) {
 
-								FileOutputStream fos = new FileOutputStream( Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" ) );
+								byte[] image = Files.readAllBytes( texture.toPath() );
+								
+//								FileOutputStream fos = new FileOutputStream(  );
 
-								Files.copy( texture.toPath(), fos );
+								Files.write(  new File(Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" )).toPath(), image );
 
-								fos.flush();
-								fos.close();
+								ImageIO.write ( 
+										new NormSpecGen( ImageIO.read(new ByteArrayInputStream( image ) ) ).norm(), 
+										"jpg", 
+										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm" + ".jpg" ) ) );
+								
+//								fos.flush();
+//								fos.close();
 
 								e.getValue().texture = dest;
 

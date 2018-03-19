@@ -21,8 +21,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
-import org.twak.utils.Cach2;
-import org.twak.utils.Cache2;
+import org.twak.utils.Filez;
 import org.twak.utils.Pair;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line3d;
@@ -76,7 +75,7 @@ public class GreebleGrid {
 			
 			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 			
-			if (new File( tweed.DATA +"/" +texture ).exists()) {
+			if (new File( Tweed.DATA +"/" +texture ).exists()) {
 				Texture t = tweed.getAssetManager().loadTexture( texture );
 				t.setWrap( WrapMode.Repeat );
 				mat.setTexture( "DiffuseMap", t );
@@ -88,19 +87,20 @@ public class GreebleGrid {
 			}
 			mat.setColor( "Ambient", ColorRGBA.White );
 			
-			if (builder.normal != null)
-				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( builder.normal ) );
 			
-//			mat.setColor( "Ambient", ColorRGBA.Gray );
+			String normal = Filez.stripExtn( texture )+"_norm.jpg",
+					specular = Filez.stripExtn( texture )+"_spec.jpg";
+			
+			if (new File( Tweed.DATA +"/" +normal ).exists())
+				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( normal ) );
+			
 			mat.setColor( "Diffuse", ColorRGBA.White );
-//			mat.setColor( "Abient", ColorRGBA.Gray );
 			
-			if (builder.spec != null)
-				mat.setTexture( "SpecularMap", tweed.getAssetManager().loadTexture( builder.spec ) );
+			if (new File( Tweed.DATA +"/" +specular ).exists())
+				mat.setTexture( "SpecularMap", tweed.getAssetManager().loadTexture( specular ) );
 			else
 				mat.setColor( "Specular", ColorRGBA.White );
 			
-//			mat.setFloat("Shininess", 6f); 
 			mat.setBoolean( "UseMaterialColors", true );
 
 			geom.setMaterial( mat );
@@ -566,8 +566,6 @@ public class GreebleGrid {
 			
 			Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
 			MatMeshBuilder mmb = mbs.get( "texture_"+mf.texture , mf.texture );
-			mmb.spec = mf.spec;
-			mmb.normal = mf.normal;
 
 			for ( FRect w : mf.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 

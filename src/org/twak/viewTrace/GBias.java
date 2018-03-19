@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -14,7 +13,6 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Graph2D;
 import org.twak.viewTrace.QuadTree.AABBQT;
 import org.twak.viewTrace.QuadTree.AxisAlignedBoundingBox;
-import org.twak.viewTrace.QuadTree.QLine;
 
 public class GBias {
 

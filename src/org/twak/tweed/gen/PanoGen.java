@@ -153,13 +153,20 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 		File meta = getMetaFile();
 
+		panos = null;
+		
 		if ( meta.exists() ) {
-			panos = (List<Pano>) new XStream().fromXML( meta );
+			try {
+				panos = (List<Pano>) new XStream().fromXML( meta );
+			} catch ( Throwable th ) {
+				th.printStackTrace();
+			}
 		}
-		else 
+		
+		
+		if (panos == null) 
 		{
-
-			panos.clear();
+			panos = new ArrayList<>();
 			
 			for ( File f : Tweed.toWorkspace( folder).listFiles() ) {
 				String extn = Filez.getExtn( f.getName() );

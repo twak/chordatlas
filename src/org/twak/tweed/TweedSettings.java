@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
@@ -158,11 +160,13 @@ public class TweedSettings {
 		if (folder == null)
 			return;
 		
-		if (recentFiles.f.isEmpty() || !recentFiles.f.get(0).equals (folder) ) {
+		if (recentFiles.f.isEmpty() || !recentFiles.f.contains (folder) ) {
 			recentFiles.f.add( 0, folder );
 			
 			while (recentFiles.f.size() > 20)
 				recentFiles.f.remove( recentFiles.f.size() - 1 );
+			
+			
 			
 			try {
 				new XStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
@@ -182,6 +186,11 @@ public class TweedSettings {
 				System.out.println( "couldn't load recent project list" );
 				recentFiles = new RecentFiles();
 			}
+			
+			Set<File> hs = new LinkedHashSet<>();
+			hs.addAll(recentFiles.f);
+			recentFiles.f.clear();
+			recentFiles.f.addAll(hs);
 		}
 		
 		if (!recentFiles.f.isEmpty()) {

@@ -432,7 +432,7 @@ public class TweedFrame {
 			sp.add( "+ panos (jpg)", new Runnable() {
 				@Override
 				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
+					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), null ) {
 						public void heresTheFile( File oneOfMany ) throws Throwable {
 							//						removeGens( PanoGen.class );
 							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );

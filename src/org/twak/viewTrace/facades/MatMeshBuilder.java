@@ -5,7 +5,7 @@ import org.twak.siteplan.jme.MeshBuilder;
 public class MatMeshBuilder extends MeshBuilder {
 
 	float[] color;
-	String name, texture, spec, normal;
+	String name, texture;
 	
 	public MatMeshBuilder (String name, float[] color) {
 		this.name = name;

@@ -169,6 +169,7 @@ public class CGAMini {
 
 		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
 
+		mf.rects.clear();
 		mf.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ); 
 		
 		for ( int f = 0; f < floors.size(); f++ ) {
