@@ -23,10 +23,31 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 /**
  * Utilties to synthesize facade using Pix2Pix network
  */
-public class Pix2Pix {
-	
 
-	
+public class Pix2Pix {
+
+	public enum CMPLabel { //sequence is  z-order
+		Background (1, 0,0, 170 ),
+		Facade     (2, 0,0, 255 ),
+		Molding    (10, 255, 85, 0 ),
+		Cornice    (5, 0, 255, 255 ),
+		Pillar     (11, 255,0, 0 ),
+		Window     (3, 0, 85, 255 ),
+		Door       (4, 0,170, 255 ),
+		Sill       (6, 85,255, 170 ),
+		Blind      (8, 255,255, 0 ),
+		Balcony    (7, 170,255, 85 ),
+		Shop       (12, 170,0, 0 ),
+		Deco       (9, 255,170, 0 );
+		
+		final int index;
+		final Color rgb;
+		
+		CMPLabel (int index, int r, int g, int b) {
+			this.rgb = new Color (r,g,b);
+			this.index = index;
+		}
+	}
 	
 	public static void pix2pix( List<MiniFacade> minis, Runnable update ) {
 		
@@ -47,12 +68,12 @@ public class Pix2Pix {
 
 			DRectangle mini = toEdit.getAsRect();
 
-			cmpRects( toEdit, g, bounds, mini, new Color( 0, 207, 255 ), Feature.DOOR );
-			cmpRects( toEdit, g, bounds, mini, new Color( 0, 129, 250 ), Feature.WINDOW );
-			cmpRects( toEdit, g, bounds, mini, new Color( 255, 80, 0 ), Feature.MOULDING );
-			cmpRects( toEdit, g, bounds, mini, new Color( 32, 255, 224 ), Feature.CORNICE );
-			cmpRects( toEdit, g, bounds, mini, new Color( 109, 254, 149 ), Feature.SILL );
-			cmpRects( toEdit, g, bounds, mini, new Color( 175, 0, 0 ), Feature.SHOP );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Door.rgb, Feature.DOOR );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Window.rgb, Feature.WINDOW );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Molding.rgb, Feature.MOULDING );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Cornice.rgb, Feature.CORNICE );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Sill.rgb, Feature.SILL );
+			cmpRects( toEdit, g, bounds, mini, CMPLabel.Shop.rgb, Feature.SHOP );
 
 			String name = System.nanoTime() + "_" + index.size();
 
@@ -122,10 +143,17 @@ public class Pix2Pix {
 
 								Files.write(  new File(Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" )).toPath(), image );
 
-								ImageIO.write ( 
-										new NormSpecGen( ImageIO.read(new ByteArrayInputStream( image ) ) ).norm(), 
+								NormSpecGen ns = new NormSpecGen(
+										ImageIO.read(new ByteArrayInputStream( image ) ),
+										ImageIO.read( new File( f, "images/" + name + "_real_A.png" ) )
+								);
+								
+								ImageIO.write ( ns.norm, 
 										"jpg", 
-										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm" + ".jpg" ) ) );
+										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm.jpg" ) ) );
+								ImageIO.write ( ns.spec, 
+										"jpg", 
+										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_spec.jpg" ) ) );
 								
 //								fos.flush();
 //								fos.close();

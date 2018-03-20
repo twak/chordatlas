@@ -79,29 +79,33 @@ public class GreebleGrid {
 				Texture t = tweed.getAssetManager().loadTexture( texture );
 				t.setWrap( WrapMode.Repeat );
 				mat.setTexture( "DiffuseMap", t );
+				mat.setBoolean( "UseMaterialColors", false );
 			}
 			else
 			{
 				System.out.println( this.getClass().getSimpleName() + " can't find "+ tweed.SCRATCH+texture );
 				mat.setColor( "Diffuse", ColorRGBA.Red );
+				mat.setBoolean( "UseMaterialColors", true );
 			}
 			mat.setColor( "Ambient", ColorRGBA.White );
 			
 			
-			String normal = Filez.stripExtn( texture )+"_norm.jpg",
-					specular = Filez.stripExtn( texture )+"_spec.jpg";
+			String normal   = Filez.stripExtn( texture )+"_norm.jpg",
+				   specular = Filez.stripExtn( texture )+"_spec.jpg";
 			
 			if (new File( Tweed.DATA +"/" +normal ).exists())
 				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( normal ) );
 			
 			mat.setColor( "Diffuse", ColorRGBA.White );
 			
-			if (new File( Tweed.DATA +"/" +specular ).exists())
+			if (new File( Tweed.DATA +"/" +specular ).exists()) {
 				mat.setTexture( "SpecularMap", tweed.getAssetManager().loadTexture( specular ) );
+//				mat.setColor( "Diffuse", ColorRGBA.Red );
+			}
 			else
 				mat.setColor( "Specular", ColorRGBA.White );
 			
-			mat.setBoolean( "UseMaterialColors", true );
+			
 
 			geom.setMaterial( mat );
 			geom.updateGeometricState();

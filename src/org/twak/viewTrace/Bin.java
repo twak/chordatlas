@@ -13,7 +13,7 @@ public class Bin<E> {
 
 	double[] weights;
 	Set<E>[] es;
-	double min, max;
+	double min, max, sumWeight = 0;
 	boolean wrap;
 	
 	public Bin(double min, double max, int bins, boolean wrap) {
@@ -46,6 +46,7 @@ public class Bin<E> {
 		}
 		
 		weights[i] += weight;
+		sumWeight += weight;
 		
 	}
 
@@ -55,6 +56,10 @@ public class Bin<E> {
 	
 	public int getI( double val ) {
 		return Math.min (weights.length-1, (int)Math.floor ( (weights.length * ( val - min ) / ( max - min ) ) ) );
+	}
+	
+	public double fromI( int i ) {
+		return  ( i * (max - min) / weights.length + min);
 	}
 	
 	public void addRange (double valStart, double valEnd, double weight, E thing ) {
@@ -77,6 +82,17 @@ public class Bin<E> {
 			se.add(thing);
 		}
 		
+	}
+	
+	public double getAccumulative(double frac) {
+		double count = sumWeight * frac, sofar = 0;
+		
+		for (int i = 0; i < weights.length; i++) {
+			sofar += weights[i];
+			if (sofar > count)
+				return fromI(i);
+		}
+		return max;
 	}
 	
 	public int maxI() {
