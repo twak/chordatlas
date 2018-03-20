@@ -27,6 +27,8 @@ import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.Line;
 import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaint;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
@@ -66,13 +68,15 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 	public MultiMap<Feature, FRect> rects = new MultiMap<>();
 	public List<Outer> outers = new ArrayList<>();
 	public ImageFeatures imageFeatures;
-	
 	public String texture = null, normal = null, spec = null;
 	
 	public List<Double> 
 			hMargin = new ArrayList<>(), 
 			vMargin = new ArrayList<>();
 
+	
+	public List<Loop<? extends Point2d>> skelFaces = new ArrayList<>();
+	
 	public MiniFacade( MiniFacade m ) {
 		
 		this.width = m.width;
@@ -444,6 +448,11 @@ public class MiniFacade implements ICanPaint, ICanEdit {
 					}
 				
 		}
+		
+		g.setColor( Color.gray );
+		for (Loop<? extends Point2d> l : skelFaces) 
+			PaintThing.paint( l, g, ma );
+		
 		
 		g.setColor( Color.black );
 		g.drawLine( ma.toX( left ), ma.toY( 0 ), ma.toX( left + width ), ma.toY( 0 ) );

@@ -100,6 +100,9 @@ public class GreebleSkel {
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
+				
+				wt.miniFacade.skelFaces.clear();
+				
 				if ( area > bestWallArea && wt != null ) {
 				
 				if (wt.color != null)
@@ -135,11 +138,12 @@ public class GreebleSkel {
 			
 			Set<QuadF> features = new HashSet<>();
 			
-			MiniFacade mf = null;
+			MiniFacade mf2 = null;
 			
 			if (opt.isPresent() && (wt = (WallTag) opt.get() ).miniFacade != null ) {
 				
-				MiniFacade mf2 = new MiniFacade ( wt.miniFacade );
+				mf2 = new MiniFacade ( wt.miniFacade );
+				mf2.skelFaces = wt.miniFacade.skelFaces; // add found faces to original facade
 				
 				Line facadeLine;
 				{
@@ -159,11 +163,10 @@ public class GreebleSkel {
 						.map     ( r -> new QuadF (r, facadeLine) )
 						.forEach ( q -> features.add(q) );
 				
-				mf = mf2;
 			}
 
 			for ( Face f : chain ) {
-				face( f, mf, features, roofColor, wallColor );
+				face( f, mf2, features, roofColor, wallColor );
 			}
 			
 			for (QuadF w : features)
@@ -428,6 +431,7 @@ public class GreebleSkel {
 		if (mf != null) {
 			forFace = new MiniFacade(mf);
 			forFace.rects.clear();
+			mf.skelFaces.add( flat );
 		}
 		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
