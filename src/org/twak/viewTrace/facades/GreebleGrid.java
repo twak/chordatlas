@@ -79,7 +79,33 @@ public class GreebleGrid {
 				Texture t = tweed.getAssetManager().loadTexture( texture );
 				t.setWrap( WrapMode.Repeat );
 				mat.setTexture( "DiffuseMap", t );
-				mat.setBoolean( "UseMaterialColors", false );
+				mat.setColor( "Diffuse", ColorRGBA.White );
+				mat.setBoolean( "UseMaterialColors", true );
+				
+				String ext = Filez.getExtn( texture );
+				
+				String normal   = Filez.stripExtn( texture )+"_norm." + ext,
+						specular = Filez.stripExtn( texture )+"_spec." + ext;
+				
+				if (new File( Tweed.DATA +"/" +normal ).exists()) {
+					Texture n = tweed.getAssetManager().loadTexture( normal );
+					n.setWrap( WrapMode.Repeat );
+					mat.setTexture( "NormalMap", n );
+				}
+				
+//			mat.setColor( "Diffuse", ColorRGBA.White );
+				
+				if (new File( Tweed.DATA +"/" +specular ).exists()) {
+					Texture s = tweed.getAssetManager().loadTexture( specular );
+//					mat.setVector4( "Specular", ColorRGBA.Black.toVector4f() );
+					s.setWrap( WrapMode.Repeat );
+					mat.setFloat( "Shininess", 10 );
+					mat.setTexture( "SpecularMap", s );
+					mat.setColor( "Specular", ColorRGBA.White );
+				}
+//			else
+//				mat.setColor( "Specular", ColorRGBA.Red );
+				
 			}
 			else
 			{
@@ -87,23 +113,9 @@ public class GreebleGrid {
 				mat.setColor( "Diffuse", ColorRGBA.Red );
 				mat.setBoolean( "UseMaterialColors", true );
 			}
-			mat.setColor( "Ambient", ColorRGBA.White );
 			
+//			mat.setColor( "Ambient", ColorRGBA.White );
 			
-			String normal   = Filez.stripExtn( texture )+"_norm.jpg",
-				   specular = Filez.stripExtn( texture )+"_spec.jpg";
-			
-			if (new File( Tweed.DATA +"/" +normal ).exists())
-				mat.setTexture( "NormalMap", tweed.getAssetManager().loadTexture( normal ) );
-			
-			mat.setColor( "Diffuse", ColorRGBA.White );
-			
-			if (new File( Tweed.DATA +"/" +specular ).exists()) {
-				mat.setTexture( "SpecularMap", tweed.getAssetManager().loadTexture( specular ) );
-//				mat.setColor( "Diffuse", ColorRGBA.Red );
-			}
-			else
-				mat.setColor( "Specular", ColorRGBA.White );
 			
 			
 

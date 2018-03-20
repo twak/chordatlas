@@ -149,11 +149,9 @@ public class Pix2Pix {
 								);
 								
 								ImageIO.write ( ns.norm, 
-										"jpg", 
-										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm.jpg" ) ) );
+										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm.png" ) ) );
 								ImageIO.write ( ns.spec, 
-										"jpg", 
-										new File(Tweed.DATA + "/" + ( "scratch/" + name + "_spec.jpg" ) ) );
+										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_spec.png" ) ) );
 								
 //								fos.flush();
 //								fos.close();

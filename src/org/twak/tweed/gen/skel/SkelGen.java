@@ -333,11 +333,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JPanel ui = new JPanel();
 		ui.setLayout( new ListDownLayout() );
 
-		JButton fac = new JButton( "edit facade" );
+		JButton fac = new JButton( "edit facade (no texture)" );
 		fac.addActionListener( e -> editFacade( skel, sf, se, false ) );
 		ui.add( fac );
 
-		JButton tex = new JButton( "texture facade" );
+		JButton tex = new JButton( "edit facade (textured)" );
 		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
 		ui.add( tex );
 		
@@ -345,7 +345,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
 		ui.add( proc );
 
-		JButton camp = new JButton( "procedural extrusions" );
+		JButton camp = new JButton( "edit plan/pofile" );
 		camp.addActionListener( new ActionListener() {
 
 			@Override
@@ -383,30 +383,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 			}
 
 		} );
-
 		ui.add( camp );
-
-		JButton mini = new JButton( "street-view" );
-		mini.addActionListener( e -> new MiniViewer( se ) );
-		if ( sf != null )
-			ui.add( mini );
-
-		JButton prof = new JButton( "profiles" );
-		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
-		ui.add( prof );
 		
-		ui.add( new JLabel( "height "+ sf.heights.size() ) );
-
 		JButton plan = new JButton( "plan" );
 		plan.addActionListener( e -> new Plot( toRender, footprint ) );
-		ui.add( plan );
-
-		JButton remove = new JButton( "remove" );
-		remove.addActionListener( e -> {
-			visible = false;
-			calculateOnJmeThread();
-			tweed.frame.removeGen( SkelGen.this );
-		} );
 		ui.add( plan );
 
 		JButton b = new JButton( "view clean profiles" );
@@ -416,6 +396,24 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JButton c = new JButton( "compare profiles" );
 		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs ) );
 		ui.add( c );
+
+		JButton mini = new JButton( "street-view" );
+		mini.addActionListener( e -> new MiniViewer( se ) );
+		if ( sf != null )
+			ui.add( mini );
+
+		JButton prof = new JButton( "profiles" );
+		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
+		ui.add( prof );
+
+		JButton remove = new JButton( "remove" );
+		remove.addActionListener( e -> {
+			visible = false;
+			calculateOnJmeThread();
+			tweed.frame.removeGen( SkelGen.this );
+		} );
+		ui.add( remove );
+
 
 		tweed.frame.setGenUI( ui );
 	}

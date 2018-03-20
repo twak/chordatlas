@@ -98,13 +98,14 @@ public class GreebleSkel {
 			t = getTag( f.profile, WallTag.class );
 			
 			WallTag wt = ((WallTag)t);
-			if (t != null && area > bestWallArea && wt != null ) {
+			if (t != null ) {
+				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
+				if ( area > bestWallArea && wt != null ) {
 				
 				if (wt.color != null)
 					wallColor = wt.color;
 				bestWallArea = area;
-				
-				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
+				}				
 			}
 		}
 		

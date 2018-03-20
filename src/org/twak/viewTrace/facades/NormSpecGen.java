@@ -90,8 +90,8 @@ public class NormSpecGen {
 				if ( 
 						distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ||
 						distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 ||
-						distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 ||
-						heights[ x ][ y ][ 0 ] > specThreshold )
+						distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 
+						)
 					spec.setRGB( x, y, Color.white.getRGB() );
 				else
 					spec.setRGB( x, y, Color.black.getRGB() );

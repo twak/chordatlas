@@ -100,7 +100,7 @@ public class HouseTool extends Tool {
 	
 	@Override
 	public String getName() {
-		return "proc-ex house";
+		return "house tool";
 	}
 
 }
