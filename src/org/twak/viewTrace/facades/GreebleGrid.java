@@ -101,8 +101,8 @@ public class GreebleGrid {
 					s.setWrap( WrapMode.Repeat );
 					mat.setFloat( "Shininess", 10 );
 					mat.setTexture( "SpecularMap", s );
-					mat.setColor( "Specular", ColorRGBA.White );
 				}
+				mat.setColor( "Specular", ColorRGBA.White );
 //			else
 //				mat.setColor( "Specular", ColorRGBA.Red );
 				
