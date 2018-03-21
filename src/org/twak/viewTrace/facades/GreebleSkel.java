@@ -254,7 +254,7 @@ public class GreebleSkel {
 				
 				wallTag = ( (WallTag) t );
 				
-				if (mf.texture == null)
+				if (mf == null || mf.texture == null)
 					faceColor = greebleGrid.mbs.get( BRICK, wallTag.color != null ? wallTag.color : wallColor );
 				else 
 					faceColor = greebleGrid.mbs.get( "texture_"+mf.texture , mf.texture );
@@ -383,6 +383,9 @@ public class GreebleSkel {
 		
 		Point3d bottomS = f.definingSE.iterator().next().getStart( f ), bottomE = f.definingSE.iterator().next().getEnd( f );
 		
+		if (bottomS == null || bottomE== null)
+			return;
+		
 		Point3d start = new Point3d ( bottomS );
 		Point3d end   = new Point3d ( bottomE );
 		
@@ -417,9 +420,13 @@ public class GreebleSkel {
 		to2d.invert();
 		
 		MiniFacade toRecess = null;
+		
+		boolean isBottom = bottomS.z < 0.1 && mf != null && mf.postState.skelFaces.isEmpty();
+		
 		if (mf != null) {
 			
-			mf.postState.skelFaces.add ( flat );
+			if (isBottom)
+				mf.postState.skelFaces.add ( flat );
 			
 			toRecess = new MiniFacade(mf);
 			toRecess.featureGen = new FeatureGenerator( toRecess );
@@ -434,17 +441,20 @@ public class GreebleSkel {
 			
 			sides = GreebleHelper.findRectagle( flat, Pointz.to2( start ), Pointz.to2( end ) );
 
+			if (mf != null) {
 			if ( sides != null )
 				facadeRect = mf.postState.innerFacadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
-			
-			mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
-			
-			mf.featureGen.update(); // computes window positions
+
+			if (isBottom) {
+				mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
+				mf.featureGen.update(); // computes window positions
+			}
 			
 			mf.featureGen.values().stream()
 				.flatMap ( k -> k.stream() )
 				.map     ( r -> new QuadF (r, megafacade) )
 				.forEach ( q -> features.add(q) );
+			}
 		}
 
 		// find window locations in 3 space

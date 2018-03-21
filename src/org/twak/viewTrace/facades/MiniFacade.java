@@ -16,6 +16,7 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.PaintThing;
+import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
 
@@ -26,7 +27,7 @@ public class MiniFacade {
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
 	public double[] 
-			color = new double[] { 1, 0, 0, 1 },
+			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ),
 			groundColor = null;
 	public double uncertainty = 0;
 	

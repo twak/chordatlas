@@ -103,13 +103,7 @@ public class SuperMeshPainter implements ICanPaintU {
 					SuperEdge se = (SuperEdge)e;
 					
 					g2.setColor( Color.black );
-					if (se.proceduralFacade != null) {
-						g2.setStroke( new BasicStroke( 3f ) );
-					}
-					else
-					{
 						g2.setStroke( new BasicStroke( 1f ) );
-					}
 					
 //					if ( se.profLine != null || ( se.over != null && ((SuperEdge)se.over).profLine != null ) ) {
 //						g2.setStroke( new BasicStroke( 2f ) );

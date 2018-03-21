@@ -64,7 +64,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 
 		plansIn.set( 0 );
 		plansOut.set( 0 );
-		meshFacades.set(0);
 		
 		Regularizer.miniFacadesUsed = 0;
 		Regularizer.regularised  = 0; 
@@ -106,7 +105,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		}
 	}
 	
-	AtomicInteger plansOut = new AtomicInteger(), plansIn = new AtomicInteger(), meshFacades = new AtomicInteger();
+	AtomicInteger plansOut = new AtomicInteger(), plansIn = new AtomicInteger();
 	
 	private MeshFile readMesh(File f, boolean plot) {
 		
@@ -125,9 +124,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 				
 				for (HalfEdge e : hf) {
 					SuperEdge se = (SuperEdge) e;
-					if (se.proceduralFacade != null) {
-						meshFacades.getAndIncrement();
-					}
 				}
 				
 			}
@@ -172,7 +168,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		}
 		
 		System.out.println(" before: " + plansIn.get() +" after " + plansOut.get() );
-		System.out.println(" buidling facades: " + meshFacades.get() );
 		System.out.println(" minifacades read: " + Regularizer.miniFacadesUsed +" fac regularised " +
 				Regularizer.regularised + "  total images " + 
 				Regularizer.seenImages.size() );

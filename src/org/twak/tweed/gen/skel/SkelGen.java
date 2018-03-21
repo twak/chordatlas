@@ -265,7 +265,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					profile = toProfile( se.prof );
 				}
 
-				tagWalls( profile, ( (SuperFace) se.face ).roofColor, se, lpb.get(), lpb.getNext().get() );
+				tagWalls( ( SuperFace) se.face, profile, se, lpb.get(), lpb.getNext().get() );
 				plan.addLoop( profile.points.get( 0 ), plan.root, profile );
 
 				b.tags.add( new SETag( se ) );
@@ -492,27 +492,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 	}
 
-	public static Profile tagWalls( Profile profile, float[] roofColor, SuperEdge se, Point2d s, Point2d e ) {
+	public static Profile tagWalls( SuperFace sf, Profile profile, SuperEdge se, Point2d s, Point2d e ) {
 
-		MiniFacade mini;
-
+		
 		if ( se.toEdit == null ) { // first time through, use regularizer 
 
-			if ( se.mini == null || ( se.mini.isEmpty() && se.proceduralFacade == null ) )
-				mini = null;
-			else {
+			if ( se.mini != null && ! se.mini.isEmpty() ) {
+				double[] range = findRange( se, s, e, null );
 
-				double[] range = findRange( se, s, e, se.proceduralFacade == null ? null : se.proceduralFacade.megafacade );
-
-				if ( range == null )
-					mini = null;
-				else
-					mini = new Regularizer().go( se.mini, range[ 0 ], range[ 1 ], se.proceduralFacade );
+				if ( range != null )
+					se.toEdit = new Regularizer().go( se.mini, range[ 0 ], range[ 1 ], null );
 			}
-		} else // second time through, use the edited results
-			mini = se.toEdit;
+			ensureMF( sf, se );
+		} 
 
-		Tag wall = new WallTag( se.profLine, se.occlusions, mini ), roof = new RoofTag( roofColor );
+		Tag wall = new WallTag( se.profLine, se.occlusions, se.toEdit ), roof = new RoofTag( sf.roofColor );
 
 		boolean first = true;
 		for ( Loop<Bar> lb : profile.points ) {
@@ -524,7 +518,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					b.tags.add( roof );
 				else {
 					if ( first )
-						b.tags.add( new WallTag( se.profLine, se.occlusions, mini, true ) );
+						b.tags.add( new WallTag( se.profLine, se.occlusions, se.toEdit, true ) );
 					else
 						b.tags.add( wall );
 				}

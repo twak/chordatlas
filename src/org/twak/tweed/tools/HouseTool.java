@@ -74,7 +74,6 @@ public class HouseTool extends Tool {
 				
 				if ( true ) {
 					se.addMini( mini );
-					se.proceduralFacade = mf;
 
 					se.toEdit = mini;
 

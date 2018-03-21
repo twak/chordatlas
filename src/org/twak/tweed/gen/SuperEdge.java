@@ -21,7 +21,6 @@ public class SuperEdge extends HalfEdge {
 	public boolean debug;
 	public List<MiniFacade> mini;
 	public MiniFacade toEdit;
-	public MegaFeatures proceduralFacade;
 	
 	public SuperEdge( Point2d s, Point2d e, HalfEdge parent ) {
 		super( s, e, parent );

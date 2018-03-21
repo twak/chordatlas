@@ -166,8 +166,6 @@ public class CGAMini extends FeatureGenerator {
 
 		DRectangle all = mf.postState != null ? mf.postState.innerFacadeRect : mf.getAsRect();
 		
-		
-		
 		List<DRectangle> occlusions = Collections.EMPTY_LIST;
 		
 		double groundFloorHeight = 0;
@@ -193,7 +191,6 @@ public class CGAMini extends FeatureGenerator {
 			if ( edges.size() != 3 ) {
 
 			} else {
-				
 
 				DRectangle cen = edges.get(1);
 				
@@ -222,11 +219,9 @@ public class CGAMini extends FeatureGenerator {
 										
 										if (visible( gWindowPanelV.get(1), occlusions ))
 											add( Feature.SHOP, gWindowPanelV.get( 1 ) );
-											
 									} 
 								}
 							}
-							
 						}
 						else
 							windowStrip( cen, Math.random() < 0.5, occlusions );
