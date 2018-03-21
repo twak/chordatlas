@@ -79,22 +79,29 @@ public class NormSpecGen {
 				
 				double ilen =  0.5 / Math.sqrt( heights[x][y][1] * heights[x][y][1] + heights[x][y][2] * heights[x][y][2] + 1 );
 				
-				int rgb = 
+				int normrgb = 
 						( ( (int) ( (heights[x][y][1] * ilen + 0.5) * 255 ) ) << 16 ) + 
 						( ( (int) ( (heights[x][y][2] * ilen + 0.5) * 255 ) ) <<  8 ) + 
 						( ( (int) ( (                   ilen + 0.5) * 255 ) ) <<  0 );
 
-				norm.setRGB( x, y, rgb );
 
 				int s = labels.getRGB( x, y );
 				if ( 
-						distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ||
+						distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
+					spec.setRGB( x, y, Color.white.getRGB() );
+					norm.setRGB( x, y, 0x8080ff );
+				}
+				else if (
 						distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 ||
 						distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 
-						)
-					spec.setRGB( x, y, Color.white.getRGB() );
-				else
+						) {
+					spec.setRGB( x, y, Color.darkGray.getRGB() );
+					norm.setRGB( x, y, normrgb );
+				}
+				else {
 					spec.setRGB( x, y, Color.black.getRGB() );
+					norm.setRGB( x, y, normrgb );
+				}
 			}
 	}
 

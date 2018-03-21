@@ -523,9 +523,9 @@ public class FeatureCache {
 					MiniFacade n = mi < i.miniFacades.size() ? i.miniFacades.get(mi) : null, 
 							   p = (mi-1) >= 0 ? i.miniFacades.get(mi-1) : null;
 					
-		            if (n != null && ( n.width < MFWidthTol || (n.rects.countValue() == 0 && n.width < MFWidthTol* 3) ) ) // skinny mf filter
+		            if (n != null && ( n.width < MFWidthTol || (n.featureGen.countValue() == 0 && n.width < MFWidthTol* 3) ) ) // skinny mf filter
 		            	n = null;
-		            if (p != null && ( p.width < MFWidthTol || (p.rects.countValue() == 0 && p.width < MFWidthTol * 3) ) )
+		            if (p != null && ( p.width < MFWidthTol || (p.featureGen.countValue() == 0 && p.width < MFWidthTol * 3) ) )
 		            	p = null;
 							   
 				    if ( n== null && p == null || n == null && p.softRight || p == null && n.softLeft || 

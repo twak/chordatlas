@@ -111,13 +111,13 @@ public class Regularizer {
 		}
 		
 		for (MiniFacade mf : out) {
-			assignFeaturesToWindows( mf.getRects( Feature.WINDOW, Feature.SHOP).stream().
-					collect( Collectors.toList() ), mf.rects );
+			assignFeaturesToWindows( mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP).stream().
+					collect( Collectors.toList() ), mf.featureGen );
 			
-			mf.rects.get( Feature.CORNICE ).clear();
-			mf.rects.get( Feature.BALCONY ).clear();
-			mf.rects.get( Feature.SILL    ).clear();
-			mf.rects.get( Feature.GRID    ).clear();
+			mf.featureGen.get( Feature.CORNICE ).clear();
+			mf.featureGen.get( Feature.BALCONY ).clear();
+			mf.featureGen.get( Feature.SILL    ).clear();
+			mf.featureGen.get( Feature.GRID    ).clear();
 		}
 		
 		
@@ -128,14 +128,14 @@ public class Regularizer {
 		
 		for (Feature f : Feature.values())
 			for (MiniFacade mf : out)
-				mf.rects.get( f ).stream().forEach( r -> r.f = f );
+				mf.featureGen.get( f ).stream().forEach( r -> r.f = f );
 		
 		
 		for (int i = 0; i < 50 * debugFrac; i++) {
 			
 			for (MiniFacade mf : out)
 				for (Feature f : toReg) 
-					cluster1 ( mf.getRects(f), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
+					cluster1 ( mf.featureGen.getRects(f), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
 			
 //			for (MiniFacade mf : out)
 //					cluster1 ( mf.getRects(toReg), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
@@ -145,10 +145,10 @@ public class Regularizer {
 			
 			for (MiniFacade mf : out)
 				for (Feature f : toReg)
-					allRects.addAll( mf.rects.get(f) );
+					allRects.addAll( mf.featureGen.get(f) );
 			
 			for (Feature f : toReg) {
-				List<FRect> allF = out.stream().flatMap( mf -> mf.rects.get( f ).stream() ).collect( Collectors.toList() );
+				List<FRect> allF = out.stream().flatMap( mf -> mf.featureGen.get( f ).stream() ).collect( Collectors.toList() );
 				cluster1 ( allF, 0.5, alpha, Bounds.WIDTH, Bounds.HEIGHT);
 			}
 			
@@ -156,23 +156,23 @@ public class Regularizer {
 			
 			if (i % 5 == 0)
 				for (MiniFacade mf : out) 
-					findNeighbours(  mf.getRects(Feature.WINDOW ) );
+					findNeighbours(  mf.featureGen.getRects(Feature.WINDOW ) );
 			
 			for (Dir dir : Dir.values())
 				clusterDeltas(allRects, 0.2, alpha, dir );
 			
 			for ( MiniFacade mf : out ) { 
 				
-				for (FRect d :  mf.rects.get(Feature.DOOR))
+				for (FRect d :  mf.featureGen.get(Feature.DOOR))
 					constrainDoor (mf, d, alpha);
-				for (FRect m :  mf.rects.get(Feature.MOULDING))
+				for (FRect m :  mf.featureGen.get(Feature.MOULDING))
 					constrainMoulding( mf, m, alpha);
 			}
 			
 			for ( MiniFacade mf : out ) {
 
 				for ( Feature f : toReg ) {
-					Iterator<FRect> rit = mf.rects.get( f ).iterator();
+					Iterator<FRect> rit = mf.featureGen.get( f ).iterator();
 
 					while ( rit.hasNext() ) {
 						FRect r = rit.next();
@@ -209,7 +209,7 @@ public class Regularizer {
 			List<Pair<MiniFacade, FRect>> allRects = new ArrayList<>();
 		
 			for (MiniFacade mf : out)
-				for (FRect r : mf.rects.get(f))
+				for (FRect r : mf.featureGen.get(f))
 					allRects.add(new Pair<>(mf, r));
 			
 			Collections.sort(allRects, new Comparator<Pair<MiniFacade, FRect>>() {
@@ -252,7 +252,7 @@ public class Regularizer {
 		
 		out.add(0, combine(out));
 		
-		totalFeature += out.get( 0 ).getRects( Feature.values() ).size();
+		totalFeature += out.get( 0 ).featureGen.getRects( Feature.values() ).size();
 		
 		System.out.println("done");
 		
@@ -290,7 +290,7 @@ public class Regularizer {
 						sy );
 				
 				win.f = Feature.WINDOW;
-				out.rects.put( win.f, win );
+				out.featureGen.put( win.f, win );
 				
 			}
 		
@@ -315,12 +315,12 @@ public class Regularizer {
 				{
 					MiniFacade gridMF = new MiniFacade( nmf );
 
-					gridMF.rects.get(Feature.GRID).clear();
-					gridMF.rects.get(Feature.WINDOW).clear();
+					gridMF.featureGen.get(Feature.GRID).clear();
+					gridMF.featureGen.get(Feature.WINDOW).clear();
 
-					for ( FRect f : nmf.rects.get( Feature.GRID ) ) {
+					for ( FRect f : nmf.featureGen.get( Feature.GRID ) ) {
 						f.f = Feature.WINDOW;
-						gridMF.rects.put( f.f, f );
+						gridMF.featureGen.put( f.f, f );
 					}
 
 					out.add( gridMF );
@@ -465,7 +465,7 @@ public class Regularizer {
 					}
 				}
 				
-				out.rects.put( o.f, o );
+				out.featureGen.put( o.f, o );
 			}
 		}
 		
@@ -481,7 +481,7 @@ public class Regularizer {
 		mr.x += 0.1; 
 		
 		for ( Feature f : Feature.values() ) { // clip to all
-			Iterator<FRect> rit = out.rects.get( f ).iterator();
+			Iterator<FRect> rit = out.featureGen.get( f ).iterator();
 			while ( rit.hasNext() ) {
 				FRect r = rit.next();
 				DRectangle section = r.intersect( mr );
@@ -508,7 +508,7 @@ public class Regularizer {
 		
 		Double out = null;
 		
-		for (FRect f : mf.getRects()) {
+		for (FRect f : mf.featureGen.getRects()) {
 		
 			if (f.getMaxY() > doorHeight && f.y < doorHeight) 
 				if (out == null)
@@ -591,7 +591,7 @@ public class Regularizer {
 	private void fixOverlaps( MiniFacade out ) {
 		
 		
-		Set<FRect> toProcess = new LinkedHashSet<>(out.getRects( forceNoOverlaps ));
+		Set<FRect> toProcess = new LinkedHashSet<>(out.featureGen.getRects( forceNoOverlaps ));
 		
 		while (!toProcess.isEmpty()) {
 			
@@ -601,7 +601,7 @@ public class Regularizer {
 			
 			Set<FRect> toadd = new LinkedHashSet<>();
 			
-			for (FRect r2 : out.getRects( forceNoOverlaps )) {
+			for (FRect r2 : out.featureGen.getRects( forceNoOverlaps )) {
 				
 				if (r1 == r2 || togo.contains( r2 ))
 					continue;
@@ -632,10 +632,10 @@ public class Regularizer {
 			}
 			
 			for (FRect a : toadd)
-				out.rects.put( a.f, a );
+				out.featureGen.put( a.f, a );
 			
 			for (FRect a : togo)
-				out.rects.remove( a.f, a );
+				out.featureGen.remove( a.f, a );
 		}
 	}
 
@@ -764,7 +764,7 @@ public class Regularizer {
 			FRect bestW = null;
 			double bestScore = 1;
 			
-			for ( FRect w2 : mf.rects.get(feat) ) {
+			for ( FRect w2 : mf.featureGen.get(feat) ) {
 				
 				if (w2.id != -1)
 					continue;
@@ -1001,7 +1001,7 @@ public class Regularizer {
 			if (f != Feature.WINDOW)
 				continue;
 			
-			Set<FRect> togo = new LinkedHashSet( mf.rects.get( f ) );
+			Set<FRect> togo = new LinkedHashSet( mf.featureGen.get( f ) );
 			
 			while (!togo.isEmpty()) {
 				
@@ -1139,7 +1139,7 @@ public class Regularizer {
 		
 		for ( Feature f : toReg ) {
 			
-			Iterator<FRect> rit = mf.rects.get( f ).iterator();
+			Iterator<FRect> rit = mf.featureGen.get( f ).iterator();
 
 			rit:
 			while ( rit.hasNext() ) {
@@ -1158,14 +1158,14 @@ public class Regularizer {
 		
 		for ( Feature f : toReg ) {
 			
-			Iterator<FRect> rit = mf.rects.get( f ).iterator();
+			Iterator<FRect> rit = mf.featureGen.get( f ).iterator();
 			
 			rit:
 				while ( rit.hasNext() ) {
 					
 					FRect r = rit.next();
 					
-					for (FRect r2 : mf.rects.get(f)) {
+					for (FRect r2 : mf.featureGen.get(f)) {
 						if (r != r2 && similarMerge(r, r2)) {
 							r2.setFrom ( average(r, r2) );
 							r2.attached.putAll( r.attached );

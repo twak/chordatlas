@@ -14,6 +14,7 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacadePainter;
 import org.twak.viewTrace.facades.Regularizer;
 
 public class MiniViewer {
@@ -60,7 +61,7 @@ public class MiniViewer {
 		PaintThing.debug.clear();
 		plot.toPaint.clear();
 		
-		MiniFacade.PAINT_IMAGE = paintImage.isSelected();
+		MiniFacadePainter.PAINT_IMAGE = paintImage.isSelected();
 
 		double[] range = se.findRange();
 		

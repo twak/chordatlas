@@ -609,7 +609,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.width = se.length();
 		}
 		else
-			se.toEdit.texture = se.toEdit.spec = se.toEdit.normal = null;
+			se.toEdit.texture = null;
 		
 		
 		Plot p = new Plot( se.toEdit );
@@ -677,7 +677,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 		
 		ensureMF(sf, se);
-		new CGAMini( se.toEdit ).cga();
+		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		patchWallTag( skel, se, se.toEdit);
 	}
 	
@@ -693,7 +693,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				
 				ensureMF((SuperFace)hf, se);
 				mfs.add( se.toEdit );
-				new CGAMini( se.toEdit ).cga();
+				se.toEdit.featureGen = new CGAMini( se.toEdit );
 			}
 		
 		new Thread( new Runnable() {

@@ -17,12 +17,11 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
  * @author twak
  *
  */
-public class CGAMini {
+public class CGAMini extends FeatureGenerator {
 
-	 MiniFacade mf;
-	
 	public CGAMini( MiniFacade mf) {
-		this.mf = mf;
+		super(mf);
+		update();
 	}
 
 	private static List<Double> split3 (RectDir r, double first, double last) {
@@ -157,9 +156,8 @@ public class CGAMini {
 		
 		return true;
 	}
-
 	
-	public void cga () {
+	public void update () {
 
 		DRectangle all = mf.getAsRect();
 		
@@ -169,7 +167,8 @@ public class CGAMini {
 
 		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
 
-		mf.rects.clear();
+		clear();
+		
 		mf.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ); 
 		
 		for ( int f = 0; f < floors.size(); f++ ) {
@@ -203,7 +202,7 @@ public class CGAMini {
 							List<DRectangle> doorHeight = groundPanel.get( 0 ).splitY( r -> split1( r, 2.2 ) );
 
 							if (visible(  doorHeight.get( 0 ), occlusions ))
-								mf.add( Feature.DOOR, doorHeight.get( 0 ) );
+								add( Feature.DOOR, doorHeight.get( 0 ) );
 
 							if ( groundPanel.size() > 1 ) {
 
@@ -213,7 +212,7 @@ public class CGAMini {
 									if ( gWindowPanelV.size() > 2 ) {
 										
 										if (visible( gWindowPanelV.get(1), occlusions ))
-											mf.add( Feature.SHOP, gWindowPanelV.get( 1 ) );
+											add( Feature.SHOP, gWindowPanelV.get( 1 ) );
 											
 									} 
 								}
@@ -230,7 +229,7 @@ public class CGAMini {
 								f > 0 && f < floors.size() - 1 &&  Math.random() < 0.5, occlusions );
 						
 						if (f == 1 )
-							mf.add( Feature.MOULDING, new DRectangle (floor.x + 0.1, floor.y,  floor.width - 0.2, 0.5 ) );
+							add( Feature.MOULDING, new DRectangle (floor.x + 0.1, floor.y,  floor.width - 0.2, 0.5 ) );
 					}
 				}
 			}
@@ -255,23 +254,23 @@ public class CGAMini {
 						
 						DRectangle window = winPanel.get( 1 );
 						
-						mf.add ( Feature.WINDOW, window );
+						add ( Feature.WINDOW, window );
 						
 						DRectangle sill = new DRectangle(window);
 						sill.height = 0.2;
 						sill.y -= sill.height;
-						mf.add ( Feature.SILL, sill );
+						add ( Feature.SILL, sill );
 						
 						DRectangle lintel = new DRectangle(sill);
 						sill.y = window.getMaxY();
-						mf.add ( Feature.CORNICE, sill );
+						add ( Feature.CORNICE, sill );
 						
 						if ( makeBalcony ) {
 							DRectangle balcony = new DRectangle( winPanel.get( 1 ) );
 							balcony.height = winPanel.get( 1 ).height / 3;
 							balcony.x -= 0.15;
 							balcony.width += 0.3;
-							mf.add( Feature.BALCONY, balcony );
+							add( Feature.BALCONY, balcony );
 						}
 					}
 				} 

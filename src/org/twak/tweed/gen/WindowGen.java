@@ -94,7 +94,7 @@ public class WindowGen extends Gen implements IDumpObjs {
 					float offset = (float) Math.random() * 5;
 					
 					for (MiniFacade mini : im.miniFacades) {
-						for (DRectangle r : mini.rects.get(Feature.WINDOW)) {
+						for (DRectangle r : mini.featureGen.get(Feature.WINDOW)) {
 						
 							Vector3f loc = new Vector3f( mfStart );
 
@@ -105,7 +105,7 @@ public class WindowGen extends Gen implements IDumpObjs {
 						}
 						
 						
-						if (!mini.rects.get(Feature.WINDOW).isEmpty()) {
+						if (!mini.featureGen.get(Feature.WINDOW).isEmpty()) {
 
 							Vector3f loc = new Vector3f(mfStart);
 							loc.addLocal(along.mult((float) mini.left)).addLocal(in.mult(offset) );

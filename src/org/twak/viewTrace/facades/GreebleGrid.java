@@ -99,7 +99,7 @@ public class GreebleGrid {
 					Texture s = tweed.getAssetManager().loadTexture( specular );
 //					mat.setVector4( "Specular", ColorRGBA.Black.toVector4f() );
 					s.setWrap( WrapMode.Repeat );
-					mat.setFloat( "Shininess", 10 );
+					mat.setFloat( "Shininess", 50 );
 					mat.setTexture( "SpecularMap", s );
 				}
 				mat.setColor( "Specular", ColorRGBA.White );
@@ -481,7 +481,7 @@ public class GreebleGrid {
 
 			//			MiniFacade mf = wallTag.miniFacade;
 
-			for ( FRect w : mf.rects.get( Feature.WINDOW ) ) {
+			for ( FRect w : mf.featureGen.get( Feature.WINDOW ) ) {
 
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -509,7 +509,7 @@ public class GreebleGrid {
 				
 			}
 
-			for ( FRect s_ : mf.rects.get( Feature.SHOP ) ) {
+			for ( FRect s_ : mf.featureGen.get( Feature.SHOP ) ) {
 				
 				FRect s = new FRect(s_);
 				
@@ -532,7 +532,7 @@ public class GreebleGrid {
 					} );
 				}
 			}
-			for ( DRectangle d : mf.rects.get( Feature.DOOR ) ) {
+			for ( DRectangle d : mf.featureGen.get( Feature.DOOR ) ) {
 				if ( all.contains( d ) )
 					g.insert( d, new Griddable() {
 						@Override
@@ -542,7 +542,7 @@ public class GreebleGrid {
 					} );
 			}
 
-			for ( DRectangle b : mf.rects.get( Feature.BALCONY ) ) {
+			for ( DRectangle b : mf.featureGen.get( Feature.BALCONY ) ) {
 				if ( all.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
@@ -557,7 +557,7 @@ public class GreebleGrid {
 					} );
 			}
 
-			for ( DRectangle b : mf.rects.get( Feature.MOULDING ) ) {
+			for ( DRectangle b : mf.featureGen.get( Feature.MOULDING ) ) {
 				if ( all.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
@@ -583,7 +583,7 @@ public class GreebleGrid {
 			Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
 			MatMeshBuilder mmb = mbs.get( "texture_"+mf.texture , mf.texture );
 
-			for ( FRect w : mf.getRects( Feature.WINDOW, Feature.SHOP ) ) {
+			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -594,7 +594,7 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( FRect w : mf.rects.get( Feature.DOOR ) ) {
+			for ( FRect w : mf.featureGen.get( Feature.DOOR ) ) {
 				
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -605,7 +605,7 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( FRect w : mf.getRects( Feature.MOULDING, Feature.CORNICE, Feature.SILL ) ) {
+			for ( FRect w : mf.featureGen.getRects( Feature.MOULDING, Feature.CORNICE, Feature.SILL ) ) {
 				
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -616,7 +616,7 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( DRectangle b : mf.rects.get( Feature.BALCONY ) ) {
+			for ( DRectangle b : mf.featureGen.get( Feature.BALCONY ) ) {
 				if ( all.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override

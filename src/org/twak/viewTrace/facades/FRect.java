@@ -235,6 +235,12 @@ public class FRect extends DRectangle implements ICanEdit {
 	@Override
 	public void getMenu( MouseEvent e, PanMouseAdaptor ma, ChangeListener toRepaint ) {
 	}
+
+	@Override
+	public void setObject( Object o ) {
+		if (o != this)
+			throw new Error("!");
+	}
 }
 
 

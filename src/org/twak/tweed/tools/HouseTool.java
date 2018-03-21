@@ -89,7 +89,7 @@ public class HouseTool extends Tool {
 		mini = new MiniFacade();
 		mini.width = length;
 		mini.height = 20;
-		mini.rects.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
+		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
 		mini.color = new double[] {0.8,0.8,0.3,1};
 		mini.imageFeatures = imf;
 		mini.texture = null;//"tex.jpg";

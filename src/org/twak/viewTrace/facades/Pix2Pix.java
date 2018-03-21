@@ -63,6 +63,10 @@ public class Pix2Pix {
 			//		g.setColor( new Color (0, 0, 255 ) );
 			//		g.fillRect( 255, 0, 255, 255 );
 
+//			get resultion right
+//			stretch and fill mf.skelFaces in dark blue
+			
+			
 			g.setColor( new Color( 0, 48, 255 ) );
 			g.fillRect( 256, 0, 256, 255 );
 
@@ -139,8 +143,6 @@ public class Pix2Pix {
 
 								byte[] image = Files.readAllBytes( texture.toPath() );
 								
-//								FileOutputStream fos = new FileOutputStream(  );
-
 								Files.write(  new File(Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" )).toPath(), image );
 
 								NormSpecGen ns = new NormSpecGen(
@@ -153,13 +155,9 @@ public class Pix2Pix {
 								ImageIO.write ( ns.spec, 
 										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_spec.png" ) ) );
 								
-//								fos.flush();
-//								fos.close();
-
 								e.getValue().texture = dest;
 
 								texture.delete();
-//								index.remove( name );
 								
 								found = true;
 							}
@@ -185,7 +183,7 @@ public class Pix2Pix {
 	}
 
 	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, Feature...features ) {
-		for (FRect r : toEdit.getRects(features)) {
+		for (FRect r : toEdit.featureGen.getRects(features)) {
 			
 			DRectangle w = bounds.scale ( mini.normalize( r ) );
 			

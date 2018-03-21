@@ -34,6 +34,7 @@ import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacadePainter;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -201,6 +202,8 @@ public class SolverState implements Serializable
 				perp.set( -perp.y, perp.x );
 				perp.normalize();
 
+				MiniFacadePainter mfPainter = new MiniFacadePainter();
+				
 				for ( int i = 0; i < mfs.size(); i++ ) {
 
 					MiniFacade mf = mfs.get( i );
@@ -219,7 +222,7 @@ public class SolverState implements Serializable
 					double w = mf.width * 0.1;
 					double h = mf.height * 0.1;
 
-					mf.paintImage( g, ma, p2.x - w, p2.y - h, p2.x + w, p2.y + h );
+					mfPainter.paintImage( g, ma, mf, p2.x - w, p2.y - h, p2.x + w, p2.y + h );
 				}
 			}
 		};
