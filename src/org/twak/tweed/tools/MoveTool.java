@@ -12,13 +12,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-public class HandleTool extends Tool {
+public class MoveTool extends Tool {
 
 	Handle currentDraggingHandle = null;
 	Node currentHandles = new Node();//new HashSet<>();
 	Tweed tweed;
 	
-	public HandleTool( Tweed tweed ) {
+	public MoveTool( Tweed tweed ) {
 		super( tweed );
 	}
 	

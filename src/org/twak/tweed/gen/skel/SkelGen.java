@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.ProgressMonitor;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
@@ -45,6 +46,7 @@ import org.twak.tweed.gen.ProfileAssignmentViewer;
 import org.twak.tweed.gen.SkelFootprint;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -61,13 +63,12 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
+import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Regularizer;
-import org.twak.viewTrace.facades.RoofTag;
-import org.twak.viewTrace.facades.WallTag;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -80,7 +81,15 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public SkelFootprint skelFootprint;
 	protected List<Line> footprint;
-
+	
+	static {
+		PlanSkeleton.TAGS = new String[][]
+			    {
+	        {"org.twak.tweed.gen.skel.WallTag", "wall"},
+	        {"org.twak.tweed.gen.skel.RoofTag", "roof"},
+	    };
+	}
+	
 	public SkelGen() {
 		super( "headless", null );
 		skelFootprint = new SkelFootprint();
@@ -137,11 +146,19 @@ public class SkelGen extends Gen implements IDumpObjs {
 			for ( int i = 0; i < toRender.faces.size(); i++ )
 				try {
 					HalfFace f = toRender.faces.get( i );
-
 					SuperFace sf = (SuperFace) f;
-					PlanSkeleton skel = calc( sf );
-					if ( skel != null )
-						setSkel( skel, skel.output, sf );
+					
+					Rendered previouslyRendered = geometry.get( sf );
+					
+					if (previouslyRendered.skel != null) {
+							setSkel ( previouslyRendered.skel, previouslyRendered.output, sf);
+					}
+					else
+					{
+						PlanSkeleton skel = calc( sf );
+						if ( skel != null )
+							setSkel( skel, skel.output, sf );
+					}
 
 				} catch ( Throwable th ) {
 					th.printStackTrace();
@@ -294,7 +311,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 		return skel;
 	}
 
-	Map<SuperFace, Node> geometry = new IdentityHashMap<>();
+	private static class Rendered {
+		
+		PlanSkeleton skel;
+		Node node;
+		Output output;
+		
+		public void set( Node node, Output output, PlanSkeleton skel ) {
+			this.node = node;
+			this.output = output;
+			this.skel = skel;
+			
+		}
+	}
+	
+	Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
 
 	public synchronized void setSkel( PlanSkeleton skel, Output output, SuperFace sf ) {
 
@@ -314,7 +345,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		house = greeble.showSkeleton( output, onclick );
 
 		gNode.attachChild( house );
-		geometry.put( sf, house );
+		geometry.get( sf ).set (house, output, skel );
 
 		tweed.getRootNode().updateGeometricState();
 		tweed.getRootNode().updateModelBound();
@@ -322,9 +353,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	private void removeGeometryFor( SuperFace sf ) {
-		if ( geometry.get( sf ) != null ) {
-			geometry.get( sf ).removeFromParent();
-			geometry.remove( sf );
+		Rendered rd = geometry.get( sf );
+		if ( rd != null ) {
+			
+			if (rd.node != null ) {
+				rd.node.removeFromParent();
+				rd.node = null;
+			}
 		}
 	}
 
@@ -333,14 +368,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JPanel ui = new JPanel();
 		ui.setLayout( new ListDownLayout() );
 
-		JButton fac = new JButton( "edit facade (no texture)" );
-		fac.addActionListener( e -> editFacade( skel, sf, se, false ) );
+		JButton fac = new JButton( "edit facade" );
+		fac.addActionListener( e -> editFacade( skel, sf, se ) );
 		ui.add( fac );
 
-		JButton tex = new JButton( "edit facade (textured)" );
-		tex.addActionListener( e -> editFacade( skel, sf, se, true ) );
-		ui.add( tex );
-		
 		JButton proc = new JButton( "procedural facade" );
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
 		ui.add( proc );
@@ -352,16 +383,23 @@ public class SkelGen extends Gen implements IDumpObjs {
 			public void actionPerformed( ActionEvent e ) {
 
 				closeSitePlan();
+				Plot.closeLast();
 
+				for (HalfEdge he :sf)
+				{
+					SuperEdge ee = (SuperEdge)he;
+					if (ee.toEdit != null)
+						ee.toEdit.texture = null;
+				}
+				
 				siteplan = new Siteplan( skel.plan, false ) {
 
 					SuperFace workon = sf;
 
 					public void show( Output output, Skeleton threadKey ) {
 
+						
 						super.show( output, threadKey );
-
-						Plot.closeLast();
 
 						tweed.enqueue( new Runnable() {
 
@@ -583,9 +621,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
 		ui.add( compare );
 		
-		JButton pf = new JButton( "procedural facades" );
+		JButton pf = new JButton( "procedural all facades" );
 		pf.addActionListener( l -> cgaAll() );
 		ui.add( pf );
+		
+		JButton tf = new JButton( "texture all facades" );
+		tf.addActionListener( l -> textureAll() );
+		ui.add( tf );
 		
 		return ui;
 	}
@@ -595,24 +637,31 @@ public class SkelGen extends Gen implements IDumpObjs {
 		Jme3z.dump( dump, gNode, 0 );
 	}
 
-	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se, boolean texture ) {
+	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 		closeSitePlan();
 
+		JToggleButton texture = new JToggleButton( "textured" );
+		texture.setSelected( se.toEdit != null && se.toEdit.texture != null );
+		
 		if ( se.toEdit == null ) {
 			ensureMF( sf, se );
-			if ( !texture )
+			if ( !texture.isSelected() )
 				se.toEdit.groundFloorHeight = 2;
 		}
 
-		if ( texture )  {
+		if ( texture.isSelected() )  {
 			patchWallTag (skel, se, se.toEdit);
 			se.toEdit.width = se.length();
 		}
 		else
 			se.toEdit.texture = null;
 		
+		if (se.toEdit.featureGen instanceof CGAMini) { // de-proecuralize before editing 
+			((CGAMini) se.toEdit.featureGen).update();
+			se.toEdit.featureGen = new FeatureGenerator( se.toEdit, se.toEdit.featureGen );
+		}
 		
-		Plot p = new Plot( se.toEdit );
+		Plot p = new Plot( se.toEdit, texture );
 
 		Changed c = new Changed() {
 
@@ -620,7 +669,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			public void changed() {
 
 				PaintThing.debug.clear();
-				if ( texture )
+				if ( texture.isSelected() )
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
@@ -638,15 +687,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 							} );
 						}
 					} ).start();
-				else
+				else {
+					
+					se.toEdit.texture = null;
+					
 					tweed.enqueue( new Runnable() {
 						@Override
 						public void run() {
 							setSkel( skel, skel.output, sf );
 						}
 					} );
+				}
 			}
 		};
+		
+		texture.addActionListener( l -> c.changed() );
 		
 		c.changed();
 		p.addEditListener( c );
@@ -677,12 +732,32 @@ public class SkelGen extends Gen implements IDumpObjs {
 	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 		
 		ensureMF(sf, se);
+		
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
+		se.toEdit.featureGen.update();
+		
 		patchWallTag( skel, se, se.toEdit);
+		
+		calculateOnJmeThread();
 	}
 	
 
 	private void cgaAll() {
+		
+		
+		for (HalfFace hf : toRender )
+			for (HalfEdge he : hf) {
+				SuperEdge se = (SuperEdge) he;
+				
+				ensureMF((SuperFace)hf, se);
+				se.toEdit.featureGen = new CGAMini( se.toEdit );
+				se.toEdit.featureGen.update();
+			}
+		
+		calculateOnJmeThread();
+	}
+	
+	private void textureAll() {
 		
 		List<MiniFacade> mfs = new ArrayList<>();
 		
@@ -690,10 +765,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
 				
-				
 				ensureMF((SuperFace)hf, se);
 				mfs.add( se.toEdit );
-				se.toEdit.featureGen = new CGAMini( se.toEdit );
+				se.toEdit.featureGen.update();
 			}
 		
 		new Thread( new Runnable() {

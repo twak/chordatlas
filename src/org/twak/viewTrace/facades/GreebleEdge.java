@@ -15,6 +15,7 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Output.SharedEdge;
 import org.twak.siteplan.jme.MeshBuilder;
+import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;

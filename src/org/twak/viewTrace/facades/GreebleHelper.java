@@ -122,8 +122,20 @@ public class GreebleHelper {
 		}.run();
 		
 	}
+	
 
-	public static DRectangle findRect( Loop<Point2d> rect ) {
+	public static LoopL<Point2d> wallUVs( LoopL<Point2d> coords, DRectangle unit ) {
+
+		return coords.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<Point2d> pt ) {
+				return unit.normalize( pt.get() );
+			}
+		}.run();
+	}
+
+
+	public static DRectangle findRect( Loop<? extends Point2d> rect ) {
 		double[] bounds = Loopz.minMax2d( rect );
 		
 		DRectangle all = new DRectangle(
@@ -324,5 +336,4 @@ public class GreebleHelper {
 		
 		return null;
 	}
-
 }

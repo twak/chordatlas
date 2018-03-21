@@ -21,13 +21,14 @@ import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.PlanSkeleton.ColumnProperties;
-import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
+import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.tweed.gen.skel.SETag;
+import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
@@ -54,8 +55,6 @@ public class GreebleSkel {
 	OnClick onClick;
 	
 	GreebleGrid greebleGrid;
-	
-	MMeshBuilderCache mbs;
 	
 	boolean isTextured = false;
 	
@@ -99,20 +98,21 @@ public class GreebleSkel {
 			
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
+				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 				
-				wt.miniFacade.skelFaces.clear();
+//				wt.miniFacade.postState = null;
 				
 				if ( area > bestWallArea && wt != null ) {
-				
-				if (wt.color != null)
-					wallColor = wt.color;
-				bestWallArea = area;
-				}				
+
+					if ( wt.color != null )
+						wallColor = wt.color;
+					bestWallArea = area;
+				}			
 			}
 		}
 		
-		greebleGrid = new GreebleGrid(tweed, mbs = new MMeshBuilderCache());
+		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		edges( output, roofColor );
@@ -126,42 +126,35 @@ public class GreebleSkel {
 			
 			WallTag wt = null;
 			
-			Set<QuadF> features = new HashSet<>();
 			
 			MiniFacade mf2 = null;
+			Set<QuadF> features = new HashSet<>();
 			
+			Line megafacade = null;
 			if (opt.isPresent() && (wt = (WallTag) opt.get() ).miniFacade != null ) {
 				
 				mf2 = new MiniFacade ( wt.miniFacade );
-				mf2.skelFaces = wt.miniFacade.skelFaces; // add found faces to original facade
+				mf2.postState = wt.miniFacade.postState = new PostProcessState();
 				
-				Line facadeLine;
 				{
 					Edge e = chain.get( 0 ).edge;
-					facadeLine = new Line ( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
+					megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
 				}
 				
 				if (TweedSettings.settings.snapFacadeWidth) {
 					// move/scale mf horizontally from mean-image-location to mesh-facade-location
-					double[] meshSE = findSE ( wt.miniFacade, facadeLine, chain );
+					double[] meshSE = findSE ( wt.miniFacade, megafacade, chain );
 					mf2.scaleX( meshSE[0], meshSE[1] );
 				}
-				
-				// find window locations in 3 space
-				mf2.featureGen.values().stream()
-						.flatMap ( f -> f.stream() )
-						.map     ( r -> new QuadF (r, facadeLine) )
-						.forEach ( q -> features.add(q) );
-				
 			}
 
 			for ( Face f : chain ) {
-				face( f, mf2, features, roofColor, wallColor );
+				face( f, mf2, features, roofColor, wallColor, megafacade );
 			}
 			
 			for (QuadF w : features)
 				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
-					greebleGrid.createDormerWindow( w, mbs.WOOD, mbs.GLASS, 
+					greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
 							(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 				}
 			
@@ -249,9 +242,9 @@ public class GreebleSkel {
 			return new double[] {out[0], out[0] + mf.width }; 
 	}
 		
-	private void face (Face f, MiniFacade mf, Set<QuadF> features, float[] roofColor, float[] wallColor ) {
+	private void face (Face f, MiniFacade mf, Set<QuadF> features, float[] roofColor, float[] wallColor, Line megafacade ) {
 
-		MatMeshBuilder faceColor = mbs.ERROR;
+		MatMeshBuilder faceColor = greebleGrid.mbs.ERROR;
 		
 		WallTag wallTag = null;
 
@@ -260,7 +253,11 @@ public class GreebleSkel {
 			if ( t instanceof WallTag ) {
 				
 				wallTag = ( (WallTag) t );
-				faceColor = greebleGrid.mbs.get( BRICK, wallTag.color != null ? wallTag.color : wallColor );
+				
+				if (mf.texture == null)
+					faceColor = greebleGrid.mbs.get( BRICK, wallTag.color != null ? wallTag.color : wallColor );
+				else 
+					faceColor = greebleGrid.mbs.get( "texture_"+mf.texture , mf.texture );
 
 			} else if ( t instanceof RoofTag ) {
 				
@@ -287,11 +284,13 @@ public class GreebleSkel {
 			if (wallTag != null) 
 				wallTag.isGroundFloor = f.definingCorners.iterator().next().z < 1;
 				
-			mapTo2d( f, ll, mf, wallTag, features, faceColor );
+			mapTo2d( f, ll, mf, wallTag, features, faceColor, megafacade );
 		}
 	}
 	
 	protected static class QuadF {
+		
+		// potential window - either recessed, dormer (if a corner is between faces) , or deleted (if a corner outside all faces in chain)
 		
 		Point3d[] 
 			corners = new Point3d[4],
@@ -367,7 +366,8 @@ public class GreebleSkel {
 			MiniFacade mf,
 			WallTag wallTag, 
 			Set<QuadF> features, 
-			MatMeshBuilder faceMaterial ) {
+			MatMeshBuilder faceMaterial, 
+			Line megafacade ) {
 		
 		Matrix4d to2dXY = new Matrix4d();
 		
@@ -416,14 +416,13 @@ public class GreebleSkel {
 		Matrix4d to2d = new Matrix4d( to3d ); // now in jme space
 		to2d.invert();
 		
-		MiniFacade forFace = null;
+		MiniFacade toRecess = null;
 		if (mf != null) {
 			
-			mf.featureGen.update();
-			mf.skelFaces.add( flat );
+			mf.postState.skelFaces.add ( flat );
 			
-			forFace = new MiniFacade(mf);
-			forFace.featureGen.clear();
+			toRecess = new MiniFacade(mf);
+			toRecess.featureGen = new FeatureGenerator( toRecess );
 		}
 		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
@@ -432,11 +431,23 @@ public class GreebleSkel {
 		DRectangle facadeRect = null;
 		
 		if ( wallTag != null ) {
+			
 			sides = GreebleHelper.findRectagle( flat, Pointz.to2( start ), Pointz.to2( end ) );
 
 			if ( sides != null )
-				facadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
+				facadeRect = mf.postState.innerFacadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
+			
+			mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
+			
+			mf.featureGen.update(); // computes window positions
+			
+			mf.featureGen.values().stream()
+				.flatMap ( k -> k.stream() )
+				.map     ( r -> new QuadF (r, megafacade) )
+				.forEach ( q -> features.add(q) );
 		}
+
+		// find window locations in 3 space
 		
 		List<DRectangle> floors = new ArrayList();
 		List<MatMeshBuilder> materials = new ArrayList();
@@ -454,16 +465,19 @@ public class GreebleSkel {
 				
 				Loop<Point2d>[] cut = Loopz.cutConvex( loop, new LinearForm( 0, 1, mf.groundFloorHeight ) );
 				faceMaterial.add( cut[ 1 ].singleton(), to3d );
-				gfm.add( cut[ 0 ].singleton(), to3d );
+				LoopL<Point2d> pts = cut[ 0 ].singleton();
+				gfm.add( pts, GreebleHelper.wallUVs(pts, mf.postState.outerFacadeRect), to3d );
 			}
 			
 			materials.add( gfm );
 			materials.add( faceMaterial );
 		} else {
+			
 			floors.add( facadeRect );
 			materials.add( faceMaterial );
 			if (sides != null)
-				faceMaterial.add( sides, to3d );
+				faceMaterial.add( sides, 
+						isTextured ? GreebleHelper.wallUVs(sides, mf.postState.outerFacadeRect) : null, to3d );
 		}
 
 		for ( int j = 0; j < floors.size(); j++ ) {
@@ -477,46 +491,49 @@ public class GreebleSkel {
 				QuadF n = quit.next();
 
 				if ( n.project( to2d, to3d, flat, facePlane, new Vector3d( along.y, 0, -along.x ) ) && 
-						wallTag != null && floorRect != null && forFace != null ) {
+						wallTag != null && floorRect != null && toRecess != null ) {
 
 					// set the vertical bounds, so we can just render in 2d
 					FRect bounds = new FRect( n.original );
 					n.setBounds( to2d, bounds );
 
 					if ( floorRect.contains( bounds ) ) {
-						forFace.featureGen.put( n.original.f, bounds );
+						toRecess.featureGen.put( n.original.f, bounds );
 						quit.remove();
 					}
 				}
 			}
 
-			if ( wallTag == null || forFace == null || floorRect == null ) {
+			if ( wallTag == null || toRecess == null || floorRect == null ) {
 				LoopL<LPoint2d> loop = flat.singleton();
-				m.add( loop, m.texture == null ? null :  GreebleHelper.roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), 0.2 ), to3d );
+				m.add( loop, m.texture == null ? null :  
+					GreebleHelper.roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), 0.4 ), to3d );
+				
 				return;
 			}
 
-			List<DRectangle> occlusions = new ArrayList<>();
-			for ( LineHeight lh : wallTag.occlusions ) {
-
-				Point3d s = new Point3d( lh.start.x, lh.start.y, lh.min ), e = new Point3d( lh.end.x, lh.end.y, lh.max );
-
-				to2dXY.transform( s );
-				to2dXY.transform( e );
-
-				occlusions.add( new DRectangle( Math.min( s.x, e.x ), s.z, Math.abs( e.x - s.x ), Math.abs( e.z - s.z ) ) );
-			}
+//			List<DRectangle> occlusions = new ArrayList<>();
+//			for ( LineHeight lh : wallTag.occlusions ) {
+//
+//				Point3d s = new Point3d( lh.start.x, lh.start.y, lh.min ), e = new Point3d( lh.end.x, lh.end.y, lh.max );
+//
+//				to2dXY.transform( s );
+//				to2dXY.transform( e );
+//
+//				occlusions.add( new DRectangle( Math.min( s.x, e.x ), s.z, Math.abs( e.x - s.x ), Math.abs( e.z - s.z ) ) );
+//			}
 
 			if ( mf.texture == null )
 				greebleGrid.buildGrid (
 					floorRect,
 					to3d,
-					forFace,
+					toRecess,
 					m,
 					wallTag );
 			else
 				greebleGrid.textureGrid (
 					floorRect,
+					mf.postState.outerFacadeRect,
 					to3d,
 					mf );
 		
@@ -525,9 +542,10 @@ public class GreebleSkel {
 	
 	public void edges( Output output, float[] roofColor ) {
 
-		GreebleEdge.roowWallGreeble( output, mbs.get( TILE, roofColor ), mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ) );
+		GreebleEdge.roowWallGreeble( output, 
+				greebleGrid.mbs.get( TILE, roofColor ), greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ) );
 
 		for ( Face f : output.faces.values() )
-			GreebleEdge.roofGreeble( f, mbs.get( TILE, roofColor ) );
+			GreebleEdge.roofGreeble( f, greebleGrid.mbs.get( TILE, roofColor ) );
 	}
 }

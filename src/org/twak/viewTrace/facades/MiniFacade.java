@@ -55,8 +55,7 @@ public class MiniFacade {
 			hMargin = new ArrayList<>(), 
 			vMargin = new ArrayList<>();
 
-	// last perimeter from skeleton evaluation
-	public List<Loop<? extends Point2d>> skelFaces = new ArrayList<>();
+	public PostProcessState postState = null;
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -78,6 +77,7 @@ public class MiniFacade {
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
 		this.texture = m.texture;
+		this.featureGen = m.featureGen.copy(this);
 		
 		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
 		

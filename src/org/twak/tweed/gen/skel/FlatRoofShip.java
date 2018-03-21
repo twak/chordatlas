@@ -98,7 +98,7 @@ public class FlatRoofShip extends Ship
     @Override
     public String getFeatureName()
     {
-        return ("roof");
+        return ("cap-roof");
     }
 
     @Override

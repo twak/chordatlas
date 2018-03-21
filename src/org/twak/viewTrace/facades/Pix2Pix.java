@@ -70,7 +70,7 @@ public class Pix2Pix {
 			g.setColor( new Color( 0, 48, 255 ) );
 			g.fillRect( 256, 0, 256, 255 );
 
-			DRectangle mini = toEdit.getAsRect();
+			DRectangle mini = toEdit.postState.outerFacadeRect;
 
 			cmpRects( toEdit, g, bounds, mini, CMPLabel.Door.rgb, Feature.DOOR );
 			cmpRects( toEdit, g, bounds, mini, CMPLabel.Window.rgb, Feature.WINDOW );

@@ -12,16 +12,20 @@ import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.Line;
+import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import com.vividsolutions.jts.algorithm.CGAlgorithms;
 
 public class HouseTool extends Tool {
 
@@ -36,7 +40,7 @@ public class HouseTool extends Tool {
 		ImageFeatures imf = new ImageFeatures();// FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
 		imf.mega = mf;	
 		
-		double[] minMax = new double[] {0, 15, 0, 25};
+		double[] minMax = new double[] {0, 7, 0, 12};
 		HalfMesh2.Builder builder = new HalfMesh2.Builder( SuperEdge.class, SuperFace.class );
 		builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
 		builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
@@ -46,19 +50,26 @@ public class HouseTool extends Tool {
 
 		HalfMesh2 mesh = builder.done();
 
-		Prof p = new Prof();
+		Prof p1 = new Prof(), p2 = new Prof();
 		
-		p.add( new Point2d (0,0) );
-		p.add( new Point2d (0,20) );
-		p.add( new Point2d (-5,25) );
+		p1.add( new Point2d (0,0) );
+		p1.add( new Point2d (0,10) );
+		p1.add( new Point2d (-5,15) );
 		
-		boolean first = true;
+		p2.add( new Point2d (0,0) );
+		p2.add( new Point2d (0,10) );
+		
+		Prof[] ps = new Prof[] {p1, p2};
+		
+//		boolean first = true;
+		int count = 0;
 		
 		for (HalfFace f : mesh) {
 			for (HalfEdge e : f) {
 				SuperEdge se = (SuperEdge)e;
 				
-				se.prof = p;
+				se.prof = ps[count%ps.length];
+				
 				MiniFacade mini = newMini(imf, se.length());
 				
 				if ( true ) {
@@ -67,11 +78,11 @@ public class HouseTool extends Tool {
 
 					se.toEdit = mini;
 
-					if ( first )
+					if ( count == 0 )
 						se.addMini( mini );
 				}
-				first = false;
-				
+//				first = false;
+				count++;
 			}
 
 			SuperFace sf = (SuperFace)f;
@@ -89,12 +100,16 @@ public class HouseTool extends Tool {
 		mini = new MiniFacade();
 		mini.width = length;
 		mini.height = 20;
+		
 		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
-		mini.color = new double[] {0.8,0.8,0.3,1};
+		mini.featureGen = new CGAMini( mini );
+		
+		mini.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
 		mini.imageFeatures = imf;
 		mini.texture = null;//"tex.jpg";
 //		mini.normal = "normal.jpg";
 //		mini.spec = "spec.jpg";
+		
 		return mini;
 	}
 	

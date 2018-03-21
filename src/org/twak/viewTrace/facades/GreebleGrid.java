@@ -21,6 +21,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
+import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Filez;
 import org.twak.utils.Pair;
 import org.twak.utils.geom.DRectangle;
@@ -93,7 +94,7 @@ public class GreebleGrid {
 					mat.setTexture( "NormalMap", n );
 				}
 				
-//			mat.setColor( "Diffuse", ColorRGBA.White );
+			mat.setColor( "Ambient", ColorRGBA.Gray );
 				
 				if (new File( Tweed.DATA +"/" +specular ).exists()) {
 					Texture s = tweed.getAssetManager().loadTexture( specular );
@@ -105,7 +106,6 @@ public class GreebleGrid {
 				mat.setColor( "Specular", ColorRGBA.White );
 //			else
 //				mat.setColor( "Specular", ColorRGBA.Red );
-				
 			}
 			else
 			{
@@ -113,11 +113,7 @@ public class GreebleGrid {
 				mat.setColor( "Diffuse", ColorRGBA.Red );
 				mat.setBoolean( "UseMaterialColors", true );
 			}
-			
 //			mat.setColor( "Ambient", ColorRGBA.White );
-			
-			
-			
 
 			geom.setMaterial( mat );
 			geom.updateGeometricState();
@@ -576,48 +572,48 @@ public class GreebleGrid {
 		} );
 	}
 
-	protected void textureGrid( DRectangle all, Matrix4d to3d, MiniFacade mf ) {
+	protected void textureGrid( DRectangle allGeom, DRectangle allUV, Matrix4d to3d, MiniFacade mf ) {
 
 		if ( mf != null && mf.texture != null ) {
 			
-			Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
+			Grid g = new Grid( .10, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 			MatMeshBuilder mmb = mbs.get( "texture_"+mf.texture , mf.texture );
 
 			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
-				if ( all.contains( w ) )
+				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, all.normalize( rect ), to3d, mmb, 0.2f );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
 						}
 					} );
 			}
 			
 			for ( FRect w : mf.featureGen.get( Feature.DOOR ) ) {
 				
-				if ( all.contains( w ) )
+				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, all.normalize( rect ), to3d, mmb, 0.5f );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
 						}
 					} );
 			}
 			
 			for ( FRect w : mf.featureGen.getRects( Feature.MOULDING, Feature.CORNICE, Feature.SILL ) ) {
 				
-				if ( all.contains( w ) )
+				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, all.normalize( rect ), to3d, mmb, -0.2f );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.2f );
 						}
 					} );
 			}
 			
 			for ( DRectangle b : mf.featureGen.get( Feature.BALCONY ) ) {
-				if ( all.contains( b ) )
+				if ( allGeom.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
@@ -634,7 +630,7 @@ public class GreebleGrid {
 			g.instance( new Griddable() {
 				@Override
 				public void instance( DRectangle rect ) {
-					mmb.add( rect, all.normalize(rect), to3d );
+					mmb.add( rect, allUV.normalize(rect), to3d );
 				}
 			} );
 		}

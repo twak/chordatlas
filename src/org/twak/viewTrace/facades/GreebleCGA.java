@@ -8,6 +8,7 @@ import javax.vecmath.Point2d;
 
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Cache;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;

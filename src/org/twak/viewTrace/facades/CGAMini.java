@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 
@@ -21,7 +22,11 @@ public class CGAMini extends FeatureGenerator {
 
 	public CGAMini( MiniFacade mf) {
 		super(mf);
-		update();
+	}
+	
+	@Override
+	public FeatureGenerator copy( MiniFacade n ) {
+		return new CGAMini( n );
 	}
 
 	private static List<Double> split3 (RectDir r, double first, double last) {
@@ -159,7 +164,9 @@ public class CGAMini extends FeatureGenerator {
 	
 	public void update () {
 
-		DRectangle all = mf.getAsRect();
+		DRectangle all = mf.postState != null ? mf.postState.innerFacadeRect : mf.getAsRect();
+		
+		
 		
 		List<DRectangle> occlusions = Collections.EMPTY_LIST;
 		
@@ -167,6 +174,8 @@ public class CGAMini extends FeatureGenerator {
 
 		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
 
+		Random randy = new Random( (long) ( all.height * 1000 + all.width * 10000 ) );
+		
 		clear();
 		
 		mf.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ); 
@@ -226,7 +235,7 @@ public class CGAMini extends FeatureGenerator {
 					} else {
 
 						windowStrip( cen, 
-								f > 0 && f < floors.size() - 1 &&  Math.random() < 0.5, occlusions );
+								f > 0 && f < floors.size() - 1 &&  randy.nextBoolean(), occlusions );
 						
 						if (f == 1 )
 							add( Feature.MOULDING, new DRectangle (floor.x + 0.1, floor.y,  floor.width - 0.2, 0.5 ) );

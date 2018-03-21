@@ -30,7 +30,7 @@ import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.tweed.tools.HandleTool;
+import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
@@ -98,8 +98,8 @@ public class Tweed extends SimpleApplication {
 
 	Tool[] tools = new Tool[] {  
 			new SelectTool(this), 
-			new HouseTool(this) 
-//			new HandleTool(this), 
+			new HouseTool(this),
+			new MoveTool(this), 
 //			new AlignTool(this), 
 //			new FacadeTool(this),
 //			new PlaneTool(this) 

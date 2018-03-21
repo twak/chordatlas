@@ -1,12 +1,16 @@
-package org.twak.viewTrace.facades;
+package org.twak.tweed.gen.skel;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.twak.camp.Tag;
+import org.twak.siteplan.tags.PlanTag;
 import org.twak.utils.Line;
+import org.twak.viewTrace.facades.GreebleSkel;
+import org.twak.viewTrace.facades.LineHeight;
+import org.twak.viewTrace.facades.MiniFacade;
 
-public class WallTag extends Tag{
+public class WallTag extends PlanTag{
 	
 	public Line planLine;
 	public List<LineHeight> occlusions;
@@ -23,6 +27,11 @@ public class WallTag extends Tag{
 	public double noWindowsBelow = 0;
 	public MiniFacade miniFacade;
 
+	public WallTag() {
+		super("wall");
+	}
+	
+	
 	
 	public WallTag(Line planLine, List<LineHeight> occlusions, MiniFacade miniFacade) {
 		super( "wall" );
