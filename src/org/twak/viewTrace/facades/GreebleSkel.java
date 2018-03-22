@@ -1,6 +1,7 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.swing.SwingUtilities;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Edge;
@@ -84,6 +86,7 @@ public class GreebleSkel {
 		
 		isTextured = false;
 		
+		// find some sensible defaults to propogate
 		for ( Face f : output.faces.values() )  {
 			
 			double area = Loopz.area3 ( f.getLoopL() );
@@ -101,7 +104,7 @@ public class GreebleSkel {
 				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 				
-//				wt.miniFacade.postState = null;
+				wt.miniFacade.postState = null;
 				
 				if ( area > bestWallArea && wt != null ) {
 
@@ -112,15 +115,50 @@ public class GreebleSkel {
 			}
 		}
 		
+		List<List<Face>> chains = Campz.findChains( output );
+		
+//		chains = Collections.singletonList( chains.get( 3 ) );
+		
+		// give each minifacade a chance to update its features based on the skeleton result
+		for (List<Face> chain : chains) {
+			Set<MiniFacade> opt = chain.stream().flatMap( f -> f.profile.stream() ).filter( tag -> tag instanceof WallTag ).map(tag -> ((WallTag)tag).miniFacade ).collect( Collectors.toSet() );
+			
+			for (MiniFacade mf : opt) {
+				
+				mf.postState = new PostProcessState();
+				
+				Edge e = chain.get( 0 ).edge;
+				Line megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y );
+				double mfl = megafacade.length();
+				Vector2d dir =megafacade.dir();
+				LinearForm3D lf = new LinearForm3D( new Vector3d(-dir.y, dir.x, 0), e.start );
+				
+				for (Face f : chain) {
+					for (Loop<Point2d> face : f.points.new Map<Point2d>() {
+						@Override
+							public Point2d map( Loopable<Point3d> input ) {
+								Point3d i = input.get();
+								Point3d inSpace = lf.project( i );
+								Point2d onGround = new Point2d(inSpace.x, inSpace.y);
+								return new Point2d (megafacade.findPPram( onGround ) * mfl, inSpace.z); 
+							} }
+						.run() ) {
+							mf.postState.skelFaces.add( face );
+						}
+				}
+				
+				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
+				mf.featureGen.update();
+			}
+		}
+		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		edges( output, roofColor );
 		
-		for (List<Face> chain : Campz.findChains( output )) {
-			
-//			for ( Face f : output.faces.values() )
-//				mbs.get(roofColor).add3d( Loopz.insertInnerEdges( f.getLoopL() ), zToYup );
+		// generate geometry for each face
+		for (List<Face> chain : chains) {
 			
 			Optional<Tag> opt = chain.stream().flatMap( f -> f.profile.stream() ).filter( tag -> tag instanceof WallTag ).findAny();
 			
@@ -130,22 +168,30 @@ public class GreebleSkel {
 			MiniFacade mf2 = null;
 			Set<QuadF> features = new HashSet<>();
 			
-			Line megafacade = null;
+			Line megafacade = new Line();
 			if (opt.isPresent() && (wt = (WallTag) opt.get() ).miniFacade != null ) {
 				
-				mf2 = new MiniFacade ( wt.miniFacade );
-				mf2.postState = wt.miniFacade.postState = new PostProcessState();
+				mf2 = wt.miniFacade;
 				
 				{
 					Edge e = chain.get( 0 ).edge;
-					megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
+					megafacade.set( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
 				}
 				
 				if (TweedSettings.settings.snapFacadeWidth) {
+					
+					mf2 = new MiniFacade ( wt.miniFacade );
+					mf2.postState = wt.miniFacade.postState;
+					
 					// move/scale mf horizontally from mean-image-location to mesh-facade-location
 					double[] meshSE = findSE ( wt.miniFacade, megafacade, chain );
 					mf2.scaleX( meshSE[0], meshSE[1] );
 				}
+				
+				mf2.featureGen.values().stream()
+					.flatMap ( k -> k.stream() )
+					.map     ( r -> new QuadF (r, megafacade) )
+					.forEach ( q -> features.add(q) );
 			}
 
 			for ( Face f : chain ) {
@@ -158,10 +204,7 @@ public class GreebleSkel {
 							(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 				}
 			
-//			for ( String mName : mbs.cache.keySet() )
-//				for (float[] mCol : mbs.cache.get( mName ).keySet() )		
-//					node.attachChild( mb2Geom( output, chain, mName, mCol ) );
-			
+			// output per-material objects
 			greebleGrid.attachAll(node, chain, output, new ClickMe() {
 				@Override
 				public void clicked( Object data ) {
@@ -421,13 +464,8 @@ public class GreebleSkel {
 		
 		MiniFacade toRecess = null;
 		
-		boolean isBottom = bottomS.z < 0.1 && mf != null && mf.postState.skelFaces.isEmpty();
 		
 		if (mf != null) {
-			
-			if (isBottom)
-				mf.postState.skelFaces.add ( flat );
-			
 			toRecess = new MiniFacade(mf);
 			toRecess.featureGen = new FeatureGenerator( toRecess );
 		}
@@ -443,17 +481,12 @@ public class GreebleSkel {
 
 			if (mf != null) {
 			if ( sides != null )
-				facadeRect = mf.postState.innerFacadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
+				facadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
 
-			if (isBottom) {
-				mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
-				mf.featureGen.update(); // computes window positions
-			}
-			
-			mf.featureGen.values().stream()
-				.flatMap ( k -> k.stream() )
-				.map     ( r -> new QuadF (r, megafacade) )
-				.forEach ( q -> features.add(q) );
+//			if (isBottom) {
+//				mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
+//				mf.featureGen.update(); // computes window positions
+//			}
 			}
 		}
 
@@ -540,12 +573,18 @@ public class GreebleSkel {
 					toRecess,
 					m,
 					wallTag );
-			else
+			else {
+				
+				DRectangle uvs = new DRectangle(mf.postState.outerFacadeRect);
+				uvs.y -= bottomS.z;
+				
 				greebleGrid.textureGrid (
 					floorRect,
-					mf.postState.outerFacadeRect,
+					uvs,
 					to3d,
-					mf );
+					toRecess );
+			}
+				
 		
 		}
 	}

@@ -135,8 +135,9 @@ public class GreebleHelper {
 	}
 
 
-	public static DRectangle findRect( Loop<? extends Point2d> rect ) {
-		double[] bounds = Loopz.minMax2d( rect );
+	public static DRectangle findRect( Loop<? extends Point2d> skelFaces ) {
+		
+		double[] bounds = Loopz.minMax2d( skelFaces );
 		
 		DRectangle all = new DRectangle(
 				bounds[0], 
@@ -145,6 +146,20 @@ public class GreebleHelper {
 				bounds[3] - bounds[2] );
 		
 		return all;
+		
+	}
+	public static DRectangle findRect( List<Loop<? extends Point2d>> skelFaces ) {
+		
+		DRectangle bounds = null;
+		
+		for (Loop<? extends Point2d> loop : skelFaces) {
+			for (Loopable<? extends Point2d> pt : loop.loopableIterator())
+				if (bounds == null)
+					bounds = new DRectangle(pt.get().x, pt.get().y, 0, 0);
+				else
+					bounds.envelop( pt.get() );
+		}
+		return bounds;
 	}
 	
 	public static LoopL<Point2d> findRectagle( Loop<LPoint2d> flat, Point2d s, Point2d e ) {

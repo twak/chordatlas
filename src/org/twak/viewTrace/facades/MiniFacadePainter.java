@@ -123,12 +123,6 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 				
 		}
 		
-		g.setColor( Color.gray );
-		
-		if ( mf.postState != null )
-			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.skelFaces ) )
-				paintPolygon( l, g, ma );
-		
 		
 		g.setColor( Color.black );
 		g.drawLine( ma.toX( mf.left ), ma.toY( 0 ), ma.toX( mf.left + mf.width ), ma.toY( 0 ) );
@@ -142,6 +136,13 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		g.setStroke( new BasicStroke( 1 ) );
 		g.drawLine( ma.toX( mf.left ), ma.toY( -mf.height ), ma.toX( mf.left + mf.width ), ma.toY( -mf.height ) );
 		g.drawLine( ma.toX( mf.left ), ma.toY( -mf.groundFloorHeight ), ma.toX( mf.left + mf.width ), ma.toY( -mf.groundFloorHeight ) );
+
+		g.setColor( Color.gray );
+		
+		if ( mf.postState != null )
+			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.skelFaces ) )
+				paintPolygon( l, g, ma );
+		
 	}
 	
 	private static void paintPolygon (Loop<? extends Point2d> ll, Graphics2D g, PanMouseAdaptor ma) {
@@ -152,6 +153,8 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 			p.addPoint(ma.toX(pt.x), ma.toY(-pt.y));
 
 		g.draw(p);
+//		g.setColor( new Color ( 50,50,50,50 ) );
+//		g.fill( p );
 	}
 
 	public void paintImage( Graphics2D g, PanMouseAdaptor ma, MiniFacade mf, double x1, double y1, double x2, double y2 ) {

@@ -17,7 +17,6 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
-import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
 
 public class MiniFacade {
@@ -79,6 +78,7 @@ public class MiniFacade {
 		this.scale = m.scale;
 		this.texture = m.texture;
 		this.featureGen = m.featureGen.copy(this);
+		this.postState = m.postState;
 		
 		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
 		

@@ -164,7 +164,10 @@ public class CGAMini extends FeatureGenerator {
 	
 	public void update () {
 
-		DRectangle all = mf.postState != null ? mf.postState.innerFacadeRect : mf.getAsRect();
+		DRectangle all = mf.getAsRect();
+		
+//		if  ( mf.postState != null && mf.postState.innerFacadeRect != null )
+//			all = mf.postState.innerFacadeRect;
 		
 		List<DRectangle> occlusions = Collections.EMPTY_LIST;
 		

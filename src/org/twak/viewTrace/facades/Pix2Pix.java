@@ -2,10 +2,10 @@ package org.twak.viewTrace.facades;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,9 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
@@ -66,11 +68,32 @@ public class Pix2Pix {
 //			get resultion right
 //			stretch and fill mf.skelFaces in dark blue
 			
+			DRectangle mini;
 			
-			g.setColor( new Color( 0, 48, 255 ) );
+			g.setColor( CMPLabel.Background.rgb );
 			g.fillRect( 256, 0, 256, 255 );
+			
+			g.setColor( CMPLabel.Facade.rgb );
+			if (toEdit.postState == null) {
+				g.fillRect( 256, 0, 256, 255 );
+				mini = toEdit.getAsRect();
+			}
+			else
+			{
+				mini = toEdit.postState.outerFacadeRect;
+					
+				Polygon p = new Polygon();
 
-			DRectangle mini = toEdit.postState == null ? toEdit.getAsRect() : toEdit.postState.outerFacadeRect;
+				for ( Loop<? extends Point2d> loop : toEdit.postState.skelFaces )
+					for ( Point2d pt : loop ) {
+						Point2d p2 = bounds.scale( mini.normalize( pt ) );
+						p.addPoint( (int) p2.x, (int) -p2.y+256 );
+					}
+				g.fill( p );
+				
+			}
+			
+
 
 			cmpRects( toEdit, g, bounds, mini, CMPLabel.Door.rgb, Feature.DOOR );
 			cmpRects( toEdit, g, bounds, mini, CMPLabel.Window.rgb, Feature.WINDOW );
@@ -145,15 +168,19 @@ public class Pix2Pix {
 								
 								Files.write(  new File(Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" )).toPath(), image );
 
+								BufferedImage labels = ImageIO.read( new File( f, "images/" + name + "_real_A.png" ) );
+								
 								NormSpecGen ns = new NormSpecGen(
-										ImageIO.read(new ByteArrayInputStream( image ) ),
-										ImageIO.read( new File( f, "images/" + name + "_real_A.png" ) )
-								);
+											ImageIO.read(new ByteArrayInputStream( image ) ),
+											labels 
+										);
 								
 								ImageIO.write ( ns.norm, 
 										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_norm.png" ) ) );
 								ImageIO.write ( ns.spec, 
 										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_spec.png" ) ) );
+//								ImageIO.write ( labels, 
+//										"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_labels.png" ) ) );
 								
 								e.getValue().texture = dest;
 
