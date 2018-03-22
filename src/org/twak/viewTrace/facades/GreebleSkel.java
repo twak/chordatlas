@@ -1,10 +1,11 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
@@ -60,7 +62,8 @@ public class GreebleSkel {
 	
 	boolean isTextured = false;
 	
-	public static float[] BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
+	public static float[] 
+			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
 			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	
 	public GreebleSkel( Tweed tweed ) {
@@ -86,6 +89,9 @@ public class GreebleSkel {
 		
 		isTextured = false;
 		
+		Map<Object, WallTag> occluderIDs = new HashMap<>();
+		MultiMap<Object, Face> possibleOCcluders = new MultiMap<>();
+		
 		// find some sensible defaults to propogate
 		for ( Face f : output.faces.values() )  {
 			
@@ -102,6 +108,9 @@ public class GreebleSkel {
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
 				
+//				occluderIDs.put( wt.occlusionID, wt );
+//				possibleOCcluders.putAll( wt.occlusionID, wt.occlusions, true );
+				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 				
 				wt.miniFacade.postState = null;
@@ -115,15 +124,21 @@ public class GreebleSkel {
 			}
 		}
 		
+		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
+		
 		List<List<Face>> chains = Campz.findChains( output );
 		
 //		chains = Collections.singletonList( chains.get( 3 ) );
 		
 		// give each minifacade a chance to update its features based on the skeleton result
 		for (List<Face> chain : chains) {
-			Set<MiniFacade> opt = chain.stream().flatMap( f -> f.profile.stream() ).filter( tag -> tag instanceof WallTag ).map(tag -> ((WallTag)tag).miniFacade ).collect( Collectors.toSet() );
 			
-			for (MiniFacade mf : opt) {
+			Set<WallTag> opt = chain.stream().flatMap( f -> f.profile.stream() )
+					.filter( tag -> tag instanceof WallTag ).map( t -> (WallTag)t ).collect( Collectors.toSet() );
+			
+			for (WallTag wt : opt) {
+				
+				MiniFacade mf = wt.miniFacade;
 				
 				mf.postState = new PostProcessState();
 				
@@ -133,19 +148,15 @@ public class GreebleSkel {
 				Vector2d dir =megafacade.dir();
 				LinearForm3D lf = new LinearForm3D( new Vector3d(-dir.y, dir.x, 0), e.start );
 				
-				for (Face f : chain) {
-					for (Loop<Point2d> face : f.points.new Map<Point2d>() {
-						@Override
-							public Point2d map( Loopable<Point3d> input ) {
-								Point3d i = input.get();
-								Point3d inSpace = lf.project( i );
-								Point2d onGround = new Point2d(inSpace.x, inSpace.y);
-								return new Point2d (megafacade.findPPram( onGround ) * mfl, inSpace.z); 
-							} }
-						.run() ) {
+				for (Face f : chain) 
+					if (GreebleHelper.getTag( f.profile, WallTag.class ) != null)
+						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
 							mf.postState.skelFaces.add( face );
-						}
-				}
+				
+//				for (Object key : possibleOCcluders.get( wt.occlusionID )) {
+//					WallTag other = occluderIDs.get( key );
+//					
+//				}
 				
 				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
 				mf.featureGen.update();
@@ -154,7 +165,7 @@ public class GreebleSkel {
 		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
-		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
+		
 		edges( output, roofColor );
 		
 		// generate geometry for each face
@@ -223,6 +234,18 @@ public class GreebleSkel {
 				}
 			});
 		}
+	}
+
+	private LoopL<Point2d> projectTo( Line megafacade, double mfl, LinearForm3D lf, Face f ) {
+		return f.points.new Map<Point2d>() {
+			@Override
+				public Point2d map( Loopable<Point3d> input ) {
+					Point3d i = input.get();
+					Point3d inSpace = lf.project( i );
+					Point2d onGround = new Point2d(inSpace.x, inSpace.y);
+					return new Point2d (megafacade.findPPram( onGround ) * mfl, inSpace.z); 
+				} }
+			.run();
 	}
 
 	

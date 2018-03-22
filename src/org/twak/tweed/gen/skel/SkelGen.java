@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -506,7 +507,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 			ensureMF( sf, se );
 		} 
 
-		Tag wall = new WallTag( se.profLine, se.occlusions, se.toEdit ), roof = new RoofTag( sf.roofColor );
+		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
+			roof = new RoofTag( sf.roofColor );
 
 		boolean first = true;
 		for ( Loop<Bar> lb : profile.points ) {
@@ -518,7 +520,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					b.tags.add( roof );
 				else {
 					if ( first )
-						b.tags.add( new WallTag( se.profLine, se.occlusions, se.toEdit, true ) );
+						b.tags.add( new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit, true ) );
 					else
 						b.tags.add( wall );
 				}

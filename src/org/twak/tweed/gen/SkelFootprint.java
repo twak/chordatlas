@@ -63,6 +63,7 @@ import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.ColorRGBAPainter;
@@ -199,7 +200,7 @@ public class SkelFootprint {
 		
 		updateHeights           ( SS.mesh );
 		
-		if (FALSE) // not needed if we're not doing fully procedural windows
+		if (TRUE) // not needed if we're not doing fully procedural windows
 			findOcclusions ( SS.mesh );
 
 	}
@@ -1057,11 +1058,11 @@ public class SkelFootprint {
 //									!el1.isOnLeft(  e2l.fromPPram( 0.5 ) ) 
 									) {
 								
-								( (SuperEdge) e1 ).occlusions.add(
-										new LineHeight( 
-												el1.project( e2l.start, true ), 
-												el1.project( e2l.end, true ), 
-												0, ( (SuperFace) hf2 ).height ) );
+								( (SuperEdge) e1 ).occlusions.add( e2 );
+//										new LineHeight( 
+//												el1.project( e2l.start, true ), 
+//												el1.project( e2l.end, true ), 
+//												0, ( (SuperFace) hf2 ).height ) );
 								count++;
 							}
 						}

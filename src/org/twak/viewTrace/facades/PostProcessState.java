@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import org.hsqldb.lib.HashSet;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;

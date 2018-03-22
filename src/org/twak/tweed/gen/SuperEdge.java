@@ -14,7 +14,7 @@ import org.twak.viewTrace.facades.MiniFacade;
 
 public class SuperEdge extends HalfEdge {
 
-	public List<LineHeight> occlusions = new ArrayList<>();
+	public List<Object> occlusions = new ArrayList<>();
 	public SuperLine profLine;
 	public Prof prof;
 	public int profI;

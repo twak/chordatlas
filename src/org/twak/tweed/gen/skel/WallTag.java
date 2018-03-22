@@ -1,19 +1,17 @@
 package org.twak.tweed.gen.skel;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.twak.camp.Tag;
 import org.twak.siteplan.tags.PlanTag;
 import org.twak.utils.Line;
-import org.twak.viewTrace.facades.GreebleSkel;
-import org.twak.viewTrace.facades.LineHeight;
 import org.twak.viewTrace.facades.MiniFacade;
 
 public class WallTag extends PlanTag{
 	
 	public Line planLine;
-	public List<LineHeight> occlusions;
 	public float[] color = null;//new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	public boolean isGroundFloor, makeDoor = Math.random() < 0.5;
 	public double windowDepth = 0.5;//Math.random() * 0.3 + 0.4;
@@ -27,16 +25,21 @@ public class WallTag extends PlanTag{
 	public double noWindowsBelow = 0;
 	public MiniFacade miniFacade;
 
+	public Object occlusionID; // markers for which other tags may occlude
+	public Set<Object> occlusions = new HashSet<>();
+	
 	public WallTag() {
 		super("wall");
 	}
 	
 	
 	
-	public WallTag(Line planLine, List<LineHeight> occlusions, MiniFacade miniFacade) {
+	public WallTag(Line planLine, Object occlusionID, Set<Object> occlusions, MiniFacade miniFacade) {
 		super( "wall" );
 		
 		this.occlusions = occlusions;
+		this.occlusionID = occlusionID;
+		
 		this.planLine = planLine;
 		this.miniFacade = miniFacade;
 
@@ -94,12 +97,12 @@ public class WallTag extends PlanTag{
 		}
 	}
 
-	public WallTag( Line planline, List<LineHeight> occlusions, MiniFacade miniFacade, boolean isGroundFloor ) {
-		this( planline, occlusions, miniFacade );
+	public WallTag( Line planline, Object occlusionID, Set<Object> occlusions, MiniFacade miniFacade, boolean isGroundFloor ) {
+		this( planline, occlusionID, occlusions, miniFacade );
 		this.isGroundFloor = isGroundFloor;
 	}
 
 	public WallTag( WallTag wtf, MiniFacade scaledMF ) {
-		this (wtf.planLine, wtf.occlusions, scaledMF, wtf.isGroundFloor);
+		this (wtf.planLine, wtf.occlusionID, wtf.occlusions, scaledMF, wtf.isGroundFloor);
 	}
 }

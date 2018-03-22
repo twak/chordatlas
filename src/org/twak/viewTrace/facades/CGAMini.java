@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
@@ -166,8 +167,16 @@ public class CGAMini extends FeatureGenerator {
 
 		DRectangle all = mf.getAsRect();
 		
-//		if  ( mf.postState != null && mf.postState.innerFacadeRect != null )
-//			all = mf.postState.innerFacadeRect;
+		
+//		if  ( mf.postState != null ) {
+//			
+//			all = new DRectangle ( all );
+//			
+//			OptionalDouble od = mf.postState.skelFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
+//			
+//			if (od.isPresent())
+//				all.height = od.getAsDouble();
+//		}
 		
 		List<DRectangle> occlusions = Collections.EMPTY_LIST;
 		
