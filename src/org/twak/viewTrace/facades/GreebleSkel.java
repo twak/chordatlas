@@ -38,7 +38,6 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
-import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
@@ -89,8 +88,7 @@ public class GreebleSkel {
 		
 		isTextured = false;
 		
-		Map<Object, WallTag> occluderIDs = new HashMap<>();
-		MultiMap<Object, Face> possibleOCcluders = new MultiMap<>();
+		Map<Object, Face> occluderIDs = new HashMap<>();
 		
 		// find some sensible defaults to propogate
 		for ( Face f : output.faces.values() )  {
@@ -108,8 +106,9 @@ public class GreebleSkel {
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
 				
-//				occluderIDs.put( wt.occlusionID, wt );
-//				possibleOCcluders.putAll( wt.occlusionID, wt.occlusions, true );
+				if (f.parent == null /*is bottom */)
+					for (Object o : wt.occlusions)
+						occluderIDs.put( wt.occlusionID, f );
 				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 				
@@ -127,8 +126,10 @@ public class GreebleSkel {
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		
 		List<List<Face>> chains = Campz.findChains( output );
+		// chains = Collections.singletonList( chains.get( 3 ) );
+
 		
-//		chains = Collections.singletonList( chains.get( 3 ) );
+		int count  = 0;
 		
 		// give each minifacade a chance to update its features based on the skeleton result
 		for (List<Face> chain : chains) {
@@ -153,15 +154,20 @@ public class GreebleSkel {
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
 							mf.postState.skelFaces.add( face );
 				
-//				for (Object key : possibleOCcluders.get( wt.occlusionID )) {
-//					WallTag other = occluderIDs.get( key );
-//					
-//				}
+				for (Object o : wt.occlusions )  {
+					Face f = occluderIDs.get( o );
+					if (f != null) {
+						count ++;
+					mf.postState.occluders.add (projectTo( megafacade, mfl, lf, f ));
+					}
+				}
 				
 				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
 				mf.featureGen.update();
 			}
 		}
+		
+		System.out.println( ">>>> " + count );
 		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
@@ -237,6 +243,10 @@ public class GreebleSkel {
 	}
 
 	private LoopL<Point2d> projectTo( Line megafacade, double mfl, LinearForm3D lf, Face f ) {
+		
+		if (f == null)
+			return new LoopL<>();
+		
 		return f.points.new Map<Point2d>() {
 			@Override
 				public Point2d map( Loopable<Point3d> input ) {
@@ -563,7 +573,8 @@ public class GreebleSkel {
 					FRect bounds = new FRect( n.original );
 					n.setBounds( to2d, bounds );
 
-					if ( floorRect.contains( bounds ) ) {
+					if ( floorRect.contains( bounds ) ) 
+					{
 						toRecess.featureGen.put( n.original.f, bounds );
 						quit.remove();
 					}

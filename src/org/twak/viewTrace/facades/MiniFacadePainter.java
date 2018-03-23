@@ -21,6 +21,7 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.ui.ColourPicker;
@@ -137,11 +138,18 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		g.drawLine( ma.toX( mf.left ), ma.toY( -mf.height ), ma.toX( mf.left + mf.width ), ma.toY( -mf.height ) );
 		g.drawLine( ma.toX( mf.left ), ma.toY( -mf.groundFloorHeight ), ma.toX( mf.left + mf.width ), ma.toY( -mf.groundFloorHeight ) );
 
-		g.setColor( Color.gray );
 		
-		if ( mf.postState != null )
+		g.setStroke( new BasicStroke( 3 ) );
+		if ( mf.postState != null ) {
+			g.setColor( Color.gray );
 			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.skelFaces ) )
 				paintPolygon( l, g, ma );
+			
+			g.setColor( Color.red );
+			for ( LoopL<Point2d> ll : new ArrayList<LoopL<Point2d>>( mf.postState.occluders ) )
+				for (Loop<Point2d> l : ll)
+					paintPolygon( l, g, ma );
+		}
 		
 	}
 	

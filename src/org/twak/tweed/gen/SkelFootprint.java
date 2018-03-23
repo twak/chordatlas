@@ -115,7 +115,7 @@ public class SkelFootprint {
 		this(null); // headless
 	}
 
-	public HalfMesh2 go(List<Line> footprint, SkelGen skelGen, ProgressMonitor m ) {
+	public HalfMesh2 buildAndSolve(List<Line> footprint, SkelGen skelGen, ProgressMonitor m ) {
 		
 		this.skelGen = skelGen;
 		
@@ -156,8 +156,8 @@ public class SkelFootprint {
 		if ( TRUE )
 			postProcesss(SS);
 		
-		dbgCountProfileEdges( SS );
-		dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
+//		dbgCountProfileEdges( SS );
+//		dbgShowProfiles( SS.mesh, SS.globalProfs, SS.profFit, "edge fit" );
 		
 		if (FALSE) {
 			PaintThing.debug.clear();
@@ -1041,6 +1041,7 @@ public class SkelFootprint {
 	private static void findOcclusions( HalfMesh2 mesh ) {
 
 		int count = 0;
+		Set<HalfFace> fc = new HashSet<>();
 		
 		for ( HalfFace hf : mesh.faces )
 			for ( HalfEdge e1 : hf.edges() ) {
@@ -1064,11 +1065,12 @@ public class SkelFootprint {
 //												el1.project( e2l.end, true ), 
 //												0, ( (SuperFace) hf2 ).height ) );
 								count++;
+								fc.add(hf);
 							}
 						}
 				}
 			}
-		System.out.println("found "+count+" occluding surfaces");
+		System.out.println("found "+count+" occluding surfaces. " + fc.size() + " buildings with occlusions");
 	}
 
 	

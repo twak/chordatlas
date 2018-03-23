@@ -132,7 +132,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	private void optimize( ProgressMonitor m ) {
-		toRender = skelFootprint.go( footprint, this, m );
+		toRender = skelFootprint.buildAndSolve( footprint, this, m );
 	}
 
 	@Override
@@ -241,7 +241,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				ses.put( se.start, se );
 			}
 
-			lp = Loopz.mergeAdjacentEdges2( lp, 0.001 );
+//			lp = Loopz.mergeAdjacentEdges2( lp, 0.001 );
 
 			//			if ( Loopz.area( lpd ) < 5 )
 			//				return null;

@@ -219,8 +219,10 @@ public class CGAMini extends FeatureGenerator {
 							
 							List<DRectangle> doorHeight = groundPanel.get( 0 ).splitY( r -> split1( r, 2.2 ) );
 
-							if (visible(  doorHeight.get( 0 ), occlusions ))
+							if (visible(  doorHeight.get( 0 ), occlusions )) {
+								doorHeight.get( 0 ).y += 0.01; // otherwise it gets culled out
 								add( Feature.DOOR, doorHeight.get( 0 ) );
+							}
 
 							if ( groundPanel.size() > 1 ) {
 

@@ -121,8 +121,6 @@ public class TweedSettings {
 
 	public static void save(boolean backup) {
 		
-			
-		
 		if (folder != null) {
 			
 			settings.genList = TweedFrame.instance.genList.stream().filter( g -> g instanceof ICanSave ).collect( Collectors.toList() );
@@ -160,20 +158,19 @@ public class TweedSettings {
 		if (folder == null)
 			return;
 		
-		if (recentFiles.f.isEmpty() || !recentFiles.f.contains (folder) ) {
+		recentFiles.f.remove( folder );
+		
+//		if (recentFiles.f.isEmpty() || !recentFiles.f.contains (folder) ) {
 			recentFiles.f.add( 0, folder );
 			
 			while (recentFiles.f.size() > 20)
 				recentFiles.f.remove( recentFiles.f.size() - 1 );
-			
-			
-			
 			try {
 				new XStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 			}
-		}
+//		}
 	}
 
 	public static void loadDefault() {

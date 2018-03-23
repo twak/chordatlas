@@ -74,8 +74,8 @@ public class Tube {
 			out.add (f2, f1, b1, b2);
 		}
 		
-//		cap( out, after ,  along, profilePts, true  );
-//		cap( out, before, nAlong, profilePts, false );
+		cap( out, after ,  along, profilePts, true  );
+		cap( out, before, nAlong, profilePts, false );
 	}
 
 	private static double angle( Collection<LinearForm3D> lfs, Line3d line ) {
