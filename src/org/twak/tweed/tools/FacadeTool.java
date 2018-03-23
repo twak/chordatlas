@@ -212,8 +212,8 @@ public class FacadeTool extends SelectTool {
 							if (imageFilename == null)
 								imageFilename = new File (pano.name).getName() + "_" + tpm.megafacade.start + "_" + tpm.megafacade.end;
 							
-							BufferedImage bi = pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
-							if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK)
+							BufferedImage bi = pg.render( null, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
+							if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK|| GISGen.mode == Mode.RENDER_ALL_BLOCKS )
 								images.add ( bi );
 
 							try {
@@ -241,7 +241,7 @@ public class FacadeTool extends SelectTool {
 						}
 					}
 					
-					if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK)
+					if (GISGen.mode == Mode.RENDER_SELECTED_BLOCK || GISGen.mode == Mode.RENDER_ALL_BLOCKS )
 						Imagez.writeSummary (new File (megaFolder, "summary.png"), images);
 				}
 			}

@@ -101,7 +101,7 @@ public class Tweed extends SimpleApplication {
 			new HouseTool(this),
 			new MoveTool(this), 
 //			new AlignTool(this), 
-//			new FacadeTool(this),
+			new FacadeTool(this),
 //			new PlaneTool(this) 
 };
 	
