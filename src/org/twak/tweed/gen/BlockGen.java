@@ -1,6 +1,7 @@
 package org.twak.tweed.gen;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -12,12 +13,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -27,9 +31,11 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.Streamz;
+import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
 import org.twak.viewTrace.FacadeFinder;
@@ -184,8 +190,25 @@ public class BlockGen extends ObjGen {
 			}
 		} );
 		
-		JTextArea name = new JTextArea( nameCoords() );
+		StringBuilder sb = new StringBuilder();
+		sb.append( nameCoords() );
+		Optional<Gen> hg = tweed.frame.gens( LotInfoGen.class ).stream().findAny();
+		
+		if ( hg.isPresent() )
+			for ( Loop<Point3d> loop : polies )
+				try {
+					sb.append( "\n" );
+					SuperLoop<Point3d> sl = (SuperLoop) loop;
+					for ( Map.Entry<String, Object> e : ( (LotInfoGen) hg.get() ).getProperties( sl ).entrySet() )
+						sb.append( e.getKey() + " : " + e.getValue() + " " );
+				}
+				catch (Throwable th) {th.printStackTrace(  ); }
+		
+		
+		JTextArea name = new JTextArea( sb.toString() );
 		name.setEditable( false );
+		JScrollPane nameScroller = new JScrollPane( name );
+		nameScroller.setPreferredSize( new Dimension( 100, 150 ) );
 		
 		panel.add(profiles, 0 );
 		panel.add(panos, 1 );
@@ -196,8 +219,8 @@ public class BlockGen extends ObjGen {
 //		panel.add( tooD );
 		if (getSolutionFile().exists())
 			panel.add( loadSln );
-		panel.add(new JLabel("name:") );
-		panel.add( name );
+		panel.add(new JLabel("metadata:") );
+		panel.add( nameScroller );
 		
 		return panel;
 	}

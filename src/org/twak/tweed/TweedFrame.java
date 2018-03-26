@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -39,13 +38,12 @@ import javax.swing.UIManager;
 import javax.vecmath.Vector3d;
 
 import org.twak.readTrace.MiniTransform;
+import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
-import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -429,13 +427,12 @@ public class TweedFrame {
 				}
 			} );
 
-			sp.add( "+ panos (jpg)", new Runnable() {
+			sp.add( "+ metadata", new Runnable() {
 				@Override
 				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), null ) {
-						public void heresTheFile( File oneOfMany ) throws Throwable {
-							//						removeGens( PanoGen.class );
-							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
+					new SimpleFileChooser( frame, false, "Select one of many csv files", new File( Tweed.JME ), "csv" ) {
+						public void heresTheFile( File obj ) throws Throwable {
+							addGen( new LotInfoGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
 						};
 					};
 				}

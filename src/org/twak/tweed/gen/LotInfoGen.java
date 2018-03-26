@@ -10,14 +10,18 @@ import java.util.stream.Stream;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.vecmath.Point3d;
 
 import org.twak.tweed.Tweed;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.SuperLoop;
 
-public class HeightGen extends Gen {
+public class LotInfoGen extends Gen implements ICanSave {
 
+	public transient Map<String, OS> heights = new HashMap();
 
-	public Map<String, OS> heights = new HashMap();
-
+	File location;
+	
 	public static class OS {
 		double abshmin, absh2, abshmax, relh2, relhmax;
 
@@ -28,17 +32,31 @@ public class HeightGen extends Gen {
 			this.relh2 = relh2;
 			this.relhmax = relhmax;
 		}
-
 	}
 
-	public HeightGen( File location, Tweed tweed ) {
-		super( location.getName(), tweed );
+	public LotInfoGen() {}
+	
+	public LotInfoGen( File csvfile, Tweed tweed ) {
+		super( csvfile.getName(), tweed );
+		this.location = csvfile.getParentFile();
+		
+		refresh();
+	}
+	
+	@Override
+	public void onLoad( Tweed tweed ) {
+		super.onLoad( tweed );
+		refresh();
+	}
+	
+	public void refresh() {
 
 		final int[] count = new int[1];
 
-		for ( File csv : new File( "/home/twak/data/Download_around_ucl_562795" ).listFiles() ) {
+		
+		for ( File csv : Tweed.toWorkspace( location ).listFiles() ) {
 			if ( csv.getName().endsWith( ".csv" ) ) {
-				System.out.println( "loading to redis " + csv.getName() );
+				System.out.println( "loading to metadata from " + csv.getName() );
 
 				try ( Stream<String> stream = Files.lines( csv.toPath() ) ) {
 
@@ -46,10 +64,10 @@ public class HeightGen extends Gen {
 						@Override
 						public void accept( String line ) {
 							String[] vals = line.split( "," );
-							String name = vals[ 1 ];
+							String name = vals[ 0 ];
 
 							try {
-							heights.put( name, new OS( Double.parseDouble( vals[ 5 ] ), Double.parseDouble( vals[ 6 ] ), Double.parseDouble( vals[ 7 ] ), Double.parseDouble( vals[ 8 ] ), Double.parseDouble( vals[ 9 ] ) ) );
+								heights.put( name, new OS( Double.parseDouble( vals[ 5 ] ), Double.parseDouble( vals[ 6 ] ), Double.parseDouble( vals[ 7 ] ), Double.parseDouble( vals[ 8 ] ), Double.parseDouble( vals[ 9 ] ) ) );
 							}
 							catch (NumberFormatException e) {}
 
@@ -63,18 +81,22 @@ public class HeightGen extends Gen {
 
 			}
 		}
-		System.out.println( count[ 0 ] + " records loaded" );
+		System.out.println( count[ 0 ] + " records loaded." );
 	}
+	
 
 	@Override
 	public JComponent getUI() {
-		return new JLabel("no 3d");
+		return new JLabel("serving data for " + heights.size()+" blocks");
 	}
 
-	public Map getProperties( String name ) {
+	public Map<String,Object> getProperties( Loop<Point3d> l ) {
+		
+		SuperLoop<Point3d> sl = (SuperLoop)l;
+		
 		Map<String, Object> out = new HashMap();
 		
-		OS os = heights.get(name);
+		OS os = heights.get(sl.properties.get( "name" ));
 		
 		if (os != null) {
 			out.put( "abshmin", os.abshmin );

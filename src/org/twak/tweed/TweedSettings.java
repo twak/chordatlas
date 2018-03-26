@@ -132,7 +132,6 @@ public class TweedSettings {
 			
 			try {
 				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
-				TweedSettings.settings.badGeomAngle = -0.1;
 				new XStream(new PureJavaReflectionProvider()).toXML( TweedSettings.settings, fos );
 			} catch ( Throwable e ) {
 				e.printStackTrace();

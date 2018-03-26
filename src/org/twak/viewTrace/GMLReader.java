@@ -81,8 +81,9 @@ public abstract class GMLReader {
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 			
-			if (localName.equals("regent") ) 
-				featureName = attributes.getValue("fid");
+			String name = attributes.getValue( "fid" );
+			if ( name != null )
+				featureName = name;
 			
 			super.startElement(uri, localName, qName, attributes);
 		}

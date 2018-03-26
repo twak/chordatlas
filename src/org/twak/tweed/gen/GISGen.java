@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -143,15 +144,15 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			return;
 		}
 		
-		Optional<Gen> hg = tweed.frame.gens( HeightGen.class ).stream().findAny();
-		
-		if ( hg.isPresent() )
-			for ( Loop<Point3d> poly : polies ) {
-				if ( poly instanceof SuperLoop ) {
-					SuperLoop sl = ( (SuperLoop) poly );
-					sl.properties.putAll( ((HeightGen)hg.get()).getProperties( (String) sl.properties.get( "name" ) ) );
-				}
-			}
+//		Optional<Gen> hg = tweed.frame.gens( LotInfoGen.class ).stream().findAny();
+//		
+//		if ( hg.isPresent() )
+//			for ( Loop<Point3d> poly : polies ) {
+//				if ( poly instanceof SuperLoop ) {
+//					SuperLoop sl = ( (SuperLoop) poly );
+//					sl.properties.putAll( ((LotInfoGen)hg.get()).getProperties( (String) sl.properties.get( "name" ) ) );
+//				}
+//			}
 
 		for ( Loop<Point3d> poly : polies) {
 
@@ -407,5 +408,4 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		out.scale( scale / l );
 		return out;
 	}
-
 }
