@@ -127,6 +127,9 @@ public class TweedSettings {
 			
 			FileOutputStream fos = null;
 			
+			settings.cameraOrientation = TweedFrame.instance.tweed.oldCameraRot;
+			settings.cameraLocation = TweedFrame.instance.tweed.oldCameraLoc;
+			
 			try {
 				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
 				TweedSettings.settings.badGeomAngle = -0.1;

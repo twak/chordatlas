@@ -69,14 +69,14 @@ public class GreebleSkel {
 		this.tweed = tweed;
 	}
 
-	public Node showSkeleton( Output output, OnClick onClick ) {
+	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup ) {
 		
 		this.onClick = onClick;
-		createMesh( output );
+		createMesh( output, occluderLookup );
 		return node;
 	}
 
-	public void createMesh( Output output ) {
+	public void createMesh( Output output, java.util.Map<Object, Face> occluderLookup ) {
 		
 		float[] roofColor = BLANK_ROOF,
 				wallColor = BLANK_WALL;
@@ -88,7 +88,6 @@ public class GreebleSkel {
 		
 		isTextured = false;
 		
-		Map<Object, Face> occluderIDs = new HashMap<>();
 		
 		// find some sensible defaults to propogate
 		for ( Face f : output.faces.values() )  {
@@ -106,10 +105,6 @@ public class GreebleSkel {
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
 				
-				if (f.parent == null /*is bottom */)
-					for (Object o : wt.occlusions)
-						occluderIDs.put( wt.occlusionID, f );
-				
 				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
 				
 				wt.miniFacade.postState = null;
@@ -119,7 +114,7 @@ public class GreebleSkel {
 					if ( wt.color != null )
 						wallColor = wt.color;
 					bestWallArea = area;
-				}			
+				}
 			}
 		}
 		
@@ -128,8 +123,6 @@ public class GreebleSkel {
 		List<List<Face>> chains = Campz.findChains( output );
 		// chains = Collections.singletonList( chains.get( 3 ) );
 
-		
-		int count  = 0;
 		
 		// give each minifacade a chance to update its features based on the skeleton result
 		for (List<Face> chain : chains) {
@@ -154,20 +147,17 @@ public class GreebleSkel {
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
 							mf.postState.skelFaces.add( face );
 				
-				for (Object o : wt.occlusions )  {
-					Face f = occluderIDs.get( o );
-					if (f != null) {
-						count ++;
-					mf.postState.occluders.add (projectTo( megafacade, mfl, lf, f ));
-					}
+				if ( occluderLookup != null )
+					for ( Object o : wt.occlusions ) {
+						Face f = occluderLookup.get( o );
+						if ( f != null ) 
+							mf.postState.occluders.add( projectTo( megafacade, mfl, lf, f ) );
 				}
 				
 				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
 				mf.featureGen.update();
 			}
 		}
-		
-		System.out.println( ">>>> " + count );
 		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		

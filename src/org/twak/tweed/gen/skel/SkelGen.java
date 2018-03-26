@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 
 import org.twak.camp.Output;
+import org.twak.camp.Output.Face;
 import org.twak.camp.Skeleton;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
@@ -65,6 +65,7 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
+import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -82,6 +83,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public SkelFootprint skelFootprint;
 	protected List<Line> footprint;
+	private  Map<Object, Face> lastOccluders = new HashMap<>();
+
 	
 	static {
 		PlanSkeleton.TAGS = new String[][]
@@ -143,7 +146,26 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		Node pNode = new Node();
 
-		if ( toRender != null )
+
+		
+//		Map<Object, Face> occluderIDs = new HashMap<>();
+//		
+//		// find some sensible defaults to propogate
+//		for ( Face f : toRender output.faces.values() )  {
+//			
+//			WallTag wt = ((WallTag)t);
+//			if (t != null ) {
+//				
+//				if (f.parent == null /*is bottom */)
+//					for (Object o : wt.occlusions)
+//						occluderIDs.put( wt.occlusionID, f );
+//
+//		
+		
+		if ( toRender != null ) {
+
+			 Map<Object, Face> occluderLookup = lastOccluders = new HashMap<>();
+			
 			for ( int i = 0; i < toRender.faces.size(); i++ )
 				try {
 					HalfFace f = toRender.faces.get( i );
@@ -151,20 +173,35 @@ public class SkelGen extends Gen implements IDumpObjs {
 					
 					Rendered previouslyRendered = geometry.get( sf );
 					
-					if (previouslyRendered.skel != null) {
-							setSkel ( previouslyRendered.skel, previouslyRendered.output, sf);
-					}
-					else
-					{
-						PlanSkeleton skel = calc( sf );
-						if ( skel != null )
-							setSkel( skel, skel.output, sf );
-					}
+					if (previouslyRendered.skel == null)  
+						previouslyRendered.skel = calc( sf );
+
+					if (previouslyRendered.skel != null) 
+						for (Face ff :previouslyRendered.skel.output.faces.values()) {
+							WallTag wt = (WallTag) GreebleHelper.getTag( ff.profile, WallTag.class );
+							if (wt != null && ff.parent == null) {
+								occluderLookup.put(wt.occlusionID, ff);
+							}
+						}
+					
+				} catch ( Throwable th ) {
+					th.printStackTrace();
+				}
+		
+			for ( int i = 0; i < toRender.faces.size(); i++ )
+				
+				try {
+					SuperFace sf = (SuperFace) toRender.faces.get( i );
+					Rendered previouslyRendered = geometry.get( sf );
+					
+					if (previouslyRendered.skel != null) 
+							setSkel ( previouslyRendered.skel, sf, occluderLookup);
 
 				} catch ( Throwable th ) {
 					th.printStackTrace();
 				}
-
+		}
+		
 		if ( !pNode.getChildren().isEmpty() )
 			tweed.frame.addGen( new JmeGen( "sProfs", tweed, pNode ), false );
 
@@ -227,7 +264,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		LoopL<HalfEdge> edges = sf.findHoles();
 		LoopL<Point2d> lpd = new LoopL();
-
+		
 		for ( Loop<HalfEdge> loopHE : edges ) {
 
 			Map<Point2d, SuperEdge> ses = new HashMap();
@@ -241,7 +278,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				ses.put( se.start, se );
 			}
 
-//			lp = Loopz.mergeAdjacentEdges2( lp, 0.001 );
+			lp = Loopz.mergeAdjacentEdges2( lp, 0.001 );
 
 			//			if ( Loopz.area( lpd ) < 5 )
 			//				return null;
@@ -275,7 +312,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				plan.profiles.put( b, profile );
 			}
 		}
-
+		
 		plan.points = loopl;
 
 		if ( cap != null ) {
@@ -309,6 +346,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		PlanSkeleton skel = new PlanSkeleton( plan );
 		skel.skeleton();
+		
 		return skel;
 	}
 
@@ -328,7 +366,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 	Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
 
-	public synchronized void setSkel( PlanSkeleton skel, Output output, SuperFace sf ) {
+	public synchronized void setSkel( PlanSkeleton skel, SuperFace sf, Map<Object, Face> occluderLookup ) {
 
 		removeGeometryFor( sf );
 
@@ -342,11 +380,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 		};
 
 		GreebleSkel greeble = new GreebleSkel( tweed );
-
-		house = greeble.showSkeleton( output, onclick );
+		
+		house = greeble.showSkeleton( skel.output, onclick, occluderLookup );
 
 		gNode.attachChild( house );
-		geometry.get( sf ).set (house, output, skel );
+		geometry.get( sf ).set (house, skel.output, skel );
 
 		tweed.getRootNode().updateGeometricState();
 		tweed.getRootNode().updateModelBound();
@@ -410,7 +448,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 								removeGeometryFor( workon );
 								tweed.frame.setGenUI( null ); // current selection is invalid
 
-								setSkel( (PlanSkeleton) threadKey, output, workon );
+								setSkel( (PlanSkeleton) threadKey, workon, lastOccluders );
 
 							}
 
@@ -675,7 +713,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 									tweed.enqueue( new Runnable() {
 										@Override
 										public void run() {
-											setSkel( skel, skel.output, sf );
+											setSkel( skel, sf, lastOccluders );
 											tweed.getRootNode().updateGeometricState();
 										}
 									} );
@@ -690,7 +728,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					tweed.enqueue( new Runnable() {
 						@Override
 						public void run() {
-							setSkel( skel, skel.output, sf );
+							setSkel( skel, sf, lastOccluders );
 						}
 					} );
 				}

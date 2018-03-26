@@ -179,12 +179,9 @@ public class SkelFootprint {
 	}
 	
 	public static void postProcesss( SolverState SS ) {
-
 		
 		mergeSameClassification ( SS.mesh );
 		mergeSameClassification ( SS.mesh );
-
-		
 
 		if (TweedSettings.settings.roofColours)
 			findRoofColor           ( SS.mesh );
@@ -202,7 +199,6 @@ public class SkelFootprint {
 		
 		if (TRUE) // not needed if we're not doing fully procedural windows
 			findOcclusions ( SS.mesh );
-
 	}
 
 	private static void mergeSmallFaces( SolverState SS ) {
@@ -363,7 +359,6 @@ public class SkelFootprint {
 			}
 		}
 		
-		System.out.println("found crossings "+count);
 		killDoubleEdges( mesh );
 	}
 
@@ -1040,9 +1035,6 @@ public class SkelFootprint {
 
 	private static void findOcclusions( HalfMesh2 mesh ) {
 
-		int count = 0;
-		Set<HalfFace> fc = new HashSet<>();
-		
 		for ( HalfFace hf : mesh.faces )
 			for ( HalfEdge e1 : hf.edges() ) {
 
@@ -1054,23 +1046,13 @@ public class SkelFootprint {
 
 							Line e2l = e2.line();
 
-							if ( 	el1.distance( e2l ) < 1 && 
-									e2l.absAngle( el1 ) > Math.PI * 0.7  
-//									!el1.isOnLeft(  e2l.fromPPram( 0.5 ) ) 
-									) {
-								
+							if ( el1.distance( e2l ) < 1 && e2l.absAngle( el1 ) > Math.PI * 0.7
+							//									!el1.isOnLeft(  e2l.fromPPram( 0.5 ) ) 
+							) 
 								( (SuperEdge) e1 ).occlusions.add( e2 );
-//										new LineHeight( 
-//												el1.project( e2l.start, true ), 
-//												el1.project( e2l.end, true ), 
-//												0, ( (SuperFace) hf2 ).height ) );
-								count++;
-								fc.add(hf);
-							}
 						}
 				}
 			}
-		System.out.println("found "+count+" occluding surfaces. " + fc.size() + " buildings with occlusions");
 	}
 
 	

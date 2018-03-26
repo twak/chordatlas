@@ -435,6 +435,9 @@ public class Tweed extends SimpleApplication {
 	
 	boolean checkForEnd = true;
 	int oldWidth, oldHeight;
+	public Vector3f oldCameraLoc = new Vector3f(575.0763f, 159.23715f, -580.0377f);
+	public Quaternion oldCameraRot = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
+
 	
 	public void simpleUpdate(float tpf) {
 		
@@ -456,8 +459,8 @@ public class Tweed extends SimpleApplication {
 		
 		checkForEnd = true;
 		
-		TweedSettings.settings.cameraLocation = cam.getLocation();
-		TweedSettings.settings.cameraOrientation = cam.getRotation();
+		oldCameraLoc = cam.getLocation();
+		oldCameraRot = cam.getRotation();
 	}
 	
 	private AnalogListener moveListener = new AnalogListener() {

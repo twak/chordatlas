@@ -51,16 +51,17 @@ public class VizSkelGen extends SkelGen {
 		
 		SuperFace sf;
 		
-		if (mode == Mode.Extrude)  {
-			sf = toHalf ( Loopz.to3d( Loopz.removeInnerEdges( Loopz.toXZLoop ( blockGen.polies ) ).get(0)  , 0, 1) );
+		if ( mode == Mode.Extrude ) {
+			sf = toHalf( Loopz.to3d( Loopz.removeInnerEdges( Loopz.toXZLoop( blockGen.polies ) ).get( 0 ), 0, 1 ) );
 			PlanSkeleton skel = calc( sf );
-			setSkel( skel, skel.output , sf);
-		}
-		else for (Loop <Point3d> loop : blockGen.polies ) { 
-			sf = toHalf(loop);
-			PlanSkeleton skel = calc( sf );
-			setSkel( skel, skel.output , sf);
-		}
+			setSkel( skel, sf, null );
+		} else
+			for ( Loop<Point3d> loop : blockGen.polies ) {
+				sf = toHalf( loop );
+				PlanSkeleton skel = calc( sf );
+				setSkel( skel, sf, null );
+			}
+		
 		gNode.updateModelBound();
 		gNode.updateGeometricState();
 		setVisible(visible);
