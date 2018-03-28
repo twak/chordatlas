@@ -305,16 +305,16 @@ public class TweedFrame {
 		obj.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-
-				ObjDump dump = new ObjDump();
-
-				for ( Gen g : genList )
-					if ( g.visible && g instanceof IDumpObjs )
-						( (IDumpObjs) g ).dumpObj( dump );
-
 				new SimpleFileChooser(frame, true, "save all as obj", new File (Tweed.SCRATCH, "all.obj"), "obj") {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
+
+						ObjDump dump = new ObjDump();
+
+						for ( Gen g : genList )
+							if ( g.visible && g instanceof IDumpObjs )
+								( (IDumpObjs) g ).dumpObj( dump );
+						
 						dump.dump( f, new File ( Tweed.DATA ) );
 					}
 				}; 

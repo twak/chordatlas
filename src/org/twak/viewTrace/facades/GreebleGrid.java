@@ -590,15 +590,8 @@ public class GreebleGrid {
 						public void instance( DRectangle rect ) {
 							if (w.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
-							else {
-								
-								DRectangle r = new DRectangle(ZERO_ONE_UVS);
-								double c = (w.height - w.width) / w.height;
-								r.x += c /2;
-								r.width = w.width / w.height;
-								
-								createInnie( rect, r, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
-							}
+							else 
+								createInnie( rect, normalizeForInset ( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
 						}
 					} );
 			}
@@ -611,15 +604,8 @@ public class GreebleGrid {
 						public void instance( DRectangle rect ) {
 							if (w.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
-							else {
-								
-								DRectangle r = new DRectangle(ZERO_ONE_UVS);
-								double c = (w.height - w.width) / w.height;
-								r.x += c /2;
-								r.width = w.width / w.height;
-								
-								createInnie( rect, r, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.5f );
-							}
+							else 
+								createInnie( rect, normalizeForInset( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.5f );
 						}
 					} );
 			}
@@ -657,6 +643,24 @@ public class GreebleGrid {
 				}
 			} );
 		}
+	}
+
+	/**
+	 * Compute uv stretch for non-square component
+	 */
+	public static DRectangle normalizeForInset( FRect w ) {
+		
+		DRectangle r = new DRectangle(ZERO_ONE_UVS);
+		
+		r.x += Math.max (0, 0.5 * (w.height - w.width) / w.height);
+		r.y += Math.max (0, 0.5 * (w.width - w.height) / w.width );
+		
+		if (w.height > w.width) 
+			r.width = w.width / w.height;
+		else
+			r.height = w.height / w.width;
+		
+		return r;
 	}
 	
 }
