@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.twak.utils.Parallel;
+
 
 public class Mosaic {
 
@@ -49,9 +49,8 @@ public class Mosaic {
 
 	public void processLines( List<String> lines, File result ) {
 		
-		lines.stream().forEach( s -> System.out.println( s ) );
 		System.out.println( lines.size() + " lines found" );
-
+		
 //		for (String s : lines) {
 //			System.out.println( "downloading " + s );
 //			tile (s, result);
@@ -64,6 +63,10 @@ public class Mosaic {
 
 	public int tile( String s, File result ) {
 
+		File out = new File( result, s + ".jpg" );
+		if (out.exists())
+			return 1;
+		
 		Matcher m = p.matcher( s );
 
 		if ( m.matches() ) {
@@ -91,7 +94,7 @@ public class Mosaic {
 				param.setCompressionMode( ImageWriteParam.MODE_EXPLICIT ); // Needed see javadoc
 				param.setCompressionQuality( 1f ); // Highest quality
 
-				ImageOutputStream ios = ImageIO.createImageOutputStream( new File( result, s + ".jpg" ) );
+				ImageOutputStream ios = ImageIO.createImageOutputStream( out );
 				writer.setOutput( ios );
 				writer.write( mosaic );
 

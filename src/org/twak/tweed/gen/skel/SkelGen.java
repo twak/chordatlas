@@ -707,7 +707,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							Pix2Pix.pix2pix( Collections.singletonList( se.toEdit ), new Runnable() {
+							new Pix2Pix().facade( Collections.singletonList( se.toEdit ), new Runnable() {
 
 								public void run() {
 									tweed.enqueue( new Runnable() {
@@ -778,7 +778,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	private void cgaAll() {
 		
-		
 		for (HalfFace hf : toRender )
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
@@ -807,7 +806,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		new Thread( new Runnable() {
 			@Override
 			public void run() {
-				Pix2Pix.pix2pix( mfs, new Runnable() {
+				new Pix2Pix().facade( mfs, new Runnable() {
 					public void run() {
 						tweed.enqueue( new Runnable() {
 							@Override

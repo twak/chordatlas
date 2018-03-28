@@ -28,6 +28,7 @@ public class FRect extends DRectangle implements ICanEdit {
 	public Feature f;
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
+	public String texture;
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
@@ -45,6 +46,7 @@ public class FRect extends DRectangle implements ICanEdit {
 		gridCoords = o.gridCoords == null ? null : Arrays.copyOf( o.gridCoords, o.gridCoords.length );
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
+		texture = o.texture;
 	}
 	
 	public FRect() {

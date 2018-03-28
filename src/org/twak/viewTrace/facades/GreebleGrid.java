@@ -572,6 +572,8 @@ public class GreebleGrid {
 		} );
 	}
 
+	final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
+	
 	protected void textureGrid( DRectangle allGeom, DRectangle allUV, Matrix4d to3d, MiniFacade mf ) {
 
 		if ( mf != null && mf.texture != null ) {
@@ -582,10 +584,21 @@ public class GreebleGrid {
 			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
 				if ( allGeom.contains( w ) )
+					
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
+							if (w.texture == null)
+								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
+							else {
+								
+								DRectangle r = new DRectangle(ZERO_ONE_UVS);
+								double c = (w.height - w.width) / w.height;
+								r.x += c /2;
+								r.width = w.width / w.height;
+								
+								createInnie( rect, r, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
+							}
 						}
 					} );
 			}
@@ -596,7 +609,17 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
+							if (w.texture == null)
+								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
+							else {
+								
+								DRectangle r = new DRectangle(ZERO_ONE_UVS);
+								double c = (w.height - w.width) / w.height;
+								r.x += c /2;
+								r.width = w.width / w.height;
+								
+								createInnie( rect, r, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.5f );
+							}
 						}
 					} );
 			}
