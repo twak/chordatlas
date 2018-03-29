@@ -27,6 +27,10 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		}
 	}
 
+	public FeatureGenerator( FeatureGenerator featureGen ) {
+		this (featureGen.mf, featureGen);
+	}
+
 	public void add( Feature feat, DRectangle rect ) {
 		FRect f = new FRect( rect );
 		f.f = feat;

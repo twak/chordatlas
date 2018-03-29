@@ -1,11 +1,9 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +47,8 @@ import com.jme3.scene.Node;
 
 public class GreebleSkel {
 
+	private static final double TILE_UV_SCALE = 0.4;
+	private static final String TILE_TEXTURED = "tile_textured";
 	private static final String TILE = "tile";
 	private static final String BRICK = "brick";
 	private static final String TILE_JPG = "tile.jpg";
@@ -86,7 +86,7 @@ public class GreebleSkel {
 		
 		double bestWallArea = 0, bestRoofArea = 0;
 		
-		isTextured = false;
+		isTextured = true;
 		
 		
 		// find some sensible defaults to propogate
@@ -161,9 +161,6 @@ public class GreebleSkel {
 		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
-		
-		edges( output, roofColor );
-		
 		// generate geometry for each face
 		for (List<Face> chain : chains) {
 			
@@ -210,6 +207,8 @@ public class GreebleSkel {
 					greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
 							(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 				}
+
+			edges( output, roofColor );
 			
 			// output per-material objects
 			greebleGrid.attachAll(node, chain, output, new ClickMe() {
@@ -330,7 +329,7 @@ public class GreebleSkel {
 				RoofTag rt = (RoofTag)t;
 				
 				if (isTextured)
-					faceColor = greebleGrid.mbs.get("tile_textured", TILE_JPG ); 
+					faceColor = greebleGrid.mbs.get(TILE_TEXTURED, TILE_JPG ); 
 				else
 					faceColor = greebleGrid.mbs.get(TILE, rt.color != null ? rt.color : roofColor );
 			}
@@ -574,7 +573,7 @@ public class GreebleSkel {
 			if ( wallTag == null || toRecess == null || floorRect == null ) {
 				LoopL<LPoint2d> loop = flat.singleton();
 				m.add( loop, m.texture == null ? null :  
-					GreebleHelper.roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), 0.4 ), to3d );
+					GreebleHelper.roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), TILE_UV_SCALE ), to3d );
 				
 				return;
 			}
@@ -608,15 +607,17 @@ public class GreebleSkel {
 					to3d,
 					toRecess );
 			}
-				
-		
 		}
 	}
 	
 	public void edges( Output output, float[] roofColor ) {
 
+		
 		GreebleEdge.roowWallGreeble( output, 
-				greebleGrid.mbs.get( TILE, roofColor ), greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ) );
+				greebleGrid.mbs.get( TILE, roofColor ),
+//				greebleGrid.mbs.get( TILE, roofColor ),
+				isTextured ? greebleGrid.mbs.get(TILE_TEXTURED, TILE_JPG ) : greebleGrid.mbs.get( TILE, roofColor ), 
+				greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ), TILE_UV_SCALE );
 
 		for ( Face f : output.faces.values() )
 			GreebleEdge.roofGreeble( f, greebleGrid.mbs.get( TILE, roofColor ) );

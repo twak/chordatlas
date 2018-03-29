@@ -17,6 +17,7 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 
 public class GreebleHelper {
@@ -116,6 +117,25 @@ public class GreebleHelper {
 			public Point2d map( Loopable<LPoint2d> input ) {
 				
 				Point2d x = l.project( input.get(), false );
+				
+				return new Point2d ( l.findPPram( x ) * ll * d, input.get().distance( x ) * d);
+			}
+		}.run();
+		
+	}
+	
+	public static LoopL<Point2d> uvs( LoopL<Point3d> coords, double d ) {
+		
+		Point3d s = coords.get( 0 ).getFirst(), e = coords.get( 0 ).getFirstLoopable().next.get();
+		
+		Line3d l = new Line3d (s, e);
+		double ll =  l.length();
+		
+		return coords.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<Point3d> input ) {
+				
+				Point3d x = l.closestPointOn( input.get(), false );
 				
 				return new Point2d ( l.findPPram( x ) * ll * d, input.get().distance( x ) * d);
 			}

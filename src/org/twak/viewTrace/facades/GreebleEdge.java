@@ -27,7 +27,7 @@ import org.twak.viewTrace.facades.Tube.CrossGen;
 
 public class GreebleEdge {
 	
-	public static void roowWallGreeble (Output output, MeshBuilder roof, MeshBuilder wall) {
+	public static void roowWallGreeble (Output output, MeshBuilder lead, MeshBuilder roof, MeshBuilder wall, double uvScale) {
 		
 		MultiMap<Point3d, SharedEdge> boundary = new MultiMap<>();
 		
@@ -77,10 +77,10 @@ public class GreebleEdge {
 						left   = new LinearForm3D( toXZ( f2.edge.getPlaneNormal() ), toXZ(f2.edge.start ) );
 					
 					
-					Tube.tube(roof, Collections.singleton(cutS), 
+					Tube.tube( isOverhang( se ) ? roof : lead, Collections.singleton(cutS), 
 							Collections.singleton(cutE), 
 							new Line3d( toXZ ( se.start ), toXZ (  se.end) ), 
-							 left, right, isOverhang(se) ? new OverhangCross() : new LipCross() );
+							 left, right, uvScale, isOverhang(se) ? new OverhangCross() : new LipCross() );
 				}
 			}
 	}
@@ -305,7 +305,7 @@ public class GreebleEdge {
 					
 					Tube.tube( roof, end, start,
 							new Line3d( new Point3d (s.x, s.z, s.y), new Point3d (e.x, e.z, e.y) )
-							, toLF (f, 0) , toLF(oF, 0), new CrossGen() {
+							, toLF (f, 0) , toLF(oF, 0), 1, new CrossGen() {
 								
 								@Override
 								public List<Point2d> gen( Vector2d left, Vector2d right ) {

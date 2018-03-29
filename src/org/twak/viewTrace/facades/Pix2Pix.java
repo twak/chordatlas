@@ -3,13 +3,13 @@ package org.twak.viewTrace.facades;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class Pix2Pix {
 
-	private static final String LABEL2PHOTO = "facades_label2photo_pretrained";
+	private static final String LABEL2PHOTO = "facades3k";
 	private static final String WINDOW = "window_super_res";
 
 	public enum CMPLabel { //sequence is  z-order
@@ -135,7 +135,7 @@ public class Pix2Pix {
 		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
 		
-		Map<String, MiniFacade> index = new HashMap<>();
+		Map<MiniFacade, WindowMeta> index = new HashMap<>();
 		
 		for ( MiniFacade toEdit : minis ) {
 
@@ -145,35 +145,43 @@ public class Pix2Pix {
 			g.setColor( CMPLabel.Background.rgb );
 			g.fillRect( 256, 0, 256, 255 );
 			
+			
+			mini = toEdit.postState == null ? toEdit.getAsRect() : toEdit.postState.outerFacadeRect;
+
+			DRectangle mask = new DRectangle(mini);
+			{
+				mask = mask.scale( 256 / Math.max( mini.height, mini.width ) );
+				mask.x = ( 256 - mask.width ) * 0.5 + /* draw on the right of the input image */ 256;
+				mask.y = 0; //( 256 - mask.height ) * 0.5;
+			}
+			
 			g.setColor( CMPLabel.Facade.rgb );
 			
 			if ( toEdit.postState == null ) {
-				
-				g.fillRect( 256, 0, 256, 255 );
-				mini = toEdit.getAsRect();
+				cmpRects( toEdit, g, mask, mini, CMPLabel.Facade.rgb   , Collections.singletonList( new FRect ( mini ) )     );
 			} else {
-				
-				mini = toEdit.postState.outerFacadeRect;
-
 				for ( Loop<? extends Point2d> l : toEdit.postState.skelFaces)
-					g.fill( toPoly( toEdit, bounds, mini, l ) );
+					g.fill( toPoly( toEdit, mask, mini, l ) );
 				
 				g.setColor( CMPLabel.Background.rgb );
 				for ( LoopL<Point2d> ll : toEdit.postState.occluders )
 					for ( Loop<Point2d> l : ll )
-						g.fill( toPoly( toEdit, bounds, mini, l ) );
+						g.fill( toPoly( toEdit, mask, mini, l ) );
 			}
 
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Door.rgb, Feature.DOOR );
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Window.rgb, Feature.WINDOW );
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Molding.rgb, Feature.MOULDING );
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Cornice.rgb, Feature.CORNICE );
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Sill.rgb, Feature.SILL );
-			cmpRects( toEdit, g, bounds, mini, CMPLabel.Shop.rgb, Feature.SHOP );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Door   .rgb, toEdit.featureGen.getRects( Feature.DOOR    ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
 
+			mask.x -= 256;
+			
 			String name = System.nanoTime() + "_" + index.size();
 
-			index.put ( name, toEdit );
+			
+			index.put ( toEdit, new WindowMeta( name, mask ) );
 			
 			try {
 
@@ -197,14 +205,15 @@ public class Pix2Pix {
 
 					new File( Tweed.SCRATCH ).mkdirs();
 
-					for ( Map.Entry<String, MiniFacade> e : index.entrySet() ) {
+					for ( Map.Entry<MiniFacade, WindowMeta> e : index.entrySet() ) {
 
-						String name = e.getKey();
-						dest = importTexture( f, name, -1 );
+//						String name = e.getKey();
+						dest = importTexture( f, e.getValue().name, -1, e.getValue().mask );
 
+						
 						if ( dest != null ) {
-							e.getValue().texture = dest;
-							subfeatures.add( e.getValue() );
+							e.getKey().texture = dest;
+							subfeatures.add( e.getKey() );
 							found = true;
 						}
 					}
@@ -215,7 +224,6 @@ public class Pix2Pix {
 								windows( subfeatures, update );
 							};
 						}.start();
-
 						return;
 					}
 
@@ -228,19 +236,21 @@ public class Pix2Pix {
 		} ) );
 	}
 
-	private String importTexture( File f, String name, int specular ) throws IOException {
+	private String importTexture( File f, String name, int specular, DRectangle crop ) throws IOException {
 		
 		File texture = new File( f, "images/" + name + "_fake_B.png" );
-		String dest = null;
+		String dest = "missing";
 		if ( texture.exists() && texture.length() > 0 ) {
 
-			byte[] image = Files.readAllBytes( texture.toPath() );
-
-			Files.write( new File( Tweed.DATA + "/" + ( dest = "scratch/" + name + ".png" ) ).toPath(), image );
-
 			BufferedImage labels = ImageIO.read( new File( f, "images/" + name + "_real_A.png" ) ), 
-					rgb = ImageIO.read( new ByteArrayInputStream( image ) );
+					rgb = ImageIO.read( texture );
 
+			if (crop != null) {
+				
+				rgb = scaleToFill ( rgb, crop );//   .getSubimage( (int) crop.x, (int) crop.y, (int) crop.width, (int) crop.height );
+				labels = scaleToFill ( labels, crop );
+			}
+			
 			NormSpecGen ns = new NormSpecGen( rgb, labels );
 			
 			if (specular >= 0) {
@@ -250,13 +260,14 @@ public class Pix2Pix {
 				g.dispose();
 			}
 
-			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( "scratch/" + name + "_norm.png" ) ) );
-			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( "scratch/" + name + "_spec.png" ) ) );
-											ImageIO.write ( labels, 
-													"png", new File(Tweed.DATA + "/" + ( "scratch/" + name + "_src.png" ) ) );
+			dest =  "scratch/" + name ;
+			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
+			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
+			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
+//			ImageIO.write ( labels, "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			texture.delete();
 		}
-		return dest;
+		return dest + ".png";
 	}
 	
 	private DRectangle findBounds( MiniFacade toEdit ) {
@@ -267,12 +278,39 @@ public class Pix2Pix {
 			return toEdit.postState.outerFacadeRect;
 	}
 
+	private static class WindowMeta {
+		String name;
+		DRectangle mask;
+		private WindowMeta(String name, DRectangle mask) {
+			this.name = name;
+			this.mask = mask;
+
+		}
+	}
+
+	public static BufferedImage scaleToFill( BufferedImage rgb, DRectangle crop ) {
+		
+		BufferedImage out = new BufferedImage (rgb.getWidth(), rgb.getHeight(), rgb.getType() );
+		
+		Graphics2D g = out.createGraphics();
+		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+		
+		int cropy = (int) (256 - crop.height - crop.y);
+		g.drawImage( rgb, 0, 0, rgb.getWidth(), rgb.getHeight(), 
+				(int) crop.x, cropy, (int) (crop.x + crop.width), (int) (cropy + crop.height ),
+				null );
+		g.dispose();
+		
+		return out;
+	}
+	
 	private void windows( List<MiniFacade> subfeatures, Runnable update ) {
 		
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
 		
-		Map<FRect, String> names = new HashMap<>();
+		Map<FRect, WindowMeta> names = new HashMap<>();
 		
 		for ( MiniFacade mf : subfeatures ) {
 			try {
@@ -295,7 +333,9 @@ public class Pix2Pix {
 								(int) w.width , 
 								(int) w.height );
 					
-					BufferedImage scaled = Imagez.scaleSquare( Imagez.scaleLongest( dow, 256 ), 256 );
+					DRectangle mask = new DRectangle();
+					
+					BufferedImage scaled = Imagez.scaleSquare( Imagez.scaleLongest( dow, 256 ), 256, mask );
 					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 					
 					Graphics2D g = toProcess.createGraphics();
@@ -304,7 +344,7 @@ public class Pix2Pix {
 					
 					String name = System.nanoTime() + "_" + count;
 					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
-					names.put( r, name );
+					names.put( r, new WindowMeta( name, mask ) );
 					
 					count++;
 				}
@@ -321,10 +361,10 @@ public class Pix2Pix {
 
 				try {
 
-					for ( Map.Entry<FRect, String> e : names.entrySet() ) {
+					for ( Map.Entry<FRect, WindowMeta> e : names.entrySet() ) {
 
-						String name = e.getValue();
-						String dest = importTexture( f, name, 255 );
+						WindowMeta meta = e.getValue();
+						String dest = importTexture( f, meta.name, 255, meta.mask );
 
 						if ( dest != null ) 
 							e.getKey().texture = dest;
@@ -345,20 +385,32 @@ public class Pix2Pix {
 
 			for ( Point2d pt : loop ) {
 				Point2d p2 = bounds.scale( mini.normalize( pt ) );
-				p.addPoint( (int) p2.x, (int) -p2.y+256 );
+				p.addPoint( (int) p2.x, (int) ( -p2.y + 256 ) );
 			}
 		return p;
 	}
 
-	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, Feature...features ) {
-		for (FRect r : toEdit.featureGen.getRects(features)) {
+	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
+		
+//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
+//		
+//		mini = new DRectangle(mini);
+//		mini.scale( scale );
+//		
+//		mini.x = (1-mini.width) / 2;
+//		mini.y = (1-mini.height) / 2;
+		
+		for (FRect r : rects ) {
+			
+			if (mini.contains( r )) {
 			
 			DRectangle w = bounds.scale ( mini.normalize( r ) );
 			
-			w.y = bounds.getMaxY() - w.y - w.height;
+			w.y = 256 - w.y - w.height;
 			
 			g.setColor( col);
 			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
+			}
 		}
 	}
 	

@@ -811,6 +811,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 						tweed.enqueue( new Runnable() {
 							@Override
 							public void run() {
+								for (MiniFacade mf : mfs)
+									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
 								calculateOnJmeThread();
 							}
 						} );

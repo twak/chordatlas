@@ -294,7 +294,7 @@ public class GreebleGrid {
 		wall.findD(start);
 		
 		Tube.tube( mb, Collections.singleton( left ), Collections.singleton( right ), 
-				line, wall, wall, new CrossGen() {
+				line, wall, wall, 1, new CrossGen() {
 					
 					@Override
 					public List<Point2d> gen( Vector2d down, Vector2d up ) {
@@ -591,7 +591,7 @@ public class GreebleGrid {
 							if (w.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
 							else 
-								createInnie( rect, normalizeForInset ( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
 						}
 					} );
 			}
@@ -605,7 +605,7 @@ public class GreebleGrid {
 							if (w.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
 							else 
-								createInnie( rect, normalizeForInset( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.3f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.3f );
 						}
 					} );
 			}
@@ -654,36 +654,36 @@ public class GreebleGrid {
 			} );
 		}
 	}
-
-	/**
-	 * Compute uv stretch for non-square component
-	 */
-	public static DRectangle normalizeForInset( FRect w ) {
-		
-		DRectangle r = new DRectangle(w);
-		
-		double scale = Math.max( w.width, w.height );
-		r.height /= scale;
-		r.width  /= scale * 1.18;
-		
-		if (w.height > w.width) {
-			r.x = 0.5 * (w.height - w.width) / w.height + 0.04;
-			r.y=0;
-		}
-		else
-		{
-			r.y = 0.5 * (w.width - w.height) / w.width;
-			r.x=0;
-			
-		}
-//		r.y += Math.max (0, 0.5 * (w.width - w.height) / w.width );
-		
-//		if (w.height > w.width) 
-//			r.width = 0.2;// w.height / w.width;
+//
+//	/**
+//	 * Compute uv stretch for non-square component
+//	 */
+//	public static DRectangle normalizeForInset( FRect w ) {
+//		
+//		DRectangle r = new DRectangle(w);
+//		
+//		double scale = Math.max( w.width, w.height );
+//		r.height /= scale;
+//		r.width  /= scale * 1.18;
+//		
+//		if (w.height > w.width) {
+//			r.x = 0.5 * (w.height - w.width) / w.height + 0.04;
+//			r.y=0;
+//		}
 //		else
-//			r.height = w.height / w.width;
-		
-		return r;
-	}
+//		{
+//			r.y = 0.5 * (w.width - w.height) / w.width;
+//			r.x=0;
+//			
+//		}
+////		r.y += Math.max (0, 0.5 * (w.width - w.height) / w.width );
+//		
+////		if (w.height > w.width) 
+////			r.width = 0.2;// w.height / w.width;
+////		else
+////			r.height = w.height / w.width;
+//		
+//		return r;
+//	}
 	
 }
