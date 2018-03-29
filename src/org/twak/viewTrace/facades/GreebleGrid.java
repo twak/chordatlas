@@ -605,18 +605,28 @@ public class GreebleGrid {
 							if (w.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
 							else 
-								createInnie( rect, normalizeForInset( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.5f );
+								createInnie( rect, normalizeForInset( w ), to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.3f );
 						}
 					} );
 			}
 			
-			for ( FRect w : mf.featureGen.getRects( Feature.MOULDING, Feature.CORNICE, Feature.SILL ) ) {
+			for ( FRect w : mf.featureGen.getRects( Feature.MOULDING, Feature.SILL ) ) {
 				
 				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
 							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.2f );
+						}
+					} );
+			}
+			for ( FRect w : mf.featureGen.getRects( Feature.CORNICE ) ) {
+				
+				if ( allGeom.contains( w ) )
+					g.insert( w, new Griddable() {
+						@Override
+						public void instance( DRectangle rect ) {
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f );
 						}
 					} );
 			}
@@ -650,15 +660,28 @@ public class GreebleGrid {
 	 */
 	public static DRectangle normalizeForInset( FRect w ) {
 		
-		DRectangle r = new DRectangle(ZERO_ONE_UVS);
+		DRectangle r = new DRectangle(w);
 		
-		r.x += Math.max (0, 0.5 * (w.height - w.width) / w.height);
-		r.y += Math.max (0, 0.5 * (w.width - w.height) / w.width );
+		double scale = Math.max( w.width, w.height );
+		r.height /= scale;
+		r.width  /= scale * 1.18;
 		
-		if (w.height > w.width) 
-			r.width = w.width / w.height;
+		if (w.height > w.width) {
+			r.x = 0.5 * (w.height - w.width) / w.height + 0.04;
+			r.y=0;
+		}
 		else
-			r.height = w.height / w.width;
+		{
+			r.y = 0.5 * (w.width - w.height) / w.width;
+			r.x=0;
+			
+		}
+//		r.y += Math.max (0, 0.5 * (w.width - w.height) / w.width );
+		
+//		if (w.height > w.width) 
+//			r.width = 0.2;// w.height / w.width;
+//		else
+//			r.height = w.height / w.width;
 		
 		return r;
 	}
