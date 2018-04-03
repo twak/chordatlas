@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,19 +26,26 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.utils.Line;
+import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.collections.SuperLoop;
+import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.Graph2D;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.Slice;
@@ -48,6 +56,9 @@ import org.twak.viewTrace.facades.AlignStandalone2d;
 import com.jme3.asset.ModelKey;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.index.strtree.Boundable;
 
 public class BlockGen extends ObjGen {
 
@@ -191,7 +202,7 @@ public class BlockGen extends ObjGen {
 		} );
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append( nameCoords() );
+		sb.append( "name:" +nameCoords()+"\nlot info:\n" );
 		Optional<Gen> hg = tweed.frame.gens( LotInfoGen.class ).stream().findAny();
 		
 		if ( hg.isPresent() )
@@ -204,12 +215,17 @@ public class BlockGen extends ObjGen {
 				}
 				catch (Throwable th) {th.printStackTrace(  ); }
 		
+
+		
+		JButton b = new JButton("street widths");
+		b.addActionListener( e -> findWidths() );
 		
 		JTextArea name = new JTextArea( sb.toString() );
 		name.setEditable( false );
 		JScrollPane nameScroller = new JScrollPane( name );
 		nameScroller.setPreferredSize( new Dimension( 100, 150 ) );
 		
+		panel.add( b );
 		panel.add(profiles, 0 );
 		panel.add(panos, 1 );
 		panel.add(features, 2 );
@@ -222,7 +238,120 @@ public class BlockGen extends ObjGen {
 		panel.add(new JLabel("metadata:") );
 		panel.add( nameScroller );
 		
+		
 		return panel;
+	}
+
+	private void findWidths() {
+
+		LoopL<Point2d> polies2d = polies.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<Point3d> input ) {
+				return Pointz.to2( input.get() );
+			}
+			
+		}.run();
+
+		Map<Point2d, Point2d> onBoundary = new HashMap<>(); 
+		
+		{
+			LoopL<Point2d> boundary = Loopz.removeInnerEdges( polies2d );
+			boundary.stream().filter( x -> Loopz.area( x ) > 10).
+				flatMap( x -> x.streamAble() ).
+				forEach( p -> onBoundary.put( p.get(), p.getNext().get() ) );
+		}
+
+		PaintThing.debug.clear();
+		
+		GISGen gisGen = tweed.frame.getGenOf( GISGen.class );
+		gisGen.ensureQuad();
+		
+		for ( Loop<Point2d> footprint : polies2d ) {
+			
+			int count = 0;
+			for ( Loopable<Point2d> ll : footprint.loopableIterator() ) {
+				Point2d a = onBoundary.get( ll.get() );
+
+				if ( a != null && a.equals( ll.getNext().get() ) ) {
+
+					Line l = new Line( ll.get(), ll.getNext().get() );
+
+					PaintThing.debug( Color.black, 2f, l );
+				
+					double sw = findStreetWidth ( polies, l, gisGen.quadtree, 30 );
+					
+					if (sw < 1e3) {
+						
+						Vector2d dir = l.dir();
+						dir.set( new double[] { -dir.y, dir.x } );
+						dir.normalize();
+						
+						Point2d mid = l.fromPPram( 0.5 );
+						dir.scale( sw );
+						dir.add( mid );
+						PaintThing.debug( Color.black, 1f, new Line( mid, new Point2d( dir ) ) );
+					}
+				}
+
+			}
+		}
+		
+		new Plot ( polies2d );
+	}
+	
+	private static final int MIN_SW = 15;
+	private double findStreetWidth( LoopL<Point3d> ignore, Line l, Quadtree quadtree, double max ) {
+		
+		GISGen gisGen = tweed.frame.getGenOf( GISGen.class );
+		gisGen.ensureQuad();
+		
+		
+		if (l.length() < MIN_SW) {
+			Point2d cen = l.fromPPram( 0.5 );
+			Vector2d up = l.dir();
+			up.scale( MIN_SW  / (2*up.length() ) );
+			l = new Line(new Point2d ( cen ), new Point2d ( cen ) );
+			l.end.add( up );
+			l.start.sub( up);
+		}
+		
+		Vector2d dir = l.dir();
+		dir.set( new double[] { -dir.y, dir.x } );
+		dir.scale( max / l.length() );
+		
+		DRectangle dr =  new DRectangle(l.start );
+		dr.envelop( l.end );
+		
+		Point2d a = new Point2d(l.start), b = new Point2d( l.end );
+		a.add( dir ); b.add( dir );
+		dr.envelop( a ); dr.envelop( b );
+		
+		double dist = Double.MAX_VALUE;
+
+		int count = 0;
+		
+		Loop<Point2d> queryBounds = new Loop<>(l.end, l.start, a, b);
+		Envelope queryEnvelope = new Envelope( dr.x, dr.getMaxX(), dr.y, dr.getMaxY()  );
+		
+		for (Object o : quadtree.query( queryEnvelope ) ) {
+			
+			Loop<Point3d> block = (Loop)o;
+			
+			if ( ignore.contains( block ) || ! queryEnvelope.intersects( GISGen.envelope( block ) ) )
+				continue;
+			
+			for (Loopable<Point3d> pt : block.loopableIterator()) {
+				Line query = new Line ( Pointz.to2( pt.get() ) , Pointz.to2( pt.getNext().get()));
+				
+				if ( !Loopz.inside( query, queryBounds ) )
+					continue;
+				
+				dist = Math.min( dist, l.distance( query ) );
+				count++;
+			}
+		}
+		
+		return dist;
 	}
 
 	private void viewFeatures() {

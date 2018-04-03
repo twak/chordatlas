@@ -86,7 +86,7 @@ public class GreebleSkel {
 		
 		double bestWallArea = 0, bestRoofArea = 0;
 		
-		isTextured = true;
+		isTextured = false;
 		
 		
 		// find some sensible defaults to propogate

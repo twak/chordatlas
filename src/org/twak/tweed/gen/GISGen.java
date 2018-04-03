@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -49,12 +50,16 @@ import org.twak.utils.geom.Graph2D;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.geom.UnionWalker;
+import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.Closer;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.GMLReader;
 
 import com.google.common.io.Files;
+import com.jme3.scene.shape.Quad;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 public class GISGen  extends LineGen3d implements ICanSave {
 
@@ -407,5 +412,35 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			return new Vector3d();
 		out.scale( scale / l );
 		return out;
+	}
+
+	public transient Quadtree quadtree = null;
+	
+	public void ensureQuad() {
+		if (quadtree == null) 
+		{
+			System.out.print( "building quadtree..." );
+			
+			quadtree = new Quadtree();
+			
+			for (LoopL<Point3d> ll : blocks.values()) {
+
+				if ( Loopz.area( Loopz.toXZLoop( ll ) ) < 10 )
+					continue; // filter OS' kiosks
+			
+				for (Loop<Point3d> footprint : ll) {
+					Envelope e = envelope( footprint );
+					quadtree.insert( e, footprint  );
+				}
+			}
+			
+			System.out.println( "...done" );
+		}
+	}
+
+	public static Envelope envelope( Loop<Point3d> footprint ) {
+		double[] mm = footprint.stream().map( e -> Pointz.to2( e )).collect( new InaxPoint2dCollector() );
+		Envelope e = new Envelope( mm[0], mm[1], mm[2], mm[3] );
+		return e;
 	}
 }
