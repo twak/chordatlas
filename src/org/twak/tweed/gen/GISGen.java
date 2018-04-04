@@ -1,6 +1,8 @@
 package org.twak.tweed.gen;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -180,6 +183,9 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		}
 		
 		createBlocks( closer, polies );
+		
+		tweed.frame.getGenOf( LotInfoGen.class );
+		
 	}
 
 	private void createBlocks( Closer<Point3d> closer, LoopL<Point3d> polies ) {
@@ -232,6 +238,8 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	}
 	public static Mode mode = Mode.RENDER_SELECTED_BLOCK;
 	
+	private transient boolean doneStreetWidth = false;
+	
 	@Override
 	protected void polyClicked( int callbackI ) {
 
@@ -243,57 +251,75 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			importMesh( callbackI );
 		else if ( tweed.tool.getClass() == FacadeTool.class ) {
 
-			if ( mode == Mode.RENDER_SELECTED_BLOCK ) {
-				( (FacadeTool) tweed.tool ).facadeSelected( blocks.get( callbackI ), lastMesh.get( callbackI ) );
-				
-			} else if ( mode == Mode.RENDER_ALL_BLOCKS ) {
-				
-				FacadeFinder.count = 0;
-				
-				new Parallel<LoopL<Point3d>, Integer>( new ArrayList(blocks.values()), new Work<LoopL<Point3d>, Integer>() {
-					public Integer work(LoopL<Point3d> out) {
-						System.out.println("rendering... ("+ FacadeFinder.count + " images written)");
-						( (FacadeTool) tweed.tool ).facadeSelected( out, null );
-						return 1;
-					}
-				}, new Complete<Integer>() {
-
-					@Override
-					public void complete( Set<Integer> dones ) {
-						System.out.println("finished rendering "+ FacadeFinder.count + " images");
-					}
-				}, false );
-
-//				Set<LoopL<Point3d>> togo = new HashSet( blocks.values() );
-//
-//				for ( int i = 0; i < 4; i++ )
-//					new Thread() {
-//
-//						private synchronized LoopL<Point3d> getNext() {
-//							
-//							try {
-//								LoopL<Point3d> out = togo.iterator().next();
-//
-//								togo.remove( out );
-//
-//								System.out.println( "********************************* remaining:" + togo.size() );
-//
-//								return out;
-//							} catch ( NoSuchElementException e ) {
-//								return new LoopL<>();
-//							}
-//						}
-//
-//						public void run() {
-//
-//							LoopL<Point3d> ll = null;
-//							while ( null != ( ll = getNext() ) )
-//								( (FacadeTool) tweed.tool ).facadeSelected( ll, null );
-//						};
-//					}.start();
-					
-			} else if ( mode == Mode.RENDER_SAT ) {
+			if ( mode == Mode.RENDER_SAT ) {
 				SatUtils.render( tweed, blocks.get( callbackI ) );
+			} else {
+
+
+				LotInfoGen li = tweed.frame.getGenOf( LotInfoGen.class );
+				GISGen gis = tweed.frame.getGenOf( GISGen.class );
+
+				if ( li != null && gis != null && ( (FacadeTool) tweed.tool ).singleFolder ) {
+
+					if ( mode == Mode.RENDER_SELECTED_BLOCK ) {
+
+						BlockGen.findWidths( blocks.get( callbackI ), gis );
+						for ( Loop loop : blocks.get( callbackI ) )
+							li.getProperties( (SuperLoop<?>) loop );
+					} else if ( !doneStreetWidth ) {
+
+						for ( LoopL<Point3d> ll : blocks.values() ) {
+							System.out.println( "pre-processing block" );
+							BlockGen.findWidths( ll, gis );
+
+							for ( Loop loop : ll )
+								li.getProperties( (SuperLoop) loop );
+
+						}
+						doneStreetWidth = true;
+					}
+				}
+				
+				
+				List<LoopL<Point3d>> b = mode == Mode.RENDER_SELECTED_BLOCK ?
+						Collections.singletonList( blocks.get( callbackI ) ) : 
+							new ArrayList( blocks.values() );
+
+				AtomicInteger count = new AtomicInteger( 0 );
+				StringBuffer descriptions = new StringBuffer();
+				File description = new File ( Tweed.DATA + File.separator + FeatureCache.SINGLE_RENDERED_FOLDER + File.separator +"params.txt" );
+				try {
+					description.getParentFile().mkdirs();
+					BufferedWriter bw = new BufferedWriter( new FileWriter( description ) );
+
+					new Parallel<LoopL<Point3d>, Integer>( b, new Work<LoopL<Point3d>, Integer>() {
+						public Integer work( LoopL<Point3d> out ) {
+							System.out.println( "rendering... (" + count + " images written)" );
+							( (FacadeTool) tweed.tool ).facadeSelected( out, count, bw );
+							return 1;
+						}
+					}, new Complete<Integer>() {
+
+						@Override
+						public void complete( Set<Integer> dones ) {
+
+							System.out.print( "finished rendering " + count + " images\nwriting description..." );
+
+							try {
+
+								bw.close();
+							} catch ( IOException e ) {
+								e.printStackTrace();
+							}
+
+							System.out.print( "done" );
+
+						}
+					}, false );
+				} catch ( IOException e1 ) {
+					e1.printStackTrace();
+				}
+
 			}
 		}
 			

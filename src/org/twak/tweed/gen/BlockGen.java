@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,7 +35,6 @@ import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Line;
-import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -42,10 +42,8 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.geom.Graph2D;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.Slice;
@@ -58,7 +56,6 @@ import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
-import com.vividsolutions.jts.index.strtree.Boundable;
 
 public class BlockGen extends ObjGen {
 
@@ -208,17 +205,16 @@ public class BlockGen extends ObjGen {
 		if ( hg.isPresent() )
 			for ( Loop<Point3d> loop : polies )
 				try {
-					sb.append( "\n" );
 					SuperLoop<Point3d> sl = (SuperLoop) loop;
-					for ( Map.Entry<String, Object> e : ( (LotInfoGen) hg.get() ).getProperties( sl ).entrySet() )
-						sb.append( e.getKey() + " : " + e.getValue() + " " );
+					for ( Map.Entry<String, Object> e : sl.properties.entrySet() )
+						sb.append( " >" + e.getKey() + " : " + e.getValue() + "\n" );
 				}
 				catch (Throwable th) {th.printStackTrace(  ); }
 		
 
 		
 		JButton b = new JButton("street widths");
-		b.addActionListener( e -> findWidths() );
+		b.addActionListener( e -> findWidths(polies, tweed.frame.getGenOf( GISGen.class )) );
 		
 		JTextArea name = new JTextArea( sb.toString() );
 		name.setEditable( false );
@@ -242,15 +238,11 @@ public class BlockGen extends ObjGen {
 		return panel;
 	}
 
-	private void findWidths() {
+	public final static String STREET_WIDTH = "streetwidth";
+	
+	public static void findWidths(LoopL<Point3d> polies, GISGen gisGen ) {
 
-		LoopL<Point2d> polies2d = polies.new Map<Point2d>() {
-			@Override
-			public Point2d map( Loopable<Point3d> input ) {
-				return Pointz.to2( input.get() );
-			}
-			
-		}.run();
+		LoopL<Point2d> polies2d = toXZLoopSameProperties ( polies );
 
 		Map<Point2d, Point2d> onBoundary = new HashMap<>(); 
 		
@@ -261,14 +253,15 @@ public class BlockGen extends ObjGen {
 				forEach( p -> onBoundary.put( p.get(), p.getNext().get() ) );
 		}
 
-		PaintThing.debug.clear();
+//		PaintThing.debug.clear();
 		
-		GISGen gisGen = tweed.frame.getGenOf( GISGen.class );
 		gisGen.ensureQuad();
 		
 		for ( Loop<Point2d> footprint : polies2d ) {
 			
-			int count = 0;
+			Map<Line, Double> widths = new HashMap<>();
+			((SuperLoop)footprint).properties.put( STREET_WIDTH, widths );
+			
 			for ( Loopable<Point2d> ll : footprint.loopableIterator() ) {
 				Point2d a = onBoundary.get( ll.get() );
 
@@ -276,35 +269,64 @@ public class BlockGen extends ObjGen {
 
 					Line l = new Line( ll.get(), ll.getNext().get() );
 
-					PaintThing.debug( Color.black, 2f, l );
+//					PaintThing.debug( Color.black, 2f, l );
 				
-					double sw = findStreetWidth ( polies, l, gisGen.quadtree, 30 );
+					double sw = findStreetWidth ( polies, l, gisGen.quadtree, 30, gisGen );
 					
-					if (sw < 1e3) {
-						
-						Vector2d dir = l.dir();
-						dir.set( new double[] { -dir.y, dir.x } );
-						dir.normalize();
-						
-						Point2d mid = l.fromPPram( 0.5 );
-						dir.scale( sw );
-						dir.add( mid );
-						PaintThing.debug( Color.black, 1f, new Line( mid, new Point2d( dir ) ) );
-					}
+					widths.put( l, sw );
+					
+//					if (sw < 1e3) {
+//						
+//						Vector2d dir = l.dir();
+//						dir.set( new double[] { -dir.y, dir.x } );
+//						dir.normalize();
+//						
+//						Point2d mid = l.fromPPram( 0.5 );
+//						dir.scale( sw );
+//						dir.add( mid );
+//						PaintThing.debug( Color.black, 1f, new Line( mid, new Point2d( dir ) ) );
+//					}
 				}
 
 			}
 		}
 		
-		new Plot ( polies2d );
+//		new Plot ( polies2d );
+	}
+
+	private static LoopL<Point2d> toXZLoopSameProperties(LoopL<Point3d> list) {
+		
+		LoopL<Point2d> out = new LoopL<>();
+		
+		for (Loop<Point3d> ll : list)
+			out.add( toXZLoopSameProperties( ll) );
+		
+		return out;
+	}
+	
+	private static Loop<Point2d>  toXZLoopSameProperties( Loop<Point3d> ll) {
+		
+		Loop<Point2d> o;
+		
+		if (ll instanceof SuperLoop ) {
+			o = new SuperLoop( (String) ( (SuperLoop)ll).properties.get( "name" ) );
+			((SuperLoop)o).properties = ( (SuperLoop) ll ).properties;
+		}
+		else {
+			o = new Loop<>();
+		}
+		
+		for (Point3d p : ll) 
+			o.append(new Point2d(p.x, p.z));
+		
+		for (Loop<Point3d> hole : ll.holes)
+			o.holes.add(toXZLoopSameProperties(hole));
+		
+		return o;
 	}
 	
 	private static final int MIN_SW = 15;
-	private double findStreetWidth( LoopL<Point3d> ignore, Line l, Quadtree quadtree, double max ) {
-		
-		GISGen gisGen = tweed.frame.getGenOf( GISGen.class );
-		gisGen.ensureQuad();
-		
+	private static double findStreetWidth( LoopL<Point3d> ignore, Line l, Quadtree quadtree, double max, GISGen gisGen ) {
 		
 		if (l.length() < MIN_SW) {
 			Point2d cen = l.fromPPram( 0.5 );
@@ -328,7 +350,6 @@ public class BlockGen extends ObjGen {
 		
 		double dist = Double.MAX_VALUE;
 
-		int count = 0;
 		
 		Loop<Point2d> queryBounds = new Loop<>(l.end, l.start, a, b);
 		Envelope queryEnvelope = new Envelope( dr.x, dr.getMaxX(), dr.y, dr.getMaxY()  );
@@ -347,7 +368,6 @@ public class BlockGen extends ObjGen {
 					continue;
 				
 				dist = Math.min( dist, l.distance( query ) );
-				count++;
 			}
 		}
 		
@@ -444,7 +464,11 @@ public class BlockGen extends ObjGen {
 		GISGen.mode = Mode.RENDER_SELECTED_BLOCK;
 		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
 		
-		new FacadeTool(tweed).facadeSelected( polies, this );
+		try {
+			new FacadeTool(tweed).facadeSelected( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )) );
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
 	}
 
 	public String nameCoords() {

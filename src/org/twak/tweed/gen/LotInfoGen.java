@@ -40,13 +40,18 @@ public class LotInfoGen extends Gen implements ICanSave {
 		super( csvfile.getName(), tweed );
 		this.location = csvfile.getParentFile();
 		
-		refresh();
+		ensureLoaded();
 	}
 	
 	@Override
 	public void onLoad( Tweed tweed ) {
 		super.onLoad( tweed );
-		refresh();
+		ensureLoaded();
+	}
+	
+	public void ensureLoaded() {
+		if (heights.isEmpty())
+			refresh();
 	}
 	
 	public void refresh() {
@@ -81,6 +86,7 @@ public class LotInfoGen extends Gen implements ICanSave {
 
 			}
 		}
+		
 		System.out.println( count[ 0 ] + " records loaded." );
 	}
 	
@@ -90,23 +96,21 @@ public class LotInfoGen extends Gen implements ICanSave {
 		return new JLabel("serving data for " + heights.size()+" blocks");
 	}
 
-	public Map<String,Object> getProperties( Loop<Point3d> l ) {
-		
-		SuperLoop<Point3d> sl = (SuperLoop)l;
+	public final static String NAME= "name";
+	
+	public void getProperties( SuperLoop<?> sl ) {
 		
 		Map<String, Object> out = new HashMap();
 		
-		OS os = heights.get(sl.properties.get( "name" ));
+		OS os = heights.get(sl.properties.get( NAME ));
 		
 		if (os != null) {
-			out.put( "abshmin", os.abshmin );
-			out.put( "absh2", os.absh2 );
-			out.put( "abshmax", os.abshmax );
-			out.put( "relh2", os.relh2 );
-			out.put( "relhmax", os.relhmax );
+			sl.properties.put( "abshmin", os.abshmin );
+			sl.properties.put( "absh2", os.absh2 );
+			sl.properties.put( "abshmax", os.abshmax );
+			sl.properties.put( "relh2", os.relh2 );
+			sl.properties.put( "relhmax", os.relhmax );
 		}
-		
-		return out;
 	}
 
 }

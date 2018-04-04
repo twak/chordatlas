@@ -17,7 +17,11 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
+import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedFrame;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.BlockGen;
+import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PlanesGen;
 import org.twak.tweed.gen.PlanesGen.Plane;
@@ -29,13 +33,13 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.collections.Streamz;
+import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.LinearForm;
 
 public class FacadeFinder {
 
 	public List<ToProjMega> results = new ArrayList();	
-	BlockGen block;
 	
 	public static class ToProject {
 		
@@ -43,6 +47,7 @@ public class FacadeFinder {
 		public Point2d s, e;
 		public double heightEstimate;
 		public double maxHeight, minHeight;
+		public String description;
 		
 		public ToProject( Point2d s, Point2d e, double minHeight, double maxHeight ) {
 			this.s = s;
@@ -72,78 +77,16 @@ public class FacadeFinder {
 	}
 	
 	public static FacadeMode facadeMode = FacadeMode.PER_CAMERA_CROPPED;
-	public static int count = 0;
 	
-	public FacadeFinder( LoopL<Point2d> _edges, Map<Point2d, Pano> panos, List<Point3d> meshPoints, BlockGen blockGen, PlanesGen drawnPlanes ) {
+	public FacadeFinder( 
+			LoopL<Point2d> _edges, 
+			Map<Point2d, Pano> panos, 
+			PlanesGen drawnPlanes ) {
 
-		LoopL<Point2d> edges = _edges;
-		this.block = blockGen;
-		
-		MultiMap<Point2d, Integer> whichPoly = new MultiMap();
-		{
-			for (int c = 0; c < edges.size(); c++) {
-				Loop<Point2d>lp = edges.get(c);
+		MultiMap<Point2d, Integer> whichPoly = new MultiMap<>();
+		LoopL<Point2d> edges = simplify( _edges, whichPoly );
 				
-				for (Point2d pt : lp )
-					whichPoly.put(pt, c, true);
-			}
-		}
-		
-		edges = Loopz.removeInnerEdges(edges);
-		
-		double TOL = 0.5;
-		
-		Iterator<Loop<Point2d>> eit = edges.iterator();
-		
-		while (eit.hasNext())
-			if (Loopz.area( eit.next() ) < 0)
-				eit.remove();
-		
-		eit = edges.iterator();
-		
-		// use loopz.removeAdjacentEdges?
-		while (eit.hasNext()) {
-			Loop<Point2d> loop = eit.next();
-			Loopable<Point2d> start = loop.start, current = start;
-			int size = loop.count();
-			
-			boolean again;
-			do {
-				again = false;
-				Point2d a = current.getPrev().get(),
-						b = current.get(),
-						c = current.getNext().get();
-				
-				Line ab = new Line(a,b),
-				     bc = new Line (b,c);
-				
-				double angle = Anglez.dist( ab.aTan2(), bc.aTan2() );
-				
-				if ( 
-						whichPoly.get(b).size() == 1 && (
-						a.distanceSquared(b) < 0.0001 ||
-						b.distanceSquared(c) < 0.0001 ||
-						angle < 0.2 && Math.abs ( Mathz.area(a, b, c) ) < 50 * TOL * TOL  ) )
-				{
-					current.getPrev().setNext(current.getNext());
-					current.getNext().setPrev(current.getPrev());
-					size--;
-					if (start == current)
-						loop.start = start = current.getPrev();
-					
-					again = true;
-					current = current.getPrev();
-				}
-				else
-					current = current.getNext();
-			}
-			while ( ( again || current != start) && size > 2);
-			
-			if (size <= 2)
-				eit.remove();
-		}
-				
-		List<F> fs = new ArrayList<>();
+		List<FacadeDirection> fs = new ArrayList<>();
 		
 		List<Loopable<Point2d>> longestFirst = edges.stream().flatMap( x -> Streamz.stream( x.loopableIterator() ) ).sorted( 
 				(b,a) -> Double.compare( a.get().distanceSquared( a.getNext().get() ), b.get()
@@ -153,23 +96,21 @@ public class FacadeFinder {
 
 			Point2d s = lp.get(), e = lp.getNext().get();
 
-//			Loop<Point2d> orig = _edges.get( findOrigPoly( whichPoly, s, e ) );
-
 			Line l = new SuperLine( s, e );
 
 			boolean found = false;
 
-			f: for ( F f : fs )
-				if ( f.matches( l ) ) {
+			for ( FacadeDirection f : fs )
+				if ( f.addIfMatches( l ) ) {
 					found = true;
-					break f;
+					break;
 				}
 
 			if ( !found )
-				fs.add( new F( l ) );
+				fs.add( new FacadeDirection( l ) );
 		}
 		
-		for (F f : fs) {
+		for (FacadeDirection f : fs) {
 			
 			if (f.length < 2)
 				continue;
@@ -206,11 +147,7 @@ public class FacadeFinder {
 
 					double height;
 					
-					if ( l instanceof SuperLine ) {
-						height = 30;
-					} else { //heights from mesh
-						height = guessHeight( meshPoints, l );
-					}
+					height = 10;
 
 					System.out.println( "estimate facade height as " + height );
 
@@ -218,45 +155,25 @@ public class FacadeFinder {
 					ex = ex.reverse();
 					Vector2d dir = ex.dir();
 
-					dir.scale( 10 / dir.length() );
+					dir.scale( 0 / dir.length() );
 
 					ex.start.sub( dir );
 					ex.end.add( dir );
 
 					ToProject out = new ToProject( ex.start, ex.end, 0, height );
 
-					double closestDist = 20;
-					Point2d closestP = null;
-					
-					Point2d mid = ex.fromPPram( 0.5 );
+					out.description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ) );
 					
 					for ( Point2d p : panos.keySet() ) {
 
 						if ( ex.isOnLeft( p ) )
-//							if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE ) {
-
-								if ( ex.distance( p, true ) < 20 )
-									out.toProject.add( panos.get( p ) );
-//							} else {
-//
-//								double dist = mid.distance( p );
-//								if ( dist < closestDist ) {
-//									closestDist = dist;
-//									closestP = p;
-//								}
-//							}
+							if ( Mathz.inRange( ex.findPPram( p ), 0, 1 ) )  //distance( p, true ) < 20 )
+								out.toProject.add( panos.get( p ) );
 					}
+
 					
-//					if ( GMLGen.mode == Mode.RENDER_SELECTED_FACADE ) {
-						if ( out.toProject.size() > 0 )
-							megaResults.add( out );
-//					} else {
-//
-//						if ( closestP != null ) {
-//							out.toProject.add( panos.get( closestP ) );
-//							megaResults.add( out );
-//						}
-//					}
+					if ( out.toProject.size() > 0 )
+						megaResults.add( out );
 				}
 			} else if (facadeMode == FacadeMode.PER_MEGA ){
 				
@@ -351,7 +268,6 @@ public class FacadeFinder {
 						if ( left.distance( right ) > 3 ) {
 							out.toProject.add( panos.get( p ) );
 							megaResults.add( out );
-							count ++;
 						}
 					}
 				}
@@ -373,6 +289,128 @@ public class FacadeFinder {
 		}
 	}
 
+	private String createDescription( Line facade, SuperLoop<Point2d> footprint ) {
+		
+		Point2d location = facade.fromPPram( 0.5 );
+		
+		double area = Math.abs( Loopz.area( footprint ) );
+
+		String description = location.x +", " + location.y +", " + area; 
+		
+		LotInfoGen lf = TweedFrame.instance.getGenOf( LotInfoGen.class );
+		if (lf != null) {
+			
+			Map <String, Object> properties = footprint.properties;
+			
+			try {
+				double height =  (double)properties.get( "absh2" ) - (double)properties.get( "abshmin" ) ;
+				description += ", " + height;
+			}
+			catch (Throwable th) {
+				System.out.println( "no height information for block" );
+				description += ", -1";
+			}
+			
+			Map<Line, Double> streetWidths = (Map<Line, Double>) properties.get( BlockGen.STREET_WIDTH );
+			if (streetWidths != null) {
+				double bestDist = Double.MAX_VALUE;
+				double width = -1;
+				for (Line l : streetWidths.keySet()) {
+					double dist = l.distance( facade );
+					if (l.absAngle( facade ) < 0.1 && dist < 3) {
+						if (dist < bestDist) {
+							bestDist = dist;
+							width = streetWidths.get( l );
+						}
+					}
+				}
+				
+				if (width == Double.MAX_VALUE)
+					width = -1;
+				
+				if (width == -1) 
+					System.out.println( "failed to find streetwidth for block" );
+				
+				description += ", " + width;
+			}
+			else
+				description += ", -1";
+			
+			
+			
+		}
+		
+		return description;
+		
+	}
+
+	private LoopL<Point2d> simplify( LoopL<Point2d> edges, MultiMap<Point2d, Integer> whichPoly ) {
+
+		{
+			for (int c = 0; c < edges.size(); c++) {
+				Loop<Point2d>lp = edges.get(c);
+				
+				for (Point2d pt : lp )
+					whichPoly.put(pt, c, true);
+			}
+		}
+		
+		edges = Loopz.removeInnerEdges(edges);
+		
+		double TOL = 0.5;
+		
+		Iterator<Loop<Point2d>> eit = edges.iterator();
+		
+		while (eit.hasNext())
+			if (Loopz.area( eit.next() ) < 0)
+				eit.remove();
+		
+		eit = edges.iterator();
+		
+		// use loopz.removeAdjacentEdges?
+		while (eit.hasNext()) {
+			Loop<Point2d> loop = eit.next();
+			Loopable<Point2d> start = loop.start, current = start;
+			int size = loop.count();
+			
+			boolean again;
+			do {
+				again = false;
+				Point2d a = current.getPrev().get(),
+						b = current.get(),
+						c = current.getNext().get();
+				
+				Line ab = new Line(a,b),
+				     bc = new Line (b,c);
+				
+				double angle = Anglez.dist( ab.aTan2(), bc.aTan2() );
+				
+				if ( 
+						whichPoly.get(b).size() == 1 && (
+						a.distanceSquared(b) < 0.0001 ||
+						b.distanceSquared(c) < 0.0001 ||
+						angle < 0.2 && Math.abs ( Mathz.area(a, b, c) ) < 50 * TOL * TOL  ) )
+				{
+					current.getPrev().setNext(current.getNext());
+					current.getNext().setPrev(current.getPrev());
+					size--;
+					if (start == current)
+						loop.start = start = current.getPrev();
+					
+					again = true;
+					current = current.getPrev();
+				}
+				else
+					current = current.getNext();
+			}
+			while ( ( again || current != start) && size > 2);
+			
+			if (size <= 2)
+				eit.remove();
+		}
+		return edges;
+	}
+
 	private double guessHeight( List<Point3d> meshPoints, Line l ) {
 		double height;
 		height = 2;
@@ -386,32 +424,32 @@ public class FacadeFinder {
 		return height;
 	}
 
-//	private int findOrigPoly( MultiMap<Point2d, Integer> whichPoly, Point2d s, Point2d e ) {
-//		
-//		List<Integer > js = whichPoly.get( e );
-//		for (Integer i : whichPoly.get( s ) ) {
-//			for (Integer j : js) {
-//				if (i == j)
-//					return i;
-//			}
-//		}
-//		
-//		return -1;
-//	}
+	private static int findOrigPoly( MultiMap<Point2d, Integer> whichPoly, Point2d s, Point2d e ) {
+		
+		List<Integer > js = whichPoly.get( e );
+		for (Integer i : whichPoly.get( s ) ) {
+			for (Integer j : js) {
+				if (i == j)
+					return i;
+			}
+		}
+		
+		return -1;
+	}
 
-	private static class F {
+	private static class FacadeDirection {
 		
 		LinearForm lf;
 		List<Line> facades = new ArrayList();
 		double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
 		double length;
 		
-		public F( Line l ) {
+		public FacadeDirection( Line l ) {
 			lf = new LinearForm( l );
-			matches(l);
+			addIfMatches(l);
 		}
 		
-		public boolean matches(Line f) {
+		public boolean addIfMatches(Line f) {
 			if ( lf.angle( new LinearForm(f) ) < 0.1 &&
 					lf.distance( f.start ) < 3 ) {
 				

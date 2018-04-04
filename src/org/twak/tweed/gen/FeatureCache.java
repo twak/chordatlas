@@ -48,6 +48,7 @@ public class FeatureCache {
 	public static final String RENDERED_IMAGE = "orthographic";
 	public static final String RENDERED_IMAGE_PNG = RENDERED_IMAGE + ".png";
 	public static final String FEATURE_FOLDER = "features";
+	public static final String SINGLE_RENDERED_FOLDER = "rendered";
 	
 	public static class ImageFeatures implements ICanPaint {
 		
