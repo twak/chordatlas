@@ -202,7 +202,10 @@ public class FacadeTool extends SelectTool {
 								try {
 									FileWriter out = new FileWriter( new File( imageFolder, "meta.txt" ) );
 
-									out.write( pixelsPerMeter * 10 + " " + ( tp.s.distance( tp.e ) * pixelsPerMeter - pixelsPerMeter * 20 ) + " " + ( tp.maxHeight - tp.minHeight ) * pixelsPerMeter + "\n" );
+									out.write( pixelsPerMeter * 10 + " " + 
+									( tp.s.distance( tp.e ) * pixelsPerMeter - pixelsPerMeter * 20 ) + " " +
+											( tp.maxHeight - tp.minHeight ) * pixelsPerMeter + "\n" );
+									
 									out.write( pg.toString() + "\n" );
 									out.write( pano.orig.getName() + "\n" );
 

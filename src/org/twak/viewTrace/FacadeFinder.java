@@ -142,12 +142,15 @@ public class FacadeFinder {
 
 				for (Line l : f.facades) {
 
-					if ( l.lengthSquared() < 1 )
+					if ( l.lengthSquared() < 5 * 5 )
 						continue;
 
-					double height;
+					String description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ) );
 					
-					height = 10;
+					if (description == null)
+						continue;
+					
+					double height = 10;
 
 					System.out.println( "estimate facade height as " + height );
 
@@ -155,14 +158,17 @@ public class FacadeFinder {
 					ex = ex.reverse();
 					Vector2d dir = ex.dir();
 
-					dir.scale( 0 / dir.length() );
+					dir.scale( 5 / dir.length() );
 
+					Point2d mid = ex.fromPPram( 0.5 );
+					
+					ex.start.set( mid );
 					ex.start.sub( dir );
+					ex.end.set( mid );
 					ex.end.add( dir );
 
 					ToProject out = new ToProject( ex.start, ex.end, 0, height );
-
-					out.description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ) );
+					out.description = description;
 					
 					for ( Point2d p : panos.keySet() ) {
 
@@ -295,6 +301,9 @@ public class FacadeFinder {
 		
 		double area = Math.abs( Loopz.area( footprint ) );
 
+		if (area < 10)
+			return null;
+		
 		String description = location.x +", " + location.y +", " + area; 
 		
 		LotInfoGen lf = TweedFrame.instance.getGenOf( LotInfoGen.class );
@@ -304,6 +313,10 @@ public class FacadeFinder {
 			
 			try {
 				double height =  (double)properties.get( "absh2" ) - (double)properties.get( "abshmin" ) ;
+				
+				if (height < 4)
+					return null;
+				
 				description += ", " + height;
 			}
 			catch (Throwable th) {
@@ -325,19 +338,13 @@ public class FacadeFinder {
 					}
 				}
 				
-				if (width == Double.MAX_VALUE)
-					width = -1;
-				
-				if (width == -1) 
-					System.out.println( "failed to find streetwidth for block" );
+				if (width == Double.MAX_VALUE || width == -1)
+					return null;
 				
 				description += ", " + width;
 			}
 			else
-				description += ", -1";
-			
-			
-			
+				return null;
 		}
 		
 		return description;
