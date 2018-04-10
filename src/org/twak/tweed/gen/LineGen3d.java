@@ -101,7 +101,11 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 		{
 			Geometry geom;
 			Random randy = new Random();
-			for ( Map.Entry<Loop<Point3d>, Integer> e : getFaces().entrySet() ) {
+			
+			if (getFaces().size() > 5e4)
+				System.out.println( "warning too many polygons; not filling polygons");
+			else
+				for ( Map.Entry<Loop<Point3d>, Integer> e : getFaces().entrySet() ) {
 
 					Loop<Point3d> p = e.getKey();
 

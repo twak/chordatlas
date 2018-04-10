@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -23,16 +24,13 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
-import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ImagePlaneGen;
 import org.twak.tweed.gen.Pano;
@@ -41,7 +39,6 @@ import org.twak.tweed.gen.PlanesGen;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
-import org.twak.utils.geom.ObjRead;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
@@ -50,7 +47,6 @@ import org.twak.viewTrace.FacadeFinder.ToProject;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
 
@@ -88,7 +84,7 @@ public class FacadeTool extends SelectTool {
 		// fixme, we don't use this code path anymore
 	}
 
-	public void facadeSelected( LoopL<Point3d> list, AtomicInteger count, BufferedWriter description ) {
+	public void renderFacade( LoopL<Point3d> list, AtomicInteger count, BufferedWriter description ) {
 
 		double[] minMax = Loopz.minMax( list );// Polygonz.findBounds( polies, min, max );
 
@@ -172,7 +168,7 @@ public class FacadeTool extends SelectTool {
 
 						ImagePlaneGen pg = new ImagePlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
 
-						if ( GISGen.mode != Mode.RENDER_ALL_BLOCKS ) 
+						if (false /* visualize planes */)
 							tweed.frame.addGen( pg, true );
 						
 						for ( Pano pano_ : tp.toProject ) {
@@ -196,8 +192,8 @@ public class FacadeTool extends SelectTool {
 							BufferedImage bi = pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
 							
 							if ( !singleFolder ) {
-								if ( GISGen.mode == Mode.RENDER_SELECTED_BLOCK || GISGen.mode == Mode.RENDER_ALL_BLOCKS )
-									images.add( bi );
+								
+								images.add( bi );
 
 								try {
 									FileWriter out = new FileWriter( new File( imageFolder, "meta.txt" ) );
@@ -222,7 +218,7 @@ public class FacadeTool extends SelectTool {
 						}
 					}
 					
-					if ( !singleFolder && ( GISGen.mode == Mode.RENDER_SELECTED_BLOCK || GISGen.mode == Mode.RENDER_ALL_BLOCKS ) )
+					if ( !singleFolder )
 						Imagez.writeSummary (new File (megaFolder, "summary.png"), images);
 				}
 			}
@@ -272,20 +268,19 @@ public class FacadeTool extends SelectTool {
 	public void getUI( JPanel panel ) {
 
 		panel.setLayout( new ListDownLayout() );
-		
-		JComboBox<GISGen.Mode> allOne = new JComboBox<>();
-
-		allOne.addItem( GISGen.Mode.RENDER_ALL_BLOCKS );
-		allOne.addItem( GISGen.Mode.RENDER_SELECTED_BLOCK );
-//		allOne.addItem( GISGen.Mode.RENDER_SAT );
-		allOne.setSelectedItem( GISGen.mode );
-		allOne.addActionListener( new ActionListener() {
-			
-			@Override
-			public void actionPerformed( ActionEvent e ) {
-				GISGen.mode = (Mode) allOne.getSelectedItem();
-			}
-		} );
+//		
+//		JComboBox<GISGen.Mode> allOne = new JComboBox<>();
+//
+//		allOne.addItem( GISGen.Mode.RENDER_ALL_BLOCKS );
+//		allOne.addItem( GISGen.Mode.RENDER_SELECTED_BLOCK );
+//		allOne.addItem( GISGen.Mode.RANDOM_FACADE_SAMPLER );
+//		allOne.setSelectedItem( GISGen.mode );
+//		allOne.addActionListener( new ActionListener() {
+//			@Override
+//			public void actionPerformed( ActionEvent e ) {
+//				GISGen.mode = (Mode) allOne.getSelectedItem();
+//			}
+//		} );
 		
 		JComboBox<FacadeFinder.FacadeMode> granularity = new JComboBox<>();
 		
@@ -293,6 +288,8 @@ public class FacadeTool extends SelectTool {
 		granularity.addItem( FacadeMode.PER_MEGA        );
 		granularity.addItem( FacadeMode.PER_CAMERA      );
 		granularity.addItem( FacadeMode.PER_CAMERA_CROPPED      );
+		granularity.addItem( FacadeMode.PER_FETCH      );
+		
 		granularity.setSelectedItem( FacadeFinder.facadeMode );
 		granularity.addActionListener( new ActionListener() {
 			
@@ -306,9 +303,13 @@ public class FacadeTool extends SelectTool {
 		singleFolderCheck.setSelected( FacadeTool.this.singleFolder );
 		singleFolderCheck.addActionListener( e -> FacadeTool.this.singleFolder = singleFolderCheck.isSelected() );
 		
-		panel.add( allOne );
+		JButton forAll = new JButton("for all");
+		forAll.addActionListener( l -> tweed.frame.getGenOf( GISGen.class ).startRender( -1 ) );
+		
+//		panel.add( allOne );
 		panel.add( granularity );
 		panel.add( singleFolderCheck );
+		panel.add( forAll );
 		panel.add( new JLabel( "right click on any block to start" ) );
 	}
 }

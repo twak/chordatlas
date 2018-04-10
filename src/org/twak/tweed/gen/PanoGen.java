@@ -64,12 +64,14 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	File folder;
 	transient List<Pano> panos = new ArrayList();
 	
-	String sourceCRS;
+	public String sourceCRS;
 	
 	transient Pano selectedPano = null;
 	transient JPanel ui = new JPanel();
 	
-	public PanoGen() {}
+	public PanoGen() {
+		System.out.println( ">>>>" );
+	}
 	public PanoGen(File folder, Tweed tweed, String sourceCRS ) {
 		super ("panos "+folder.getName(), tweed);
 		this.folder = folder;
@@ -155,16 +157,17 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 
 		panos = null;
 		
-		if ( meta.exists() ) {
-			try {
-				panos = (List<Pano>) new XStream().fromXML( meta );
-			} catch ( Throwable th ) {
-				th.printStackTrace();
-			}
-		}
-		
-		
-		if (panos == null) 
+//		if ( meta.exists() ) 
+//		{
+//			try {
+//				panos = (List<Pano>) new XStream().fromXML( meta );
+//			} catch ( Throwable th ) {
+//				th.printStackTrace();
+//			}
+//		}
+//		
+//		
+//		if (panos == null || panos.isEmpty()) 
 		{
 			panos = new ArrayList<>();
 			
@@ -196,15 +199,17 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	}
 
 	private void createPanoGen( File f, List<Pano> results ) {
-
+		results.add( createPanoGen( f, sourceCRS  ) );
+	}
+	
+	public static Pano createPanoGen( File f, String sourceCRS ) {
 		String name = f.getName().substring( 0, f.getName().length() - 4 );
-
 		try
 		{
 			String[] sVals = name.split( "[_]", 10 );
 			
 			if (sVals.length < 6)
-				return;
+				return null;
 			
 			List<Double> pos = Arrays.asList( Arrays.copyOfRange( sVals, 0, 6 ) )
 					.stream().map( z -> Double.parseDouble( z ) ).collect( Collectors.toList() );
@@ -256,20 +261,18 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 					trans[ 2 ] );
 			
 			
-			{
-				Vector3d west = new Vector3d( (float)( trans[ 0 ] - north[ 0 ]), 0f, (float)(north [ 2 ] - trans [ 2 ] ) ); 
-				west.scale( 0.6f / west.length() );
-				location.add( west );
-			}
+//			{
+//				Vector3d west = new Vector3d( (float)( trans[ 0 ] - north[ 0 ]), 0f, (float)(north [ 2 ] - trans [ 2 ] ) ); 
+//				west.scale( 0.6f / west.length() );
+//				location.add( west );
+//			}
 			
 			System.out.println( "pano@ " + location );
 		
-			results.add ( new Pano ( name, location, 
+			return new Pano ( name, location, 
 				   (pos.get( 3 ).floatValue()+180),// + 360 - (toNorth * 180 /FastMath.PI ) ) % 360, 
 					pos.get( 4 ).floatValue(), 
-					pos.get( 5 ).floatValue() ) );
-			
-			
+					pos.get( 5 ).floatValue() );
 			
 		} catch ( IndexOutOfBoundsException e ) {
 			e.printStackTrace();
@@ -280,6 +283,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		} catch ( TransformException e ) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
 	public void downloadPanos() {

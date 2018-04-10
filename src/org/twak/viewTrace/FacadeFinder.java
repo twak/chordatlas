@@ -17,14 +17,13 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
-import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedFrame;
-import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PlanesGen;
 import org.twak.tweed.gen.PlanesGen.Plane;
+import org.twak.tweed.gen.Pointz;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
@@ -68,7 +67,7 @@ public class FacadeFinder {
 	}
 	
 	public enum FacadeMode {
-		PER_GIS, PER_MEGA, PER_CAMERA, PER_CAMERA_CROPPED;
+		PER_GIS, PER_MEGA, PER_CAMERA, PER_CAMERA_CROPPED, PER_FETCH;
 		
 		@Override
 		public String toString() {
@@ -76,7 +75,7 @@ public class FacadeFinder {
 		}
 	}
 	
-	public static FacadeMode facadeMode = FacadeMode.PER_CAMERA_CROPPED;
+	public static FacadeMode facadeMode = FacadeMode.PER_FETCH;//CAMERA_CROPPED;
 	
 	public FacadeFinder( 
 			LoopL<Point2d> _edges, 
@@ -137,19 +136,19 @@ public class FacadeFinder {
 			ToProjMega megaResults = new ToProjMega(f.getExtent().reverse());
 			
 			results.add( megaResults );
-			
+
 			if ( facadeMode == FacadeMode.PER_GIS ) {
 
-				for (Line l : f.facades) {
+				for ( Line l : f.facades ) {
 
 					if ( l.lengthSquared() < 5 * 5 )
 						continue;
 
-					String description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ) );
-					
-					if (description == null)
+					String description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ), new double[1] );
+
+					if ( description == null )
 						continue;
-					
+
 					double height = 10;
 
 					System.out.println( "estimate facade height as " + height );
@@ -161,7 +160,7 @@ public class FacadeFinder {
 					dir.scale( 5 / dir.length() );
 
 					Point2d mid = ex.fromPPram( 0.5 );
-					
+
 					ex.start.set( mid );
 					ex.start.sub( dir );
 					ex.end.set( mid );
@@ -169,44 +168,100 @@ public class FacadeFinder {
 
 					ToProject out = new ToProject( ex.start, ex.end, 0, height );
 					out.description = description;
-					
+
 					for ( Point2d p : panos.keySet() ) {
 
 						if ( ex.isOnLeft( p ) )
-							if ( Mathz.inRange( ex.findPPram( p ), 0, 1 ) )  //distance( p, true ) < 20 )
+							if ( Mathz.inRange( ex.findPPram( p ), 0, 1 ) ) //distance( p, true ) < 20 )
 								out.toProject.add( panos.get( p ) );
 					}
 
-					
 					if ( out.toProject.size() > 0 )
 						megaResults.add( out );
 				}
-			} else if (facadeMode == FacadeMode.PER_MEGA ){
+			} else if ( facadeMode == FacadeMode.PER_FETCH ) {
 				
+				List<Line> filtered = f.facades.stream().filter( l -> l.lengthSquared() > 3*3 ).collect( Collectors.toList() );
+				Collections.shuffle( filtered );
+				
+				for ( Line l : filtered ) {
+
+					SuperLoop<Point2d> orig = (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) );
+
+					not sure about height
+					double[] ho = new double[1];
+					String description = createDescription( l, orig, ho );
+
+					if ( description == null )
+						continue;
+
+					double height = Mathz.clamp( ho[0], 15, 30 );
+
+					System.out.println( "estimate facade height as " + height );
+
+					Line ex = new Line( l );
+					ex = ex.reverse();
+					Point2d mid = ex.fromPPram( 0.5 );
+					
+					if ( ex.lengthSquared() > 7 * 7 ) {
+						Vector2d dir = ex.dir();
+
+						dir.scale( 3.5 / dir.length() );
+
+						ex.start.set( mid );
+						ex.start.sub( dir );
+						ex.end.set( mid );
+						ex.end.add( dir );
+					}
+
+					
+					
+					Pano pano = new SVLatLongQuery(TweedFrame.instance.tweed.worldToLatLong(Pointz.to3( mid ))).query();
+					
+					if (pano == null)
+						continue;
+					
+					Point2d p = new Point2d (pano.location.x, pano.location.z);
+					
+					ToProject out = new ToProject( ex.start, ex.end, 0, height );
+
+					out.description = description;
+
+					should only download if these tests pass
+					double d2 = ex.distance( p );
+					
+					if ( /* ex.isOnLeft( p ) &&*/ d2 < 25 )
+						if ( ex.project( p, false ).distance( p ) < d2 / 2 ) { //distance( p, true ) < 20 )
+							out.toProject.add( pano );
+							megaResults.add( out );
+						}
+
+					break;
+				}
+			} else if ( facadeMode == FacadeMode.PER_MEGA ) {
+
 				Line mega = f.getExtent();
 
-				
 				Vector2d dir = mega.dir();
-				dir.scale (7 / dir.length());
+				dir.scale( 7 / dir.length() );
 
-				Point2d s = new Point2d (mega.start), e = new Point2d(mega.end);
-				e.add(dir);
-				s.sub(dir);
-				
+				Point2d s = new Point2d( mega.start ), e = new Point2d( mega.end );
+				e.add( dir );
+				s.sub( dir );
+
 				for ( Point2d p : panos.keySet() ) {
-					
+
 					Point2d cen = mega.project( p, false );
-					
-					if ( mega.isOnLeft( p ) && mega.distance( p, true ) < 20 &&
-						Mathz.inRange( mega.findPPram( cen ), 0, 1 ) ) {
 
-							double height = panos.get(p).location.y;
-							ToProject out = new ToProject( s, e, 0, height + 30 );
-							megaResults.add( out );
+					if ( mega.isOnLeft( p ) && mega.distance( p, true ) < 20 && Mathz.inRange( mega.findPPram( cen ), 0, 1 ) ) {
 
-							out.toProject.add( panos.get( p ) );
-						}
+						double height = panos.get( p ).location.y;
+						ToProject out = new ToProject( s, e, 0, height + 30 );
+						megaResults.add( out );
+
+						out.toProject.add( panos.get( p ) );
 					}
+				}
 				
 			} else if (facadeMode == FacadeMode.PER_CAMERA || facadeMode == FacadeMode.PER_CAMERA_CROPPED ){
 				
@@ -295,7 +350,7 @@ public class FacadeFinder {
 		}
 	}
 
-	private String createDescription( Line facade, SuperLoop<Point2d> footprint ) {
+	private String createDescription( Line facade, SuperLoop<Point2d> footprint, double[] heightOut ) {
 		
 		Point2d location = facade.fromPPram( 0.5 );
 		
@@ -312,7 +367,7 @@ public class FacadeFinder {
 			Map <String, Object> properties = footprint.properties;
 			
 			try {
-				double height =  (double)properties.get( "absh2" ) - (double)properties.get( "abshmin" ) ;
+				double height = heightOut[0] = (double)properties.get( "absh2" ) - (double)properties.get( "abshmin" ) ;
 				
 				if (height < 4)
 					return null;

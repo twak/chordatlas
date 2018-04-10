@@ -123,21 +123,38 @@ public class TweedFrame {
 		scheduler.scheduleAtFixedRate( new Runnable() {
 			@Override
 			public void run() {
+				
 				Vector3d pt = tweed.cursorPosition;
-				if ( coordLabel != null && TweedSettings.settings.trans != null) {
-					worldLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
+				
+				if ( gmlCoordLabel != null && TweedSettings.settings.trans != null && pt != null) {
+					worldLabel.setText( String.format( "world: %.4f, %.4f ", 
 							pt.x, 
 							pt.z) );
-					coordLabel.setText( pt == null ? "..." : String.format( "%.4f, %.4f ", 
+					
+					gmlCoordLabel.setText( String.format( "%s: %.4f, %.4f ",
+							TweedSettings.settings.gmlCoordSystem,
 							pt.x + TweedSettings.settings.trans[0], 
 							pt.z + TweedSettings.settings.trans[1]) );
-					crsLabel.setText(TweedSettings.settings.gmlCoordSystem);
+					
+					double[] latLong = tweed.worldToLatLong( pt );
+					
+					latLabel.setText( String.format( "%s: %.6f, %.6f ",
+							"lat/long",
+							latLong[0],
+							latLong[1]
+							) );
+				}
+				else 
+				{
+					worldLabel.setText( "?" );
+					gmlCoordLabel.setText( "?" );
+					latLabel.setText( "?" );
 				}
 
 				JFrame.setDefaultLookAndFeelDecorated( true );
 
 			}
-		}, 100, 100, TimeUnit.MILLISECONDS );
+		}, 200, 200, TimeUnit.MILLISECONDS );
 
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		frame.pack();
@@ -365,19 +382,19 @@ public class TweedFrame {
 
 		tweed.addUI( toolPanel );
 
-		coordLabel = new JLabel( "" );
-		coordLabel.setHorizontalAlignment( SwingConstants.CENTER );
+		gmlCoordLabel = new JLabel( "" );
+		gmlCoordLabel.setHorizontalAlignment( SwingConstants.CENTER );
 		worldLabel = new JLabel( "" );
 		worldLabel.setHorizontalAlignment( SwingConstants.CENTER );
-		crsLabel = new JLabel( "none" );
-		crsLabel.setHorizontalAlignment( SwingConstants.CENTER );
+		latLabel = new JLabel( "none" );
+		latLabel.setHorizontalAlignment( SwingConstants.CENTER );
 
 		out.add( toolPanel, BorderLayout.NORTH );
 		
 		JPanel coords = new JPanel( new ListDownLayout() );
 		coords.add( worldLabel );
-		coords.add( coordLabel );
-		coords.add( crsLabel );
+		coords.add( gmlCoordLabel );
+		coords.add( latLabel );
 		
 		out.add( coords, BorderLayout.SOUTH );
 
@@ -386,7 +403,7 @@ public class TweedFrame {
 		return out;
 	}
 
-	JLabel coordLabel, crsLabel, worldLabel;
+	JLabel gmlCoordLabel, latLabel, worldLabel;
 
 	private void addLayer( MouseEvent evt ) {
 

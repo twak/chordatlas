@@ -49,6 +49,7 @@ public class LotInfoGen extends Gen implements ICanSave {
 		ensureLoaded();
 	}
 	
+	
 	public void ensureLoaded() {
 		if (heights.isEmpty())
 			refresh();
@@ -98,7 +99,7 @@ public class LotInfoGen extends Gen implements ICanSave {
 
 	public final static String NAME= "name";
 	
-	public void getProperties( SuperLoop<?> sl ) {
+	public void fetchOSProperties( SuperLoop<?> sl ) {
 		
 		Map<String, Object> out = new HashMap();
 		

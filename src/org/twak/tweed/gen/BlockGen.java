@@ -31,7 +31,6 @@ import javax.vecmath.Vector2d;
 
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.GISGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Line;
@@ -358,7 +357,9 @@ public class BlockGen extends ObjGen {
 			
 			Loop<Point3d> block = (Loop)o;
 			
-			if ( ignore.contains( block ) || ! queryEnvelope.intersects( GISGen.envelope( block ) ) )
+			why is block sometime null?
+			
+			if ( block == null || ignore.contains( block ) || ! queryEnvelope.intersects( GISGen.envelope( block ) ) )
 				continue;
 			
 			for (Loopable<Point3d> pt : block.loopableIterator()) {
@@ -461,11 +462,10 @@ public class BlockGen extends ObjGen {
 				return;
 		}
 		
-		GISGen.mode = Mode.RENDER_SELECTED_BLOCK;
 		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
 		
 		try {
-			new FacadeTool(tweed).facadeSelected( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )) );
+			new FacadeTool(tweed).renderFacade( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )) );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

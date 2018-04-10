@@ -17,16 +17,22 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
+import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.FacadeTool;
@@ -338,7 +344,7 @@ public class Tweed extends SimpleApplication {
 			
 		} else {
 			cam.setFrustumPerspective(  TweedSettings.settings.fov*10 +100, 16 / 9f, 0.1f, 1e3f );
-			cam.setFrustumFar( 1e4f );
+			cam.setFrustumFar( 1e5f );
 		}
 	}
 
@@ -724,5 +730,60 @@ public class Tweed extends SimpleApplication {
 		}
 
 		return f;
+	}
+
+	public double[] worldToLatLong( Tuple3d to3 ) {
+		
+		double[] trans = new double[] { to3.x, 0, to3.z };
+		
+		try {
+		// two part transform to align heights - geoid for 4326 is different to 27700
+		
+		if ( TweedSettings.settings.gmlCoordSystem.equals( "EPSG:2062" ) ) { // oviedo :(
+			System.out.println( "******* dirty hack in place for CS" );
+
+			trans[ 2 ] += 258;
+			trans[ 0 ] -= 3;
+			trans[ 0 ] -= 3;
+		}
+		
+		{
+			Point3d tmp = new Point3d( trans );
+			TweedSettings.settings.fromOrigin.transform( tmp );
+			tmp.get( trans );
+		}
+		
+			
+		MathTransform cartesian2Country = CRS.findMathTransform( 
+				DefaultGeocentricCRS.CARTESIAN, 
+				CRS.decode( TweedSettings.settings.gmlCoordSystem ), 
+				true );
+		
+		cartesian2Country.transform( trans, 0, trans, 0, 1 );
+		
+		if ( TweedSettings.settings.gmlCoordSystem.equals( "EPSG:3042" ) ) { /* madrid?! */
+			System.out.println( "******* dirty hack in place for flipped CS" );
+			double tmp = trans[ 0 ];
+			trans[ 0 ] = trans[ 1 ];
+			trans[ 1 ] = tmp;
+		}
+		
+		MathTransform country2latlong;
+		
+			country2latlong = CRS.findMathTransform( 
+					CRS.decode( TweedSettings.settings.gmlCoordSystem ),
+					CRS.decode( Tweed.LAT_LONG ), 
+					true );
+		
+			country2latlong.transform( trans, 0, trans, 0, 1 );
+
+
+			return new double[] {trans[0], trans[1]};
+			
+		} catch ( Throwable e ) {
+			e.printStackTrace();
+		}
+		
+		return new double[] {Double.NaN, Double.NaN };
 	}
 }
