@@ -343,6 +343,10 @@ public class Pix2Pix {
 			try {
 
 				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.texture ) );
+				src = Imagez.scaleLongest( src, 128 );
+				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
+
+				
 				DRectangle mini = findBounds( mf );
 				
 				BufferedImage highRes = new BufferedImage ( 
@@ -350,6 +354,7 @@ public class Pix2Pix {
 						(int)( mini.height * FacadeTool.pixelsPerMeter), BufferedImage.TYPE_3BYTE_BGR);
 				
 				{
+					
 					Graphics2D g = highRes.createGraphics();
 					g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
 					g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
@@ -384,15 +389,15 @@ public class Pix2Pix {
 
 					String name = System.nanoTime() + "_" + count;
 
-					BufferedImage toProcess = new BufferedImage( 256, 256, BufferedImage.TYPE_3BYTE_BGR );
+					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 
 					state.nextTile = name;
 					
 					{
 						Graphics2D g = toProcess.createGraphics();
 						g.drawImage( state.big, 
-								-state.big.getWidth () + 200 * (state.nextX+1), 
-								-state.big.getHeight() + 200 * (state.nextY+1), 
+								-state.big.getWidth () + 209 * (state.nextX+1) + 47 + 256, 
+								-state.big.getHeight() + 209 * (state.nextY+1) + 47, 
 								state.big.getWidth(),
 								state.big.getHeight(),
 								null );
@@ -427,18 +432,18 @@ public class Pix2Pix {
 
 								BufferedImage rgb = ImageIO.read( texture );
 								
-								File orig = new File( f, "images/" + state.nextTile + "_real_B.png" );
+								File orig = new File( f, "images/" + state.nextTile + "_real_A.png" );
 								
 								String name = Math.random()+"";
 								ImageIO.write( rgb, "png", new File( "/home/twak/Desktop/foo/" + name + ".png" ) );
 								ImageIO.write( ImageIO.read( orig ), "png", new File( "/home/twak/Desktop/foo/" + name + "_orig.png" ) );
 								
 								Graphics2D g = state.big.createGraphics();
-//								g.drawImage( rgb, 
-//										state.big.getWidth () - 209 * (state.nextX+1), 
-//										state.big.getHeight() - 209 * (state.nextY+1), 
-//										rgb.getWidth(), 
-//										rgb.getHeight(), null );
+								g.drawImage( rgb, 
+										state.big.getWidth () - 209 * (state.nextX+1) -47, 
+										state.big.getHeight() - 209 * (state.nextY+1) -47, 
+										rgb.getWidth(), 
+										rgb.getHeight(), null );
 								g.dispose();
 							}
 							
