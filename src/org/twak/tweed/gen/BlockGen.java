@@ -357,8 +357,7 @@ public class BlockGen extends ObjGen {
 			
 			Loop<Point3d> block = (Loop)o;
 			
-			why is block sometime null?
-			
+//			why is block sometime null?
 			if ( block == null || ignore.contains( block ) || ! queryEnvelope.intersects( GISGen.envelope( block ) ) )
 				continue;
 			

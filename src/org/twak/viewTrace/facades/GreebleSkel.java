@@ -42,6 +42,7 @@ import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
 import com.jme3.scene.Node;
 
@@ -598,8 +599,13 @@ public class GreebleSkel {
 					wallTag );
 			else {
 				
-				DRectangle uvs = new DRectangle(mf.postState.outerFacadeRect);
-				uvs.y -= bottomS.z;
+				DRectangle uvs;
+				
+				if (mf.textureUVs == TextureUVs.SQUARE) {
+					uvs = new DRectangle(mf.postState.outerFacadeRect);
+					uvs.y -= bottomS.z;
+				} else 
+					uvs = GreebleGrid.ZERO_ONE_UVS;
 				
 				greebleGrid.textureGrid (
 					floorRect,

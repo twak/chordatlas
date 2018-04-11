@@ -40,7 +40,7 @@ public class HouseTool extends Tool {
 		ImageFeatures imf = new ImageFeatures();// FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
 		imf.mega = mf;	
 		
-		double[] minMax = new double[] {0, 7, 0, 12};
+		double[] minMax = new double[] {0, 3, 0, 5};
 		HalfMesh2.Builder builder = new HalfMesh2.Builder( SuperEdge.class, SuperFace.class );
 		builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
 		builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
@@ -53,8 +53,8 @@ public class HouseTool extends Tool {
 		Prof p1 = new Prof(), p2 = new Prof();
 		
 		p1.add( new Point2d (0,0) );
-		p1.add( new Point2d (0,10) );
-		p1.add( new Point2d (-5,15) );
+		p1.add( new Point2d (0,9) );
+		p1.add( new Point2d (-5,14) );
 		
 		p2.add( new Point2d (0,0) );
 		p2.add( new Point2d (0,10) );

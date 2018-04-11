@@ -79,29 +79,28 @@ public class NormSpecGen {
 				
 				double ilen =  0.5 / Math.sqrt( heights[x][y][1] * heights[x][y][1] + heights[x][y][2] * heights[x][y][2] + 1 );
 				
-				int normrgb = 
+				int normOut = 
 						( ( (int) ( (heights[x][y][1] * ilen + 0.5) * 255 ) ) << 16 ) + 
 						( ( (int) ( (heights[x][y][2] * ilen + 0.5) * 255 ) ) <<  8 ) + 
 						( ( (int) ( (                   ilen + 0.5) * 255 ) ) <<  0 );
 
-
-				int s = labels.getRGB( x, y );
-				if ( 
-						distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
-					spec.setRGB( x, y, Color.white.getRGB() );
-					norm.setRGB( x, y, 0x8080ff );
+				int specOut = Color.darkGray.getRGB();
+				
+				if ( labels != null ) {
+					int s = labels.getRGB( x, y );
+					if ( distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
+						specOut = Color.white.getRGB();
+						normOut = 0x8080ff;
+					} else if ( distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 || 
+							    distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 ) {
+						specOut = Color.darkGray.getRGB();
+					} else {
+						specOut = Color.black.getRGB();
+					}
 				}
-				else if (
-						distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 ||
-						distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 
-						) {
-					spec.setRGB( x, y, Color.darkGray.getRGB() );
-					norm.setRGB( x, y, normrgb );
-				}
-				else {
-					spec.setRGB( x, y, Color.black.getRGB() );
-					norm.setRGB( x, y, normrgb );
-				}
+				
+				spec.setRGB( x, y, specOut );
+				norm.setRGB( x, y, normOut );
 			}
 	}
 

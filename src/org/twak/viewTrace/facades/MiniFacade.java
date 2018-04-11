@@ -49,6 +49,11 @@ public class MiniFacade {
 	
 	public List<Outer> outers = new ArrayList<>();
 	public ImageFeatures imageFeatures;
+	
+	public enum TextureUVs {
+		SQUARE, ZERO_ONE;
+	}
+	public TextureUVs textureUVs = TextureUVs.SQUARE; 
 	public String texture;
 	
 	public List<Double> 
@@ -56,6 +61,8 @@ public class MiniFacade {
 			vMargin = new ArrayList<>();
 
 	public PostProcessState postState = null;
+	
+	
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );

@@ -69,7 +69,6 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	transient Map<Integer,LoopL<Point3d>> blocks = new HashMap<>();
 	transient Map<Loop<Point3d>,LoopL<Point3d>> lot2block = new HashMap<>();
 	
-	used to normalize selection by lots, not blocks etc...
 	transient List<Loop<Point3d>> lots = new ArrayList<>();
 	transient Map<Integer, BlockGen> lastMesh = new HashMap<>();
 

@@ -188,7 +188,6 @@ public class FacadeFinder {
 
 					SuperLoop<Point2d> orig = (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) );
 
-					not sure about height
 					double[] ho = new double[1];
 					String description = createDescription( l, orig, ho );
 
@@ -227,7 +226,6 @@ public class FacadeFinder {
 
 					out.description = description;
 
-					should only download if these tests pass
 					double d2 = ex.distance( p );
 					
 					if ( /* ex.isOnLeft( p ) &&*/ d2 < 25 )
