@@ -53,7 +53,7 @@ import com.thoughtworks.xstream.XStream;
 public class FacadeTool extends SelectTool {
 
 	public static final String LINE_XML = "line.xml";
-	public boolean singleFolder = false;
+	public boolean singleFolder = true;
 	long lastClick = 0;
 //	FacadeFinder ff;
 
@@ -84,7 +84,7 @@ public class FacadeTool extends SelectTool {
 		// fixme, we don't use this code path anymore
 	}
 
-	public void renderFacade( LoopL<Point3d> list, AtomicInteger count, BufferedWriter description ) {
+	public void renderFacade( LoopL<Point3d> list, AtomicInteger count, BufferedWriter description, PanoGen feedback ) {
 
 		double[] minMax = Loopz.minMax( list );// Polygonz.findBounds( polies, min, max );
 
@@ -106,14 +106,14 @@ public class FacadeTool extends SelectTool {
 
 		Point2d cen = Loopz.average( Loopz.to2dLoop( list, 1, null ) );
 		
-		renderFacades(  cen.x+"_"+cen.y, ff, count, description );
+		renderFacades(  cen.x+"_"+cen.y, ff, count, description, feedback );
 	}
 
 //	private static String FACADE_FOLDER = ;
 
 	public static final float pixelsPerMeter = 40f;
 	
-	private void renderFacades( String blockName, FacadeFinder ff, AtomicInteger count, BufferedWriter description ) {
+	private void renderFacades( String blockName, FacadeFinder ff, AtomicInteger count, BufferedWriter description, PanoGen feedback ) {
 
 		Thread thread = new Thread() {
 			@Override
@@ -140,12 +140,13 @@ public class FacadeTool extends SelectTool {
 					File megaFolder = singleFolder ? blockFile : new File( blockFile, ""+ mfi );
 					megaFolder.mkdirs();
 
-					try {
-						new XStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
+					if ( !singleFolder )
+						try {
+							new XStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
 
-					} catch ( FileNotFoundException e ) {
-						e.printStackTrace();
-					}
+						} catch ( FileNotFoundException e ) {
+							e.printStackTrace();
+						}
 
 					double rot = 0;
 
@@ -168,8 +169,11 @@ public class FacadeTool extends SelectTool {
 
 						ImagePlaneGen pg = new ImagePlaneGen( tweed, (float) tp.e.x, (float) tp.e.y, (float) tp.s.x, (float) tp.s.y, (float) tp.minHeight, (float) tp.maxHeight, tp.toProject );
 
-						if (false /* visualize planes */)
-							tweed.frame.addGen( pg, true );
+						if (feedback != null) 
+							feedback.planes.add(pg);
+						
+//						if (false /* visualize planes */)
+//							tweed.frame.addGen( pg, true );
 						
 						for ( Pano pano_ : tp.toProject ) {
 
@@ -190,6 +194,11 @@ public class FacadeTool extends SelectTool {
 								imageFilename = new File (pano.name).getName() + "_" + tpm.megafacade.start + "_" + tpm.megafacade.end;
 							
 							BufferedImage bi = pg.render( imageFolder, pixelsPerMeter, pano, tpm.megafacade, imageFilename );
+							
+							if (feedback != null) {
+								feedback.panos.add( pano );
+								feedback.calculateOnJmeThread();
+							}
 							
 							if ( !singleFolder ) {
 								
@@ -288,7 +297,7 @@ public class FacadeTool extends SelectTool {
 		granularity.addItem( FacadeMode.PER_MEGA        );
 		granularity.addItem( FacadeMode.PER_CAMERA      );
 		granularity.addItem( FacadeMode.PER_CAMERA_CROPPED      );
-		granularity.addItem( FacadeMode.PER_FETCH      );
+		granularity.addItem( FacadeMode.KANGAROO      );
 		
 		granularity.setSelectedItem( FacadeFinder.facadeMode );
 		granularity.addActionListener( new ActionListener() {

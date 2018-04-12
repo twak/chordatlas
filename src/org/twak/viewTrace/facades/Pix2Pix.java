@@ -343,8 +343,8 @@ public class Pix2Pix {
 			try {
 
 				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.texture ) );
-				src = Imagez.scaleLongest( src, 128 );
-				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
+//				src = Imagez.scaleLongest( src, 128 );
+//				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
 
 				
 				DRectangle mini = findBounds( mf );
@@ -434,9 +434,9 @@ public class Pix2Pix {
 								
 								File orig = new File( f, "images/" + state.nextTile + "_real_A.png" );
 								
-								String name = Math.random()+"";
-								ImageIO.write( rgb, "png", new File( "/home/twak/Desktop/foo/" + name + ".png" ) );
-								ImageIO.write( ImageIO.read( orig ), "png", new File( "/home/twak/Desktop/foo/" + name + "_orig.png" ) );
+//								String name = Math.random()+"";
+//								ImageIO.write( rgb, "png", new File( "/home/twak/Desktop/foo/" + name + ".png" ) );
+//								ImageIO.write( ImageIO.read( orig ), "png", new File( "/home/twak/Desktop/foo/" + name + "_orig.png" ) );
 								
 								Graphics2D g = state.big.createGraphics();
 								g.drawImage( rgb, 

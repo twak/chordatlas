@@ -464,7 +464,7 @@ public class BlockGen extends ObjGen {
 		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
 		
 		try {
-			new FacadeTool(tweed).renderFacade( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )) );
+			new FacadeTool(tweed).renderFacade( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )), null );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

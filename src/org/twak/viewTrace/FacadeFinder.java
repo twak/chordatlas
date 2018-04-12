@@ -35,6 +35,7 @@ import org.twak.utils.collections.Streamz;
 import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Anglez;
 import org.twak.utils.geom.LinearForm;
+import org.twak.viewTrace.SVLatLongQuery.Score;
 
 public class FacadeFinder {
 
@@ -67,7 +68,7 @@ public class FacadeFinder {
 	}
 	
 	public enum FacadeMode {
-		PER_GIS, PER_MEGA, PER_CAMERA, PER_CAMERA_CROPPED, PER_FETCH;
+		PER_GIS, PER_MEGA, PER_CAMERA, PER_CAMERA_CROPPED, KANGAROO;
 		
 		@Override
 		public String toString() {
@@ -75,7 +76,7 @@ public class FacadeFinder {
 		}
 	}
 	
-	public static FacadeMode facadeMode = FacadeMode.PER_FETCH;//CAMERA_CROPPED;
+	public static FacadeMode facadeMode = FacadeMode.KANGAROO;//CAMERA_CROPPED;
 	
 	public FacadeFinder( 
 			LoopL<Point2d> _edges, 
@@ -144,7 +145,10 @@ public class FacadeFinder {
 					if ( l.lengthSquared() < 5 * 5 )
 						continue;
 
-					String description = createDescription( l, (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ), new double[1] );
+					String description = 
+							createDescription( l, 
+									(SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) ), 
+									new double[1] );
 
 					if ( description == null )
 						continue;
@@ -179,7 +183,7 @@ public class FacadeFinder {
 					if ( out.toProject.size() > 0 )
 						megaResults.add( out );
 				}
-			} else if ( facadeMode == FacadeMode.PER_FETCH ) {
+			} else if ( facadeMode == FacadeMode.KANGAROO ) {
 				
 				List<Line> filtered = f.facades.stream().filter( l -> l.lengthSquared() > 3*3 ).collect( Collectors.toList() );
 				Collections.shuffle( filtered );
@@ -194,45 +198,53 @@ public class FacadeFinder {
 					if ( description == null )
 						continue;
 
-					double height = Mathz.clamp( ho[0], 15, 30 );
+//					double height = Mathz.clamp( ho[0], 15, 30 );
+					double height = ho[0];
 
 					System.out.println( "estimate facade height as " + height );
 
 					Line ex = new Line( l );
-					ex = ex.reverse();
+					ex.reverseLocal();
 					Point2d mid = ex.fromPPram( 0.5 );
 					
-					if ( ex.lengthSquared() > 7 * 7 ) {
+//					if (false)
+//					if ( ex.lengthSquared() > 7 * 7 ) 
+					{
 						Vector2d dir = ex.dir();
 
-						dir.scale( 3.5 / dir.length() );
+						dir.scale( 2 / dir.length() );
 
-						ex.start.set( mid );
+//						ex.start.set( mid );
 						ex.start.sub( dir );
-						ex.end.set( mid );
+//						ex.end.set( mid );
 						ex.end.add( dir );
 					}
+					
+					Pano pano = new SVLatLongQuery(TweedFrame.instance.tweed.worldToLatLong(Pointz.to3( mid ))).query(
+							new Score() {
+								@Override
+								public double score( Pano query ) {
+									Point2d p = new Point2d (query.location.x, query.location.z);
 
-					
-					
-					Pano pano = new SVLatLongQuery(TweedFrame.instance.tweed.worldToLatLong(Pointz.to3( mid ))).query();
+									double d2 = ex.distance( p );
+									
+									if ( ex.isOnLeft( p ) && d2 < 25 )
+										if ( ex.distance ( ex.project( p, false ) ) < 3 )  //distance( p, true ) < 20 )
+											return -d2;
+											
+									return -Double.MAX_VALUE;
+										
+								}
+							});
 					
 					if (pano == null)
 						continue;
-					
-					Point2d p = new Point2d (pano.location.x, pano.location.z);
-					
+
 					ToProject out = new ToProject( ex.start, ex.end, 0, height );
-
 					out.description = description;
-
-					double d2 = ex.distance( p );
+					out.toProject.add( pano );
 					
-					if ( /* ex.isOnLeft( p ) &&*/ d2 < 25 )
-						if ( ex.project( p, false ).distance( p ) < d2 / 2 ) { //distance( p, true ) < 20 )
-							out.toProject.add( pano );
-							megaResults.add( out );
-						}
+					megaResults.add( out );
 
 					break;
 				}
@@ -365,9 +377,17 @@ public class FacadeFinder {
 			Map <String, Object> properties = footprint.properties;
 			
 			try {
-				double height = heightOut[0] = (double)properties.get( "absh2" ) - (double)properties.get( "abshmin" ) ;
 				
-				if (height < 4)
+				double height;
+				try {
+					height= (double)properties.get( "relh2" );
+				}
+				catch (NullPointerException e) {
+					height = 30;
+				}
+				heightOut[0] = height;
+				
+				if (height < 3)
 					return null;
 				
 				description += ", " + height;

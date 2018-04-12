@@ -18,6 +18,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.twak.utils.Parallel;
+import org.twak.utils.Parallel.WorkFactory;
 
 
 public class Mosaic {
@@ -47,6 +48,8 @@ public class Mosaic {
 		processLines( lines, result );
 	}
 
+	Parallel.ListWF<String> ongoing;
+	
 	public void processLines( List<String> lines, File result ) {
 		
 		System.out.println( lines.size() + " lines found" );
@@ -56,7 +59,10 @@ public class Mosaic {
 //			tile (s, result);
 //		}
 		
-		new Parallel<String, Integer>( lines, s -> tile( s, result ), s -> System.out.println( "complete " + s.stream().mapToInt( x -> x ).sum() ), true );
+		ongoing = new Parallel.ListWF<String>( lines );
+		
+		new Parallel<String, Integer>( ongoing, s -> tile( s, result ), s ->
+			System.out.println( "complete " + s.stream().mapToInt( x -> x ).sum() ), true, 16 );
 	}
 
 	Pattern p = Pattern.compile( "[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_(.*)" );
@@ -69,12 +75,15 @@ public class Mosaic {
 		
 		Matcher m = p.matcher( s );
 
+		
 		if ( m.matches() ) {
 
 			String panoid = m.group( 1 );
 			BufferedImage mosaic = new BufferedImage( 26 * 512, 13 * 512, BufferedImage.TYPE_3BYTE_BGR );
 			Graphics g = mosaic.getGraphics();
 
+			boolean failed = false;
+			
 			for ( int x = 0; x <= 25; x++ )
 				for ( int y = 0; y <= 12; y++ ) {
 					URL url;
@@ -83,10 +92,13 @@ public class Mosaic {
 						g.drawImage( ImageIO.read( url ), x * 512, y * 512, null );
 					} catch ( Throwable th ) {
 						th.printStackTrace();
+						ongoing.abort();
+						failed = true;
 					}
 				}
 			g.dispose();
 
+			if (!failed)
 			try {
 
 				ImageWriter writer = ImageIO.getImageWritersByFormatName( "jpg" ).next();

@@ -12,8 +12,6 @@ import java.util.regex.Pattern;
 
 import org.twak.readTrace.Mosaic;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.TweedFrame;
-import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pano;
 import org.twak.tweed.gen.PanoGen;
 
@@ -21,7 +19,11 @@ public class SVLatLongQuery {
 	
 	double[] ll;
 	
-	public Pano query() {
+	public interface Score {
+		public double score (Pano p);
+	}
+	
+	public Pano query(Score score) {
 
 		URL url;
 		BufferedReader in = null;
@@ -48,7 +50,12 @@ public class SVLatLongQuery {
 			
 			Matcher m = pat.matcher( sb.toString() );
 			
+			File panoLoc = new File(Tweed.DATA+File.separator + "panos") ;
+			double bestScore = -Double.MAX_VALUE;
+			Pano bestPano = null;
+			
 			while (m.find()) {
+				
 				String meta = m.group( 0 );
 				meta = meta.replaceAll( "\\[\\[2,", " ");
 				meta = meta.replaceAll( "null,", " " );
@@ -65,17 +72,25 @@ public class SVLatLongQuery {
 				
 //				meta = meta.trim().replaceAll( "\\s+", "_" );
 				
-				File panos = new File(Tweed.DATA+File.separator + "panos") ;
-				new Mosaic( Collections.singletonList( name ), panos );
 				
-				return PanoGen.createPanoGen( new File(panos, name+".jpg") , "EPSG:4326" );
-				
+				Pano pano = PanoGen.createPanoGen( new File(panoLoc, name+".jpg") , "EPSG:4326" );
+				double s = score.score( pano );
+				if (s > bestScore) {
+					bestScore = s;
+					bestPano = pano;
+				}
 			}
 			
-//			System.out.println( ">>>> "+ll[0]+", "+ll[1] );
+			if (bestPano == null)
+				return null;
 			
-			//		Log.d("Response",s.hasNext() ? s.next() : "");
-			//		https://maps.googleapis.com/maps/api/js/GeoPhotoService.SingleImageSearch?pb=!1m5!1sapiv3!5sUS!11m2!1m1!1b0!2m4!1m2!3d"+origin.lat+"!4d"+origin.lng+"!2d50!3m10!2m2!1sen!2sGB!9m1!1e2!11m4!1m3!1e2!2b1!3e2!4m10!1e1!1e2!1e3!1e4!1e8!1e6!5m1!1e2!6m1!1e2&callback=_xdc_._v2mub5
+			new Mosaic( Collections.singletonList( bestPano.name ), panoLoc );
+			
+			if ( !new File(panoLoc, bestPano.name +".jpg").exists() )
+				return null;
+			
+			return bestPano;
+			
 		} catch ( Throwable th ) {
 			th.printStackTrace();
 		}

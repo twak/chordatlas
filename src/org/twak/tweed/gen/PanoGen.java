@@ -62,12 +62,14 @@ import com.thoughtworks.xstream.XStream;
 public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	
 	File folder;
-	transient List<Pano> panos = new ArrayList();
+	public transient List<Pano> panos = new ArrayList();
 	
 	public String sourceCRS;
 	
 	transient Pano selectedPano = null;
 	transient JPanel ui = new JPanel();
+	
+	public  transient List<ImagePlaneGen> planes = new ArrayList<>();
 	
 	public PanoGen() {
 		System.out.println( ">>>>" );
@@ -78,19 +80,26 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		this.sourceCRS = sourceCRS;
 	}
 		
+	public PanoGen( Tweed tweed ) {
+		super ("render progress", tweed);
+		this.tweed = tweed;
+		this.folder = null;
+	}
+	
 	@Override
 	public void calculate( ) {
 		
-		File absFolder = Tweed.toWorkspace( PanoGen.this.folder );
 		
-		if (!absFolder.exists())
-			throw new Error("File not found " + this.folder);
+		if ( folder != null ) {
+			File absFolder = Tweed.toWorkspace( folder );
+
+			if ( !absFolder.exists() )
+				throw new Error( "File not found " + this.folder );
+		}
 		
 		for (Spatial s : gNode.getChildren())
 			s.removeFromParent();
-		
-		panos.clear();
-		
+				
 		createPanoGens();
 		
 		Iterator<Pano> pit = panos.iterator();
@@ -147,27 +156,34 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	        
 	        gNode.attachChild(p.geom);
 		}
+		
+		for (ImagePlaneGen ipg : planes) {
+			ipg.calculate();
+			gNode.attachChild( ipg.gNode );
+		}
 
 		super.calculate();
 	}
 	
-	private void createPanoGens() {
+	protected void createPanoGens() {
 
+		panos.clear();
+		
 		File meta = getMetaFile();
 
 		panos = null;
 		
-//		if ( meta.exists() ) 
-//		{
-//			try {
-//				panos = (List<Pano>) new XStream().fromXML( meta );
-//			} catch ( Throwable th ) {
-//				th.printStackTrace();
-//			}
-//		}
-//		
-//		
-//		if (panos == null || panos.isEmpty()) 
+		if ( meta.exists() ) 
+		{
+			try {
+				panos = (List<Pano>) new XStream().fromXML( meta );
+			} catch ( Throwable th ) {
+				th.printStackTrace();
+			}
+		}
+		
+		
+		if (panos == null || panos.isEmpty()) 
 		{
 			panos = new ArrayList<>();
 			
@@ -267,7 +283,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 //				location.add( west );
 //			}
 			
-			System.out.println( "pano@ " + location );
+//			System.out.println( "pano@ " + location );
 		
 			return new Pano ( name, location, 
 				   (pos.get( 3 ).floatValue()+180),// + 360 - (toNorth * 180 /FastMath.PI ) ) % 360, 
@@ -317,6 +333,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.setLayout( new ListDownLayout() );
 		
+		if (folder != null && folder.exists())
 		if (new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
 			JButton download = new JButton("download");
 			download.addActionListener( e -> downloadPanos() );
@@ -506,5 +523,5 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	@Override
 	public void dumpObj(ObjDump dump) {
 		Jme3z.dump( dump, gNode, 0 );
-	}	
+	}
 }

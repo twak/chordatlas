@@ -278,9 +278,14 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			description.getParentFile().mkdirs();
 			BufferedWriter descBW = new BufferedWriter( new FileWriter( description ) );
 
+			PanoGen feedback = new PanoGen(tweed) {
+				protected void createPanoGens() {};
+			};
+			
+			tweed.frame.addGen( feedback, true );
+			
 			new Parallel<LoopL<Point3d>, Integer>( b, new Work<LoopL<Point3d>, Integer>() {
 				public Integer work( LoopL<Point3d> in ) {
-					
 					
 					double area = Loopz.area( Loopz.toXZLoop( in ) );
 					
@@ -294,8 +299,14 @@ public class GISGen  extends LineGen3d implements ICanSave {
 					
 					System.out.println( "rendering... (" + count + " images written)" );
 					
-					( (FacadeTool) tweed.tool ).renderFacade( in, count, descBW );
-						
+					( (FacadeTool) tweed.tool ).renderFacade( in, count, descBW, feedback );
+					
+					try {
+						descBW.flush();
+					} catch ( IOException e ) {
+						e.printStackTrace();
+					}
+					
 					return 1;
 				}
 			}, new Complete<Integer>() {
@@ -314,7 +325,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 					System.out.print( "done" );
 
 				}
-			}, false );
+			}, false, -1 );
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}
@@ -323,13 +334,13 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	private WorkFactory<LoopL<Point3d>> findBlocks( int callbackI, AtomicInteger count, Random randy ) {
 		WorkFactory<LoopL<Point3d>> b;
 		
-		int TOGET = 10000000;
+		int TOGET = Integer.MAX_VALUE;
 		
 		if ( callbackI >= 0 )
 			b = new Parallel.ListWF<LoopL<Point3d>>( Collections.singletonList( blocks.get( callbackI ) ) );
 		else {
 			
-			if (FacadeFinder.facadeMode == FacadeMode.PER_FETCH )
+			if (FacadeFinder.facadeMode == FacadeMode.KANGAROO )
 				b = new WorkFactory<LoopL<Point3d>>() {
 					@Override
 					public LoopL<Point3d> generateWork() {
@@ -341,6 +352,11 @@ public class GISGen  extends LineGen3d implements ICanSave {
 							LoopL<Point3d> ll = lot2block.get( lots.get(randy.nextInt( lots.size() )) );
 							return ll;
 						}
+					}
+
+					@Override
+					public boolean shouldAbort() {
+						return false;
 					}
 				};
 			else
