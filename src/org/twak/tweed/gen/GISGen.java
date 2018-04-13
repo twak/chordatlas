@@ -278,11 +278,11 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			description.getParentFile().mkdirs();
 			BufferedWriter descBW = new BufferedWriter( new FileWriter( description ) );
 
-			PanoGen feedback = new PanoGen(tweed) {
-				protected void createPanoGens() {};
-			};
-			
-			tweed.frame.addGen( feedback, true );
+			PanoGen feedback = null ;
+//			new PanoGen(tweed) {
+//				protected void createPanoGens() {};
+//			};
+//			tweed.frame.addGen( feedback, true );
 			
 			new Parallel<LoopL<Point3d>, Integer>( b, new Work<LoopL<Point3d>, Integer>() {
 				public Integer work( LoopL<Point3d> in ) {
@@ -325,7 +325,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 					System.out.print( "done" );
 
 				}
-			}, false, -1 );
+			}, false, 16 );
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}

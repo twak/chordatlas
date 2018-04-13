@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,7 @@ public class FacadeFinder {
 	}
 	
 	public static FacadeMode facadeMode = FacadeMode.KANGAROO;//CAMERA_CROPPED;
+	private static Random randy = new Random();
 	
 	public FacadeFinder( 
 			LoopL<Point2d> _edges, 
@@ -110,6 +112,78 @@ public class FacadeFinder {
 				fs.add( new FacadeDirection( l ) );
 		}
 		
+		if ( facadeMode == FacadeMode.KANGAROO ) {
+			
+			
+			FacadeDirection f = fs.get( randy.nextInt( fs.size() ) ); 
+			
+			List<Line> filtered = f.facades.stream().filter( l -> l.lengthSquared() > 3*3 ).collect( Collectors.toList() );
+			Collections.shuffle( filtered );
+			
+			for ( Line l : filtered ) {
+
+				SuperLoop<Point2d> orig = (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) );
+
+				double[] ho = new double[1];
+				String description = createDescription( l, orig, ho );
+
+				if ( description == null )
+					continue;
+
+//				double height = Mathz.clamp( ho[0], 15, 30 );
+				double height = ho[0];
+
+				System.out.println( "estimate facade height as " + height );
+
+				Line ex = new Line( l );
+				ex.reverseLocal();
+				Point2d mid = ex.fromPPram( 0.5 );
+				
+//				if (false)
+//				if ( ex.lengthSquared() > 7 * 7 ) 
+				{
+					Vector2d dir = ex.dir();
+
+					dir.scale( 2 / dir.length() );
+
+//					ex.start.set( mid );
+					ex.start.sub( dir );
+//					ex.end.set( mid );
+					ex.end.add( dir );
+				}
+				
+				Pano pano = new SVLatLongQuery(TweedFrame.instance.tweed.worldToLatLong(Pointz.to3( mid ))).query(
+						new Score() {
+							@Override
+							public double score( Pano query ) {
+								Point2d p = new Point2d (query.location.x, query.location.z);
+
+								double d2 = ex.distance( p );
+								
+								if ( ex.isOnLeft( p ) && d2 < 25 )
+									if ( ex.distance ( ex.project( p, false ) ) < 3 )  //distance( p, true ) < 20 )
+										return -d2;
+										
+								return -Double.MAX_VALUE;
+									
+							}
+						});
+				
+				if (pano == null)
+					continue;
+
+				ToProjMega megaResults = new ToProjMega(f.getExtent().reverse());
+				results.add( megaResults );
+				
+				ToProject out = new ToProject( ex.start, ex.end, 0, height );
+				megaResults.add( out );
+				
+				out.description = description;
+				out.toProject.add( pano );
+			}
+		}
+		else
+		f:
 		for (FacadeDirection f : fs) {
 			
 			if (f.length < 2)
@@ -138,6 +212,7 @@ public class FacadeFinder {
 			
 			results.add( megaResults );
 
+			
 			if ( facadeMode == FacadeMode.PER_GIS ) {
 
 				for ( Line l : f.facades ) {
@@ -182,71 +257,6 @@ public class FacadeFinder {
 
 					if ( out.toProject.size() > 0 )
 						megaResults.add( out );
-				}
-			} else if ( facadeMode == FacadeMode.KANGAROO ) {
-				
-				List<Line> filtered = f.facades.stream().filter( l -> l.lengthSquared() > 3*3 ).collect( Collectors.toList() );
-				Collections.shuffle( filtered );
-				
-				for ( Line l : filtered ) {
-
-					SuperLoop<Point2d> orig = (SuperLoop<Point2d>) _edges.get( findOrigPoly( whichPoly, l.start, l.end ) );
-
-					double[] ho = new double[1];
-					String description = createDescription( l, orig, ho );
-
-					if ( description == null )
-						continue;
-
-//					double height = Mathz.clamp( ho[0], 15, 30 );
-					double height = ho[0];
-
-					System.out.println( "estimate facade height as " + height );
-
-					Line ex = new Line( l );
-					ex.reverseLocal();
-					Point2d mid = ex.fromPPram( 0.5 );
-					
-//					if (false)
-//					if ( ex.lengthSquared() > 7 * 7 ) 
-					{
-						Vector2d dir = ex.dir();
-
-						dir.scale( 2 / dir.length() );
-
-//						ex.start.set( mid );
-						ex.start.sub( dir );
-//						ex.end.set( mid );
-						ex.end.add( dir );
-					}
-					
-					Pano pano = new SVLatLongQuery(TweedFrame.instance.tweed.worldToLatLong(Pointz.to3( mid ))).query(
-							new Score() {
-								@Override
-								public double score( Pano query ) {
-									Point2d p = new Point2d (query.location.x, query.location.z);
-
-									double d2 = ex.distance( p );
-									
-									if ( ex.isOnLeft( p ) && d2 < 25 )
-										if ( ex.distance ( ex.project( p, false ) ) < 3 )  //distance( p, true ) < 20 )
-											return -d2;
-											
-									return -Double.MAX_VALUE;
-										
-								}
-							});
-					
-					if (pano == null)
-						continue;
-
-					ToProject out = new ToProject( ex.start, ex.end, 0, height );
-					out.description = description;
-					out.toProject.add( pano );
-					
-					megaResults.add( out );
-
-					break;
 				}
 			} else if ( facadeMode == FacadeMode.PER_MEGA ) {
 

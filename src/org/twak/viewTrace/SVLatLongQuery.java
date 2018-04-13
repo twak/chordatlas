@@ -70,6 +70,11 @@ public class SVLatLongQuery {
 				}
 				name += parts[0];
 				
+				if (parts[0].length() > 25) {
+					System.out.println( "something strange here" );
+					continue;
+				}
+				
 //				meta = meta.trim().replaceAll( "\\s+", "_" );
 				
 				
@@ -84,7 +89,7 @@ public class SVLatLongQuery {
 			if (bestPano == null)
 				return null;
 			
-			new Mosaic( Collections.singletonList( bestPano.name ), panoLoc );
+//			new Mosaic( Collections.singletonList( bestPano.name ), panoLoc );
 			
 			if ( !new File(panoLoc, bestPano.name +".jpg").exists() )
 				return null;
