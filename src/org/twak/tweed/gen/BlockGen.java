@@ -325,7 +325,7 @@ public class BlockGen extends ObjGen {
 	}
 	
 	private static final int MIN_SW = 15;
-	private static double findStreetWidth( LoopL<Point3d> ignore, Line l, Quadtree quadtree, double max, GISGen gisGen ) {
+	private synchronized static double findStreetWidth( LoopL<Point3d> ignore, Line l, Quadtree quadtree, double max, GISGen gisGen ) {
 		
 		if (l.length() < MIN_SW) {
 			Point2d cen = l.fromPPram( 0.5 );

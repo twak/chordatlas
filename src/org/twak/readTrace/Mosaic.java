@@ -84,6 +84,7 @@ public class Mosaic {
 
 			boolean failed = false;
 			
+			x:
 			for ( int x = 0; x <= 25; x++ )
 				for ( int y = 0; y <= 12; y++ ) {
 					URL url;
@@ -94,6 +95,7 @@ public class Mosaic {
 						th.printStackTrace();
 						ongoing.abort();
 						failed = true;
+						break x;
 					}
 				}
 			g.dispose();

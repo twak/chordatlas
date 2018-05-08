@@ -114,6 +114,8 @@ public class FacadeFinder {
 		
 		if ( facadeMode == FacadeMode.KANGAROO ) {
 			
+			if (fs.isEmpty())
+				return;
 			
 			FacadeDirection f = fs.get( randy.nextInt( fs.size() ) ); 
 			
@@ -159,6 +161,9 @@ public class FacadeFinder {
 								Point2d p = new Point2d (query.location.x, query.location.z);
 
 								double d2 = ex.distance( p );
+								
+								if (d2 < 1)
+									return -Double.MAX_VALUE;
 								
 								if ( ex.isOnLeft( p ) && d2 < 25 )
 									if ( ex.distance ( ex.project( p, false ) ) < 3 )  //distance( p, true ) < 20 )

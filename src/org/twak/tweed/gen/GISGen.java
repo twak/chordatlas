@@ -268,7 +268,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		
 		AtomicInteger count = new AtomicInteger( 0 );
-		Random randy = new Random();
+		Random randy = new Random(System.nanoTime());
 		
 		WorkFactory<LoopL<Point3d>> b = findBlocks( callbackI, count, randy );
 
@@ -278,11 +278,10 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			description.getParentFile().mkdirs();
 			BufferedWriter descBW = new BufferedWriter( new FileWriter( description ) );
 
-			PanoGen feedback = new PanoGen( tweed ) {
-					protected void createPanoGens() {};
-			};
-				
-			tweed.frame.addGen( feedback, true );
+			PanoGen feedback = null;
+//			tweed.frame.addGen( new PanoGen( tweed ) {
+//					protected void createPanoGens() {};
+//			}, true);
 			
 			new Parallel<LoopL<Point3d>, Integer>( b, new Work<LoopL<Point3d>, Integer>() {
 				public Integer work( LoopL<Point3d> in ) {
@@ -326,6 +325,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 				}
 			}, false, 16 );
+			
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}
@@ -508,7 +508,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 	public transient Quadtree quadtree = null;
 	
-	public void ensureQuad() {
+	public synchronized void ensureQuad() {
 		if (quadtree == null) 
 		{
 			System.out.print( "building quadtree..." );

@@ -44,6 +44,7 @@ import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
+import org.twak.tweed.gen.PanoGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -454,6 +455,19 @@ public class TweedFrame {
 					};
 				}
 			} );
+			
+			sp.add( "+ panos (jpg)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select one of many panoramas in a directory", new File( Tweed.JME ), "jpg" ) {
+						public void heresTheFile( File oneOfMany ) throws Throwable {
+							//						removeGens( PanoGen.class );
+							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
+						};
+					};
+				}
+			} );
+			
 		} else {
 
 			sp.add( "+ gis (2d obj)", new Runnable() {
