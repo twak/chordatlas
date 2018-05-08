@@ -25,7 +25,6 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
@@ -35,7 +34,8 @@ import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
 public class Pix2Pix {
 
-	private static final String LABEL2PHOTO = "facades3k", 
+	private static final String LABEL2PHOTO = "bike_2", 
+//			private static final String LABEL2PHOTO = "facades3k", 
 			WINDOW = "window_super_res", 
 			FACADE = "facade_super_res";
 
@@ -69,28 +69,30 @@ public class Pix2Pix {
 	public static class Job {
 		String network;
 		JobResult finished;
+		public String name;
 		
-		public Job (String network, JobResult finished) {
+		public Job (String network, String name, JobResult finished) {
+			
 			this.network = network;
 			this.finished = finished;
+			this.name = name;
 		}
 	}
 	
 	public void submit( Job job ) {
-		synchronized (job.network.intern()) {
+//		synchronized (job.network.intern()) {
 			submitSafe(job);
-		}
+//		}
 	}
 	
 	public void submitSafe( Job job ) {
 		
-		File go = new File( "/home/twak/code/pix2pix-interactive/input/"+ job.network + "/test/go" );
-		String outputName = System.nanoTime() + "_" + Math.random();
-		File outDir = new File( "/home/twak/code/pix2pix-interactive/output/" + job.network +"/" + outputName );
+		File go     = new File( "/home/twak/code/bikegan/input/"  + job.network + "/val/go" );
+		File outDir = new File( "/home/twak/code/bikegan/output/" + job.network +"/" + job.name );
 		
 		try {
 			FileWriter  fos = new FileWriter( go );
-			fos.write( outputName );
+			fos.write( job.name );
 			fos.close();
 			
 		} catch ( Throwable e1 ) {
@@ -132,33 +134,67 @@ public class Pix2Pix {
 				} catch ( IOException e ) {
 					e.printStackTrace();
 				}
-				
-				break;
+				return;
 			}
 			
 		} while ( System.currentTimeMillis() - startTime < 3000 );
+		
+		System.out.println( "timeout trying to get result "+ job.name );
+		
+	}
+	
+	public void encode(File f, double[] values, Runnable update ) {
+
+		try {
+			BufferedImage bi = ImageIO.read( f );
+			bi = Imagez.scaleSquare( bi, 256 );
+			bi = Imagez.join( bi, bi );
+
+			File dir = new File( "/home/twak/code/bikegan/input/" + LABEL2PHOTO + "_e/val/" );
+			dir.mkdirs();
+			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
+
+			submit( new Job( LABEL2PHOTO, System.nanoTime() + "_" + f.getName(), new JobResult() {
+
+				@Override
+				public void finished( File f ) {
+					for ( File zf : f.listFiles() ) {
+						String[] ss = zf.getName().split( "_" );
+						for ( int i = 0; i < ss.length; i++ )
+							values[ i ] = Integer.parseInt( ss[ i ] );
+					}
+				}
+			} ) );
+
+		} catch ( Throwable e ) {
+			e.printStackTrace();
+		}
+		
 	}
 
-	
-	public void facade( List<MiniFacade> minis, Runnable update ) {
+	public void facade( List<MiniFacade> minis, double[] z, Runnable update ) {
 		
 		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
 		
-		Map<MiniFacade, WindowMeta> index = new HashMap<>();
+		Map<MiniFacade, Meta> index = new HashMap<>();
+		
+		String zs = "";
+		for (double d : z)
+			zs += "_" + d;
 		
 		for ( MiniFacade toEdit : minis ) {
 
 			DRectangle bounds = new DRectangle( 256, 0, 256, 256 );
 			DRectangle mini = findBounds (toEdit);
 			
-			g.setColor( CMPLabel.Background.rgb );
+			g.setColor( Color.black );
 			g.fillRect( 256, 0, 256, 255 );
-			
 			
 			mini = toEdit.postState == null ? toEdit.getAsRect() : toEdit.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle(mini);
+			
 			{
 				mask = mask.scale( 256 / Math.max( mini.height, mini.width ) );
 				mask.x = ( 256 - mask.width ) * 0.5 + /* draw on the right of the input image */ 256;
@@ -179,29 +215,30 @@ public class Pix2Pix {
 						g.fill( toPoly( toEdit, mask, mini, l ) );
 			}
 
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Door   .rgb, toEdit.featureGen.getRects( Feature.DOOR    ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
+			cmpRects( toEdit, g, mask, mini, Color.green, toEdit.featureGen.getRects( Feature.WINDOW    ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
+//			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
 
 			mask.x -= 256;
 			
-			String name = System.nanoTime() + "_" + index.size();
-
+			String name = System.nanoTime() + "@" + index.size();
 			
-			index.put ( toEdit, new WindowMeta( name, mask ) );
+			index.put ( toEdit, new Meta( name, mask ) );
 			
 			try {
-
-				ImageIO.write( bi, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+LABEL2PHOTO+"/test/" + name + ".png" ) );
+				File dir = new File ( "/home/twak/code/bikegan/input/"+LABEL2PHOTO+"/val/" );
+				dir.mkdirs();
+				ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
 			} catch ( IOException e ) {
 				e.printStackTrace();
 			}
 		}
 		
-		submit ( new Job (LABEL2PHOTO, new JobResult() {
+		submit ( new Job (LABEL2PHOTO, System.nanoTime() + "_" + zs, new JobResult() {
 
 			@Override
 			public void finished( File f ) {
@@ -215,11 +252,9 @@ public class Pix2Pix {
 
 					new File( Tweed.SCRATCH ).mkdirs();
 
-					for ( Map.Entry<MiniFacade, WindowMeta> e : index.entrySet() ) {
+					for ( Map.Entry<MiniFacade, Meta> e : index.entrySet() ) {
 
-//						String name = e.getKey();
 						dest = importTexture( f, e.getValue().name, -1, e.getValue().mask );
-
 						
 						if ( dest != null ) {
 							e.getKey().texture = dest;
@@ -228,21 +263,17 @@ public class Pix2Pix {
 						}
 					}
 
-					if ( found ) {
-						
-						new Thread() {
-							public void run() {
-								facadeSuper (subfeatures, update);
-							};
-						}.start();
-						
+					
+//					if ( found ) {
+//						
 //						new Thread() {
 //							public void run() {
-//								windowsSuper( subfeatures, update );
+//								facadeSuper (subfeatures, update);
 //							};
 //						}.start();
-						return;
-					}
+//						
+//						return;
+//					}
 
 				} catch ( Throwable e ) {
 					e.printStackTrace();
@@ -255,11 +286,11 @@ public class Pix2Pix {
 
 	private String importTexture( File f, String name, int specular, DRectangle crop ) throws IOException {
 		
-		File texture = new File( f, "images/" + name + "_fake_B.png" );
+		File texture = new File( f, name + ".png" );
 		String dest = "missing";
 		if ( texture.exists() && texture.length() > 0 ) {
 
-			BufferedImage labels = ImageIO.read( new File( f, "images/" + name + "_real_A.png" ) ), 
+			BufferedImage labels = ImageIO.read( new File( f, name + ".png_label" ) ), 
 					rgb = ImageIO.read( texture );
 
 			if (crop != null) {
@@ -295,10 +326,10 @@ public class Pix2Pix {
 			return toEdit.postState.outerFacadeRect;
 	}
 
-	private static class WindowMeta {
+	private static class Meta {
 		String name;
 		DRectangle mask;
-		private WindowMeta(String name, DRectangle mask) {
+		private Meta(String name, DRectangle mask) {
 			this.name = name;
 			this.mask = mask;
 		}
@@ -416,7 +447,7 @@ public class Pix2Pix {
 				}
 			}
 			
-			submit ( new Job ( FACADE, new JobResult() {
+			submit ( new Job ( FACADE, ""+System.nanoTime() /* fixme */, new JobResult() {
 				@Override
 				public void finished( File f ) {
 					
@@ -508,7 +539,7 @@ public class Pix2Pix {
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
 		
-		Map<FRect, WindowMeta> names = new HashMap<>();
+		Map<FRect, Meta> names = new HashMap<>();
 		
 		for ( MiniFacade mf : subfeatures ) {
 			try {
@@ -542,7 +573,7 @@ public class Pix2Pix {
 					
 					String name = System.nanoTime() + "_" + count;
 					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
-					names.put( r, new WindowMeta( name, mask ) );
+					names.put( r, new Meta( name, mask ) );
 					
 					count++;
 				}
@@ -553,15 +584,15 @@ public class Pix2Pix {
 			
 		}
 		
-		submit ( new Job ( WINDOW, new JobResult() {
+		submit ( new Job ( WINDOW,  ""+System.nanoTime() /* fixme */, new JobResult() {
 			@Override
 			public void finished( File f ) {
 
 				try {
 
-					for ( Map.Entry<FRect, WindowMeta> e : names.entrySet() ) {
+					for ( Map.Entry<FRect, Meta> e : names.entrySet() ) {
 
-						WindowMeta meta = e.getValue();
+						Meta meta = e.getValue();
 						String dest = importTexture( f, meta.name, 255, meta.mask );
 						
 						

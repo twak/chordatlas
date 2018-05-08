@@ -1,7 +1,9 @@
 package org.twak.tweed.gen.skel;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,9 +18,13 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.ProgressMonitor;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
 import org.twak.camp.Output;
@@ -61,6 +67,7 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
@@ -69,6 +76,7 @@ import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.NSliders;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Regularizer;
 
@@ -695,7 +703,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.featureGen = new FeatureGenerator( se.toEdit, se.toEdit.featureGen );
 		}
 		
-		Plot p = new Plot( se.toEdit, texture );
+		double[] z = new double[8];
 
 		Changed c = new Changed() {
 
@@ -707,7 +715,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							new Pix2Pix().facade( Collections.singletonList( se.toEdit ), new Runnable() {
+							new Pix2Pix().facade( Collections.singletonList( se.toEdit ),z, new Runnable() {
 
 								public void run() {
 									tweed.enqueue( new Runnable() {
@@ -734,13 +742,28 @@ public class SkelGen extends Gen implements IDumpObjs {
 				}
 			}
 		};
+
+		NSliders sliders = new NSliders(z, c);
+		
+		FileDrop drop = new FileDrop( "style" ) {
+			public void process(java.io.File f) {
+				new Pix2Pix().encode( f, z, new Runnable() {
+					@Override
+					public void run() {
+						sliders.setValues( z );
+					}
+				} );
+			};
+		};
+		
+		Plot p = new Plot( se.toEdit, texture, sliders, drop );
 		
 		texture.addActionListener( l -> c.changed() );
 		
 		c.changed();
 		p.addEditListener( c );
 	}
-
+	
 	private static void ensureMF( SuperFace sf, SuperEdge se ) {
 
 		if (se.toEdit == null) {
@@ -806,7 +829,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		new Thread( new Runnable() {
 			@Override
 			public void run() {
-				new Pix2Pix().facade( mfs, new Runnable() {
+				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
 					public void run() {
 						tweed.enqueue( new Runnable() {
 							@Override
