@@ -570,7 +570,7 @@ public class Pix2Pix {
 					
 					DRectangle mask = new DRectangle();
 					
-					BufferedImage scaled = Imagez.scaleSquare( Imagez.scaleLongest( dow, 256 ), 256, mask );
+					BufferedImage scaled = Imagez.scaleSquare( dow, 256, mask, Double.MAX_VALUE );
 					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 					
 					Graphics2D g = toProcess.createGraphics();
