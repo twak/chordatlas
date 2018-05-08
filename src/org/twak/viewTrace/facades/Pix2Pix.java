@@ -21,6 +21,7 @@ import javax.vecmath.Point2d;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -38,6 +39,8 @@ public class Pix2Pix {
 //			private static final String LABEL2PHOTO = "facades3k", 
 			WINDOW = "window_super_res", 
 			FACADE = "facade_super_res";
+	
+	public static final int LATENT_SIZE = 8;
 
 	public enum CMPLabel { //sequence is  z-order
 		Background (1, 0,0, 170 ),
@@ -45,7 +48,8 @@ public class Pix2Pix {
 		Molding    (10, 255, 85, 0 ),
 		Cornice    (5, 0, 255, 255 ),
 		Pillar     (11, 255,0, 0 ),
-		Window     (3, 0, 85, 255 ),
+		Window     (3, 0, 85, 0 ),
+//		Window     (3, 0, 85, 255 ),
 		Door       (4, 0,170, 255 ),
 		Sill       (6, 85,255, 170 ),
 		Blind      (8, 255,255, 0 ),
@@ -154,14 +158,17 @@ public class Pix2Pix {
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
-			submit( new Job( LABEL2PHOTO, System.nanoTime() + "_" + f.getName(), new JobResult() {
+			submit( new Job( LABEL2PHOTO+"_e", System.nanoTime() + "_" + Filez.stripExtn( f.getName() ), new JobResult() {
 
 				@Override
 				public void finished( File f ) {
 					for ( File zf : f.listFiles() ) {
 						String[] ss = zf.getName().split( "_" );
 						for ( int i = 0; i < ss.length; i++ )
-							values[ i ] = Integer.parseInt( ss[ i ] );
+							values[ i ] = Double.parseDouble( ss[ i ] );
+						update.run();
+						return;
+						
 					}
 				}
 			} ) );
@@ -215,9 +222,8 @@ public class Pix2Pix {
 						g.fill( toPoly( toEdit, mask, mini, l ) );
 			}
 
-			cmpRects( toEdit, g, mask, mini, Color.green, toEdit.featureGen.getRects( Feature.WINDOW    ) );
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
+			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );

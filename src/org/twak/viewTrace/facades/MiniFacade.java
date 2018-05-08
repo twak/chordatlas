@@ -28,7 +28,6 @@ public class MiniFacade {
 	public double[] 
 			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ),
 			groundColor = null;
-	public double uncertainty = 0;
 	
 	public enum Feature {
 		
@@ -147,13 +146,6 @@ public class MiniFacade {
 //		hMargin = readMargin( ((List) yaml.get("win_h_margin")) );
 //		vMargin = readMargin( ((List) yaml.get("win_v_margin")) );
 		readWinGrid( scale, imageXM, topM, ((Map) yaml.get("window-grid")) );
-		
-		if (yaml.get( "uncertainty" ) != null)
-		try{
-			uncertainty = Double.parseDouble( (String) yaml.get( "uncertainty" ) );
-		}
-		catch (NumberFormatException th) {
-		}
 		
 		if (yaml.get("mezzanine") != null) {
 			List<String> col = (List) ((Map)yaml.get( "mezzanine" )).get("rgb");

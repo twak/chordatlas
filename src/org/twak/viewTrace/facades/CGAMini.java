@@ -232,7 +232,7 @@ public class CGAMini extends FeatureGenerator {
 									if ( gWindowPanelV.size() > 2 ) {
 										
 										if (visible( gWindowPanelV.get(1), occlusions ))
-											add( Feature.SHOP, gWindowPanelV.get( 1 ) );
+											add( Feature.WINDOW, gWindowPanelV.get( 1 ) );
 									} 
 								}
 							}
@@ -252,6 +252,15 @@ public class CGAMini extends FeatureGenerator {
 				}
 			}
 		}
+		
+		
+		/**
+		 * Windows only please...
+		 */
+		for (Feature f : Feature.values() )
+			if (f != Feature.WINDOW)
+				remove( f );
+		
 	}
 
 	private void windowStrip( DRectangle cen, boolean makeBalcony, List<DRectangle> occlusions ) {

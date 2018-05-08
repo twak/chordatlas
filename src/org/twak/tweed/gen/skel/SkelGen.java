@@ -703,8 +703,26 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.featureGen = new FeatureGenerator( se.toEdit, se.toEdit.featureGen );
 		}
 		
-		double[] z = new double[8];
-
+		
+		
+		double[] z;
+		
+		FeatureGenerator gf = (FeatureGenerator) se.toEdit.featureGen;
+		if ( gf.style != null )
+			z = gf.style;
+		else
+			z = gf.style = new double[Pix2Pix.LATENT_SIZE];
+		
+		
+		List<MiniFacade> sameStyle = new ArrayList();
+		for (HalfEdge e : sf ){
+			SuperEdge se2 = (SuperEdge)e;
+			if ( se2.toEdit.featureGen.style == z)
+				sameStyle.add( se2.toEdit );
+		}
+		
+		
+		
 		Changed c = new Changed() {
 
 			@Override
@@ -715,7 +733,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
-							new Pix2Pix().facade( Collections.singletonList( se.toEdit ),z, new Runnable() {
+							new Pix2Pix().facade( sameStyle, z, new Runnable() {
 
 								public void run() {
 									tweed.enqueue( new Runnable() {
@@ -800,7 +818,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 
 	private void cgaAll() {
-		
+
 		for (HalfFace hf : toRender )
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
@@ -817,12 +835,18 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		List<MiniFacade> mfs = new ArrayList<>();
 		
+		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
+		
+		for (int i = 0; i < style.length; i++)
+			style[i] = Math.random() - 0.5;
+		
 		for (HalfFace hf : toRender )
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
 				
 				ensureMF((SuperFace)hf, se);
 				mfs.add( se.toEdit );
+				se.toEdit.featureGen.style = style;
 				se.toEdit.featureGen.update();
 			}
 		

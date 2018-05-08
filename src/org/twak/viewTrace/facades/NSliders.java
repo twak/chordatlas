@@ -47,14 +47,15 @@ public class NSliders extends JPanel {
 	public void setValues (double[] newValues) {
 		updating = true;
 		for (int i = 0; i < newValues.length; i ++) {
-			sliders[i].setValue( (i + 1) * 500 );
+			System.out.println( newValues[i] );
+			sliders[i].setValue( (int) ( (newValues[i] + 2) * 250 ) );
 		}
 		updating = false;
 		c.changed();
 	}
 	
 	private void change(JSlider s, int i) {
-		results[i] = s.getValue() / 500.  - 1;
+		results[i] = s.getValue() / 250.  - 2;
 		if (!updating && !s.getValueIsAdjusting()) {
 			c.changed();
 		}
