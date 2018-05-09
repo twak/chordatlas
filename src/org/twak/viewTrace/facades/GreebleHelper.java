@@ -107,7 +107,20 @@ public class GreebleHelper {
 
 	}
 
-	public static LoopL<Point2d> roofUVs( LoopL<LPoint2d> coords, Point2d s, Point2d e, double d ) {
+	/**
+	 * For a single roof pitch / face
+	 */
+	public static LoopL<Point2d> wholeRoofUVs ( LoopL<LPoint2d> coords, DRectangle bounds ) {
+		
+		return coords.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<LPoint2d> input ) {
+				return bounds.normalize( input.get() );
+			}
+		}.run();
+	}
+	
+	public static LoopL<Point2d> roofPitchUVs ( LoopL<LPoint2d> coords, Point2d s, Point2d e, double d ) {
 		
 		Line l = new Line (s, e);
 		double ll =  l.length();
@@ -121,7 +134,6 @@ public class GreebleHelper {
 				return new Point2d ( l.findPPram( x ) * ll * d, input.get().distance( x ) * d);
 			}
 		}.run();
-		
 	}
 	
 	public static LoopL<Point2d> uvs( LoopL<Point3d> coords, double d ) {

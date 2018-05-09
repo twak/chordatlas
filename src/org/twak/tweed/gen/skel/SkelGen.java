@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -67,9 +68,11 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -91,7 +94,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public SkelFootprint skelFootprint;
 	protected List<Line> footprint;
-	private  Map<Object, Face> lastOccluders = new HashMap<>();
+	Map<Object, Face> lastOccluders = new HashMap<>();
 
 	
 	static {
@@ -410,6 +413,11 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 	}
 
+	enum RoofSource {
+		None, Tile, Generative
+	}
+	RoofSource rs = RoofSource.None;
+	
 	private void selected( PlanSkeleton skel, Node house, SuperFace sf, SuperEdge se ) {
 
 		JPanel ui = new JPanel();
@@ -418,6 +426,23 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JButton fac = new JButton( "edit facade" );
 		fac.addActionListener( e -> editFacade( skel, sf, se ) );
 		ui.add( fac );
+		
+		AutoEnumCombo roof = new AutoEnumCombo( rs, new AutoEnumCombo.ValueSet() {
+			@Override
+			public void valueSet( Enum num ) {
+				RoofSource rs = (RoofSource)num;
+				switch(rs) {
+				case None:
+					// colour chooser
+				case Tile:
+					// plain tile
+				case Generative:
+					setRoofTextured( skel, sf, true );
+				}
+				
+			}
+		} );
+		ui.add( roof );
 
 		JButton proc = new JButton( "procedural facade" );
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
@@ -679,110 +704,33 @@ public class SkelGen extends Gen implements IDumpObjs {
 		Jme3z.dump( dump, gNode, 0 );
 	}
 
-	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
+	public void editFacade ( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
+		
 		closeSitePlan();
-
-		JToggleButton texture = new JToggleButton( "textured" );
-		texture.setSelected( se.toEdit != null && se.toEdit.texture != null );
-		
-		if ( se.toEdit == null ) {
-			ensureMF( sf, se );
-			if ( !texture.isSelected() )
-				se.toEdit.groundFloorHeight = 2;
-		}
-
-		if ( texture.isSelected() )  {
-			patchWallTag (skel, se, se.toEdit);
-			se.toEdit.width = se.length();
-		}
-		else
-			se.toEdit.texture = null;
-		
-		if (se.toEdit.featureGen instanceof CGAMini) { // de-proecuralize before editing 
-			((CGAMini) se.toEdit.featureGen).update();
-			se.toEdit.featureGen = new FeatureGenerator( se.toEdit, se.toEdit.featureGen );
-		}
-		
-		
-		
-		double[] z;
-		
-		FeatureGenerator gf = (FeatureGenerator) se.toEdit.featureGen;
-		if ( gf.style != null )
-			z = gf.style;
-		else
-			z = gf.style = new double[Pix2Pix.LATENT_SIZE];
-		
-		
-		List<MiniFacade> sameStyle = new ArrayList();
-		for (HalfEdge e : sf ){
-			SuperEdge se2 = (SuperEdge)e;
-			if ( se2.toEdit.featureGen.style == z)
-				sameStyle.add( se2.toEdit );
-		}
-		
-		
-		
-		Changed c = new Changed() {
-
-			@Override
-			public void changed() {
-
-				PaintThing.debug.clear();
-				if ( texture.isSelected() )
-					new Thread( new Runnable() {
-						@Override
-						public void run() {
-							new Pix2Pix().facade( sameStyle, z, new Runnable() {
-
-								public void run() {
-									tweed.enqueue( new Runnable() {
-										@Override
-										public void run() {
-											setSkel( skel, sf, lastOccluders );
-											tweed.getRootNode().updateGeometricState();
-										}
-									} );
-								}
-							} );
-						}
-					} ).start();
-				else {
-					
-					se.toEdit.texture = null;
-					
-					tweed.enqueue( new Runnable() {
-						@Override
-						public void run() {
-							setSkel( skel, sf, lastOccluders );
-						}
-					} );
-				}
-			}
-		};
-
-		NSliders sliders = new NSliders(z, c);
-		
-		FileDrop drop = new FileDrop( "style" ) {
-			public void process(java.io.File f) {
-				new Pix2Pix().encode( f, z, new Runnable() {
-					@Override
-					public void run() {
-						sliders.setValues( z );
-					}
-				} );
-			};
-		};
-		
-		Plot p = new Plot( se.toEdit, texture, sliders, drop );
-		
-		texture.addActionListener( l -> c.changed() );
-		
-		c.changed();
-		p.addEditListener( c );
+		new FacadeDesigner( skel, sf, se, this );
 	}
 	
-	private static void ensureMF( SuperFace sf, SuperEdge se ) {
+	public void setRoofTextured ( PlanSkeleton skel, SuperFace sf, boolean textured ) {
+		
+		JPanel panel = new JPanel();
+		JFrame texturer = WindowManager.frame("roof texture", panel);
+
+//		NSliders sliders = new NSliders(z, c);
+//		
+//		FileDrop drop = new FileDrop( "style" ) {
+//			public void process(java.io.File f) {
+//				new Pix2Pix().encode( f, z, new Runnable() {
+//					@Override
+//					public void run() {
+//						sliders.setValues( z );
+//					}
+//				} );
+//			};
+//		};
+		
+	}
+	
+	public static void ensureMF( SuperFace sf, SuperEdge se ) {
 
 		if (se.toEdit == null) {
 		se.toEdit = new MiniFacade();
@@ -846,7 +794,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				
 				ensureMF((SuperFace)hf, se);
 				mfs.add( se.toEdit );
-				se.toEdit.featureGen.style = style;
+				se.toEdit.featureGen.facadeStyle = style;
 				se.toEdit.featureGen.update();
 			}
 		
@@ -870,8 +818,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 	}
 
-
-	private void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
+	public static void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
 		
 		for (Bar b : skel.plan.profiles.keySet()) {
 			if (b.end.equals( se.start ) && b.start.equals( se.end )) {

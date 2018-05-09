@@ -18,6 +18,7 @@ import javax.vecmath.Vector3d;
 import org.twak.camp.Edge;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
+import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -46,6 +47,8 @@ import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
 import com.jme3.scene.Node;
 
+import smile.math.Math;
+
 public class GreebleSkel {
 
 	private static final double TILE_UV_SCALE = 0.4;
@@ -61,6 +64,8 @@ public class GreebleSkel {
 	GreebleGrid greebleGrid;
 	
 	boolean isTextured = false;
+	
+	DRectangle roofBounds;
 	
 	public static float[] 
 			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
@@ -89,6 +94,7 @@ public class GreebleSkel {
 		
 		isTextured = false;
 		
+		roofBounds = new DRectangle.Enveloper();
 		
 		// find some sensible defaults to propogate
 		for ( Face f : output.faces.values() )  {
@@ -116,8 +122,14 @@ public class GreebleSkel {
 						wallColor = wt.color;
 					bestWallArea = area;
 				}
+				
+				roofBounds.envelop( Pointz.to2( f.edge.start) );
+				roofBounds.envelop( Pointz.to2( f.edge.end) );
 			}
 		}
+		
+		roofBounds.grow( 2 );
+		roofBounds.height = roofBounds.width = Math.max( roofBounds.width, roofBounds.height );
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		
@@ -573,22 +585,20 @@ public class GreebleSkel {
 
 			if ( wallTag == null || toRecess == null || floorRect == null ) {
 				LoopL<LPoint2d> loop = flat.singleton();
-				m.add( loop, m.texture == null ? null :  
-					GreebleHelper.roofUVs (loop, Pointz.to2( start ), Pointz.to2( end ), TILE_UV_SCALE ), to3d );
 				
+				LoopL<Point2d> roofUVs;
+				
+				if (m.texture != null)
+					if (mf.featureGen != null && mf.featureGen.roofStyle != null)
+							roofUVs = GreebleHelper.wholeRoofUVs (loop, roofBounds );
+						else
+							roofUVs = GreebleHelper.roofPitchUVs ( loop, Pointz.to2( start ), Pointz.to2( end ), TILE_UV_SCALE );
+				else
+					roofUVs = null;
+						
+				m.add( loop, roofUVs, to3d );
 				return;
 			}
-
-//			List<DRectangle> occlusions = new ArrayList<>();
-//			for ( LineHeight lh : wallTag.occlusions ) {
-//
-//				Point3d s = new Point3d( lh.start.x, lh.start.y, lh.min ), e = new Point3d( lh.end.x, lh.end.y, lh.max );
-//
-//				to2dXY.transform( s );
-//				to2dXY.transform( e );
-//
-//				occlusions.add( new DRectangle( Math.min( s.x, e.x ), s.z, Math.abs( e.x - s.x ), Math.abs( e.z - s.z ) ) );
-//			}
 
 			if ( mf.texture == null )
 				greebleGrid.buildGrid (

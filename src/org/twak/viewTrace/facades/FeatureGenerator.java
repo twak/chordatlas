@@ -12,7 +12,9 @@ import org.w3c.dom.css.Rect;
 public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
 	MiniFacade mf;
-	public double[] style;
+	
+	public double[] facadeStyle, roofStyle;
+	
 	
 	public FeatureGenerator( MiniFacade mf ) {
 		this.mf = mf;
@@ -22,8 +24,6 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		
 		this(mf);
 		
-		
-		
 		for (Map.Entry<Feature, List<FRect>> ee : features.entrySet()) {
 			for (FRect e : ee.getValue())
 				put( ee.getKey(), new FRect( e ) );
@@ -32,7 +32,7 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
 	public FeatureGenerator( FeatureGenerator featureGen ) {
 		this (featureGen.mf, featureGen);
-		this.style = featureGen.style;
+		this.facadeStyle = featureGen.facadeStyle;
 	}
 
 	public void add( Feature feat, DRectangle rect ) {
