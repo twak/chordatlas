@@ -26,6 +26,7 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.Appearance.NetConfig;
 import org.twak.viewTrace.facades.Appearance.TextureUVs;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
@@ -147,14 +148,14 @@ public class Pix2Pix {
 		
 	}
 	
-	public void encode(File f, double[] values, Runnable update ) {
+	public void encode(File f, NetConfig config, double[] values, Runnable update ) {
 
 		try {
 			BufferedImage bi = ImageIO.read( f );
-			bi = Imagez.scaleSquare( bi, 256 );
+			bi = Imagez.scaleSquare( bi, config.resolution );
 			bi = Imagez.join( bi, bi );
 
-			File dir = new File( "/home/twak/code/bikegan/input/" + LABEL2PHOTO + "_e/val/" );
+			File dir = new File( "/home/twak/code/bikegan/input/" + config.netName + "_e/val/" );
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 

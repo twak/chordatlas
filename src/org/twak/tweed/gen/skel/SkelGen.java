@@ -541,7 +541,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 			tweed.frame.setGenUI( HasApp.get( ha ).createUI(ha, new Runnable() {
 				@Override
 				public void run() {
-					setSkel( skel, sf, lastOccluders );					
+					tweed.enqueue( new Runnable() {
+						@Override
+						public void run() {
+							setSkel( skel, sf, lastOccluders );					
+						}
+					} );
 				}
 			})  );
 	}

@@ -15,12 +15,12 @@ public class NSliders extends JPanel {
 	double[] results;
 	JSlider[] sliders;
 	boolean updating = false;
-	Changed c;
+	Runnable c;
 	
-	public NSliders (double[] result, Changed c) {
+	public NSliders (double[] result, Runnable update) {
 		
 		this.results = result;
-		this.c = c;
+		this.c = update;
 		
 		sliders = new JSlider[result.length];
 
@@ -51,13 +51,13 @@ public class NSliders extends JPanel {
 			sliders[i].setValue( (int) ( (newValues[i] + 2) * 250 ) );
 		}
 		updating = false;
-		c.changed();
+		c.run();
 	}
 	
 	private void change(JSlider s, int i) {
 		results[i] = s.getValue() / 250.  - 2;
 		if (!updating && !s.getValueIsAdjusting()) {
-			c.changed();
+			c.run();
 		}
 	}
 	

@@ -1,13 +1,23 @@
 package org.twak.viewTrace.facades;
 
-import java.awt.Color;
-import java.util.List;
+import static org.twak.viewTrace.facades.Appearance.NetConfig.Facade2Labels;
+import static org.twak.viewTrace.facades.Appearance.NetConfig.Roof;
+import static org.twak.viewTrace.facades.Appearance.NetConfig.Windows;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.ui.AutoEnumCombo;
+import org.twak.utils.ui.AutoEnumCombo.ValueSet;
+import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.FileDrop;
-import static org.twak.viewTrace.facades.Appearance.NetConfig.*;
+import org.twak.utils.ui.ListDownLayout;
 
 public class Appearance {
 	
@@ -16,7 +26,7 @@ public class Appearance {
 	}
 	
 	public enum AppMode {
-		Color, Texture, Parent, Net
+		Color, Bitmap, Parent, Net
 	}
 	
 	public AppMode appMode = AppMode.Color;
@@ -29,16 +39,18 @@ public class Appearance {
 	
 	public enum NetConfig {
 		
-		Facade2Labels (8, "facade2"),
-		Roof (8, "roof2"),
-		Windows (8, "dows1");
+		Facade2Labels (8, 256, "facade2"),
+		Roof (8, 512, "roof2"),
+		Windows (8, 256, "dows1");
 		
 		String netName;
 		int sizeZ;
+		int resolution;
 		
-		NetConfig (int sizeZ, String netName, NetConfig...children ) {
+		NetConfig (int sizeZ, int resolution, String netName, NetConfig...children ) {
 			this.sizeZ = sizeZ;
 			this.netName = netName;
+			this.resolution = resolution;
 		}
 	}
 	
@@ -49,6 +61,7 @@ public class Appearance {
 		this.texture = a.texture;
 		this.styleZ = a.styleZ;
 	}
+	
 	public Appearance(HasApp ha) {
 		
 		this.app = ha;
@@ -60,6 +73,8 @@ public class Appearance {
 		} else if (app.getClass() == FRect.class) {
 			this.config = Windows;
 		}		
+		
+		this.styleZ = new double[this.config.sizeZ];
 	}
 
 	public void update (Runnable update) {
@@ -68,6 +83,27 @@ public class Appearance {
 	
 	public JComponent createUI( HasApp ha, Runnable update ) {
 
+		JPanel out = new JPanel(new BorderLayout() );
+		
+		JPanel options = new JPanel();
+		
+		AutoEnumCombo combo = new AutoEnumCombo( appMode, new ValueSet() {
+			public void valueSet( Enum num ) {
+				appMode = (AppMode) num;
+				options.removeAll();
+				
+				options.setLayout( new ListDownLayout() );
+				buildLayout(appMode, options, update);
+				options.repaint();
+				options.revalidate();
+			}
+
+		} );
+		
+		out.add( combo, BorderLayout.NORTH );
+		out.add( options, BorderLayout.CENTER );
+		
+		
 //		double[] z;
 //		
 //		FeatureGenerator gf = (FeatureGenerator) se.toEdit.featureGen;
@@ -82,18 +118,47 @@ public class Appearance {
 //			if ( se2.toEdit.featureGen.facadeStyle == z)
 //				sameStyle.add( se2.toEdit );
 //		}
+
 		
-		NSliders sliders = new NSliders(z, c);
-		
-		FileDrop drop = new FileDrop( "style" ) {
-			public void process(java.io.File f) {
-				new Pix2Pix().encode( f, z, new Runnable() {
-					@Override
-					public void run() {
-						sliders.setValues( z );
-					}
-				} );
+		return out;
+	}
+
+	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
+		switch (appMode) {
+		case Color:
+			JButton col = new JButton("color");
+			col.addActionListener( e -> new ColourPicker(null, color) {
+				@Override
+				public void picked( Color color ) {
+					Appearance.this.color = color;
+					update.run();
+				}
+			} );
+			out.add( col );
+			break;
+		case Bitmap:
+		default:
+			out.add( new JLabel("no options") );
+			break;
+		case Net:
+
+			NSliders sliders = new NSliders( styleZ, update );
+			FileDrop drop = new FileDrop( "style" ) {
+				public void process(java.io.File f) {
+					new Pix2Pix().encode( f, config, styleZ, new Runnable() {
+						@Override
+						public void run() {
+							sliders.setValues( styleZ );
+							update.run();
+						}
+					} );
+				};
 			};
-		};
+			
+			out.add( sliders );
+			out.add( drop );
+			
+			break;
+		}
 	}
 }
