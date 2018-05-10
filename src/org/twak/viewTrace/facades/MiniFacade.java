@@ -42,7 +42,7 @@ public class MiniFacade implements HasApp {
 		}
 	}
 	
-	public Appearance app = new Appearance();
+	public Appearance app = new Appearance(this);
 	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	
@@ -392,5 +392,11 @@ public class MiniFacade implements HasApp {
 		g.dispose();
 
 		return bi;
+	}
+
+	public List<HasApp> getAppChildren() {
+		List<HasApp> out = new ArrayList<>();
+		out.addAll( featureGen.valueList() );
+		return out;
 	}
 }

@@ -20,7 +20,7 @@ public class SuperFace extends HalfFace implements HasApp {
 	public double height = 4;
 	public int classification;
 	
-	public Appearance app = new Appearance();
+	public Appearance app = new Appearance(this);
 	
 	public SuperFace() {
 		super(null);
@@ -94,5 +94,9 @@ public class SuperFace extends HalfFace implements HasApp {
 		}
 		
 		return null;
+	}
+
+	public List<HasApp> getAppChildren() {
+		return Collections.emptyList();
 	}
 }

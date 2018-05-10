@@ -391,7 +391,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			public void selected( Output output, Node house2, SuperEdge se, HasApp ha ) {
 				
 				if (tweed.tool instanceof TextureTool)
-					SkelGen.this.texture( skel, house2, sf, se, ha );
+					SkelGen.this.textureSelected( skel, house2, sf, se, ha );
 				else
 					SkelGen.this.selected( skel, house2, sf, se );
 			}
@@ -534,11 +534,16 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.frame.setGenUI( ui );
 	}
 
-	protected void texture( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
+	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
 		if (ha == null)
 			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
 		else
-			tweed.frame.setGenUI( new JLabel (  ha.getClass().getSimpleName() ) );
+			tweed.frame.setGenUI( HasApp.get( ha ).createUI(ha, new Runnable() {
+				@Override
+				public void run() {
+					setSkel( skel, sf, lastOccluders );					
+				}
+			})  );
 	}
 	
 	private WallTag findWallMini( LoopL<Bar> points ) {

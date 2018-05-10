@@ -1,5 +1,7 @@
 package org.twak.viewTrace.facades;
 
+import java.util.List;
+
 public interface HasApp {
 
 	static Appearance get( HasApp roofApp ) {
@@ -11,4 +13,5 @@ public interface HasApp {
 		return null;
 	}
 
+	public List<HasApp> getAppChildren();
 }

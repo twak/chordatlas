@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
-	public Appearance app = new Appearance();
+	public Appearance app = new Appearance (this);
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
@@ -243,6 +244,10 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	public void setObject( Object o ) {
 		if (o != this)
 			throw new Error("!");
+	}
+
+	public List<HasApp> getAppChildren() {
+		return Collections.emptyList();
 	}
 }
 

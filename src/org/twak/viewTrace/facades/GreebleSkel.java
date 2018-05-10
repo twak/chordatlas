@@ -243,7 +243,8 @@ public class GreebleSkel {
 
 							@Override
 							public void run() {
-								selected( output, node, findSuperEdge( output, chain ), (HasApp)((Object[])((Spatial) data).getUserData( Appearance ) ) [0] );
+								selected( output, node, findSuperEdge( output, chain ), 
+										(HasApp)((Object[])((Spatial) data).getUserData( Appearance ) ) [0] );
 							}
 						} );
 					} catch ( Throwable th ) {
@@ -344,13 +345,13 @@ public class GreebleSkel {
 				
 				switch ( mf.app.appMode ) {
 				case Color:
-					faceColor = greebleGrid.mbs.get( BRICK, wt.color != null ? wt.color : wallColor );
+					faceColor = greebleGrid.mbs.get( BRICK, wt.color != null ? wt.color : wallColor, mf );
 					break;
 				case Texture:
-					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG );
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, mf );
 					break;
 				case Net:
-					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture );
+					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture, mf );
 					break;
 				}
 
