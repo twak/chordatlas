@@ -346,7 +346,8 @@ public class GreebleSkel {
 				
 				switch ( mf.app.appMode ) {
 				case Color:
-					faceColor = greebleGrid.mbs.get( BRICK, wt.color != null ? wt.color : wallColor, mf );
+					faceColor = greebleGrid.mbs.get( BRICK, mf.app.color, mf );
+//					faceColor = greebleGrid.mbs.get( BRICK, mf.app.color != null ? Colourz mf.app.color : wallColor, mf );
 					break;
 				case Bitmap:
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, mf );

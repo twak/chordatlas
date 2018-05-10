@@ -6,6 +6,7 @@ import static org.twak.viewTrace.facades.Appearance.NetConfig.Windows;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -13,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.MiniRoof;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
 import org.twak.utils.ui.ColourPicker;
@@ -68,7 +71,7 @@ public class Appearance {
 		
 		if ( app.getClass() == MiniFacade.class) {
 			this.config = Facade2Labels;
-		} else if (app.getClass() == SuperFace.class) {
+		} else if (app.getClass() == MiniRoof.class) {
 			this.config = Roof;
 		} else if (app.getClass() == FRect.class) {
 			this.config = Windows;
@@ -79,9 +82,15 @@ public class Appearance {
 
 	public void update (Runnable update) {
 		
+		if (app instanceof MiniFacade)
+			new Pix2Pix().facade( Collections.singletonList( (MiniFacade) app ), config, styleZ, update );
+		else if (app instanceof SuperFace) 
+			new Pix2Pix().roofs( ((MiniRoof)app), config, styleZ, update );
+		else if (app instanceof FRect) 
+			new Pix2Pix();
 	}
 	
-	public JComponent createUI( HasApp ha, Runnable update ) {
+	public JComponent createUI( HasApp ha, Runnable globalUpdate ) {
 
 		JPanel out = new JPanel(new BorderLayout() );
 		
@@ -93,11 +102,16 @@ public class Appearance {
 				options.removeAll();
 				
 				options.setLayout( new ListDownLayout() );
-				buildLayout(appMode, options, update);
+				buildLayout(appMode, options, new Runnable() {
+					
+					@Override
+					public void run() {
+						Appearance.this.update( globalUpdate );
+					}
+				} );
 				options.repaint();
 				options.revalidate();
 			}
-
 		} );
 		
 		out.add( combo, BorderLayout.NORTH );
@@ -123,7 +137,7 @@ public class Appearance {
 		return out;
 	}
 
-	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
+	private void buildLayout( AppMode appMode, JPanel out, Runnable r ) {
 		switch (appMode) {
 		case Color:
 			JButton col = new JButton("color");
@@ -131,7 +145,7 @@ public class Appearance {
 				@Override
 				public void picked( Color color ) {
 					Appearance.this.color = color;
-					update.run();
+					r.run();
 				}
 			} );
 			out.add( col );
@@ -142,14 +156,14 @@ public class Appearance {
 			break;
 		case Net:
 
-			NSliders sliders = new NSliders( styleZ, update );
+			NSliders sliders = new NSliders( styleZ, r );
 			FileDrop drop = new FileDrop( "style" ) {
 				public void process(java.io.File f) {
 					new Pix2Pix().encode( f, config, styleZ, new Runnable() {
 						@Override
 						public void run() {
 							sliders.setValues( styleZ );
-							update.run();
+							r.run();
 						}
 					} );
 				};

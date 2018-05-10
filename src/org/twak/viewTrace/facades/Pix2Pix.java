@@ -20,6 +20,7 @@ import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
@@ -180,9 +181,9 @@ public class Pix2Pix {
 		
 	}
 
-	public void facade( List<MiniFacade> minis, double[] z, Runnable update ) {
+	public void facade( List<MiniFacade> minis, NetConfig config, double[] z, Runnable update ) {
 		
-		BufferedImage bi = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+		BufferedImage bi = new BufferedImage( config.resolution * 2, config.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D ) bi.getGraphics();
 		
 		Map<MiniFacade, Meta> index = new HashMap<>();
@@ -193,7 +194,7 @@ public class Pix2Pix {
 		
 		for ( MiniFacade toEdit : minis ) {
 
-			DRectangle bounds = new DRectangle( 256, 0, 256, 256 );
+			DRectangle bounds = new DRectangle( config.resolution, 0, config.resolution, config.resolution );
 			DRectangle mini = findBounds (toEdit);
 			
 			g.setColor( Color.black );
@@ -205,7 +206,7 @@ public class Pix2Pix {
 			
 			{
 				mask = mask.scale( 256 / Math.max( mini.height, mini.width ) );
-				mask.x = ( 256 - mask.width ) * 0.5 + /* draw on the right of the input image */ 256;
+				mask.x = ( config.resolution - mask.width ) * 0.5 + /* draw on the right of the input image */ config.resolution;
 				mask.y = 0; //( 256 - mask.height ) * 0.5;
 			}
 			
@@ -230,14 +231,14 @@ public class Pix2Pix {
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
 //			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
 
-			mask.x -= 256;
+			mask.x -= config.resolution;
 			
 			String name = System.nanoTime() + "@" + index.size();
 			
 			index.put ( toEdit, new Meta( name, mask ) );
 			
 			try {
-				File dir = new File ( "/home/twak/code/bikegan/input/"+LABEL2PHOTO+"/val/" );
+				File dir = new File ( "/home/twak/code/bikegan/input/"+config.netName+"/val/" );
 				dir.mkdirs();
 				ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
 			} catch ( IOException e ) {
@@ -649,6 +650,11 @@ public class Pix2Pix {
 			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
 			}
 		}
+	}
+
+	public void roofs( MiniRoof mr, NetConfig config, double[] styleZ, Runnable update ) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

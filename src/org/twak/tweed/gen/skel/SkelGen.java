@@ -399,8 +399,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		GreebleSkel greeble = new GreebleSkel( tweed );
 		
-		house = greeble.showSkeleton( skel.output, onclick, occluderLookup, sf );
+		house = greeble.showSkeleton( skel.output, onclick, occluderLookup, sf.mr );
 
+		sf.mr.setOutline (skel.output);
+		
 		gNode.attachChild( house );
 		geometry.get( sf ).set (house, skel.output, skel );
 
@@ -754,6 +756,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 	public static void ensureMF( SuperFace sf, SuperEdge se ) {
 
+		if (sf.mr == null)
+			sf.mr = new MiniRoof();
+		
 		if (se.toEdit == null) {
 		se.toEdit = new MiniFacade();
 		se.toEdit.left = 0;
@@ -820,23 +825,23 @@ public class SkelGen extends Gen implements IDumpObjs {
 				se.toEdit.featureGen.update();
 			}
 		
-		new Thread( new Runnable() {
-			@Override
-			public void run() {
-				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
-					public void run() {
-						tweed.enqueue( new Runnable() {
-							@Override
-							public void run() {
-								for (MiniFacade mf : mfs)
-									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
-								calculateOnJmeThread();
-							}
-						} );
-					}
-				} );
-			}
-		} ).start();
+//		new Thread( new Runnable() {
+//			@Override
+//			public void run() {
+//				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
+//					public void run() {
+//						tweed.enqueue( new Runnable() {
+//							@Override
+//							public void run() {
+//								for (MiniFacade mf : mfs)
+//									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
+//								calculateOnJmeThread();
+//							}
+//						} );
+//					}
+//				} );
+//			}
+//		} ).start();
 		
 	}
 

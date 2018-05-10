@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.viewTrace.facades.Appearance;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 
-public class SuperFace extends HalfFace implements HasApp {
+public class SuperFace extends HalfFace  {
 
 	public List<float[]> colors = null;
 	public float[] roofColor;
@@ -20,7 +21,7 @@ public class SuperFace extends HalfFace implements HasApp {
 	public double height = 4;
 	public int classification;
 	
-	public Appearance app = new Appearance(this);
+	public MiniRoof mr = null;
 	
 	public SuperFace() {
 		super(null);
@@ -94,9 +95,5 @@ public class SuperFace extends HalfFace implements HasApp {
 		}
 		
 		return null;
-	}
-
-	public List<HasApp> getAppChildren() {
-		return Collections.emptyList();
 	}
 }
