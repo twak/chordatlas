@@ -13,8 +13,7 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
 	MiniFacade mf;
 	
-	public double[] facadeStyle, roofStyle;
-	
+	public double[] facadeStyle;
 	
 	public FeatureGenerator( MiniFacade mf ) {
 		this.mf = mf;

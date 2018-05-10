@@ -21,14 +21,15 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
-public class FRect extends DRectangle implements ICanEdit {
+public class FRect extends DRectangle implements ICanEdit, HasApp {
 	
 	// these are variously used around the Regularizer...
 	public MultiMap<Feature, FRect> attached = new MultiMap<>();
 	public Feature f;
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
-	public String texture;
+	
+	public Appearance app = new Appearance();
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
@@ -46,7 +47,7 @@ public class FRect extends DRectangle implements ICanEdit {
 		gridCoords = o.gridCoords == null ? null : Arrays.copyOf( o.gridCoords, o.gridCoords.length );
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
-		texture = o.texture;
+		app = new Appearance ( o.app );
 	}
 	
 	public FRect() {

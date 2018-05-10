@@ -13,6 +13,7 @@ import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.Plot;
+import org.twak.viewTrace.facades.Appearance.AppMode;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -25,7 +26,7 @@ public class FacadeDesigner {
 	public FacadeDesigner( PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
 
 		JToggleButton texture = new JToggleButton( "textured" );
-		texture.setSelected( se.toEdit != null && se.toEdit.texture != null );
+		texture.setSelected( se.toEdit != null && se.toEdit.app.texture != null );
 		
 		if ( se.toEdit == null ) {
 			SkelGen.ensureMF( sf, se );
@@ -38,7 +39,7 @@ public class FacadeDesigner {
 			se.toEdit.width = se.length();
 		}
 		else
-			se.toEdit.texture = null;
+			se.toEdit.app.texture = null;
 		
 		if (se.toEdit.featureGen instanceof CGAMini) { // de-proecuralize before editing 
 			((CGAMini) se.toEdit.featureGen).update();
@@ -67,9 +68,13 @@ public class FacadeDesigner {
 
 				PaintThing.debug.clear();
 				if ( texture.isSelected() )
+					
 					new Thread( new Runnable() {
 						@Override
 						public void run() {
+							
+							se.toEdit.app.appMode = AppMode.Net;
+							
 							new Pix2Pix().facade( sameStyle, z, new Runnable() {
 
 								public void run() {
@@ -86,7 +91,8 @@ public class FacadeDesigner {
 					} ).start();
 				else {
 					
-					se.toEdit.texture = null;
+					se.toEdit.app.appMode = AppMode.Color;
+					se.toEdit.app.texture = null;
 					
 					sg.tweed.enqueue( new Runnable() {
 						@Override

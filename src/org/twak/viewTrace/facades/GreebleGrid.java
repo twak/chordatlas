@@ -69,7 +69,7 @@ public class GreebleGrid {
 	private Geometry mb2Tex( Output output, List<Face> chain, String name, String texture, Node node, ClickMe clickMe ) {
 		Geometry geom;
 		{
-			MatMeshBuilder builder =  mbs.get( name, texture );
+			MatMeshBuilder builder =  mbs.getTexture( name, texture );
 			
 			geom = new Geometry( "material_" +texture, builder.getMesh() );
 			geom.setUserData( Jme3z.MAT_KEY, name );
@@ -141,6 +141,8 @@ public class GreebleGrid {
 			geom.setMaterial( mat );
 			geom.updateGeometricState();
 			geom.updateModelBound();
+			
+			geom.setUserData( GreebleSkel.Appearance, name );
 
 			if ( chain != null )
 				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
@@ -469,14 +471,14 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void buildGrid( DRectangle all, Matrix4d to3d, MiniFacade mf, MeshBuilder wallColorMat, WallTag wallTag ) {
+	protected void buildGrid( DRectangle all, Matrix4d to3d, MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
 
 		Grid g = new Grid( .10, all.x, all.getMaxX(), all.y, all.getMaxY() );
 
 		if ( mf != null ) {
 
-			//			MiniFacade mf = wallTag.miniFacade;
-
+			wallColorMat.onclick = mf;
+			
 			for ( FRect w : mf.featureGen.get( Feature.WINDOW ) ) {
 
 				if ( all.contains( w ) )
@@ -576,10 +578,10 @@ public class GreebleGrid {
 	
 	protected void textureGrid( DRectangle allGeom, DRectangle allUV, Matrix4d to3d, MiniFacade mf ) {
 
-		if ( mf != null && mf.texture != null ) {
+		if ( mf != null && mf.app.texture != null ) {
 			
 			Grid g = new Grid( .10, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
-			MatMeshBuilder mmb = mbs.get( "texture_"+mf.texture , mf.texture );
+			MatMeshBuilder mmb = mbs.get( "texture_"+mf.app.texture , mf.app.texture, mf );
 
 			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
@@ -588,10 +590,10 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (w.texture == null)
+							if (w.app.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.2f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.app.texture, w.app.texture, w ) , 0.2f );
 						}
 					} );
 			}
@@ -602,10 +604,10 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (w.texture == null)
+							if (w.app.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.texture, w.texture ) , 0.3f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.app.texture, w.app.texture, w ) , 0.3f );
 						}
 					} );
 			}

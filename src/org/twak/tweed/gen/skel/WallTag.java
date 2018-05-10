@@ -50,14 +50,11 @@ public class WallTag extends PlanTag{
 					(float) miniFacade.color[ 1 ], 
 					(float) miniFacade.color[ 2 ], 1f };
 			
-			if (this.miniFacade.groundColor != null && ! Arrays.equals( miniFacade.color, miniFacade.groundColor ) )
-				this.groundFloorColor = new float[] { 
-//						(float) miniFacade.color[ 0 ] * 0.5f, 
-//						(float) miniFacade.color[ 1 ] * 0.5f, 
-//						(float) miniFacade.color[ 2 ] * 0.5f, 1f };
-				(float) miniFacade.groundColor[ 0 ], 
-				(float) miniFacade.groundColor[ 1 ], 
-				(float) miniFacade.groundColor[ 2 ], 1f };
+//			if (this.miniFacade.groundColor != null && ! Arrays.equals( miniFacade.color, miniFacade.groundColor ) )
+//				this.groundFloorColor = new float[] { 
+//				(float) miniFacade.groundColor[ 0 ], 
+//				(float) miniFacade.groundColor[ 1 ], 
+//				(float) miniFacade.groundColor[ 2 ], 1f };
 		}
 
 		

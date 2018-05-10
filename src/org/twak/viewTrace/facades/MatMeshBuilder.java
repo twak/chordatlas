@@ -6,6 +6,7 @@ public class MatMeshBuilder extends MeshBuilder {
 
 	float[] color;
 	String name, texture;
+	public HasApp onclick;
 	
 	public MatMeshBuilder (String name, float[] color) {
 		this.name = name;

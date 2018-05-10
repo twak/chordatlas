@@ -54,6 +54,7 @@ import org.twak.tweed.gen.ProfileAssignmentViewer;
 import org.twak.tweed.gen.SkelFootprint;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
@@ -73,11 +74,13 @@ import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.WindowManager;
+import org.twak.viewTrace.facades.Appearance.AppMode;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
+import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NSliders;
 import org.twak.viewTrace.facades.Pix2Pix;
@@ -385,8 +388,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		OnClick onclick = new OnClick() {
 			@Override
-			public void selected( Output output, Node house2, SuperEdge se ) {
-				SkelGen.this.selected( skel, house2, sf, se );
+			public void selected( Output output, Node house2, SuperEdge se, HasApp ha ) {
+				
+				if (tweed.tool instanceof TextureTool)
+					SkelGen.this.texture( skel, house2, sf, se, ha );
+				else
+					SkelGen.this.selected( skel, house2, sf, se );
 			}
 		};
 
@@ -457,11 +464,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 				closeSitePlan();
 				Plot.closeLast();
 
-				for (HalfEdge he :sf)
-				{
-					SuperEdge ee = (SuperEdge)he;
-					if (ee.toEdit != null)
-						ee.toEdit.texture = null;
+				for ( HalfEdge he : sf ) {
+					SuperEdge ee = (SuperEdge) he;
+					if ( ee.toEdit != null )
+						ee.toEdit.app.appMode = AppMode.Color;
 				}
 				
 				siteplan = new Siteplan( skel.plan, false ) {
@@ -528,7 +534,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		tweed.frame.setGenUI( ui );
 	}
 
-
+	protected void texture( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
+		tweed.frame.setGenUI( new JLabel (  ha.getClass().getSimpleName() ) );
+	}
+	
 	private WallTag findWallMini( LoopL<Bar> points ) {
 
 		Optional<Tag> wall = points.streamE().flatMap( b -> b.tags.stream() ).filter( t -> t instanceof WallTag ).findAny();

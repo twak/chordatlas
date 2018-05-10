@@ -26,8 +26,8 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.Appearance.TextureUVs;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
 /**
  * Utilties to synthesize facade using Pix2Pix network
@@ -263,7 +263,7 @@ public class Pix2Pix {
 						dest = importTexture( f, e.getValue().name, -1, e.getValue().mask );
 						
 						if ( dest != null ) {
-							e.getKey().texture = dest;
+							e.getKey().app.texture = dest;
 							subfeatures.add( e.getKey() );
 							found = true;
 						}
@@ -379,7 +379,7 @@ public class Pix2Pix {
 		for ( MiniFacade mf : subfeatures ) {
 			try {
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.texture ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture ) );
 //				src = Imagez.scaleLongest( src, 128 );
 //				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
 
@@ -519,8 +519,8 @@ public class Pix2Pix {
 								ImageIO.write( ns.norm  , "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 //								ImageIO.write( ns.spec  , "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
 								
-								mf.textureUVs = TextureUVs.ZERO_ONE;
-								mf.texture = dest + ".png";
+								mf.app.textureUVs = TextureUVs.ZERO_ONE;
+								mf.app.texture = dest + ".png";
 										
 							} catch ( IOException e1 ) {
 								e1.printStackTrace();
@@ -550,7 +550,7 @@ public class Pix2Pix {
 		for ( MiniFacade mf : subfeatures ) {
 			try {
 			
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.texture )  );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture )  );
 				DRectangle mini = findBounds( mf );
 				
 				for ( FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) ) {
@@ -603,7 +603,7 @@ public class Pix2Pix {
 						
 						
 						if ( dest != null ) 
-							e.getKey().texture = dest;
+							e.getKey().app.texture = dest;
 					}
 				} catch (Throwable th) {
 					th.printStackTrace();

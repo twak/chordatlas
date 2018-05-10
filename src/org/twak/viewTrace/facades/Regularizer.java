@@ -373,22 +373,22 @@ public class Regularizer {
 		out.imageFeatures = in.get( 0 ).imageFeatures;
 		
 		out.color = new double[] {0,0,0,1}; 
-		out.groundColor = new double[] {0,0,0,1};
+//		out.groundColor = new double[] {0,0,0,1};
 		
 		int gcc = 0;
 		for (MiniFacade mf : in) 
 			for (int i = 0; i < 3; i++) {
 				out.color[i] += mf.color[i];
-				if (mf.groundColor != null) {
-					out.groundColor[i] += mf.groundColor[i];
-					gcc++;
-				}
+//				if (mf.groundColor != null) {
+//					out.groundColor[i] += mf.groundColor[i];
+//					gcc++;
+//				}
 			}
 		
 		for (int i = 0; i < 3; i++) {
 			out.color[i] /= in.size();
-			if (gcc > 0)
-				out.groundColor[i] /= gcc;
+//			if (gcc > 0)
+//				out.groundColor[i] /= gcc;
 		}
 		
 		

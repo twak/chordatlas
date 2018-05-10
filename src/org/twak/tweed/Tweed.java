@@ -17,7 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -25,21 +24,19 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
-import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.HouseTool;
+import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
+import org.twak.tweed.tools.TextureTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
 import org.twak.utils.ui.ListDownLayout;
@@ -51,7 +48,6 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetKey;
-import com.jme3.asset.TextureKey;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.audio.AudioListenerState;
 import com.jme3.collision.CollisionResult;
@@ -109,6 +105,7 @@ public class Tweed extends SimpleApplication {
 //			new AlignTool(this), 
 			new FacadeTool(this),
 //			new PlaneTool(this) 
+			new TextureTool(this),
 };
 	
 	public Tool tool;

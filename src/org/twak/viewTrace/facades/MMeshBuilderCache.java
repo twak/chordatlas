@@ -8,11 +8,34 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		super ( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
 	}
 	
-	public MatMeshBuilder get (String name, String texture ) {
-		return textures.get( name, texture );
+	public MatMeshBuilder get (String name, float[] col, HasApp onclick ) {
+		
+		MatMeshBuilder out = get( name, col );
+		
+		if (out.onclick == null)
+			out.onclick = onclick;
+		else if (out.onclick != onclick)
+			System.err.println( "warning: attempt to assign different click-source" );
+		
+		return out;
+	}
+	public MatMeshBuilder get (String name, String texture, HasApp onclick ) {
+		
+		MatMeshBuilder out = textures.get( name, texture );
+		
+		if (out.onclick == null)
+			out.onclick = onclick;
+		else if (out.onclick != onclick)
+			System.err.println( "warning: attempt to assign different click-source" );
+		
+		return out;
 	}
 
-	Cach2<String, String, MatMeshBuilder> textures = new Cach2<String, String, MatMeshBuilder>( (a,b ) -> 
+	public MatMeshBuilder getTexture( String name, String t ) {
+		return textures.get( name, t );
+	}
+	
+	public Cach2<String, String, MatMeshBuilder> textures = new Cach2<String, String, MatMeshBuilder>( (a,b ) -> 
 		new MatMeshBuilder( (String)a, (String)b ).ensureUVs() );
 	
 	final static float[] 
@@ -28,6 +51,9 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		ERROR =  get( "error", error),
 		MOULDING = get( "brick", moudling ),
 		BALCONY =  get( "balcony", balcony);
+
+	
+	
 
 
 }

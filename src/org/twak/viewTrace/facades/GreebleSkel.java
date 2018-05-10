@@ -40,12 +40,14 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.viewTrace.facades.Appearance.AppMode;
+import org.twak.viewTrace.facades.Appearance.TextureUVs;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.MiniFacade.TextureUVs;
 
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import smile.math.Math;
 
@@ -56,6 +58,8 @@ public class GreebleSkel {
 	private static final String TILE = "tile";
 	private static final String BRICK = "brick";
 	private static final String TILE_JPG = "tile.jpg";
+	
+	public static final String Appearance = "appearance";
 	Tweed tweed;
 	Node node = new Node();
 	
@@ -112,7 +116,7 @@ public class GreebleSkel {
 			WallTag wt = ((WallTag)t);
 			if (t != null ) {
 				
-				isTextured |= wt.miniFacade != null && wt.miniFacade.texture != null;
+				isTextured |= wt.miniFacade != null && wt.miniFacade.app.texture != null;
 				
 				wt.miniFacade.postState = null;
 				
@@ -233,7 +237,7 @@ public class GreebleSkel {
 
 							@Override
 							public void run() {
-								selected( output, node, findSuperEdge( output, chain ) );
+								selected( output, node, findSuperEdge( output, chain ), ((Spatial) data).getUserData( Appearance ) );
 							}
 						} );
 					} catch ( Throwable th ) {
@@ -263,12 +267,12 @@ public class GreebleSkel {
 	
 
 	public interface OnClick {
-		void selected( Output output, Node node, SuperEdge superEdge );
+		void selected( Output output, Node node, SuperEdge superEdge, HasApp ha );
 	}
 
-	private void selected( Output output, Node out, SuperEdge superEdge ) {
+	private void selected( Output output, Node out, SuperEdge superEdge, HasApp ha ) {
 		if (onClick != null)
-			onClick.selected (output, out, superEdge );
+			onClick.selected (output, out, superEdge, ha );
 	}
 	
 	private SuperEdge findSuperEdge( Output output, List<Face> chain ) {
@@ -324,32 +328,42 @@ public class GreebleSkel {
 
 		MatMeshBuilder faceColor = greebleGrid.mbs.ERROR;
 		
-		WallTag wallTag = null;
+		WallTag wt = null;
 
 		for ( Tag t : f.profile ) {
 
 			if ( t instanceof WallTag ) {
 				
-				wallTag = ( (WallTag) t );
+				wt = ( (WallTag) t );
 				
-				if (mf == null || mf.texture == null)
-					faceColor = greebleGrid.mbs.get( BRICK, wallTag.color != null ? wallTag.color : wallColor );
-				else 
-					faceColor = greebleGrid.mbs.get( "texture_"+mf.texture , mf.texture );
+				switch ( mf.app.appMode ) {
+				case Color:
+					faceColor = greebleGrid.mbs.get( BRICK, wt.color != null ? wt.color : wallColor );
+					break;
+				case Texture:
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG );
+				case Net:
+					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture );
+					break;
+				}
 
 			} else if ( t instanceof RoofTag ) {
 				
 				RoofTag rt = (RoofTag)t;
 				
-				if (isTextured)
-					faceColor = greebleGrid.mbs.get(TILE_TEXTURED, TILE_JPG ); 
-				else
-					faceColor = greebleGrid.mbs.get(TILE, rt.color != null ? rt.color : roofColor );
+				switch ( mf.app.appMode ) {
+				case Color:
+					faceColor = greebleGrid.mbs.get( TILE, rt.color != null ? rt.color : roofColor );
+				case Texture:
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG );
+				case Net:
+					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture );
+				}
 			}
 		}
 
 		if ( f.edge.getPlaneNormal().angle( new Vector3d( 0, 0,1 ) ) < 0.1 )
-			wallTag = null;
+			wt = null;
 		
 		for ( Loop<Point3d> ll : f.getLoopL() ) {
 			for ( Loopable<Point3d> lll : ll.loopableIterator() )
@@ -359,10 +373,10 @@ public class GreebleSkel {
 
 		for ( Loop<LPoint3d> ll : GreebleHelper.findPerimeter( f ) ) {
 				
-			if (wallTag != null) 
-				wallTag.isGroundFloor = f.definingCorners.iterator().next().z < 1;
+			if (wt != null) 
+				wt.isGroundFloor = f.definingCorners.iterator().next().z < 1;
 				
-			mapTo2d( f, ll, mf, wallTag, features, faceColor, megafacade );
+			mapTo2d( f, ll, mf, wt, features, faceColor, megafacade );
 		}
 	}
 	
@@ -452,6 +466,9 @@ public class GreebleSkel {
 		Vector3d up    = f.edge.uphill,
 				 along = f.edge.direction(),
 				 out   = f.edge.getPlaneNormal();
+		
+		// unique materials to allow selection
+		faceMaterial = greebleGrid.mbs.get( faceMaterial.name+f.hashCode(), faceMaterial.color, (HasApp) mf );
 		
 		along.normalize();
 		
@@ -588,8 +605,8 @@ public class GreebleSkel {
 				
 				LoopL<Point2d> roofUVs;
 				
-				if (m.texture != null)
-					if (mf.featureGen != null && mf.featureGen.roofStyle != null)
+				if (mf.app.appMode != AppMode.Color )
+					if ( mf.app.appMode == AppMode.Net )
 							roofUVs = GreebleHelper.wholeRoofUVs (loop, roofBounds );
 						else
 							roofUVs = GreebleHelper.roofPitchUVs ( loop, Pointz.to2( start ), Pointz.to2( end ), TILE_UV_SCALE );
@@ -600,7 +617,8 @@ public class GreebleSkel {
 				return;
 			}
 
-			if ( mf.texture == null )
+			if ( mf.app.appMode == AppMode.Color )
+				
 				greebleGrid.buildGrid (
 					floorRect,
 					to3d,
@@ -611,7 +629,7 @@ public class GreebleSkel {
 				
 				DRectangle uvs;
 				
-				if (mf.textureUVs == TextureUVs.SQUARE) {
+				if (mf.app.textureUVs == TextureUVs.SQUARE) {
 					uvs = new DRectangle(mf.postState.outerFacadeRect);
 					uvs.y -= bottomS.z;
 				} else 
@@ -628,11 +646,10 @@ public class GreebleSkel {
 	
 	public void edges( Output output, float[] roofColor ) {
 
-		
 		GreebleEdge.roowWallGreeble( output, 
 				greebleGrid.mbs.get( TILE, roofColor ),
 //				greebleGrid.mbs.get( TILE, roofColor ),
-				isTextured ? greebleGrid.mbs.get(TILE_TEXTURED, TILE_JPG ) : greebleGrid.mbs.get( TILE, roofColor ), 
+				isTextured ? greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG ) : greebleGrid.mbs.get( TILE, roofColor ), 
 				greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ), TILE_UV_SCALE );
 
 		for ( Face f : output.faces.values() )

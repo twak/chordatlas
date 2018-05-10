@@ -19,15 +19,13 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 
-public class MiniFacade {
-	
-	// locations in imageFeatures.mega.megafacade R^2 space.
+public class MiniFacade implements HasApp {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
 	public double[] 
-			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ),
-			groundColor = null;
+			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
+//			groundColor = null;
 	
 	public enum Feature {
 		
@@ -44,24 +42,18 @@ public class MiniFacade {
 		}
 	}
 	
+	public Appearance app = new Appearance();
+	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	
 	public List<Outer> outers = new ArrayList<>();
 	public ImageFeatures imageFeatures;
-	
-	public enum TextureUVs {
-		SQUARE, ZERO_ONE;
-	}
-	public TextureUVs textureUVs = TextureUVs.SQUARE; 
-	public String texture;
 	
 	public List<Double> 
 			hMargin = new ArrayList<>(), 
 			vMargin = new ArrayList<>();
 
 	public PostProcessState postState = null;
-	
-	
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -75,14 +67,14 @@ public class MiniFacade {
 		this.groundFloorHeight = m.groundFloorHeight;
 		this.left = m.left;
 		this.color = Arrays.copyOf( m.color, m.color.length );
-		if (m.groundColor != null)
-			this.groundColor = Arrays.copyOf( m.groundColor, m.groundColor.length );
+//		if (m.groundColor != null)
+//			this.groundColor = Arrays.copyOf( m.groundColor, m.groundColor.length );
 		this.softLeft = m.softLeft;
 		this.softRight = m.softRight;
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
-		this.texture = m.texture;
+		this.app = new Appearance ( m.app );
 		this.featureGen = m.featureGen.copy(this);
 		this.postState = m.postState;
 		
@@ -147,13 +139,13 @@ public class MiniFacade {
 //		vMargin = readMargin( ((List) yaml.get("win_v_margin")) );
 		readWinGrid( scale, imageXM, topM, ((Map) yaml.get("window-grid")) );
 		
-		if (yaml.get("mezzanine") != null) {
-			List<String> col = (List) ((Map)yaml.get( "mezzanine" )).get("rgb");
-			groundColor = new double[] {
-					Double.parseDouble ( col.get( 0 ) ),
-					Double.parseDouble ( col.get( 1 ) ),
-					Double.parseDouble ( col.get( 2 ) ), 1 };
-		}
+//		if (yaml.get("mezzanine") != null) {
+//			List<String> col = (List) ((Map)yaml.get( "mezzanine" )).get("rgb");
+//			groundColor = new double[] {
+//					Double.parseDouble ( col.get( 0 ) ),
+//					Double.parseDouble ( col.get( 1 ) ),
+//					Double.parseDouble ( col.get( 2 ) ), 1 };
+//		}
 		
 		
 	}

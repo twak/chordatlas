@@ -16,6 +16,7 @@ import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.viewTrace.facades.Appearance.AppMode;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -105,7 +106,7 @@ public class HouseTool extends Tool {
 		
 		mini.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
 		mini.imageFeatures = imf;
-		mini.texture = null;//"tex.jpg";
+		mini.app.appMode = AppMode.Color;//"tex.jpg";
 //		mini.normal = "normal.jpg";
 //		mini.spec = "spec.jpg";
 		
