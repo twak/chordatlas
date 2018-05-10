@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.viewTrace.facades.Appearance;
+import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 
-public class SuperFace extends HalfFace {
+public class SuperFace extends HalfFace implements HasApp {
 
 	public List<float[]> colors = null;
 	public float[] roofColor;
@@ -17,6 +19,8 @@ public class SuperFace extends HalfFace {
 	public List<Double> maxProfHeights; // from profiles
 	public double height = 4;
 	public int classification;
+	
+	public Appearance app = new Appearance();
 	
 	public SuperFace() {
 		super(null);

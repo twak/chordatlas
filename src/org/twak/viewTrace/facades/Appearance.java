@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.awt.Color;
 
 public class Appearance {
+	
 	public enum TextureUVs {
 		SQUARE, ZERO_ONE;
 	}
@@ -10,7 +11,6 @@ public class Appearance {
 	public enum AppMode {
 		Color, Texture, Parent, Net
 	}
-
 	
 	public Appearance( Appearance a ) {
 		this.appMode = a.appMode;
@@ -20,12 +20,11 @@ public class Appearance {
 		this.styleZ = a.styleZ;
 	}
 	
-	public Appearance() {
-	}
+	public Appearance() {}
 
 	public AppMode appMode = AppMode.Color;
 	public TextureUVs textureUVs = TextureUVs.SQUARE;
-	public Color color;
+	public Color color = Color.gray;
 	public String texture;
 	public double[] styleZ;
 }

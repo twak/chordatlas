@@ -55,18 +55,15 @@ public class GreebleGrid {
 	public void attachAll( Node node, List<Face> chain, Output output, ClickMe clickMe ) {
 		for ( String mName : mbs.cache.keySet() )
 			for (float[] mCol : mbs.cache.get( mName ).keySet() )		
-				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe ) );
+				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe, mbs.get( mName, mCol ) ) );
 		
-		for (String textName : mbs.textures.cache.keySet())
-			for (String texture : mbs.textures.cache.get( textName ).keySet() ) {
-				
-				node.attachChild( mb2Tex( output, chain, textName, texture, node, clickMe ) );
-			}
-			
-		
+		for (String mName : mbs.textures.cache.keySet())
+			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
+				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, mName ) ) );
 	}
 	
-	private Geometry mb2Tex( Output output, List<Face> chain, String name, String texture, Node node, ClickMe clickMe ) {
+	private Geometry mb2Tex( Output output, List<Face> chain, String name, 
+			String texture, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
 		Geometry geom;
 		{
 			MatMeshBuilder builder =  mbs.getTexture( name, texture );
@@ -115,6 +112,8 @@ public class GreebleGrid {
 			}
 //			mat.setColor( "Ambient", ColorRGBA.White );
 
+			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
+			
 			geom.setMaterial( mat );
 			geom.updateGeometricState();
 			geom.updateModelBound();
@@ -126,7 +125,8 @@ public class GreebleGrid {
 		return geom;
 	}
 
-	private Geometry mb2Geom( Output output, List<Face> chain, String name, float[] col, Node node, ClickMe clickMe ) {
+	private Geometry mb2Geom( Output output, List<Face> chain, String name, 
+			float[] col, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
 		Geometry geom;
 		{
 			geom = new Geometry( "material_" + col[ 0 ] + "_" + col[ 1 ] + "_" + col[ 2 ], mbs.get( name, col ).getMesh() );
@@ -142,7 +142,7 @@ public class GreebleGrid {
 			geom.updateGeometricState();
 			geom.updateModelBound();
 			
-			geom.setUserData( GreebleSkel.Appearance, name );
+			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
 
 			if ( chain != null )
 				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
@@ -477,7 +477,7 @@ public class GreebleGrid {
 
 		if ( mf != null ) {
 
-			wallColorMat.onclick = mf;
+			wallColorMat.app = mf;
 			
 			for ( FRect w : mf.featureGen.get( Feature.WINDOW ) ) {
 
@@ -581,7 +581,7 @@ public class GreebleGrid {
 		if ( mf != null && mf.app.texture != null ) {
 			
 			Grid g = new Grid( .10, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
-			MatMeshBuilder mmb = mbs.get( "texture_"+mf.app.texture , mf.app.texture, mf );
+			MatMeshBuilder mmb = mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture, mf );
 
 			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
@@ -593,7 +593,7 @@ public class GreebleGrid {
 							if (w.app.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.app.texture, w.app.texture, w ) , 0.2f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture, w.app.texture, w ) , 0.2f );
 						}
 					} );
 			}
@@ -607,7 +607,7 @@ public class GreebleGrid {
 							if (w.app.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.get( "texture_"+w.app.texture, w.app.texture, w ) , 0.3f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture, w.app.texture, w ) , 0.3f );
 						}
 					} );
 			}

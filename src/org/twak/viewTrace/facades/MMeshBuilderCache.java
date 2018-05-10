@@ -1,6 +1,9 @@
 package org.twak.viewTrace.facades;
 
+import java.awt.Color;
+
 import org.twak.utils.Cach2;
+import org.twak.utils.ui.Colour;
 
 public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 	
@@ -8,24 +11,31 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		super ( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
 	}
 	
+	public MatMeshBuilder get (String name, Color col, HasApp onclick ) {
+		return get (name, Colour.toF4( col ), onclick);
+	}
 	public MatMeshBuilder get (String name, float[] col, HasApp onclick ) {
 		
-		MatMeshBuilder out = get( name, col );
+		if (col == null)
+			System.err.println( "warning null colour" );
 		
-		if (out.onclick == null)
-			out.onclick = onclick;
-		else if (out.onclick != onclick)
+		MatMeshBuilder out = get( name, col );
+//		HasApp.get( onclick ).color = Colour.fromF ( col );
+		
+		if (out.app == null)
+			out.app = onclick;
+		else if (out.app != onclick)
 			System.err.println( "warning: attempt to assign different click-source" );
 		
 		return out;
 	}
-	public MatMeshBuilder get (String name, String texture, HasApp onclick ) {
+	public MatMeshBuilder getTexture (String name, String texture, HasApp onclick ) {
 		
 		MatMeshBuilder out = textures.get( name, texture );
 		
-		if (out.onclick == null)
-			out.onclick = onclick;
-		else if (out.onclick != onclick)
+		if (out.app == null)
+			out.app = onclick;
+		else if (out.app != onclick)
 			System.err.println( "warning: attempt to assign different click-source" );
 		
 		return out;

@@ -28,6 +28,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.tweed.gen.skel.SETag;
 import org.twak.tweed.gen.skel.WallTag;
@@ -70,6 +71,7 @@ public class GreebleSkel {
 	boolean isTextured = false;
 	
 	DRectangle roofBounds;
+	private HasApp roofApp;
 	
 	public static float[] 
 			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
@@ -79,9 +81,10 @@ public class GreebleSkel {
 		this.tweed = tweed;
 	}
 
-	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup ) {
+	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup, HasApp roof ) {
 		
 		this.onClick = onClick;
+		this.roofApp = roof;
 		createMesh( output, occluderLookup );
 		return node;
 	}
@@ -127,8 +130,11 @@ public class GreebleSkel {
 					bestWallArea = area;
 				}
 				
-				roofBounds.envelop( Pointz.to2( f.edge.start) );
-				roofBounds.envelop( Pointz.to2( f.edge.end) );
+				for ( Loop<SharedEdge> lc : f.edges )
+					for ( SharedEdge se : lc ) {
+						roofBounds.envelop( Pointz.to2( se.start ) );
+						roofBounds.envelop( Pointz.to2( se.end ) );
+					}
 			}
 		}
 		
@@ -237,7 +243,7 @@ public class GreebleSkel {
 
 							@Override
 							public void run() {
-								selected( output, node, findSuperEdge( output, chain ), ((Spatial) data).getUserData( Appearance ) );
+								selected( output, node, findSuperEdge( output, chain ), (HasApp)((Object[])((Spatial) data).getUserData( Appearance ) ) [0] );
 							}
 						} );
 					} catch ( Throwable th ) {
@@ -342,6 +348,7 @@ public class GreebleSkel {
 					break;
 				case Texture:
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG );
+					break;
 				case Net:
 					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture );
 					break;
@@ -349,15 +356,20 @@ public class GreebleSkel {
 
 			} else if ( t instanceof RoofTag ) {
 				
-				RoofTag rt = (RoofTag)t;
+//				RoofTag rt = (RoofTag)t;
 				
-				switch ( mf.app.appMode ) {
+				Appearance ra = HasApp.get ( roofApp );
+				
+				switch ( ra.appMode ) {
 				case Color:
-					faceColor = greebleGrid.mbs.get( TILE, rt.color != null ? rt.color : roofColor );
+					faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
+					break;
 				case Texture:
-					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG );
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, roofApp );
+					break;
 				case Net:
-					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture );
+					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture, mf.app.texture, roofApp );
+					break;
 				}
 			}
 		}
@@ -468,7 +480,7 @@ public class GreebleSkel {
 				 out   = f.edge.getPlaneNormal();
 		
 		// unique materials to allow selection
-		faceMaterial = greebleGrid.mbs.get( faceMaterial.name+f.hashCode(), faceMaterial.color, (HasApp) mf );
+		faceMaterial = greebleGrid.mbs.get( faceMaterial.name+f.hashCode(), faceMaterial.color, faceMaterial.app );
 		
 		along.normalize();
 		
@@ -646,10 +658,26 @@ public class GreebleSkel {
 	
 	public void edges( Output output, float[] roofColor ) {
 
+		MatMeshBuilder mmb;
+		
+		Appearance a = HasApp.get( roofApp );
+		
+		switch ( a.appMode ) {
+			case Color: 
+			default:
+				mmb = greebleGrid.mbs.get( TILE, roofColor, roofApp );
+				break;
+			case Texture:
+				mmb = greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG, roofApp );
+				break;
+			case Net:
+				mmb = greebleGrid.mbs.getTexture( TILE_TEXTURED+"_" + a.texture, a.texture, roofApp );
+				break;
+		}
+		
 		GreebleEdge.roowWallGreeble( output, 
-				greebleGrid.mbs.get( TILE, roofColor ),
-//				greebleGrid.mbs.get( TILE, roofColor ),
-				isTextured ? greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG ) : greebleGrid.mbs.get( TILE, roofColor ), 
+				greebleGrid.mbs.get( TILE, roofColor, roofApp ),
+				mmb, 
 				greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ), TILE_UV_SCALE );
 
 		for ( Face f : output.faces.values() )

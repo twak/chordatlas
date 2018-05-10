@@ -399,7 +399,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		GreebleSkel greeble = new GreebleSkel( tweed );
 		
-		house = greeble.showSkeleton( skel.output, onclick, occluderLookup );
+		house = greeble.showSkeleton( skel.output, onclick, occluderLookup, sf );
 
 		gNode.attachChild( house );
 		geometry.get( sf ).set (house, skel.output, skel );
@@ -535,7 +535,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	protected void texture( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
-		tweed.frame.setGenUI( new JLabel (  ha.getClass().getSimpleName() ) );
+		if (ha == null)
+			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
+		else
+			tweed.frame.setGenUI( new JLabel (  ha.getClass().getSimpleName() ) );
 	}
 	
 	private WallTag findWallMini( LoopL<Bar> points ) {
