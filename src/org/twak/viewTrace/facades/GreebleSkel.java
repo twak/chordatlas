@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -178,7 +179,7 @@ public class GreebleSkel {
 			
 			
 			MiniFacade mf2 = null;
-			Set<QuadF> features = new HashSet<>();
+			Set<QuadF> processedFeatures = new HashSet<>();
 			
 			Line megafacade = new Line();
 			if (opt.isPresent() && (wt = (WallTag) opt.get() ).miniFacade != null ) {
@@ -203,20 +204,31 @@ public class GreebleSkel {
 				mf2.featureGen.values().stream()
 					.flatMap ( k -> k.stream() )
 					.map     ( r -> new QuadF (r, megafacade) )
-					.forEach ( q -> features.add(q) );
+					.forEach ( q -> processedFeatures.add(q) );
 			}
 
-			for ( Face f : chain ) {
-				face( f, mf2, features, megafacade );
-			}
+			Set<QuadF> allFeatures = new LinkedHashSet<>();
+			allFeatures.addAll( processedFeatures );
 			
-			if (TweedSettings.settings.createDormers)
-			for (QuadF w : features)
-				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
-					greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
-							(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+			for ( Face f : chain ) 
+				face( f, mf2, processedFeatures, megafacade );
+			
+			if ( TweedSettings.settings.createDormers ) {
+				Iterator<QuadF> quit = processedFeatures.iterator();
+				while ( quit.hasNext() ) {
+					QuadF w = quit.next();
+					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
+						greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, (float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+						quit.remove();
+					}
 				}
+			}
 
+			allFeatures.removeAll( processedFeatures );
+			for (QuadF q1 : allFeatures)
+				if (!processedFeatures.contains( q1 ))
+					mf2.postState.generatedWindows.add(q1.original);
+			
 			edges( output, roofColor );
 			
 			// output per-material objects

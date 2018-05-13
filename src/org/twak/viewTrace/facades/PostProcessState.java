@@ -1,7 +1,9 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Point2d;
 
@@ -23,4 +25,6 @@ public class PostProcessState {
 	public DRectangle innerFacadeRect;
 	public DRectangle outerFacadeRect;
 	public List<LoopL<Point2d>> occluders = new ArrayList();
+	
+	public Set<FRect> generatedWindows = new LinkedHashSet<>();
 }

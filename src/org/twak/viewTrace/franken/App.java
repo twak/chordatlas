@@ -30,7 +30,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public String texture;
 	
 	public double[] styleZ;
-	HasApp app;
+	HasApp hasA;
 
 	// GAN optoins
 	String netName;
@@ -39,7 +39,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public DRectangle textureRect;
 	
 	public App( App a ) {
-		this.app = a.app;
+		this.hasA = a.hasA;
 		this.appMode = a.appMode;
 		this.textureUVs = a.textureUVs;
 		this.color = a.color;
@@ -52,7 +52,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public App( HasApp ha, String netName, int sizeZ, int resolution ) {
 		
-		this.app = ha; 
+		this.hasA = ha; 
 		this.netName = netName;
 		this.styleZ = new double[sizeZ];
 		this.resolution = resolution;

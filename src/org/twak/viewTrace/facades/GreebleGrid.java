@@ -485,8 +485,12 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
+
+							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+w.hashCode(), mbs.wood,  w );
+							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+w.hashCode(), mbs.glass, w );
+							
 							createWindow( rect, to3d, 
-									wallColorMat, mbs.WOOD, mbs.GLASS, 
+									wallColorMat, wood, glass,
 									wallTag.windowDepth, 
 									(float) wallTag.sillDepth, 
 									(float) w.attachedHeight.get(Feature.SILL).d, 
@@ -520,7 +524,10 @@ public class GreebleGrid {
 						@Override
 						public void instance( DRectangle rect ) {
 
-							createWindow( rect, to3d, wallColorMat, mbs.WOOD, mbs.GLASS, 
+							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+s.hashCode(), mbs.wood,  s );
+							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+s.hashCode(), mbs.glass, s );
+							
+							createWindow( rect, to3d, wallColorMat, wood, glass, 
 									wallTag.windowDepth, 
 									(float) wallTag.sillDepth, 
 									(float) s.attachedHeight.get(Feature.SILL).d, 

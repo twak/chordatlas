@@ -47,7 +47,16 @@ public class FacadeCoarse extends App {
 
 	@Override
 	public MultiMap<String, App> getDown() {
-		return new MultiMap<>();
+		
+		MiniFacade mf = (MiniFacade)hasA;
+		
+		MultiMap<String, App> out = new MultiMap<>();
+		
+		if (mf.postState != null)
+		for (FRect r : mf.postState.generatedWindows)
+			out.put( "window", r.app );
+		
+		return out;
 	}
 
 	@Override
@@ -63,7 +72,7 @@ public class FacadeCoarse extends App {
 
 		Map<MiniFacade, Meta> index = new HashMap<>();
 
-		for ( MiniFacade toEdit : Collections.singletonList( (MiniFacade) app ) ) {
+		for ( MiniFacade toEdit : Collections.singletonList( (MiniFacade) hasA ) ) {
 
 			DRectangle bounds = new DRectangle( resolution, 0, resolution, resolution );
 			DRectangle mini = findBounds( toEdit );

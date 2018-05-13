@@ -54,7 +54,7 @@ public class RoofTex extends App {
 
 		Map<MiniRoof, String> index = new HashMap<>();
 
-		for ( MiniRoof toEdit : Collections.singletonList( (MiniRoof) app ) ) {
+		for ( MiniRoof toEdit : Collections.singletonList( (MiniRoof) hasA ) ) {
 
 			DRectangle drawTo = new DRectangle( resolution, 0, resolution, resolution );
 

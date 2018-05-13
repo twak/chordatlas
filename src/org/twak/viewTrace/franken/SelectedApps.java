@@ -87,11 +87,12 @@ public class SelectedApps extends ArrayList<App>{
 	
 	public JComponent createUI( Runnable globalUpdate ) {
 
-		JPanel out = new JPanel(new BorderLayout() );
+		JPanel top = new JPanel(new ListDownLayout() );
+		JPanel main = new JPanel(new BorderLayout() );
 		
 		JPanel options = new JPanel();
 
-//		out.add( new JLabel(config.netName +" @ "+config.resolution+"x"+config.resolution) );
+		top.add( new JLabel( exemplar.netName +" @ "+exemplar.resolution+"x"+exemplar.resolution), BorderLayout.NORTH );
 		
 		JPanel upDown = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		
@@ -110,7 +111,7 @@ public class SelectedApps extends ArrayList<App>{
 			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( globalUpdate) ) );
 		}
 		
-		out.add(upDown);
+		top.add(upDown);
 		
 		AutoEnumCombo combo = new AutoEnumCombo( exemplar.appMode, new ValueSet() {
 			public void valueSet( Enum num ) {
@@ -137,9 +138,9 @@ public class SelectedApps extends ArrayList<App>{
 		} );
 		buildLayout(exemplar.appMode, options, () -> SelectedApps.this.computeAll( globalUpdate ) );
 		
-		
-		out.add( combo, BorderLayout.NORTH );
-		out.add( options, BorderLayout.CENTER );
+		top.add(combo);
+		main.add( top, BorderLayout.NORTH );
+		main.add( options, BorderLayout.CENTER );
 		
 		
 //		double[] z;
@@ -158,7 +159,7 @@ public class SelectedApps extends ArrayList<App>{
 //		}
 
 		
-		return out;
+		return top;
 	}
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable whenDone ) {
