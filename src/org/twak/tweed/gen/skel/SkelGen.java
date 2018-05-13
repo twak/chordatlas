@@ -422,11 +422,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 	}
 
-	enum RoofSource {
-		None, Tile, Generative
-	}
-	RoofSource rs = RoofSource.None;
-	
 	private void selected( PlanSkeleton skel, Node house, SuperFace sf, SuperEdge se ) {
 
 		JPanel ui = new JPanel();
@@ -715,26 +710,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		closeSitePlan();
 		new FacadeDesigner( skel, sf, se, this );
-	}
-	
-	public void setRoofTextured ( PlanSkeleton skel, SuperFace sf, boolean textured ) {
-		
-		JPanel panel = new JPanel();
-		JFrame texturer = WindowManager.frame("roof texture", panel);
-
-//		NSliders sliders = new NSliders(z, c);
-//		
-//		FileDrop drop = new FileDrop( "style" ) {
-//			public void process(java.io.File f) {
-//				new Pix2Pix().encode( f, z, new Runnable() {
-//					@Override
-//					public void run() {
-//						sliders.setValues( z );
-//					}
-//				} );
-//			};
-//		};
-		
 	}
 	
 	public static void ensureMF( SuperFace sf, SuperEdge se ) {

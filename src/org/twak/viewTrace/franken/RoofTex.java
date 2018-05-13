@@ -109,7 +109,10 @@ public class RoofTex extends App {
 		bounds.grow( 2 );
 		
 		mr.app.textureUVs = TextureUVs.Rectangle;
-		mr.app.textureRect = bounds; 
+		mr.app.textureRect = new DRectangle ( bounds );
+		
+		bounds.y += bounds.height;
+		bounds.height = -bounds.height;
 		
 		List<Polygon> boundary = Loopz.toPolygon (mr.boundary, bounds, drawTo );
 		List<Polygon> pitches  = Loopz.toPolygon (mr.pitches , bounds, drawTo );

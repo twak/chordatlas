@@ -210,6 +210,7 @@ public class GreebleSkel {
 				face( f, mf2, features, megafacade );
 			}
 			
+			if (TweedSettings.settings.createDormers)
 			for (QuadF w : features)
 				if (( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
 					greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
@@ -613,7 +614,7 @@ public class GreebleSkel {
 					if ( ra.textureUVs != TextureUVs.Rectangle )
 						roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 					else 
-						roofUVs = GreebleHelper.wholeRoofUVs( loop, ra.textureRect );
+						roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
 				}
 						
 				m.add( loop, roofUVs, to3d );

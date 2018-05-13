@@ -11,6 +11,7 @@ import javax.vecmath.Point3d;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Tag;
+import org.twak.tweed.gen.Pointz;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -110,12 +111,12 @@ public class GreebleHelper {
 	/**
 	 * For a single roof pitch / face
 	 */
-	public static LoopL<Point2d> wholeRoofUVs ( LoopL<LPoint2d> coords, DRectangle bounds ) {
+	public static LoopL<Point2d> wholeRoofUVs ( LoopL<LPoint3d> coords, DRectangle bounds ) {
 		
 		return coords.new Map<Point2d>() {
 			@Override
-			public Point2d map( Loopable<LPoint2d> input ) {
-				return bounds.normalize( input.get() );
+			public Point2d map( Loopable<LPoint3d> input ) {
+				return bounds.normalize( Pointz.to2XY( input.get() ) );
 			}
 		}.run();
 	}
