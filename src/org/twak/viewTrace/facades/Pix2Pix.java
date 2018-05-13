@@ -2,34 +2,27 @@ package org.twak.viewTrace.facades;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
-import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.Appearance.NetConfig;
-import org.twak.viewTrace.facades.Appearance.TextureUVs;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App.TextureUVs;
 
 /**
  * Utilties to synthesize facade using Pix2Pix network
@@ -60,7 +53,7 @@ public class Pix2Pix {
 		Deco       (9, 255,170, 0 );
 		
 		final int index;
-		final Color rgb;
+		public final Color rgb;
 		
 		CMPLabel (int index, int r, int g, int b) {
 			this.rgb = new Color (r,g,b);
@@ -85,13 +78,13 @@ public class Pix2Pix {
 		}
 	}
 	
-	public void submit( Job job ) {
+	public static void submit( Job job ) {
 //		synchronized (job.network.intern()) {
 			submitSafe(job);
 //		}
 	}
 	
-	public void submitSafe( Job job ) {
+	public static void submitSafe( Job job ) {
 		
 		File go     = new File( "/home/twak/code/bikegan/input/"  + job.network + "/val/go" );
 		File outDir = new File( "/home/twak/code/bikegan/output/" + job.network +"/" + job.name );
@@ -132,7 +125,7 @@ public class Pix2Pix {
 
 			if ( outDir.exists() ) {
 				
-				System.out.println( "processing" );
+				System.out.println( "processing "+job.name );
 				job.finished.finished( outDir );
 				
 				try {
@@ -149,14 +142,15 @@ public class Pix2Pix {
 		
 	}
 	
-	public void encode(File f, NetConfig config, double[] values, Runnable update ) {
+	public void encode(File f, int resolution, String netName, double[] values, Runnable update ) {
 
 		try {
+			
 			BufferedImage bi = ImageIO.read( f );
-			bi = Imagez.scaleSquare( bi, config.resolution );
+			bi = Imagez.scaleSquare( bi, resolution );
 			bi = Imagez.join( bi, bi );
 
-			File dir = new File( "/home/twak/code/bikegan/input/" + config.netName + "_e/val/" );
+			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "_e/val/" );
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
@@ -181,118 +175,11 @@ public class Pix2Pix {
 		
 	}
 
-	public void facade( List<MiniFacade> minis, NetConfig config, double[] z, Runnable update ) {
-		
-		BufferedImage bi = new BufferedImage( config.resolution * 2, config.resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D g = (Graphics2D ) bi.getGraphics();
-		
-		Map<MiniFacade, Meta> index = new HashMap<>();
-		
-		String zs = "";
-		for (double d : z)
-			zs += "_" + d;
-		
-		for ( MiniFacade toEdit : minis ) {
+//	public void facade( List<MiniFacade> minis, double[] z, String netName, int resolution, Runnable update ) {
+//		
+//	}
 
-			DRectangle bounds = new DRectangle( config.resolution, 0, config.resolution, config.resolution );
-			DRectangle mini = findBounds (toEdit);
-			
-			g.setColor( Color.black );
-			g.fillRect( 256, 0, 256, 255 );
-			
-			mini = toEdit.postState == null ? toEdit.getAsRect() : toEdit.postState.outerFacadeRect;
-
-			DRectangle mask = new DRectangle(mini);
-			
-			{
-				mask = mask.scale( 256 / Math.max( mini.height, mini.width ) );
-				mask.x = ( config.resolution - mask.width ) * 0.5 + /* draw on the right of the input image */ config.resolution;
-				mask.y = 0; //( 256 - mask.height ) * 0.5;
-			}
-			
-			g.setColor( CMPLabel.Facade.rgb );
-			
-			if ( toEdit.postState == null ) {
-				cmpRects( toEdit, g, mask, mini, CMPLabel.Facade.rgb   , Collections.singletonList( new FRect ( mini ) )     );
-			} else {
-				for ( Loop<? extends Point2d> l : toEdit.postState.skelFaces)
-					g.fill( toPoly( toEdit, mask, mini, l ) );
-				
-				g.setColor( CMPLabel.Background.rgb );
-				for ( LoopL<Point2d> ll : toEdit.postState.occluders )
-					for ( Loop<Point2d> l : ll )
-						g.fill( toPoly( toEdit, mask, mini, l ) );
-			}
-
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.WINDOW   ) );
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
-//			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
-
-			mask.x -= config.resolution;
-			
-			String name = System.nanoTime() + "@" + index.size();
-			
-			index.put ( toEdit, new Meta( name, mask ) );
-			
-			try {
-				File dir = new File ( "/home/twak/code/bikegan/input/"+config.netName+"/val/" );
-				dir.mkdirs();
-				ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
-			} catch ( IOException e ) {
-				e.printStackTrace();
-			}
-		}
-		
-		submit ( new Job (LABEL2PHOTO, System.nanoTime() + "_" + zs, new JobResult() {
-
-			@Override
-			public void finished( File f ) {
-
-				boolean found = false;
-
-				String dest;
-				try {
-
-					List<MiniFacade> subfeatures = new ArrayList();
-
-					new File( Tweed.SCRATCH ).mkdirs();
-
-					for ( Map.Entry<MiniFacade, Meta> e : index.entrySet() ) {
-
-						dest = importTexture( f, e.getValue().name, -1, e.getValue().mask );
-						
-						if ( dest != null ) {
-							e.getKey().app.texture = dest;
-							subfeatures.add( e.getKey() );
-							found = true;
-						}
-					}
-
-					
-//					if ( found ) {
-//						
-//						new Thread() {
-//							public void run() {
-//								facadeSuper (subfeatures, update);
-//							};
-//						}.start();
-//						
-//						return;
-//					}
-
-				} catch ( Throwable e ) {
-					e.printStackTrace();
-				}
-				update.run();
-			}
-
-		} ) );
-	}
-
-	private String importTexture( File f, String name, int specular, DRectangle crop ) throws IOException {
+	public static String importTexture( File f, String name, int specular, DRectangle crop ) throws IOException {
 		
 		File texture = new File( f, name + ".png" );
 		String dest = "missing";
@@ -326,13 +213,6 @@ public class Pix2Pix {
 		return dest + ".png";
 	}
 	
-	private DRectangle findBounds( MiniFacade toEdit ) {
-		
-		if ( toEdit.postState == null ) 
-			return toEdit.getAsRect();
-		else 
-			return toEdit.postState.outerFacadeRect;
-	}
 
 	private static class Meta {
 		String name;
@@ -409,6 +289,14 @@ public class Pix2Pix {
 		}
 		
 		facadeContinue (todo, update);
+	}
+	
+	private DRectangle findBounds( MiniFacade toEdit ) {
+		
+		if ( toEdit.postState == null ) 
+			return toEdit.getAsRect();
+		else 
+			return toEdit.postState.outerFacadeRect;
 	}
 	
 	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable update ) {
@@ -617,44 +505,13 @@ public class Pix2Pix {
 		} ) );
 	}
 	
-
-	private static Polygon toPoly( MiniFacade toEdit, DRectangle bounds, DRectangle mini, Loop<? extends Point2d> loop ) {
-		Polygon p = new Polygon();
-
-			for ( Point2d pt : loop ) {
-				Point2d p2 = bounds.scale( mini.normalize( pt ) );
-				p.addPoint( (int) p2.x, (int) ( -p2.y + 256 ) );
-			}
-		return p;
-	}
-
-	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
-		
-//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
-//		
-//		mini = new DRectangle(mini);
-//		mini.scale( scale );
-//		
-//		mini.x = (1-mini.width) / 2;
-//		mini.y = (1-mini.height) / 2;
-		
-		for (FRect r : rects ) {
-			
-			if (mini.contains( r )) {
-			
-			DRectangle w = bounds.scale ( mini.normalize( r ) );
-			
-			w.y = 256 - w.y - w.height;
-			
-			g.setColor( col);
-			g.fillRect( (int) w.x, (int)w.y, (int)w.width, (int)w.height );
-			}
+	public static void setInput( BufferedImage bi, String name, String netName ) {
+		try {
+			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "/val/" );
+			dir.mkdirs();
+			ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
+		} catch ( IOException e ) {
+			e.printStackTrace();
 		}
 	}
-
-	public void roofs( MiniRoof mr, NetConfig config, double[] styleZ, Runnable update ) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

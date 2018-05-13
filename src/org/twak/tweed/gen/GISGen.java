@@ -531,7 +531,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	}
 
 	public static Envelope envelope( Loop<Point3d> footprint ) {
-		double[] mm = footprint.stream().map( e -> Pointz.to2( e )).collect( new InaxPoint2dCollector() );
+		double[] mm = footprint.stream().map( e -> Pointz.to2XZ( e )).collect( new InaxPoint2dCollector() );
 		Envelope e = new Envelope( mm[0], mm[1], mm[2], mm[3] );
 		return e;
 	}

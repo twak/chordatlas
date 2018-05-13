@@ -83,10 +83,10 @@ public class Tube {
 			Line l = new Line (b.x, b.z, c.x, c.z);
 			double llen = l.length();
 			
-			uvs.append ( new Point2d (l.findPPram( Pointz.to2( a ) ) * llen * uvScale, -height * uvScale ) );
-			uvs.append ( new Point2d (l.findPPram( Pointz.to2( b ) ) * llen * uvScale, 0 ) );
-			uvs.append ( new Point2d (l.findPPram( Pointz.to2( c ) ) * llen * uvScale, 0 ) );
-			uvs.append ( new Point2d (l.findPPram( Pointz.to2( d ) ) * llen * uvScale, -height * uvScale ) );
+			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( a ) ) * llen * uvScale, -height * uvScale ) );
+			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( b ) ) * llen * uvScale, 0 ) );
+			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( c ) ) * llen * uvScale, 0 ) );
+			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( d ) ) * llen * uvScale, -height * uvScale ) );
 
 			out.add ( face.singleton(), uvs.singleton(), true );
 		}

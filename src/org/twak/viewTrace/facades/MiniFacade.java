@@ -18,13 +18,14 @@ import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.franken.App;
 
 public class MiniFacade implements HasApp {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
-	public double[] 
-			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
+//	public double[] 
+//			color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
 //			groundColor = null;
 	
 	public enum Feature {
@@ -42,7 +43,7 @@ public class MiniFacade implements HasApp {
 		}
 	}
 	
-	public Appearance app = new Appearance(this);
+	public App app;
 	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	
@@ -52,8 +53,11 @@ public class MiniFacade implements HasApp {
 	public List<Double> 
 			hMargin = new ArrayList<>(), 
 			vMargin = new ArrayList<>();
+	
+	double imageXM, scale;
 
 	public PostProcessState postState = null;
+
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -66,7 +70,7 @@ public class MiniFacade implements HasApp {
 		this.height = m.height;
 		this.groundFloorHeight = m.groundFloorHeight;
 		this.left = m.left;
-		this.color = Arrays.copyOf( m.color, m.color.length );
+//		this.color = Arrays.copyOf( m.color, m.color.length );
 //		if (m.groundColor != null)
 //			this.groundColor = Arrays.copyOf( m.groundColor, m.groundColor.length );
 		this.softLeft = m.softLeft;
@@ -74,7 +78,7 @@ public class MiniFacade implements HasApp {
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
-		this.app = new Appearance ( m.app );
+		this.app = m.app;// m.app.copy();
 		this.featureGen = m.featureGen.copy(this);
 		this.postState = m.postState;
 		
@@ -89,10 +93,8 @@ public class MiniFacade implements HasApp {
 
 	
 	public MiniFacade(){
-		
+		app = App.createFor( this );
 	}
-	
-	double imageXM, scale;
 	
 	public MiniFacade (
 			
@@ -107,6 +109,7 @@ public class MiniFacade implements HasApp {
 		this.imageFeatures = ifs;
 		this.imageXM = imageXM;
 		this.scale = scale;
+		this.app = App.createFor( this );
 		
 		double topM = imageHeightM;
 		
@@ -129,10 +132,10 @@ public class MiniFacade implements HasApp {
 		
 		List<String> rgb = (List) yaml.get( "rgb" );
 		
-		color = new double[] {
-				Double.parseDouble ( rgb.get( 0 ) ),
-				Double.parseDouble ( rgb.get( 1 ) ),
-				Double.parseDouble ( rgb.get( 2 ) ), 1 };
+		app.color = new Color( 
+				Float.parseFloat ( rgb.get( 0 ) ),
+				Float.parseFloat ( rgb.get( 1 ) ),
+				Float.parseFloat ( rgb.get( 2 ) ) );
 		
 		readRegions ( scale, imageXM, topM, ((Map) yaml.get("regions")) );
 //		hMargin = readMargin( ((List) yaml.get("win_h_margin")) );

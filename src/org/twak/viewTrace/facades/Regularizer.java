@@ -1,5 +1,6 @@
 package org.twak.viewTrace.facades;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.streams.InAxDouble;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.DumbCluster1DImpl;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -295,8 +297,8 @@ public class Regularizer {
 			}
 		
 		out.groundFloorHeight = ypad + sy + gy/2;
-		out.color = new double[] { 1,0,0, 1.0f };
-		out.color = new double[] { 200 / 255f, 180 / 255f, 170 / 255f, 1.0f };
+		out.app.color = Color.red;//new double[] { 1,0,0, 1.0f };
+//		out.color = new double[] { 200 / 255f, 180 / 255f, 170 / 255f, 1.0f };
 //		out.groundColor = new double[] { 180 / 255f, 150 / 255f, 140 / 255f, 1.0f };
 		
 		return out;
@@ -372,13 +374,13 @@ public class Regularizer {
 		out.width = rp - lp;
 		out.imageFeatures = in.get( 0 ).imageFeatures;
 		
-		out.color = new double[] {0,0,0,1}; 
+		double[] color = new double[] {0,0,0,1}; 
 //		out.groundColor = new double[] {0,0,0,1};
 		
 		int gcc = 0;
 		for (MiniFacade mf : in) 
 			for (int i = 0; i < 3; i++) {
-				out.color[i] += mf.color[i];
+				color[i] += color[i];
 //				if (mf.groundColor != null) {
 //					out.groundColor[i] += mf.groundColor[i];
 //					gcc++;
@@ -386,10 +388,12 @@ public class Regularizer {
 			}
 		
 		for (int i = 0; i < 3; i++) {
-			out.color[i] /= in.size();
+			color[i] /= in.size();
 //			if (gcc > 0)
 //				out.groundColor[i] /= gcc;
 		}
+		
+		out.app.color = Colourz.to4( color );
 		
 		
 		

@@ -3,7 +3,7 @@ package org.twak.viewTrace.facades;
 import java.awt.Color;
 
 import org.twak.utils.Cach2;
-import org.twak.utils.ui.Colour;
+import org.twak.utils.ui.Colourz;
 
 public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 	
@@ -12,7 +12,7 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 	}
 	
 	public MatMeshBuilder get (String name, Color col, HasApp onclick ) {
-		return get (name, Colour.toF4( col ), onclick);
+		return get (name, Colourz.toF4( col ), onclick);
 	}
 	public MatMeshBuilder get (String name, float[] col, HasApp onclick ) {
 		

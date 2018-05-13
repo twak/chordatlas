@@ -11,6 +11,7 @@ import javax.vecmath.Point2d;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 /**
@@ -188,7 +189,7 @@ public class CGAMini extends FeatureGenerator {
 		
 		clear();
 		
-		mf.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL ); 
+//		mf.app.color = Colourz.to4 ( GreebleSkel.BLANK_WALL ); 
 		
 		for ( int f = 0; f < floors.size(); f++ ) {
 

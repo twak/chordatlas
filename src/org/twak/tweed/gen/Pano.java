@@ -18,7 +18,7 @@ import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.LinearForm3D;
-import org.twak.utils.ui.Colour;
+import org.twak.utils.ui.Colourz;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -220,7 +220,7 @@ public class Pano {
 			
 		}
 		
-		return Colour.asInt( (int) rgb[ 0 ], (int) rgb[ 1 ], (int) rgb[ 2 ] );
+		return Colourz.asInt( (int) rgb[ 0 ], (int) rgb[ 1 ], (int) rgb[ 2 ] );
 	}
 
 	private void get( BufferedImage image, double x, double y, double weight, double[] result ) {

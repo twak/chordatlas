@@ -31,7 +31,7 @@ import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.geom.ObjDump;
-import org.twak.utils.ui.Colour;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.FacadeFinder;
 
@@ -237,7 +237,7 @@ public class ImagePlaneGen extends Gen implements IDumpObjs {
 				int d = (int)(dist * 256);
 				double r = dist*256 - d;
 				
-				int c = Colour.asInt(  
+				int c = Colourz.asInt(  
 						Mathz.clamp ( d + (r > 0.25 ? 1 : 0), 0, 255),
 						Mathz.clamp ( d + (r > 0.50 ? 1 : 0), 0, 255),
 						Mathz.clamp ( d + (r > 0.75 ? 1 : 0), 0, 255) );

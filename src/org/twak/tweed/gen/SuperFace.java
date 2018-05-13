@@ -7,9 +7,9 @@ import java.util.List;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
-import org.twak.viewTrace.facades.Appearance;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.App;
 
 public class SuperFace extends HalfFace  {
 
@@ -21,7 +21,7 @@ public class SuperFace extends HalfFace  {
 	public double height = 4;
 	public int classification;
 	
-	public MiniRoof mr = null;
+	public transient MiniRoof mr = new MiniRoof();
 	
 	public SuperFace() {
 		super(null);

@@ -362,7 +362,7 @@ public class BlockGen extends ObjGen {
 				continue;
 			
 			for (Loopable<Point3d> pt : block.loopableIterator()) {
-				Line query = new Line ( Pointz.to2( pt.get() ) , Pointz.to2( pt.getNext().get()));
+				Line query = new Line ( Pointz.to2XZ( pt.get() ) , Pointz.to2XZ( pt.getNext().get()));
 				
 				if ( !Loopz.inside( query, queryBounds ) )
 					continue;

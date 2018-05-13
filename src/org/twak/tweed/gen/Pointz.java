@@ -23,8 +23,12 @@ public class Pointz {
 		return new Line3d (line.start.x, 0, line.start.y, line.end.x, 0, line.end.y);
 	}
 
-	public static Point2d to2( Tuple3d loc ) {
+	public static Point2d to2XZ( Tuple3d loc ) {
 		return new Point2d(loc.x, loc.z);
+	}
+	
+	public static Point2d to2XY( Tuple3d loc ) {
+		return new Point2d(loc.x, loc.y);
 	}
 
 	public static Point3d to3( Point2d p2, double y ) {

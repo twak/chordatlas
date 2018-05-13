@@ -7,12 +7,13 @@ import java.util.Set;
 
 import org.twak.siteplan.tags.PlanTag;
 import org.twak.utils.Line;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade;
 
 public class WallTag extends PlanTag{
 	
 	public Line planLine;
-	public float[] color = null;//new float[] {228/255f, 223/255f, 206/255f, 1.0f };
+//	public float[] color = null;//new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	public boolean isGroundFloor, makeDoor = Math.random() < 0.5;
 	public double windowDepth = 0.5;//Math.random() * 0.3 + 0.4;
 	public double doorDepth = 0.4;
@@ -43,19 +44,21 @@ public class WallTag extends PlanTag{
 		this.planLine = planLine;
 		this.miniFacade = miniFacade;
 
-		if (this.miniFacade != null ) {
-			if ( this.miniFacade.color != null)
-				this.color = new float[] { 
-					(float) miniFacade.color[ 0 ], 
-					(float) miniFacade.color[ 1 ], 
-					(float) miniFacade.color[ 2 ], 1f };
+//		if (this.miniFacade != null ) {
+//			if ( this.miniFacade.color != null)
+//				float[] c = Colour.toF4( miniFacade.app.color );
+//				
+//				this.color = new float[] { 
+//					(float) c[ 0 ], 
+//					(float) c[ 1 ], 
+//					(float) c[ 2 ], 1f };
 			
 //			if (this.miniFacade.groundColor != null && ! Arrays.equals( miniFacade.color, miniFacade.groundColor ) )
 //				this.groundFloorColor = new float[] { 
 //				(float) miniFacade.groundColor[ 0 ], 
 //				(float) miniFacade.groundColor[ 1 ], 
 //				(float) miniFacade.groundColor[ 2 ], 1f };
-		}
+//		}
 
 		
 //		else if (Math.random() < 0.7) {

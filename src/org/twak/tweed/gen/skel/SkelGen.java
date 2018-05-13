@@ -74,12 +74,12 @@ import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.WindowManager;
-import org.twak.viewTrace.facades.Appearance.AppMode;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NSliders;
@@ -436,23 +436,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		fac.addActionListener( e -> editFacade( skel, sf, se ) );
 		ui.add( fac );
 		
-		AutoEnumCombo roof = new AutoEnumCombo( rs, new AutoEnumCombo.ValueSet() {
-			@Override
-			public void valueSet( Enum num ) {
-				RoofSource rs = (RoofSource)num;
-				switch(rs) {
-				case None:
-					// colour chooser
-				case Tile:
-					// plain tile
-				case Generative:
-					setRoofTextured( skel, sf, true );
-				}
-				
-			}
-		} );
-		ui.add( roof );
-
 		JButton proc = new JButton( "procedural facade" );
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
 		ui.add( proc );
@@ -540,7 +523,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		if (ha == null)
 			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
 		else
-			tweed.frame.setGenUI( HasApp.get( ha ).createUI(ha, new Runnable() {
+			tweed.frame.setGenUI( HasApp.get( ha ).createUI( new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {

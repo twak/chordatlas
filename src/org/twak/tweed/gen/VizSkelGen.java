@@ -69,7 +69,7 @@ public class VizSkelGen extends SkelGen {
 
 	private SuperFace toHalf(Loop<Point3d> loop ) {
 		
-		Cache<Point3d, Point2d> look = new Cach<>( x -> Pointz.to2(x) );
+		Cache<Point3d, Point2d> look = new Cach<>( x -> Pointz.to2XZ(x) );
 		
 		HalfEdge last = null, first = null;
 		SuperFace out = new SuperFace();

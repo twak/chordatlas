@@ -55,7 +55,6 @@ public class TextureTool extends SelectTool {
 	public static final String LINE_XML = "line.xml";
 	public boolean singleFolder = true;
 	long lastClick = 0;
-//	FacadeFinder ff;
 
 	public TextureTool( Tweed tweed ) {
 		super( tweed );

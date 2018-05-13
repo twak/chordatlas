@@ -333,27 +333,27 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 			});
 		}
 		
-		pop.add( "color", new Runnable() {
-			@Override
-			public void run() {
-
-				new ColourPicker( null, new Color ( (float) mf.color[0], (float) mf.color[1], (float) mf.color[2]  )) {
-					
-					@Override
-					public void picked( Color color ) {
-						
-						mf.color = new double[] {
-								color.getRed() / 255f,
-								color.getGreen() / 255f,
-								color.getBlue() / 255f, 
-								1
-						};
-						
-						cl.stateChanged( null );
-					}
-				};
-			}
-		});
+//		pop.add( "color", new Runnable() {
+//			@Override
+//			public void run() {
+//
+//				new ColourPicker( null, new Color ( (float) mf.color[0], (float) mf.color[1], (float) mf.color[2]  )) {
+//					
+//					@Override
+//					public void picked( Color color ) {
+//						
+//						mf.color = new double[] {
+//								color.getRed() / 255f,
+//								color.getGreen() / 255f,
+//								color.getBlue() / 255f, 
+//								1
+//						};
+//						
+//						cl.stateChanged( null );
+//					}
+//				};
+//			}
+//		});
 		
 		pop.show();
 		

@@ -682,29 +682,17 @@ public class Prof extends ArrayList<Point2d> {
 				llines.set( i, FindLines.rotateToAngle( l, l.fromPPram( 0.5 ), Mathz.PI2 ) );
 		}
 
-		//		llines.stream().filter( l -> l.start.y > l.end.y ).forEach( l -> l.reverseLocal() );
-
 		Collections.sort( llines, new Comparator<Line>() {
 			public int compare( Line o1, Line o2 ) {
 				return Double.compare( o1.fromPPram( 0.2 ).y, o2.fromPPram( 0.2 ).y );
 			};
 		} );
 
-		//		for (Line l : llines)
-		//			PaintThing.debug( new Color(170,0,255), 2f, new Line( l.start.x+5, -l.start.y, l.end.x+5, -l.end.y ) );
-
 		Line lastL = null;
 		Point2d lastP = new Point2d( 0, -Double.MAX_VALUE );
 
-		//		int c = 0;
 
 		for ( Line l : llines ) {
-
-			//			if (c >= 6)
-			//				continue;
-			//			if ( c== 5)
-			//				System.out.println("here");
-			//			c++;
 
 			Point2d mid = l.fromPPram( 0.5 );
 
@@ -712,9 +700,6 @@ public class Prof extends ArrayList<Point2d> {
 				continue;
 
 			boolean startAbove = l.start.y >= lastP.y && l.start.x <= lastP.x, endAbove = l.end.y >= lastP.y && l.end.x <= lastP.x;
-
-			//				out.add(l.start);
-			//				out.add(l.end);
 
 			if ( l.end.y < l.start.y )
 				l.end.y = l.start.y;

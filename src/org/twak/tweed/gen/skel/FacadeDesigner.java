@@ -6,9 +6,9 @@ import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.ui.Plot;
-import org.twak.viewTrace.facades.Appearance.AppMode;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
+import org.twak.viewTrace.franken.App.AppMode;
 
 public class FacadeDesigner {
 	

@@ -8,7 +8,7 @@ import java.util.List;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.PaintThing.ICanPaint;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.Colour;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 /**
@@ -37,7 +37,7 @@ public abstract class Outer extends DRectangle implements ICanPaint {
 			
 			List<FRect> toPaint = list();
 			for (FRect w : toPaint)  {
-				g.setColor( Colour.transparent( feature.color, 50 ) );
+				g.setColor( Colourz.transparent( feature.color, 50 ) );
 				g.fillRect( ma.toX( w.x ), ma.toY (-w.y-w.height ), ma.toZoom( w.width ), ma.toZoom( w.height ) );
 				
 				g.setColor( feature.color );

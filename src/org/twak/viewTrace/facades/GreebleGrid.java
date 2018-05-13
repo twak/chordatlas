@@ -59,7 +59,7 @@ public class GreebleGrid {
 		
 		for (String mName : mbs.textures.cache.keySet())
 			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
-				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, mName ) ) );
+				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, texture ) ) );
 	}
 	
 	private Geometry mb2Tex( Output output, List<Face> chain, String name, 

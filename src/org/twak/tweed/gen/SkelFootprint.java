@@ -323,7 +323,7 @@ public class SkelFootprint {
 					
 					for (Prof p : mf.getTween(se.start, se.end, 0) ) {
 						
-						Line proj = new Line ( Pointz.to2(p.to3d(p.get(0))),Pointz.to2(p.to3d(p.get(p.size() -1)))  );
+						Line proj = new Line ( Pointz.to2XZ(p.to3d(p.get(0))),Pointz.to2XZ(p.to3d(p.get(p.size() -1)))  );
 
 						for (HalfEdge e2 : f) {
 							

@@ -21,6 +21,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App;
 
 public class FRect extends DRectangle implements ICanEdit, HasApp {
 	
@@ -30,7 +31,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
-	public Appearance app = new Appearance (this);
+	public App app;
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
@@ -40,33 +41,43 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	
 	public FRect( FRect o ) {
 		super(o);
+		
 		f = o.f;
 		id = o.id;
+		
 		outer = o.outer;
+		
 		xi = o.xi;
 		yi = o.yi;
+		
 		gridCoords = o.gridCoords == null ? null : Arrays.copyOf( o.gridCoords, o.gridCoords.length );
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
-		app = new Appearance ( o.app );
+		
+//		if (o.app != null)
+		app = o.app;//.copy();
 	}
 	
 	public FRect() {
 		super();
+		app = App.createFor( this );
 	}
 	
 	public FRect( double x, double y, double w, double h ) {
 		super (x,y,w,h);
+		app = App.createFor( this );
 	}
 
 
 	public FRect( DRectangle r ) {
 		super( r );
+		app = App.createFor( this );
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h ) {
 		super (x,y,w,h);
 		this.f = feature;
+		app = App.createFor( this );
 	}
 
 	public FRect getAdj(Dir d) {

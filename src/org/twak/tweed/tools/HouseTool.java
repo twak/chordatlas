@@ -7,26 +7,25 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
-import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Line;
-import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
-import org.twak.viewTrace.facades.Appearance.AppMode;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App.AppMode;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
-import com.vividsolutions.jts.algorithm.CGAlgorithms;
 
 public class HouseTool extends Tool {
 
@@ -103,10 +102,10 @@ public class HouseTool extends Tool {
 		
 		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
 		mini.featureGen = new CGAMini( mini );
-		
-		mini.color = Arrayz.toDoubleArray( GreebleSkel.BLANK_WALL );
+
 		mini.imageFeatures = imf;
 		mini.app.appMode = AppMode.Color;//"tex.jpg";
+		mini.app.color = Colourz.to4 ( GreebleSkel.BLANK_WALL );
 //		mini.normal = "normal.jpg";
 //		mini.spec = "spec.jpg";
 		
