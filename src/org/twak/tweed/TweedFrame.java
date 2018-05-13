@@ -35,6 +35,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.vecmath.Vector3d;
 
 import org.twak.readTrace.MiniTransform;
@@ -172,6 +173,8 @@ public class TweedFrame {
 
 		JPanel out = new JPanel( new BorderLayout() );
 
+		out.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
+		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar( menuBar );
 

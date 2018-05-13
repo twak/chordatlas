@@ -289,7 +289,7 @@ public class Regularizer {
 						lt + xpad + x * ( sx + gx),
 						ypad + y * ( sy + gy),
 						sx,
-						sy );
+						sy, out );
 				
 				win.f = Feature.WINDOW;
 				out.featureGen.put( win.f, win );
@@ -448,7 +448,7 @@ public class Regularizer {
 						o.setFrom( o.union( n ) );
 					
 				} else // about same size: average position: windows on a grid
-					o = new FRect( average( found.toArray( new FRect[found.size()] ) ) );
+					o = new FRect( average( found.toArray( new FRect[found.size()] ) ), out );
 				
 				{
 					FRect t = found.get(0);
@@ -1185,7 +1185,7 @@ public class Regularizer {
 
 	private DRectangle average( FRect...rs_ ) {
 		
-		FRect out = new FRect();
+		FRect out = new FRect( (FRect) null);
 		
 		List<FRect> rs= new ArrayList();
 

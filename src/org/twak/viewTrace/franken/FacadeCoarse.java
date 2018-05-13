@@ -97,7 +97,7 @@ public class FacadeCoarse extends App {
 			g.setColor( CMPLabel.Facade.rgb );
 
 			if ( toEdit.postState == null ) {
-				cmpRects( toEdit, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini ) ) );
+				cmpRects( toEdit, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, toEdit ) ) );
 			} else {
 				for ( Loop<? extends Point2d> l : toEdit.postState.skelFaces )
 					g.fill( toPoly( toEdit, mask, mini, l ) );

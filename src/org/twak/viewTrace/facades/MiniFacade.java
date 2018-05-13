@@ -191,7 +191,7 @@ public class MiniFacade implements HasApp {
 					Double.parseDouble( (String) r.get( "left"   ) ) / scale + left,
 				    topM - Double.parseDouble( (String) r.get( "bottom"    ) ) / scale,
  				   (Double.parseDouble( (String) r.get( "right"  ) ) - Double.parseDouble( (String) r.get( "left" ) )) / scale,
-				   h
+				   h, this
 					));
 		}
 		
@@ -264,7 +264,7 @@ public class MiniFacade implements HasApp {
 				
 				List<Double> dp = ((List<String>)wp).stream().map(x -> Double.parseDouble(x)).collect( Collectors.toList() );
 				
-				FRect win = new FRect();
+				FRect win = new FRect(this);
 				
 				win.f = Feature.GRID;
 				win.x      = dp.get(1) / scale + imageXM;

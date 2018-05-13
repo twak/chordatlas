@@ -32,6 +32,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	public int id = -1;
 	
 	public App app;
+	public MiniFacade mf;
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
@@ -56,28 +57,33 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 		
 //		if (o.app != null)
 		app = o.app;//.copy();
+		this.mf = o.mf;
 	}
 	
-	public FRect() {
+	public FRect(MiniFacade mf) {
 		super();
 		app = App.createFor( this );
+		this.mf = mf;
 	}
 	
-	public FRect( double x, double y, double w, double h ) {
+	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		app = App.createFor( this );
+		this.mf = mf;
 	}
 
 
-	public FRect( DRectangle r ) {
+	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
 		app = App.createFor( this );
+		this.mf = mf;
 	}
 
-	public FRect( Feature feature, double x, double y, double w, double h ) {
+	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.f = feature;
 		app = App.createFor( this );
+		this.mf = mf;
 	}
 
 	public FRect getAdj(Dir d) {

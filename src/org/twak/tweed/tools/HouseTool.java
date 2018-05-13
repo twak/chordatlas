@@ -100,7 +100,7 @@ public class HouseTool extends Tool {
 		mini.width = length;
 		mini.height = 20;
 		
-		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3 ) );
+		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3, mini ) );
 		mini.featureGen = new CGAMini( mini );
 
 		mini.imageFeatures = imf;

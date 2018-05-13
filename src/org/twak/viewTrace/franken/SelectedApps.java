@@ -1,6 +1,7 @@
 package org.twak.viewTrace.franken;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -11,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
 
 import org.twak.tweed.TweedFrame;
 import org.twak.utils.collections.MultiMap;
@@ -64,6 +66,7 @@ public class SelectedApps extends ArrayList<App>{
 		Map<String, SelectedApps> out = new LinkedHashMap<>();
 		for (App a : this) {
 			MultiMap<String, App> as = a.getDown();
+			if (as != null)
 			for ( String name : as.keySet() ) 
 				out.put( name, new SelectedApps(as.get( name )) );
 		}
@@ -91,8 +94,9 @@ public class SelectedApps extends ArrayList<App>{
 		JPanel main = new JPanel(new BorderLayout() );
 		
 		JPanel options = new JPanel();
+		options.add( new JLabel("help") );
 
-		top.add( new JLabel( exemplar.netName +" @ "+exemplar.resolution+"x"+exemplar.resolution), BorderLayout.NORTH );
+		top.add( new JLabel( exemplar.netName +", "+exemplar.resolution+"px, "+size()+" selected"), BorderLayout.NORTH );
 		
 		JPanel upDown = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		
@@ -105,8 +109,9 @@ public class SelectedApps extends ArrayList<App>{
 		
 		Map<String, SelectedApps> downs = findDown();
 		
+		if (downs != null)
 		for (String wayDown : downs.keySet()) {
-			JButton down = new JButton("↓ "+wayDown);
+			JButton down = new JButton("↓ "+wayDown+"("+downs.get( wayDown ).size()+")");
 			upDown.add( down, BorderLayout.EAST);
 			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( globalUpdate) ) );
 		}
@@ -116,9 +121,8 @@ public class SelectedApps extends ArrayList<App>{
 		AutoEnumCombo combo = new AutoEnumCombo( exemplar.appMode, new ValueSet() {
 			public void valueSet( Enum num ) {
 				
-				for (App a : SelectedApps.this) {
+				for (App a : SelectedApps.this)
 					a.appMode = (AppMode) num;
-				}
 				
 				options.removeAll();
 				
@@ -139,27 +143,11 @@ public class SelectedApps extends ArrayList<App>{
 		buildLayout(exemplar.appMode, options, () -> SelectedApps.this.computeAll( globalUpdate ) );
 		
 		top.add(combo);
+		
 		main.add( top, BorderLayout.NORTH );
 		main.add( options, BorderLayout.CENTER );
-		
-		
-//		double[] z;
-//		
-//		FeatureGenerator gf = (FeatureGenerator) se.toEdit.featureGen;
-//		if ( gf.facadeStyle != null )
-//			z = gf.facadeStyle;
-//		else
-//			z = gf.facadeStyle = new double[Pix2Pix.LATENT_SIZE];
-		
-//		List<MiniFacade> sameStyle = new ArrayList();
-//		for (HalfEdge e : sf ){
-//			SuperEdge se2 = (SuperEdge)e;
-//			if ( se2.toEdit.featureGen.facadeStyle == z)
-//				sameStyle.add( se2.toEdit );
-//		}
 
-		
-		return top;
+		return main;
 	}
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable whenDone ) {
