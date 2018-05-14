@@ -10,6 +10,7 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Output.SharedEdge;
 import org.twak.tweed.gen.Pointz;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -20,6 +21,7 @@ import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.RoofApp;
 
 public class MiniRoof implements HasApp {
 
@@ -27,8 +29,12 @@ public class MiniRoof implements HasApp {
 	public LoopL<Point2d> pitches, flats;
 	public DRectangle bounds;
 	
-	public App app = App.createFor( this);
+	public RoofApp app = new RoofApp( this );
 	
+	public MiniRoof( SuperFace superFace ) {
+		app.parent = superFace;
+	}
+
 	public void setOutline( Output output ) {
 		
 		pitches = new LoopL<>();

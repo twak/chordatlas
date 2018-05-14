@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class SelectedApps extends ArrayList<App>{
 	public SelectedApps() {}
 	
 	public SelectedApps( List<App> list ) {
-		super (list);
+		super (new ArrayList (new LinkedHashSet<>(list) ) );
 		exemplar = list.get( 0 );
 	}
 
@@ -63,13 +64,15 @@ public class SelectedApps extends ArrayList<App>{
 	}
 	
 	private Map<String, SelectedApps> findDown () {
+		MultiMap<String, App> as = new MultiMap<>();
+		
+		for (App a : this) 
+			as.putAll( a.getDown() );
+		
 		Map<String, SelectedApps> out = new LinkedHashMap<>();
-		for (App a : this) {
-			MultiMap<String, App> as = a.getDown();
-			if (as != null)
-			for ( String name : as.keySet() ) 
-				out.put( name, new SelectedApps(as.get( name )) );
-		}
+		for (String name : as.keySet())
+			out.put( name, new SelectedApps(as.get( name ) ) );
+			
 		return out;
 	}
 	
@@ -77,16 +80,19 @@ public class SelectedApps extends ArrayList<App>{
 		computeAll_( globaUpdate, 0 );
 	}
 	private void computeAll_(Runnable globalUpdate, int i) {
-		if (i >= size())
-			globalUpdate.run();
-		else
-			get(i).computeWithChildren( globalUpdate, 
-					new Runnable() {
-						@Override
-						public void run() {
-							computeAll_( globalUpdate, i + 1 );
-						}
-					} );
+		
+		App.computeWithChildren( this, 0, globalUpdate );
+		
+//		if (i >= size())
+//			globalUpdate.run();
+//		else
+//			get(i).computeWithChildren( globalUpdate, 
+//					new Runnable() {
+//						@Override
+//						public void run() {
+//							computeAll_( globalUpdate, i + 1 );
+//						}
+//					} );
 	}
 	
 	public JComponent createUI( Runnable globalUpdate ) {
@@ -143,7 +149,8 @@ public class SelectedApps extends ArrayList<App>{
 		} );
 		buildLayout(exemplar.appMode, options, () -> SelectedApps.this.computeAll( globalUpdate ) );
 		
-		top.add(combo);
+		if (exemplar.resolution > 0)
+			top.add(combo); // building doesn't have options yet
 		
 		main.add( top, BorderLayout.NORTH );
 		main.add( options, BorderLayout.CENTER );

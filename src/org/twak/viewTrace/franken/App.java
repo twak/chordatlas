@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JComponent;
 
+import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -67,9 +68,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	public static App createFor(HasApp ha) {
 		
 		if ( ha.getClass() == MiniFacade.class) {
-			return new FacadeCoarse(ha);
+			return new FacadeApp(ha);
 		} else if (ha.getClass() == MiniRoof.class) {
-			return new RoofTex(ha);
+			return new RoofApp(ha);
 		} else if (ha.getClass() == FRect.class) {
 			return new Tex2Panes(ha);
 		}		
@@ -84,75 +85,59 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	static final int Batch_Size = 16;
 	
-	public static void computeWithChildren (List<App> todo, int first, Runnable globalUpdate, Runnable whenDone ) {
+	public static void computeWithChildren (List<App> todo, int first, Runnable globalUpdate ) {
+		
 		
 		if (first >= todo.size()) {
+			System.out.println( "finishing "+ todo.get( 0 ).getClass().getSimpleName() );
+			
+			globalUpdate.run();
 			
 			MultiMap< String, App> downs = new MultiMap<>();
 			for (App a : todo) 
 				downs.putAll ( a.getDown() );
 			
 			for (String d : downs.keySet()) 
-				new Thread( () ->  computeWithChildren( downs.get( d ), globalUpdate, whenDone ) ).start();
-			
+				new Thread( () ->  App.computeWithChildren( downs.get( d ), 0, globalUpdate ) ).start();
 		}
 		else {
+			
 		
 			List<App> batch = new ArrayList<>();
-			for ( int i = first; i < Math.min( todo.size(), first + Batch_Size ); i++ )
-				batch.add( todo.get( i ) );
-
-//			computeSelf ( globalUpdate, () ->computeWithChildren( todo, globalUpdate, whenDone ) );
 			
+			for ( int i = first; i < Math.min( todo.size(), first + Batch_Size ); i++ ) {
+				App app = todo.get( i );
+				if (app.appMode == AppMode.Net)
+					batch.add( todo.get( i ) );
+			}
+
+			if (!batch.isEmpty()) {
+				System.out.println( "batch " + first + " "+ todo.get( 0 ).getClass().getSimpleName() );
+				batch.get( 0 ).computeBatch ( () -> App.computeWithChildren( todo, first + Batch_Size, globalUpdate ), 
+					batch );
+			}
+			else
+				App.computeWithChildren( todo, first + Batch_Size, globalUpdate );
 		}
-		
-		
 		
 	}
 	
-	public static void computeWithChildren (List<App> todo, Runnable globalUpdate, Runnable whenDone ) {
-		
-	}
 	
-	public void computeWithChildren( Runnable globalUpdate, Runnable whenDone ) {
-
-		switch ( appMode ) {
-
-		case Color:
-			whenDone.run();
-			break;
-		case Net:
-			computeSelf( globalUpdate, new Runnable() {
-				@Override
-				public void run() {
-					List<App> downs = getDown().valueList();
-					
-					net (downs, 0);
-
-				}
-
-				private void net( List<App> downs, int i ) {
-
-					if (i >= downs.size()) {
-						whenDone.run();
-						return;
-					}
-					
-					downs.get( i ).computeWithChildren( globalUpdate, new Runnable() {
-					@Override
-					public void run() {
-						 net (downs, i+1);
-						}
-					} );
-					
-				}
-			} );
-			break;
-		default:
-			color = Color.red;
-			whenDone.run();
-		}
-	}
+//	public void computeWithChildren( Runnable globalUpdate, Runnable whenDone ) {
+//
+//		switch ( appMode ) {
+//
+//		case Color:
+//			whenDone.run();
+//			break;
+//		case Net:
+//			
+//			break;
+//		default:
+//			color = Color.red;
+//			whenDone.run();
+//		}
+//	}
 
 	public String zAsString() {
 		String zs = "";
@@ -164,7 +149,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract App copy();
 	public abstract App getUp();
 	public abstract MultiMap<String, App> getDown();
-	public abstract void computeSelf(Runnable globalUpdate, Runnable whenDone);
+	public abstract void computeBatch(Runnable whenDone, List<App> batch);
 	
 	
 }

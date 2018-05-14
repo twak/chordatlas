@@ -49,7 +49,7 @@ public class Tex2Panes extends App {
 	}
 
 	@Override
-	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
@@ -57,53 +57,48 @@ public class Tex2Panes extends App {
 		Map<FRect, Meta> names = new HashMap<>();
 		
 //		for ( MiniFacade mf : subfeatures ) {
-		{
+		for ( App a : batch ) {
 			try {
-			MiniFacade mf = ((FRect)hasA).mf;
-			
-//			if (mf.featureGen instanceof CGAMini)
-//				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
-			
-			
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture )  );
+				MiniFacade mf = ( (FRect) a.hasA ).mf;
+
+				//			if (mf.featureGen instanceof CGAMini)
+				//				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
+
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture ) );
 				DRectangle mini = Pix2Pix.findBounds( mf );
-				
-//				for ( FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) ) 
-			{
-				FRect r = (FRect) hasA;
-				
-					if (!mini.contains( r ))
-						return;//continue;
-					
-					DRectangle w = bounds.scale ( mini.normalize( r ) );
-					w.y = bounds.getMaxY() - w.y - w.height;
-					
-					
-					BufferedImage dow =
+
+				FRect r = (FRect) a.hasA;
+
+				if ( !mini.contains( r ) )
+					return;//continue;
+
+				DRectangle w = bounds.scale( mini.normalize( r ) );
+				w.y = bounds.getMaxY() - w.y - w.height;
+
+				BufferedImage dow =
 							src.getSubimage(  
 								(int) w.x, 
 								(int) w.y,
 								(int) w.width , 
 								(int) w.height );
-					
-					DRectangle mask = new DRectangle();
-					
-					BufferedImage scaled = Imagez.scaleSquare( dow, 256, mask, Double.MAX_VALUE );
-					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
-					
-					Graphics2D g = toProcess.createGraphics();
-					g.drawImage( scaled, 256, 0, null );
-					g.dispose();
 
-					String wName = name +"_"+ count+"@"+System.nanoTime();
-					Pix2Pix.addInput( toProcess, wName, netName );
-					
-//					String name = System.nanoTime() + "_" + count;
-//					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
+				DRectangle mask = new DRectangle();
 
-					names.put( r, new Meta( wName, mask ) );
-					count++;
-				}
+				BufferedImage scaled = Imagez.scaleSquare( dow, 256, mask, Double.MAX_VALUE );
+				BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+
+				Graphics2D g = toProcess.createGraphics();
+				g.drawImage( scaled, 256, 0, null );
+				g.dispose();
+
+				String wName = name + "_" + count + "@" + System.nanoTime();
+				Pix2Pix.addInput( toProcess, wName, netName );
+
+				//					String name = System.nanoTime() + "_" + count;
+				//					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
+
+				names.put( r, new Meta( wName, mask ) );
+				count++;
 
 			} catch ( IOException e1 ) {
 				e1.printStackTrace();
@@ -124,8 +119,6 @@ public class Tex2Panes extends App {
 						
 						if ( dest != null ) 
 							e.getKey().app.texture = dest;
-						
-						globalUpdate.run();
 					}
 					
 				} catch (Throwable th) {

@@ -19,6 +19,7 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.FacadeApp;
 
 public class MiniFacade implements HasApp {
 	
@@ -43,7 +44,7 @@ public class MiniFacade implements HasApp {
 		}
 	}
 	
-	public App app;
+	public FacadeApp app = new FacadeApp( this );
 	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	
@@ -94,7 +95,6 @@ public class MiniFacade implements HasApp {
 
 	
 	public MiniFacade(){
-		app = App.createFor( this );
 	}
 	
 	public MiniFacade (
@@ -110,7 +110,6 @@ public class MiniFacade implements HasApp {
 		this.imageFeatures = ifs;
 		this.imageXM = imageXM;
 		this.scale = scale;
-		this.app = App.createFor( this );
 		
 		double topM = imageHeightM;
 		

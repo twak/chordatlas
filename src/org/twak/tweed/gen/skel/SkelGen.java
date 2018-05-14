@@ -81,6 +81,7 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.FacadeApp;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NSliders;
@@ -580,6 +581,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 			}
 			ensureMF( sf, se );
 		} 
+		
+		
+		if ( se.toEdit != null ) 
+			se.toEdit.app.parent = sf;
 
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
 			roof = new RoofTag( sf.roofColor );
@@ -716,12 +721,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public static void ensureMF( SuperFace sf, SuperEdge se ) {
 
 		if (sf.mr == null)
-			sf.mr = new MiniRoof();
-		
-		if (se.toEdit == null) {
-		se.toEdit = new MiniFacade();
-		se.toEdit.left = 0;
-		se.toEdit.width = se.length();
+			sf.mr = new MiniRoof(sf);
+
+		if ( se.toEdit == null ) {
+			se.toEdit = new MiniFacade();
+			se.toEdit.left = 0;
+			se.toEdit.width = se.length();
 		}
 		
 		if (se.mini != null && !se.mini.isEmpty())
@@ -742,7 +747,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		ensureMF(sf, se);
 		
-		se.toEdit.app = App.createFor( se.toEdit );
+		se.toEdit.app = new FacadeApp( se.toEdit );
 		
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		se.toEdit.featureGen.update();

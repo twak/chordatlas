@@ -10,30 +10,35 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
+import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
-public class RoofTex extends App {
+public class RoofApp extends App {
 
-	public RoofTex(HasApp ha) {
+	public SuperFace parent;
+
+	public RoofApp(HasApp ha) {
 		super(ha, "roof", "roofs2", 8, 512);
 	}
 
-	public RoofTex( RoofTex ruf ) {
+	public RoofApp( RoofApp ruf ) {
 		super( ruf );
 	}
 
 	@Override
 	public App getUp() {
-		return null;
+		return parent.app;
 	}
 
 	@Override
@@ -43,18 +48,20 @@ public class RoofTex extends App {
 
 	@Override
 	public App copy() {
-		return new RoofTex( this );
+		return new RoofApp( this );
 	}
 	
 	@Override
-	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 		Map<MiniRoof, String> index = new HashMap<>();
 
-		for ( MiniRoof toEdit : Collections.singletonList( (MiniRoof) hasA ) ) {
+		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
+		
+		for ( MiniRoof toEdit : mrb ) {
 
 			DRectangle drawTo = new DRectangle( resolution, 0, resolution, resolution );
 

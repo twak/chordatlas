@@ -10,8 +10,9 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.BuildingApp;
 
-public class SuperFace extends HalfFace  {
+public class SuperFace extends HalfFace implements HasApp {
 
 	public List<float[]> colors = null;
 	public float[] roofColor;
@@ -21,7 +22,9 @@ public class SuperFace extends HalfFace  {
 	public double height = 4;
 	public int classification;
 	
-	public transient MiniRoof mr = new MiniRoof();
+	public transient MiniRoof mr = new MiniRoof(this);
+	
+	public BuildingApp app = new BuildingApp(this); 
 	
 	public SuperFace() {
 		super(null);

@@ -26,9 +26,9 @@ import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
 public class FacadeSuper extends App implements HasApp {
 
-	FacadeCoarse parent;
+	FacadeApp parent;
 	
-	public FacadeSuper( FacadeCoarse parent ) {
+	public FacadeSuper( FacadeApp parent ) {
 		super( null, "super-facade", "super3", 8, 256 );
 		this.hasA = this;
 		this.parent = parent;
@@ -54,11 +54,13 @@ public class FacadeSuper extends App implements HasApp {
 	}
 	
 	@Override
-	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		Map<MiniFacade, FacState> todo = new LinkedHashMap();
 		
-		MiniFacade mf = (MiniFacade) parent.hasA;
+		FacadeSuper fs = (FacadeSuper ) batch.get( 0 );
+		
+		MiniFacade mf = (MiniFacade) fs.parent.hasA;
 		
 		{
 			try {
@@ -89,14 +91,14 @@ public class FacadeSuper extends App implements HasApp {
 			}
 		}
 		
-		facadeContinue (todo, globalUpdate, whenDone );
+		facadeContinue (todo, whenDone );
 	}
 	
 
-	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable update, Runnable finished ) {
+	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
-			finished.run();
+			whenDone.run();
 			return;
 		}
 		
@@ -223,7 +225,7 @@ public class FacadeSuper extends App implements HasApp {
 						e1.printStackTrace();
 					}
 
-					facadeContinue( todo, update, finished );
+					facadeContinue( todo, whenDone );
 				}
 			} ) );
 		

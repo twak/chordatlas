@@ -598,9 +598,9 @@ public class GreebleGrid {
 						@Override
 						public void instance( DRectangle rect ) {
 							if (w.app.texture == null)
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f );
+								createInnie( rect, allUV.normalize( rect ), to3d,mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ), 0.2f );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture+w.hashCode(), w.app.texture, w ) , 0.2f );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ) , 0.2f );
 						}
 					} );
 			}

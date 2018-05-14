@@ -10,10 +10,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
@@ -29,23 +31,23 @@ import org.twak.viewTrace.facades.Pix2Pix.CMPLabel;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
-public class FacadeCoarse extends App {
+public class FacadeApp extends App {
 
 	FacadeSuper zuper = new FacadeSuper(this);
+	public SuperFace parent;
 	
-	public FacadeCoarse( HasApp ha ) {
+	public FacadeApp( HasApp ha ) {
 		super( ha, "facade coarse", "bike_2", 8, 256 );
 	}
 
-	public FacadeCoarse( FacadeCoarse facadeCoarse ) {
+	public FacadeApp( FacadeApp facadeCoarse ) {
 		super( facadeCoarse );
 		this.zuper = facadeCoarse.zuper;
 	}
 
 	@Override
 	public App getUp() {
-		// TODO Auto-generated method stub
-		return null;
+		return parent.app;
 	}
 
 	@Override
@@ -66,19 +68,21 @@ public class FacadeCoarse extends App {
 
 	@Override
 	public App copy() {
-		return new FacadeCoarse( this );
+		return new FacadeApp( this );
 	}
 
 	@Override
-	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 
 		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 		Map<MiniFacade, Meta> index = new HashMap<>();
+		
+		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
 
-		for ( MiniFacade mf : Collections.singletonList( (MiniFacade) hasA ) ) {
+		for ( MiniFacade mf : mfb ) {
 			
 			if (mf.featureGen instanceof CGAMini)
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
@@ -143,8 +147,6 @@ public class FacadeCoarse extends App {
 				String dest;
 				try {
 
-					List<MiniFacade> subfeatures = new ArrayList();
-
 					new File( Tweed.SCRATCH ).mkdirs();
 
 					for ( Map.Entry<MiniFacade, Meta> e : index.entrySet() ) {
@@ -153,7 +155,6 @@ public class FacadeCoarse extends App {
 
 						if ( dest != null ) {
 							e.getKey().app.texture = dest;
-							subfeatures.add( e.getKey() );
 							found = true;
 						}
 					}
