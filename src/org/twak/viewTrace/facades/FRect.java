@@ -262,10 +262,6 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 		if (o != this)
 			throw new Error("!");
 	}
-
-	public List<HasApp> getAppChildren() {
-		return Collections.emptyList();
-	}
 }
 
 

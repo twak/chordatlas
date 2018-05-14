@@ -3,6 +3,7 @@ package org.twak.viewTrace.facades;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.Random;
 
@@ -28,7 +29,15 @@ public class CGAMini extends FeatureGenerator {
 	
 	@Override
 	public FeatureGenerator copy( MiniFacade n ) {
-		return new CGAMini( n );
+		
+		FeatureGenerator out = new CGAMini( n );
+		
+		for (Map.Entry<Feature, List<FRect>> ee : entrySet()) {
+			for (FRect e : ee.getValue())
+				out.put( ee.getKey(), new FRect( e ) );
+		}
+		
+		return out;
 	}
 
 	private static List<Double> split3 (RectDir r, double first, double last) {

@@ -73,19 +73,20 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	private void computeAll(Runnable whenDone) {
-		computeAll_( whenDone, 0 );
+	private void computeAll(Runnable globaUpdate) {
+		computeAll_( globaUpdate, 0 );
 	}
-	private void computeAll_(Runnable whenDone, int i) {
+	private void computeAll_(Runnable globalUpdate, int i) {
 		if (i >= size())
-			whenDone.run();
+			globalUpdate.run();
 		else
-			get(i).computeWithChildren( new Runnable() {
-				@Override
-				public void run() {
-					computeAll_(whenDone, i+1);
-				}
-			});
+			get(i).computeWithChildren( globalUpdate, 
+					new Runnable() {
+						@Override
+						public void run() {
+							computeAll_( globalUpdate, i + 1 );
+						}
+					} );
 	}
 	
 	public JComponent createUI( Runnable globalUpdate ) {
@@ -94,15 +95,15 @@ public class SelectedApps extends ArrayList<App>{
 		JPanel main = new JPanel(new BorderLayout() );
 		
 		JPanel options = new JPanel();
-		options.add( new JLabel("help") );
 
-		top.add( new JLabel( exemplar.netName +", "+exemplar.resolution+"px, "+size()+" selected"), BorderLayout.NORTH );
+		top.add( new JLabel( exemplar.name +" ("+size()+" selected)"), BorderLayout.NORTH );
 		
 		JPanel upDown = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		
+		SelectedApps ups = findUp();
 		
-		if ( !findUp().isEmpty() ) {
-			JButton up   = new JButton("↑");
+		if ( !ups.isEmpty() ) {
+			JButton up   = new JButton("↑" + ups.exemplar.name);
 			up.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findUp().createUI ( globalUpdate) ));
 			upDown.add( up, BorderLayout.WEST);
 		}
@@ -159,11 +160,17 @@ public class SelectedApps extends ArrayList<App>{
 		case Color:
 			JButton col = new JButton("color");
 			
+			for (App a : SelectedApps.this) {
+				a.texture = null;
+			}
+			
 			col.addActionListener( e -> new ColourPicker(null, exemplar.color) {
 				@Override
 				public void picked( Color color ) {
-					for (App a : SelectedApps.this)
+					for (App a : SelectedApps.this) {
 						a.color = color;
+						a.texture = null;
+					}
 					whenDone.run();
 				}
 			} );
@@ -190,10 +197,12 @@ public class SelectedApps extends ArrayList<App>{
 					new Pix2Pix().encode( f, exemplar.resolution, exemplar.netName, exemplar.styleZ, new Runnable() {
 						@Override
 						public void run() {
-							for (App a : SelectedApps.this)
-								a.styleZ = exemplar.styleZ;
+//							for (App a : SelectedApps.this)
+//								a.styleZ = exemplar.styleZ;
 							
-							whenDone.run();
+							sliders.setValues (exemplar.styleZ);
+							
+//							whenDone.run();
 						}
 					} );
 				};

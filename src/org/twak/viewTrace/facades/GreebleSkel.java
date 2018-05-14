@@ -179,6 +179,8 @@ public class GreebleSkel {
 			
 			
 			MiniFacade mf2 = null;
+			
+			
 			Set<QuadF> processedFeatures = new HashSet<>();
 			
 			Line megafacade = new Line();
@@ -212,6 +214,12 @@ public class GreebleSkel {
 			
 			for ( Face f : chain ) 
 				face( f, mf2, processedFeatures, megafacade );
+
+			allFeatures.removeAll( processedFeatures );
+			for (QuadF q1 : allFeatures)
+				mf2.postState.generatedWindows.add(q1.original);
+			
+			System.out.println( "size "+ mf2.postState.generatedWindows.size() );
 			
 			if ( TweedSettings.settings.createDormers ) {
 				Iterator<QuadF> quit = processedFeatures.iterator();
@@ -224,10 +232,7 @@ public class GreebleSkel {
 				}
 			}
 
-			allFeatures.removeAll( processedFeatures );
-			for (QuadF q1 : allFeatures)
-				if (!processedFeatures.contains( q1 ))
-					mf2.postState.generatedWindows.add(q1.original);
+
 			
 			edges( output, roofColor );
 			

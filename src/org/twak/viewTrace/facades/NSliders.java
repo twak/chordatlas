@@ -1,13 +1,17 @@
 package org.twak.viewTrace.facades;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.ui.ListDownLayout;
 
 public class NSliders extends JPanel {
@@ -42,6 +46,33 @@ public class NSliders extends JPanel {
 				}
 			} );
 		}
+		
+		JButton zero = new JButton("zero");
+		zero.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				for (int i = 0; i < result.length; i++)
+					result[i] = 0;
+				
+				setValues(result);
+			}
+		} );
+		add (zero);
+		
+		JButton rand = new JButton("random");
+		rand.addActionListener(  new ActionListener() {
+			Random randy = new Random();
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				for (int i = 0; i < result.length; i++)
+					result[i] = randy.nextGaussian();
+				
+				setValues(result);
+			}
+		}  );
+		add (rand);
 	}
 
 	public void setValues (double[] newValues) {

@@ -24,7 +24,7 @@ import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 public class RoofTex extends App {
 
 	public RoofTex(HasApp ha) {
-		super(ha, "roofs2", 8, 512);
+		super(ha, "roof", "roofs2", 8, 512);
 	}
 
 	public RoofTex( RoofTex ruf ) {
@@ -47,7 +47,7 @@ public class RoofTex extends App {
 	}
 	
 	@Override
-	public void computeSelf( Runnable whenDone ) {
+	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
 		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
@@ -64,7 +64,7 @@ public class RoofTex extends App {
 
 			index.put( toEdit, name );
 
-			Pix2Pix.setInput( bi, name, netName );
+			Pix2Pix.addInput( bi, name, netName );
 		}
 
 		Pix2Pix.submit( new Job( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {

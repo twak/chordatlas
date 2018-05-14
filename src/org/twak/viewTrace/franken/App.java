@@ -2,13 +2,14 @@ package org.twak.viewTrace.franken;
 
 
 import java.awt.Color;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JComponent;
 
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -31,7 +32,8 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public double[] styleZ;
 	HasApp hasA;
-
+	String name;
+	
 	// GAN optoins
 	String netName;
 	int sizeZ;
@@ -48,10 +50,13 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.netName = a.netName;
 		this.sizeZ = a.sizeZ;
 		this.resolution = a.resolution;
+		this.name = a.name;
 	}
 	
-	public App( HasApp ha, String netName, int sizeZ, int resolution ) {
+	public App( HasApp ha, String name, String netName, int sizeZ, int resolution ) {
 		
+		this.name = name;
+		this.netName = name;
 		this.hasA = ha; 
 		this.netName = netName;
 		this.styleZ = new double[sizeZ];
@@ -75,29 +80,44 @@ public abstract class App /*earance*/ implements Cloneable {
 		return new SelectedApps( this ).createUI(  globalUpdate );
 	}
 
-	public void computeWithChildren( Runnable globalUpdate ) {
+	public void computeWithChildren( Runnable globalUpdate, Runnable whenDone ) {
 
 		switch ( appMode ) {
 
 		case Color:
-			globalUpdate.run();
+			whenDone.run();
 			break;
 		case Net:
-			computeSelf( new Runnable() {
+			computeSelf( globalUpdate, new Runnable() {
 				@Override
 				public void run() {
-					MultiMap<String, App> downs = getDown();
 					
-					for ( App a : downs.valueList() )
-						a.computeWithChildren( globalUpdate );
+					List<App> downs = getDown().valueList();
 					
-					globalUpdate.run();
+					net (downs, 0);
+
+				}
+
+				private void net( List<App> downs, int i ) {
+
+					if (i >= downs.size()) {
+						whenDone.run();
+						return;
+					}
+					
+					downs.get( i ).computeWithChildren( globalUpdate, new Runnable() {
+					@Override
+					public void run() {
+						 net (downs, i+1);
+						}
+					} );
+					
 				}
 			} );
 			break;
 		default:
 			color = Color.red;
-			globalUpdate.run();
+			whenDone.run();
 		}
 	}
 
@@ -111,7 +131,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract App copy();
 	public abstract App getUp();
 	public abstract MultiMap<String, App> getDown();
-	public abstract void computeSelf(Runnable runnable);
+	public abstract void computeSelf(Runnable globalUpdate, Runnable whenDone);
 	
 	
 }

@@ -22,13 +22,13 @@ import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
-public class Tex2Panes extends App {
+public class Panes2Windows extends App {
 
-	public Tex2Panes(HasApp ha) {
+	public Panes2Windows(HasApp ha) {
 		super(ha, "panes", "dows2", 8, 256);
 	}
 	
-	public Tex2Panes(Tex2Panes t) {
+	public Panes2Windows(Panes2Windows t) {
 		super (t);
 	}
 	
@@ -44,7 +44,7 @@ public class Tex2Panes extends App {
 
 	@Override
 	public App copy() {
-			return new Tex2Panes( this );
+			return new Panes2Windows( this );
 	}
 
 	@Override

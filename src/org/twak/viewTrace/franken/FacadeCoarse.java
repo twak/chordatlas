@@ -5,14 +5,12 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
@@ -20,7 +18,9 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -31,12 +31,15 @@ import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
 public class FacadeCoarse extends App {
 
+	FacadeSuper zuper = new FacadeSuper(this);
+	
 	public FacadeCoarse( HasApp ha ) {
-		super( ha, "bike_2", 8, 256 );
+		super( ha, "facade coarse", "bike_2", 8, 256 );
 	}
 
 	public FacadeCoarse( FacadeCoarse facadeCoarse ) {
 		super( facadeCoarse );
+		this.zuper = facadeCoarse.zuper;
 	}
 
 	@Override
@@ -56,6 +59,8 @@ public class FacadeCoarse extends App {
 		for (FRect r : mf.postState.generatedWindows)
 			out.put( "window", r.app );
 		
+		out.put( "super", zuper );
+		
 		return out;
 	}
 
@@ -65,22 +70,26 @@ public class FacadeCoarse extends App {
 	}
 
 	@Override
-	public void computeSelf( Runnable whenDone ) {
+	public void computeSelf(Runnable globalUpdate, Runnable whenDone) {
 
+		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 		Map<MiniFacade, Meta> index = new HashMap<>();
 
-		for ( MiniFacade toEdit : Collections.singletonList( (MiniFacade) hasA ) ) {
+		for ( MiniFacade mf : Collections.singletonList( (MiniFacade) hasA ) ) {
+			
+			if (mf.featureGen instanceof CGAMini)
+				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 
 			DRectangle bounds = new DRectangle( resolution, 0, resolution, resolution );
-			DRectangle mini = findBounds( toEdit );
+			DRectangle mini = Pix2Pix.findBounds( mf );
 
 			g.setColor( Color.black );
 			g.fillRect( resolution, 0, resolution, resolution );
 
-			mini = toEdit.postState == null ? toEdit.getAsRect() : toEdit.postState.outerFacadeRect;
+			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
 
@@ -96,20 +105,20 @@ public class FacadeCoarse extends App {
 
 			g.setColor( CMPLabel.Facade.rgb );
 
-			if ( toEdit.postState == null ) {
-				cmpRects( toEdit, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, toEdit ) ) );
+			if ( mf.postState == null ) {
+				cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
 			} else {
-				for ( Loop<? extends Point2d> l : toEdit.postState.skelFaces )
-					g.fill( toPoly( toEdit, mask, mini, l ) );
+				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
+					g.fill( toPoly( mf, mask, mini, l ) );
 
 				g.setColor( CMPLabel.Background.rgb );
-				for ( LoopL<Point2d> ll : toEdit.postState.occluders )
+				for ( LoopL<Point2d> ll : mf.postState.occluders )
 					for ( Loop<Point2d> l : ll )
-						g.fill( toPoly( toEdit, mask, mini, l ) );
+						g.fill( toPoly( mf, mask, mini, l ) );
 			}
 
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-			cmpRects( toEdit, g, mask, mini, CMPLabel.Window.rgb, toEdit.featureGen.getRects( Feature.WINDOW ) );
+			cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
@@ -119,9 +128,9 @@ public class FacadeCoarse extends App {
 
 			String name = System.nanoTime() + "@" + index.size();
 
-			index.put( toEdit, new Meta( name, mask ) );
+			index.put( mf, new Meta( name, mask ) );
 
-			Pix2Pix.setInput( bi, name, netName );
+			Pix2Pix.addInput( bi, name, netName );
 		}
 
 		Pix2Pix.submit( new Job( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {
@@ -201,13 +210,5 @@ public class FacadeCoarse extends App {
 			this.name = name;
 			this.mask = mask;
 		}
-	}
-
-	private DRectangle findBounds( MiniFacade toEdit ) {
-
-		if ( toEdit.postState == null )
-			return toEdit.getAsRect();
-		else
-			return toEdit.postState.outerFacadeRect;
 	}
 }

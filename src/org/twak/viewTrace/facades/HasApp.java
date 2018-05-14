@@ -14,6 +14,4 @@ public interface HasApp {
 		}
 		return null;
 	}
-
-	public List<HasApp> getAppChildren();
 }

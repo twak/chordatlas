@@ -18,8 +18,9 @@ import org.twak.viewTrace.Bin;
 
 public class NormSpecGen {
 
-	BufferedImage rgb, labels;
-	BufferedImage norm, spec;
+	public BufferedImage rgb, labels;
+	public BufferedImage norm;
+	public BufferedImage spec;
 
 	public NormSpecGen( BufferedImage rgb, BufferedImage labels ) {
 		this.rgb = rgb;

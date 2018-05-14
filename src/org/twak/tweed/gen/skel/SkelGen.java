@@ -79,6 +79,7 @@ import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
+import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -481,26 +482,26 @@ public class SkelGen extends Gen implements IDumpObjs {
 		} );
 		ui.add( camp );
 		
-		JButton plan = new JButton( "plan" );
-		plan.addActionListener( e -> new Plot( toRender, footprint ) );
-		ui.add( plan );
+//		JButton plan = new JButton( "plan" );
+//		plan.addActionListener( e -> new Plot( toRender, footprint ) );
+//		ui.add( plan );
+//
+//		JButton b = new JButton( "view clean profiles" );
+//		b.addActionListener( e -> SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed ) );
+//		ui.add( b );
+//
+//		JButton c = new JButton( "compare profiles" );
+//		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs ) );
+//		ui.add( c );
 
-		JButton b = new JButton( "view clean profiles" );
-		b.addActionListener( e -> SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed ) );
-		ui.add( b );
-
-		JButton c = new JButton( "compare profiles" );
-		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs ) );
-		ui.add( c );
-
-		JButton mini = new JButton( "street-view" );
-		mini.addActionListener( e -> new MiniViewer( se ) );
-		if ( sf != null )
-			ui.add( mini );
-
-		JButton prof = new JButton( "profiles" );
-		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
-		ui.add( prof );
+//		JButton mini = new JButton( "street-view" );
+//		mini.addActionListener( e -> new MiniViewer( se ) );
+//		if ( sf != null )
+//			ui.add( mini );
+//
+//		JButton prof = new JButton( "profiles" );
+//		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
+//		ui.add( prof );
 
 		JButton remove = new JButton( "remove" );
 		remove.addActionListener( e -> {
@@ -740,6 +741,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 		
 		ensureMF(sf, se);
+		
+		se.toEdit.app = App.createFor( se.toEdit );
 		
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		se.toEdit.featureGen.update();

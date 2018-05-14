@@ -42,8 +42,6 @@ public class MiniRoof implements HasApp {
 			
 			LoopL<Point2d> k = f.edge.uphill.angle( Mathz.Z_UP ) > Math.PI * 0.4 ? flats : pitches;
 			
-			System.out.println();
-			
 			k.addAll( f.points.new Map<Point2d>() {
 				@Override
 				public Point2d map( Loopable<Point3d> input ) {
@@ -61,9 +59,5 @@ public class MiniRoof implements HasApp {
 		for (Loop<Point2d> l : pitches)
 			for (Point2d p : l) 
 				bounds.envelop( p );
-	}
-	
-	public List<HasApp> getAppChildren() {
-		return Collections.emptyList();
 	}
 }

@@ -82,7 +82,8 @@ public class MiniFacade implements HasApp {
 		this.featureGen = m.featureGen.copy(this);
 		this.postState = m.postState;
 		
-		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
+		
+//		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
 		
 		this.hMargin = new ArrayList(m.hMargin);
 		this.vMargin = new ArrayList(m.vMargin);
@@ -395,11 +396,5 @@ public class MiniFacade implements HasApp {
 		g.dispose();
 
 		return bi;
-	}
-
-	public List<HasApp> getAppChildren() {
-		List<HasApp> out = new ArrayList<>();
-		out.addAll( featureGen.valueList() );
-		return out;
 	}
 }
