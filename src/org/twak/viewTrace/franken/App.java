@@ -72,7 +72,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		} else if (ha.getClass() == MiniRoof.class) {
 			return new RoofApp(ha);
 		} else if (ha.getClass() == FRect.class) {
-			return new Tex2Panes(ha);
+			return new PanesLabelApp(ha);
 		}		
 		
 		throw new Error("unkown to factory " + ha.getClass().getSimpleName());

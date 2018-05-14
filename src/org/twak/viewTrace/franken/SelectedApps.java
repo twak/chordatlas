@@ -80,19 +80,7 @@ public class SelectedApps extends ArrayList<App>{
 		computeAll_( globaUpdate, 0 );
 	}
 	private void computeAll_(Runnable globalUpdate, int i) {
-		
 		App.computeWithChildren( this, 0, globalUpdate );
-		
-//		if (i >= size())
-//			globalUpdate.run();
-//		else
-//			get(i).computeWithChildren( globalUpdate, 
-//					new Runnable() {
-//						@Override
-//						public void run() {
-//							computeAll_( globalUpdate, i + 1 );
-//						}
-//					} );
 	}
 	
 	public JComponent createUI( Runnable globalUpdate ) {

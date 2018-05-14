@@ -23,13 +23,15 @@ import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
-public class Tex2Panes extends App {
+public class PanesLabelApp extends App {
 
-	public Tex2Panes(HasApp ha) {
+	PanesTexApp child = new PanesTexApp( this );
+	
+	public PanesLabelApp(HasApp ha) {
 		super(ha, "panes", "dows2", 8, 256);
 	}
 	
-	public Tex2Panes(Tex2Panes t) {
+	public PanesLabelApp(PanesLabelApp t) {
 		super (t);
 	}
 	
@@ -40,12 +42,16 @@ public class Tex2Panes extends App {
 
 	@Override
 	public MultiMap<String, App> getDown() {
-		return new MultiMap<>();
+		MultiMap<String, App>  out = new MultiMap<>();
+		
+		out.put( "facade texture", child );
+		
+		return out;
 	}
 
 	@Override
 	public App copy() {
-			return new Tex2Panes( this );
+			return new PanesLabelApp( this );
 	}
 
 	@Override

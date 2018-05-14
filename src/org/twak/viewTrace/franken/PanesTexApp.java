@@ -23,19 +23,23 @@ import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
-public class Panes2Windows extends App {
+public class PanesTexApp extends App implements HasApp {
 
-	public Panes2Windows(HasApp ha) {
-		super(ha, "panes", "dows2", 8, 256);
+	private PanesLabelApp parent;
+
+	public PanesTexApp(PanesLabelApp parent) {
+		super(null, "panes", "dows2", 8, 256);
+		super.hasA = this;
+		this.parent = parent;
 	}
 	
-	public Panes2Windows(Panes2Windows t) {
+	public PanesTexApp(PanesTexApp t) {
 		super (t);
 	}
 	
 	@Override
 	public App getUp() {
-		return ((FRect)hasA).mf.app;
+		return parent;
 	}
 
 	@Override
@@ -45,7 +49,7 @@ public class Panes2Windows extends App {
 
 	@Override
 	public App copy() {
-			return new Panes2Windows( this );
+			return new PanesTexApp( this );
 	}
 
 	@Override
