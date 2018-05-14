@@ -82,13 +82,13 @@ public class NSliders extends JPanel {
 			sliders[i].setValue( (int) ( (newValues[i] + 2) * 250 ) );
 		}
 		updating = false;
-		c.run();
+		new Thread (() -> c.run()).start();
 	}
 	
 	private void change(JSlider s, int i) {
 		results[i] = s.getValue() / 250.  - 2;
 		if (!updating && !s.getValueIsAdjusting()) {
-			c.run();
+			new Thread (() -> c.run()).start();
 		}
 	}
 	

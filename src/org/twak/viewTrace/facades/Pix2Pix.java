@@ -30,11 +30,6 @@ import org.twak.viewTrace.franken.App.TextureUVs;
 
 public class Pix2Pix {
 
-	private static final String LABEL2PHOTO = "bike_2", 
-//			private static final String LABEL2PHOTO = "facades3k", 
-			WINDOW = "window_super_res", 
-			FACADE = "facade_super_res";
-	
 	public static final int LATENT_SIZE = 8;
 
 	public enum CMPLabel { //sequence is  z-order
@@ -43,7 +38,7 @@ public class Pix2Pix {
 		Molding    (10, 255, 85, 0 ),
 		Cornice    (5, 0, 255, 255 ),
 		Pillar     (11, 255,0, 0 ),
-		Window     (3, 0, 85, 0 ),
+		Window     (3, 0, 255, 0 ),
 //		Window     (3, 0, 85, 255 ),
 		Door       (4, 0,170, 255 ),
 		Sill       (6, 85,255, 170 ),
@@ -155,7 +150,7 @@ public class Pix2Pix {
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
-			submit( new Job( LABEL2PHOTO+"_e", System.nanoTime() + "_" + Filez.stripExtn( f.getName() ), new JobResult() {
+			submit( new Job( netName+"_e", System.nanoTime() + "_" + Filez.stripExtn( f.getName() ), new JobResult() {
 
 				@Override
 				public void finished( File f ) {
@@ -176,11 +171,7 @@ public class Pix2Pix {
 		
 	}
 
-//	public void facade( List<MiniFacade> minis, double[] z, String netName, int resolution, Runnable update ) {
-//		
-//	}
-
-	public static String importTexture( File f, String name, int specular, DRectangle crop ) throws IOException {
+	public static String importTexture( File f, String name, int specular, Map<Color, Color> specLookup, DRectangle crop ) throws IOException {
 		
 		File texture = new File( f, name + ".png" );
 		String dest = "missing";
@@ -195,7 +186,7 @@ public class Pix2Pix {
 				labels = scaleToFill ( labels, crop );
 			}
 			
-			NormSpecGen ns = new NormSpecGen( rgb, labels );
+			NormSpecGen ns = new NormSpecGen( rgb, labels, specLookup );
 			
 			if (specular >= 0) {
 				Graphics2D g = ns.spec.createGraphics();
@@ -208,7 +199,7 @@ public class Pix2Pix {
 			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
-//			ImageIO.write ( labels, "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
+			ImageIO.write ( labels, "png", new File( Tweed.DATA + "/" + ( dest + "_lab.png" ) ) );
 			texture.delete();
 		}
 		return dest + ".png";

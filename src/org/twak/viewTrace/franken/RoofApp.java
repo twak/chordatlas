@@ -84,7 +84,7 @@ public class RoofApp extends App {
 
 					for ( Map.Entry<MiniRoof, String> e : index.entrySet() ) {
 
-						String dest = Pix2Pix.importTexture( f, e.getValue(), -1, null );
+						String dest = Pix2Pix.importTexture( f, e.getValue(), -1, null,  null );
 
 						if ( dest != null ) 
 							e.getKey().app.texture = dest;

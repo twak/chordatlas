@@ -71,6 +71,13 @@ public class FacadeApp extends App {
 		return new FacadeApp( this );
 	}
 
+	final static Map<Color, Color> specLookup = new HashMap<>();
+	static {
+		specLookup.put( Pix2Pix.CMPLabel.Window.rgb, Color.white );
+		specLookup.put( Pix2Pix.CMPLabel.Shop.rgb  , Color.darkGray );
+		specLookup.put( Pix2Pix.CMPLabel.Door.rgb  , Color.gray );
+	}
+	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
@@ -151,7 +158,7 @@ public class FacadeApp extends App {
 
 					for ( Map.Entry<MiniFacade, Meta> e : index.entrySet() ) {
 
-						dest = Pix2Pix.importTexture( f, e.getValue().name, -1, e.getValue().mask );
+						dest = Pix2Pix.importTexture( f, e.getValue().name, -1, specLookup, e.getValue().mask );
 
 						if ( dest != null ) {
 							e.getKey().app.texture = dest;

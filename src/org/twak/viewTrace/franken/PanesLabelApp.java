@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,9 +15,7 @@ import org.twak.tweed.Tweed;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Pix2Pix;
@@ -26,9 +25,10 @@ import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 public class PanesLabelApp extends App {
 
 	PanesTexApp child = new PanesTexApp( this );
+	public String label;
 	
 	public PanesLabelApp(HasApp ha) {
-		super(ha, "panes", "dows2", 8, 256);
+		super(ha, "label windows", "dows2", 8, 256);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -121,10 +121,12 @@ public class PanesLabelApp extends App {
 					for ( Map.Entry<FRect, Meta> e : names.entrySet() ) {
 
 						Meta meta = e.getValue();
-						String dest = Pix2Pix.importTexture( f, meta.name, 255, meta.mask );
+						String dest = Pix2Pix.importTexture( f, meta.name, 255, null, meta.mask );
 						
-						if ( dest != null ) 
+						if ( dest != null ) {  
 							e.getKey().app.texture = dest;
+							((PanesLabelApp ) e.getKey().app).label = dest;
+						}
 					}
 					
 				} catch (Throwable th) {

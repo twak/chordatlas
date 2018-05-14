@@ -1,6 +1,6 @@
 package org.twak.viewTrace.franken;
 
-import java.awt.Graphics2D;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +14,7 @@ import org.twak.tweed.Tweed;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.CGAMini;
-import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
@@ -28,7 +24,7 @@ public class PanesTexApp extends App implements HasApp {
 	private PanesLabelApp parent;
 
 	public PanesTexApp(PanesLabelApp parent) {
-		super(null, "panes", "dows2", 8, 256);
+		super(null, "texture windows", "dows1", 8, 256);
 		super.hasA = this;
 		this.parent = parent;
 	}
@@ -51,6 +47,12 @@ public class PanesTexApp extends App implements HasApp {
 	public App copy() {
 			return new PanesTexApp( this );
 	}
+	
+	final static Map<Color, Color> specLookup = new HashMap<>();
+	static {
+		specLookup.put( Color.blue, Color.white );
+		specLookup.put( Color.red, Color.gray );
+	}
 
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {
@@ -58,47 +60,40 @@ public class PanesTexApp extends App implements HasApp {
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
 
-		Map<FRect, Meta> names = new HashMap<>();
+		Map<PanesTexApp, Meta> names = new HashMap<>();
 
 		for ( App a : batch ) {
 
 			try {
-				MiniFacade mf = ( (FRect) a.hasA ).mf;
+				
+				PanesTexApp pta = (PanesTexApp)a;
 
-				//			if (mf.featureGen instanceof CGAMini)
-				//				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
+				BufferedImage labels = ImageIO.read( Tweed.toWorkspace( pta.parent.label ) );
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture ) );
-				DRectangle mini = Pix2Pix.findBounds( mf );
-
-				FRect r = (FRect) a.hasA;
-
-				if ( !mini.contains( r ) )
-					return;//continue;
-
-				DRectangle w = bounds.scale( mini.normalize( r ) );
-				w.y = bounds.getMaxY() - w.y - w.height;
-
-				BufferedImage dow =
-							src.getSubimage(  
-								(int) w.x, 
-								(int) w.y,
-								(int) w.width , 
-								(int) w.height );
+//				FRect r = (FRect) a.hasA;
+//				DRectangle w = bounds.scale( mini.normalize( r ) );
+//				w.y = bounds.getMaxY() - w.y - w.height;
+//
+//				BufferedImage dow =
+//							src.getSubimage(  
+//								(int) w.x, 
+//								(int) w.y,
+//								(int) w.width , 
+//								(int) w.height );
 
 				DRectangle mask = new DRectangle();
 
-				BufferedImage scaled = Imagez.scaleSquare( dow, 256, mask, Double.MAX_VALUE );
-				BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+				BufferedImage scaled = Imagez.scaleSquare( labels, 256 );
+				BufferedImage toProcess = Imagez.join( scaled, scaled );
 
-				Graphics2D g = toProcess.createGraphics();
-				g.drawImage( scaled, 256, 0, null );
-				g.dispose();
+//				Graphics2D g = toProcess.createGraphics();
+//				g.drawImage( scaled, 256, 0, null );
+//				g.dispose();
 
 				String wName = name + "_" + count + "@" + System.nanoTime();
 				Pix2Pix.addInput( toProcess, wName, netName );
 
-				names.put( r, new Meta( wName, mask ) );
+				names.put( pta, new Meta( wName, mask, labels ) );
 				count++;
 
 			} catch ( IOException e1 ) {
@@ -112,13 +107,16 @@ public class PanesTexApp extends App implements HasApp {
 
 				try {
 
-					for ( Map.Entry<FRect, Meta> e : names.entrySet() ) {
+					for ( Map.Entry<PanesTexApp, Meta> e : names.entrySet() ) {
 
 						Meta meta = e.getValue();
-						String dest = Pix2Pix.importTexture( f, meta.name, 255, meta.mask );
+						
+						String dest = Pix2Pix.importTexture( f, meta.name, 1, specLookup, null );
 
-						if ( dest != null )
-							e.getKey().app.texture = dest;
+						if ( dest != null ) {
+							e.getKey().texture = dest;
+							e.getKey().parent.texture = dest;
+						}
 					}
 
 				} catch ( Throwable th ) {
@@ -134,9 +132,12 @@ public class PanesTexApp extends App implements HasApp {
 private static class Meta {
 	String name;
 	DRectangle mask;
-	private Meta(String name, DRectangle mask) {
+	BufferedImage labels;
+	
+	private Meta(String name, DRectangle mask, BufferedImage labels) {
 		this.name = name;
 		this.mask = mask;
+		this.labels = labels;
 	}
 }
 }

@@ -200,7 +200,7 @@ public class FacadeSuper extends App implements HasApp {
 							
 //							File texture = new File( f, "images/" + state.nextTile + "_fake_B.png" );
 							
-							NormSpecGen ns = new NormSpecGen( state.big, null );
+							NormSpecGen ns = new NormSpecGen( state.big, null, null );
 
 							String dest =  "scratch/facade_" + state.nextTile ;
 							

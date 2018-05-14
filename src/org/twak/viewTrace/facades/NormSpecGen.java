@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -21,10 +22,12 @@ public class NormSpecGen {
 	public BufferedImage rgb, labels;
 	public BufferedImage norm;
 	public BufferedImage spec;
-
-	public NormSpecGen( BufferedImage rgb, BufferedImage labels ) {
+	public Map<Color, Color> specLookup;
+	
+	public NormSpecGen( BufferedImage rgb, BufferedImage labels, Map<Color, Color> spedLookup ) {
 		this.rgb = rgb;
 		this.labels = labels;
+		this.specLookup = spedLookup;
 		
 		buildMaps();
 	}
@@ -87,17 +90,33 @@ public class NormSpecGen {
 
 				int specOut = Color.darkGray.getRGB();
 				
-				if ( labels != null ) {
+				if ( specLookup != null ) {
+					
 					int s = labels.getRGB( x, y );
-					if ( distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
-						specOut = Color.white.getRGB();
-						normOut = 0x8080ff;
-					} else if ( distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 || 
-							    distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 ) {
-						specOut = Color.darkGray.getRGB();
-					} else {
-						specOut = Color.black.getRGB();
+					
+					specOut = Color.black.getRGB();
+					
+					for (Color src : specLookup.keySet()) {
+						Color dest = specLookup.get( src );
+						
+						if ( distance( s, src.getRGB(), t1, t2 ) < 10 ) {
+							specOut = dest.getRGB();
+							
+							if (specOut == Color.white.getRGB()) // shiny things are float
+								normOut = 0x8080ff;
+						}
 					}
+					
+					
+//					if ( distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
+//						specOut = Color.white.getRGB();
+//						normOut = 0x8080ff;
+//					} else if ( distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 || 
+//							    distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 ) {
+//						specOut = Color.darkGray.getRGB();
+//					} else {
+//					
+//					}
 				}
 				
 				spec.setRGB( x, y, specOut );
@@ -128,20 +147,20 @@ public class NormSpecGen {
 		t2[2] =  ( ( c       ) & 0xFF );
 	}
 	
-	public static void main( String[] args ) {
-
-		try {
-
-			NormSpecGen hm = new NormSpecGen( 
-					ImageIO.read( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/tex.jpg" ) ), 
-					ImageIO.read( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/labels.jpg" ) )
-				);
-
-			new Show( hm.norm );
-			new Show( hm.spec );
-
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main( String[] args ) {
+//
+//		try {
+//
+//			NormSpecGen hm = new NormSpecGen( 
+//					ImageIO.read( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/tex.jpg" ) ), 
+//					ImageIO.read( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/labels.jpg" ) )
+//				);
+//
+//			new Show( hm.norm );
+//			new Show( hm.spec );
+//
+//		} catch ( IOException e ) {
+//			e.printStackTrace();
+//		}
+//	}
 }
