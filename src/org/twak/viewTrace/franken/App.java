@@ -2,6 +2,7 @@ package org.twak.viewTrace.franken;
 
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -80,6 +81,39 @@ public abstract class App /*earance*/ implements Cloneable {
 		return new SelectedApps( this ).createUI(  globalUpdate );
 	}
 
+	
+	static final int Batch_Size = 16;
+	
+	public static void computeWithChildren (List<App> todo, int first, Runnable globalUpdate, Runnable whenDone ) {
+		
+		if (first >= todo.size()) {
+			
+			MultiMap< String, App> downs = new MultiMap<>();
+			for (App a : todo) 
+				downs.putAll ( a.getDown() );
+			
+			for (String d : downs.keySet()) 
+				new Thread( () ->  computeWithChildren( downs.get( d ), globalUpdate, whenDone ) ).start();
+			
+		}
+		else {
+		
+			List<App> batch = new ArrayList<>();
+			for ( int i = first; i < Math.min( todo.size(), first + Batch_Size ); i++ )
+				batch.add( todo.get( i ) );
+
+//			computeSelf ( globalUpdate, () ->computeWithChildren( todo, globalUpdate, whenDone ) );
+			
+		}
+		
+		
+		
+	}
+	
+	public static void computeWithChildren (List<App> todo, Runnable globalUpdate, Runnable whenDone ) {
+		
+	}
+	
 	public void computeWithChildren( Runnable globalUpdate, Runnable whenDone ) {
 
 		switch ( appMode ) {
@@ -91,7 +125,6 @@ public abstract class App /*earance*/ implements Cloneable {
 			computeSelf( globalUpdate, new Runnable() {
 				@Override
 				public void run() {
-					
 					List<App> downs = getDown().valueList();
 					
 					net (downs, 0);
