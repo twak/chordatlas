@@ -4,6 +4,7 @@ package org.twak.viewTrace.franken;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -15,6 +16,7 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.style.StyleSource;
 
 public abstract class App /*earance*/ implements Cloneable {
 	
@@ -33,6 +35,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public String texture;
 	
 	public double[] styleZ;
+	public StyleSource styleSource;
 	
 	HasApp hasA;
 	String name;
@@ -83,7 +86,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		return new JPanel();
 	}
 
-	
+	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
 	public static void computeWithChildren (List<App> todo, int first, Runnable globalUpdate ) {
@@ -108,8 +111,12 @@ public abstract class App /*earance*/ implements Cloneable {
 			
 			for ( int i = first; i < Math.min( todo.size(), first + Batch_Size ); i++ ) {
 				App app = todo.get( i );
-				if (app.appMode == AppMode.Net)
+				if (app.appMode == AppMode.Net) {
+					
+					if (app.styleSource != null)
+						app.styleZ = app.styleSource.draw( randy );
 					batch.add( todo.get( i ) );
+				}
 			}
 
 			if (!batch.isEmpty()) {

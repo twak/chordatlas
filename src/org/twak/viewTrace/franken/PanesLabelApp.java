@@ -110,7 +110,7 @@ public class PanesLabelApp extends App {
 
 				DRectangle mask = new DRectangle();
 
-				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE ), mask, resolution, resolution );
+				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE, Color.black ), mask, resolution, resolution, Color.black );
 				
 				scaled = new FastBlur().processImage( scaled, 5 );
 				
