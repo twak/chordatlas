@@ -35,6 +35,7 @@ public class FacadeApp extends App {
 
 	FacadeSuper zuper = new FacadeSuper(this);
 	public SuperFace parent;
+	public String coarse;
 	
 	public FacadeApp( HasApp ha ) {
 		super( ha, "facade coarse", "bike_2", 8, 256 );
@@ -146,8 +147,6 @@ public class FacadeApp extends App {
 			@Override
 			public void finished( File f ) {
 
-				boolean found = false;
-
 				String dest;
 				try {
 
@@ -158,8 +157,7 @@ public class FacadeApp extends App {
 						dest = Pix2Pix.importTexture( f, e.getValue().name, -1, specLookup, e.getValue().mask );
 
 						if ( dest != null ) {
-							e.getKey().app.texture = dest;
-							found = true;
+							e.getKey().app.coarse = e.getKey().app.texture = dest;
 						}
 					}
 

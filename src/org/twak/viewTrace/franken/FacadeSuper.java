@@ -67,27 +67,39 @@ public class FacadeSuper extends App implements HasApp {
 		{
 			try {
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeApp) parent).coarse ) );
 //				src = Imagez.scaleLongest( src, 128 );
 //				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
 
 				
 				DRectangle mini = Pix2Pix.findBounds( mf );
 				
-				BufferedImage highRes = new BufferedImage ( 
+				BufferedImage tiny = Imagez.scaleTo( src, (int) ( mini.width * 10 ), (int) ( mini.width * 10 ) );
+				Imagez.gaussianNoise( tiny, 0.03 );
+				
+				BufferedImage highRes = Imagez.scaleTo( tiny,
 						(int)( mini.width * FacadeTool.pixelsPerMeter),
-						(int)( mini.height * FacadeTool.pixelsPerMeter), BufferedImage.TYPE_3BYTE_BGR);
+						(int)( mini.height * FacadeTool.pixelsPerMeter) );
+						
+//						, BufferedImage.TYPE_3BYTE_BGR);
+//				{
+//					Graphics2D g= tiny.createGraphics();
+//					g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
+//					g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+//					g.drawImage( src, 0, 0, highRes.getWidth(), highRes.getHeight(), null );
+//					g.dispose();
+//				}
 				
-
+//				BufferedImage blurred = new FastBlur().processImage( src, 5 );
 				
-				{
-					Graphics2D g = highRes.createGraphics();
-					g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
-					g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
-//					BufferedImage blurred = new FastBlur().processImage( src, 5 );
-					g.drawImage( src, 0, 0, highRes.getWidth(), highRes.getHeight(), null );
-					g.dispose();
-				}
+//				{
+//					Graphics2D g = highRes.createGraphics();
+//					g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
+//					g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+//
+//					g.drawImage( src, 0, 0, highRes.getWidth(), highRes.getHeight(), null );
+//					g.dispose();
+//				}
 				
 				todo.put( mf, new FacState(highRes) );
 				
@@ -99,53 +111,60 @@ public class FacadeSuper extends App implements HasApp {
 		facadeContinue (todo, whenDone );
 	}
 	
-
+	final static int overlap = 47, nonOverlap = 256 - overlap; 
+	
 	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
 			return;
 		}
-		
+
 		int MAX_CONCURRENT = 32;
-		
-			int count = 0;
-			for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {
-				try {
 
-					FacState state = e.getValue();
+		int count = 0;
+		for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {
+			try {
 
-					String name = System.nanoTime() + "_" + count;
+				FacState state = e.getValue();
+				state.nextTiles.clear();
+
+				for ( int z = 0; z <= state.next; z++ ) {
+
+					int x = z, y = state.next - z;
+
+					if ( x > state.maxX || y > state.maxY )
+						continue;
 
 					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 
-					state.nextTile = name;
-					
+					TileState ts = new TileState( System.nanoTime() + "_" + x + "_" + y + "_" + count, x, y );
+					state.nextTiles.add( ts );
 					{
 						Graphics2D g = toProcess.createGraphics();
 						g.drawImage( state.big, 
-								-state.big.getWidth () + 209 * (state.nextX+1) + 47 + 256, 
-								-state.big.getHeight() + 209 * (state.nextY+1) + 47, 
-								state.big.getWidth(),
-								state.big.getHeight(),
-								null );
-						
-						
+								-state.big.getWidth() + nonOverlap * ( x + 1 ) + overlap + 256,
+								-state.big.getHeight() + nonOverlap * ( y + 1 ) + overlap,
+								state.big.getWidth(), state.big.getHeight(), null );
+
 						g.dispose();
 					}
-					
-					Pix2Pix.addInput( toProcess, name, netName );
 
-//					ImageIO.write( toProcess, "png", new File( "/home/twak/Desktop/test_" + name + ".png" ) );
+					Pix2Pix.addInput( toProcess, ts.nextTile, netName );
 
-					System.out.println( "++" + state.nextX +", " + state.nextY );
-
-					if ( count > MAX_CONCURRENT )
-						break;
-				} catch ( Throwable th ) {
-					th.printStackTrace();
+					System.out.println( "++" + x + ", " + y );
+					count++;
 				}
+				
+				state.next++;
+				
+//				if ( count > MAX_CONCURRENT )
+//					break;
+				
+			} catch ( Throwable th ) {
+				th.printStackTrace();
 			}
+		}
 			
 			Pix2Pix.submit ( new Job ( netName,  System.nanoTime() + "_" + zAsString(), new JobResult() {
 				@Override
@@ -153,44 +172,36 @@ public class FacadeSuper extends App implements HasApp {
 					
 					
 					// patch images with new tiles...
-					for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {
+					for ( FacState state : todo.values() ) {
+						for ( TileState tile : state.nextTiles ) {
 						try {
-
-							FacState state = e.getValue();
 							
-							File texture = new File( f, state.nextTile + ".png" );
+							File texture = new File( f, tile.nextTile + ".png" );
 							if ( texture.exists() && texture.length() > 0 ) {
 
 								BufferedImage rgb = ImageIO.read( texture );
-								
-								File orig = new File( f, state.nextTile + ".png_label" );
-								
-//								String name = Math.random()+"";
-//								ImageIO.write( rgb, "png", new File( "/home/twak/Desktop/foo/" + name + ".png" ) );
-//								ImageIO.write( ImageIO.read( orig ), "png", new File( "/home/twak/Desktop/foo/" + name + "_orig.png" ) );
-								
 								Graphics2D g = state.big.createGraphics();
+								
 								g.drawImage( rgb, 
-										state.big.getWidth () - 209 * (state.nextX+1) -47, 
-										state.big.getHeight() - 209 * (state.nextY+1) -47, 
+										state.big.getWidth () - nonOverlap * (tile.nextX+1) -overlap, 
+										state.big.getHeight() - nonOverlap * (tile.nextY+1) -overlap, 
 										rgb.getWidth(), 
 										rgb.getHeight(), null );
 								g.dispose();
 							}
 							
-							if ( state.nextY == state.maxY && state.nextX == state.maxX ) {
-								state.nextX = state.nextY = -1; // done
-							} else if ( state.nextX == state.maxX ) {
-								state.nextY++;
-								state.nextX = 0;
-							} else {
-								state.nextX++;
-							}
+//							if ( state.nextY == state.maxY && state.nextX == state.maxX ) {
+//								state.nextX = state.nextY = -1; // done
+//							} else if ( state.nextX == state.maxX ) {
+//								state.nextY++;
+//								state.nextX = 0;
+//							} else {
+//								state.nextX++;
+//							}
 							
-							if ( count > MAX_CONCURRENT )
-								break;
 						} catch ( Throwable th ) {
 							th.printStackTrace();
+						}
 						}
 					}
 					
@@ -198,19 +209,19 @@ public class FacadeSuper extends App implements HasApp {
 					
 					// finished - import texture!
 					for (MiniFacade mf : new ArrayList<> (todo.keySet())) {
+						
 						FacState state = todo.get( mf );
 						
-						if (state.nextY == -1) { // done
+						if (state.next > state.maxX + state.maxY ) { // done
 							
 							todo.remove( mf );
 							
-//							File texture = new File( f, "images/" + state.nextTile + "_fake_B.png" );
-							
-							state.big = Imagez.scaleSquare( state.big, Mathz.nextPower2( Math.max( state.big.getWidth(), state.big.getHeight())  ) );
+							int dim = Mathz.nextPower2( Math.max( state.big.getWidth(), state.big.getHeight())  );
+							state.big = Imagez.scaleTo( state.big, dim, dim);
 							
 							NormSpecGen ns = new NormSpecGen( state.big, null, null );
 
-							String dest =  "scratch/facade_" + state.nextTile ;
+							String dest = "scratch/"+System.nanoTime() +"_"+ Math.random();
 							
 							try {
 								ImageIO.write( state.big, "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
@@ -242,14 +253,27 @@ public class FacadeSuper extends App implements HasApp {
 	private static class FacState {
 		
 		BufferedImage big;
-		int nextX = 0, nextY = 0, maxX, maxY;
-		public String nextTile;
+		int next = 0, maxX, maxY;
+		
+		public List<TileState> nextTiles = new ArrayList<>();
 		
 		public FacState( BufferedImage big ) {
 			this.big = big;
 
-			this.maxX = ( big.getWidth()  / 200 );
-			this.maxY = ( big.getHeight() / 200 );
+			this.maxX = ( big.getWidth()  / nonOverlap );
+			this.maxY = ( big.getHeight() / nonOverlap );
+		}
+	}
+	
+	private static class TileState {
+		
+		int nextX = 0, nextY = 0;
+		public String nextTile;
+		
+		public TileState( String name, int x, int y ) {
+			this.nextX = x;
+			this.nextY = y;
+			this.nextTile = name;
 		}
 	}
 	
