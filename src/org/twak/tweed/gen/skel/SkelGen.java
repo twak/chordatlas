@@ -44,6 +44,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.CompareGens;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Gen;
@@ -82,6 +83,7 @@ import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.FacadeApp;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NSliders;
@@ -520,7 +522,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		if (ha == null)
 			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
 		else
-			tweed.frame.setGenUI( HasApp.get( ha ).createUI( new Runnable() {
+			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps( HasApp.get( ha ) ).createUI( new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -530,7 +532,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 						}
 					} );
 				}
-			})  );
+			}) );
 	}
 	
 	private WallTag findWallMini( LoopL<Bar> points ) {

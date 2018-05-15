@@ -4,14 +4,14 @@ package org.twak.viewTrace.franken;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
-import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -33,6 +33,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public String texture;
 	
 	public double[] styleZ;
+	
 	HasApp hasA;
 	String name;
 	
@@ -78,8 +79,8 @@ public abstract class App /*earance*/ implements Cloneable {
 		throw new Error("unkown to factory " + ha.getClass().getSimpleName());
 	}
 	
-	public JComponent createUI( Runnable globalUpdate ) {
-		return new SelectedApps( this ).createUI(  globalUpdate );
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+		return new JPanel();
 	}
 
 	

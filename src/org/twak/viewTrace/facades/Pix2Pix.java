@@ -177,8 +177,9 @@ public class Pix2Pix {
 		String dest = "missing";
 		if ( texture.exists() && texture.length() > 0 ) {
 
-			BufferedImage labels = ImageIO.read( new File( f, name + ".png_label" ) ), 
-					rgb = ImageIO.read( texture );
+			BufferedImage rgb = ImageIO.read( texture );
+			
+			BufferedImage labels = ImageIO.read( new File( f, name + ".png_label" ) ); 
 
 			if (crop != null) {
 				

@@ -76,14 +76,14 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	private void computeAll(Runnable globaUpdate) {
+	public void computeAll(Runnable globaUpdate) {
 		computeAll_( globaUpdate, 0 );
 	}
 	private void computeAll_(Runnable globalUpdate, int i) {
 		App.computeWithChildren( this, 0, globalUpdate );
 	}
 	
-	public JComponent createUI( Runnable globalUpdate ) {
+	public JPanel createUI( Runnable globalUpdate ) {
 
 		JPanel top = new JPanel(new ListDownLayout() );
 		JPanel main = new JPanel(new BorderLayout() );
@@ -202,7 +202,8 @@ public class SelectedApps extends ArrayList<App>{
 					} );
 				};
 			};
-			
+
+			out.add( exemplar.createUI( whenDone, this ) );
 			out.add( sliders );
 			out.add( drop );
 			

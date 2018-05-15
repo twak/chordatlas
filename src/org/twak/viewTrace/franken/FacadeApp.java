@@ -103,15 +103,12 @@ public class FacadeApp extends App {
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
+//			mask = mask.centerSquare();
 
 			{
-				mask = mask.scale( 256 / Math.max( mini.height, mini.width ) );
-				mask.x = ( resolution - mask.width ) * 0.5 + /*
-																 * draw on the
-																 * right of the
-																 * input image
-																 */ resolution;
-				mask.y = 0; //( 256 - mask.height ) * 0.5;
+				mask = mask.scale( resolution / Math.max( mini.height, mini.width ) );
+				mask.x = ( resolution - mask.width ) * 0.5 + resolution;
+				mask.y = 0; 
 			}
 
 			g.setColor( CMPLabel.Facade.rgb );

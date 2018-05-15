@@ -147,7 +147,7 @@ public class Tweed extends SimpleApplication {
 		
 		ambient = new AmbientLight();
 		rootNode.addLight(ambient);
-		setAmbient( 0 );
+//		setAmbient( 0 );
 
 
 		setDisplayFps(false);
@@ -693,6 +693,7 @@ public class Tweed extends SimpleApplication {
 		
 		setFov( 0 );
 		setCameraSpeed( 0 );
+		setAmbient( 0 );
 
 		frame.setGens( TweedSettings.settings.genList );
 		
