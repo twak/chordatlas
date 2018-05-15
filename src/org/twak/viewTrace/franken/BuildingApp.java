@@ -4,10 +4,13 @@ import java.util.List;
 
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 
 public class BuildingApp extends App {
+
+	public SkelGen parent;
 
 	public BuildingApp( SuperFace superFace ) {
 		super( superFace, "building", null, 0, 0 );
@@ -15,6 +18,7 @@ public class BuildingApp extends App {
 
 	public BuildingApp( BuildingApp buildingApp ) {
 		super (buildingApp);
+		this.parent = buildingApp.parent;
 	}
 
 	@Override
@@ -24,7 +28,7 @@ public class BuildingApp extends App {
 
 	@Override
 	public App getUp() {
-		return null;
+		return parent.app;
 	}
 
 	@Override

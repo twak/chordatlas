@@ -15,6 +15,8 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.utils.Imagez;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
@@ -76,10 +78,13 @@ public class FacadeSuper extends App implements HasApp {
 						(int)( mini.width * FacadeTool.pixelsPerMeter),
 						(int)( mini.height * FacadeTool.pixelsPerMeter), BufferedImage.TYPE_3BYTE_BGR);
 				
+
+				
 				{
 					Graphics2D g = highRes.createGraphics();
 					g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
 					g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+//					BufferedImage blurred = new FastBlur().processImage( src, 5 );
 					g.drawImage( src, 0, 0, highRes.getWidth(), highRes.getHeight(), null );
 					g.dispose();
 				}
@@ -124,6 +129,7 @@ public class FacadeSuper extends App implements HasApp {
 								state.big.getWidth(),
 								state.big.getHeight(),
 								null );
+						
 						
 						g.dispose();
 					}
@@ -200,6 +206,8 @@ public class FacadeSuper extends App implements HasApp {
 							
 //							File texture = new File( f, "images/" + state.nextTile + "_fake_B.png" );
 							
+							state.big = Imagez.scaleSquare( state.big, Mathz.nextPower2( Math.max( state.big.getWidth(), state.big.getHeight())  ) );
+							
 							NormSpecGen ns = new NormSpecGen( state.big, null, null );
 
 							String dest =  "scratch/facade_" + state.nextTile ;
@@ -230,8 +238,7 @@ public class FacadeSuper extends App implements HasApp {
 			} ) );
 		
 	}
-
-	
+		
 	private static class FacState {
 		
 		BufferedImage big;

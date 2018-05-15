@@ -1,9 +1,7 @@
 package org.twak.tweed.gen.skel;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,16 +14,10 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JToggleButton;
 import javax.swing.ProgressMonitor;
-import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
 import org.twak.camp.Output;
@@ -49,9 +41,7 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.JmeGen;
-import org.twak.tweed.gen.MiniViewer;
 import org.twak.tweed.gen.Prof;
-import org.twak.tweed.gen.ProfileAssignmentViewer;
 import org.twak.tweed.gen.SkelFootprint;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
@@ -60,8 +50,6 @@ import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
-import org.twak.utils.PaintThing;
-import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -70,39 +58,35 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
-import org.twak.utils.ui.AutoEnumCombo;
-import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
-import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.facades.CGAMini;
-import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
-import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.App.AppMode;
-import org.twak.viewTrace.franken.FacadeApp;
-import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.NSliders;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Regularizer;
+import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.FacadeApp;
+import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-public class SkelGen extends Gen implements IDumpObjs {
+public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 	public BlockGen blockGen;
 
-	public HalfMesh2 toRender = null;
+	public HalfMesh2 block = null;
 
 	public SkelFootprint skelFootprint;
 	protected List<Line> footprint;
 	Map<Object, Face> lastOccluders = new HashMap<>();
 
+	public BlockApp app = new BlockApp( this );
 	
 	static {
 		PlanSkeleton.TAGS = new String[][]
@@ -143,7 +127,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		super( "skel", tweed );
 
-		this.toRender = mesh;
+		setRender ( mesh );
 		this.blockGen = blockGen;
 
 		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
@@ -153,7 +137,14 @@ public class SkelGen extends Gen implements IDumpObjs {
 	}
 
 	private void optimize( ProgressMonitor m ) {
-		toRender = skelFootprint.buildAndSolve( footprint, this, m );
+		setRender ( skelFootprint.buildAndSolve( footprint, this, m ) );
+	}
+
+	private void setRender( HalfMesh2 mesh ) {
+		this.block = mesh;
+		
+		for (HalfFace f : block)
+			((SuperFace)f).app.parent = this;		
 	}
 
 	@Override
@@ -180,13 +171,13 @@ public class SkelGen extends Gen implements IDumpObjs {
 //
 //		
 		
-		if ( toRender != null ) {
+		if ( block != null ) {
 
 			 Map<Object, Face> occluderLookup = lastOccluders = new HashMap<>();
 			
-			for ( int i = 0; i < toRender.faces.size(); i++ )
+			for ( int i = 0; i < block.faces.size(); i++ )
 				try {
-					HalfFace f = toRender.faces.get( i );
+					HalfFace f = block.faces.get( i );
 					SuperFace sf = (SuperFace) f;
 					
 					Rendered previouslyRendered = geometry.get( sf );
@@ -206,10 +197,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 					th.printStackTrace();
 				}
 		
-			for ( int i = 0; i < toRender.faces.size(); i++ )
+			for ( int i = 0; i < block.faces.size(); i++ )
 				
 				try {
-					SuperFace sf = (SuperFace) toRender.faces.get( i );
+					SuperFace sf = (SuperFace) block.faces.get( i );
 					Rendered previouslyRendered = geometry.get( sf );
 					
 					if (previouslyRendered.skel != null) 
@@ -762,7 +753,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	private void cgaAll() {
 
-		for (HalfFace hf : toRender )
+		for (HalfFace hf : block )
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
 				
@@ -783,7 +774,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		for (int i = 0; i < style.length; i++)
 			style[i] = Math.random() - 0.5;
 		
-		for (HalfFace hf : toRender )
+		for (HalfFace hf : block )
 			for (HalfEdge he : hf) {
 				SuperEdge se = (SuperEdge) he;
 				

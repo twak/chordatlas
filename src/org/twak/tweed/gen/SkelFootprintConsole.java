@@ -78,7 +78,7 @@ public class SkelFootprintConsole {
 		
 		SkelFootprint.postProcesss(SS);
 		
-		gen.toRender = SS.mesh;
+		gen.block = SS.mesh;
 		gen.calculate();
 
 		gen.dumpObj( obj );

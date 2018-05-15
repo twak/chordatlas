@@ -29,7 +29,7 @@ public class RoofApp extends App {
 	public SuperFace parent;
 
 	public RoofApp(HasApp ha) {
-		super(ha, "roof", "roofs2", 8, 512);
+		super(ha, "roof", "roofs4", 8, 512);
 	}
 
 	public RoofApp( RoofApp ruf ) {

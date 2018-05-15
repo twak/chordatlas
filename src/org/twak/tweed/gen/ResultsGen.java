@@ -156,7 +156,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 					
 					SkelGen sg = new SkelGen( tweed );
 
-					sg.toRender = block.mesh;
+					sg.block = block.mesh;
 					sg.parentNode = gNode;
 					sg.calculate();
 					ResultsGen.this.gNode.attachChild( sg.gNode );

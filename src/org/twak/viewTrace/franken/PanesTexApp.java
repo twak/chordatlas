@@ -51,7 +51,7 @@ public class PanesTexApp extends App implements HasApp {
 	final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
 		specLookup.put( Color.blue, Color.white );
-		specLookup.put( Color.red, Color.gray );
+		specLookup.put( Color.red, Color.black );
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class PanesTexApp extends App implements HasApp {
 
 						Meta meta = e.getValue();
 						
-						String dest = Pix2Pix.importTexture( f, meta.name, 1, specLookup, null );
+						String dest = Pix2Pix.importTexture( f, meta.name, -1, specLookup, null );
 
 						if ( dest != null ) {
 							e.getKey().texture = dest;
