@@ -107,9 +107,8 @@ public abstract class App /*earance*/ implements Cloneable {
 			
 			for (String d : downs.keySet()) 
 				new Thread( () ->  App.computeWithChildren( downs.get( d ), 0, globalUpdate ) ).start();
-		}
-		else {
 			
+		} else {
 		
 			List<App> batch = new ArrayList<>();
 			

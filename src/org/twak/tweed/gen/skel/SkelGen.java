@@ -476,6 +476,14 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		} );
 		ui.add( camp );
 		
+		JButton tex = new JButton( "texture" );
+		tex.addActionListener( x -> {
+			tweed.setTool( new TextureTool( tweed ) );
+			SkelGen.this.textureSelected( skel, house, sf, se, se.toEdit );
+		}
+				);
+		ui.add( tex );
+		
 //		JButton plan = new JButton( "plan" );
 //		plan.addActionListener( e -> new Plot( toRender, footprint ) );
 //		ui.add( plan );
@@ -497,11 +505,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 //		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
 //		ui.add( prof );
 
-		JButton remove = new JButton( "remove" );
+		JButton remove = new JButton( "remove building" );
 		remove.addActionListener( e -> {
-			visible = false;
+			block.faces.remove( sf );
 			calculateOnJmeThread();
-			tweed.frame.removeGen( SkelGen.this );
 		} );
 		ui.add( remove );
 
@@ -562,15 +569,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	}
 
 	public static Profile tagWalls( SuperFace sf, Profile profile, SuperEdge se, Point2d s, Point2d e ) {
-
 		
 		if ( se.toEdit == null ) { // first time through, use regularizer 
-
-			if ( se.mini != null && ! se.mini.isEmpty() ) {
+			if ( se.toRegularize != null && ! se.toRegularize.isEmpty() ) {
 				double[] range = findRange( se, s, e, null );
 
 				if ( range != null )
-					se.toEdit = new Regularizer().go( se.mini, range[ 0 ], range[ 1 ], null );
+					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null );
 			}
 			ensureMF( sf, se );
 		} 
@@ -607,13 +612,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		Line mf;
 
-		if ( se.mini.isEmpty() || se.mini.get( 0 ).imageFeatures == null ) {
+		if ( se.toRegularize.isEmpty() || se.toRegularize.get( 0 ).imageFeatures == null ) {
 			if ( backup == null )
 				return null;
 			else
 				mf = backup;
 		} else
-			mf = se.mini.get( 0 ).imageFeatures.mega.megafacade; // todo: bad place for this method.
+			mf = se.toRegularize.get( 0 ).imageFeatures.mega.megafacade; // todo: bad place for this method.
 
 		double mfL = mf.length();
 		return new double[] { mf.findPPram( s ) * mfL, mf.findPPram( e ) * mfL };
@@ -722,8 +727,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			se.toEdit.width = se.length();
 		}
 		
-		if (se.mini != null && !se.mini.isEmpty())
-			se.toEdit.height = se.mini.get( 0 ).height;
+		if (se.toRegularize != null && !se.toRegularize.isEmpty())
+			se.toEdit.height = se.toRegularize.get( 0 ).height;
 		else if (se.prof != null) {
 
 			if (se.prof.size() > 2)

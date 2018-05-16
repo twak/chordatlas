@@ -164,13 +164,12 @@ public class GreebleSkel {
 							mf.postState.occluders.add( projectTo( megafacade, mfl, lf, f ) );
 				}
 				
-				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
 				
 				if ( seen.add( mf ) ) {
+					mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
 					mf.width = chain.get( 0 ).edge.length();
+					mf.featureGen.update();
 				}
-				
-				mf.featureGen.update();
 			}
 		}
 		

@@ -33,7 +33,7 @@ public class MiniViewer {
 
 
 		this.se = se;
-		toViz = se.mini;
+		toViz = se.toRegularize;
 		
 		mini = new JSlider( -1, 20, -1 );
 		animation = new JSlider (-1, 100, 100);

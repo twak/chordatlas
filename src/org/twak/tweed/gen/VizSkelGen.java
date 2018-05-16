@@ -86,7 +86,7 @@ public class VizSkelGen extends SkelGen {
 		
 			e.face = out;
 			e.prof = null;//!
-			e.mini = Collections.EMPTY_LIST;
+			e.toRegularize = Collections.EMPTY_LIST;
 			
 			
 			if (mode == Mode.Profiles)

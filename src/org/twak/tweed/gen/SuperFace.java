@@ -93,8 +93,8 @@ public class SuperFace extends HalfFace implements HasApp {
 		
 		for (HalfEdge e : this) {
 			SuperEdge se = (SuperEdge)e;
-			if (se.mini != null && !se.mini.isEmpty())
-				return se.mini.get( 0 );
+			if (se.toRegularize != null && !se.toRegularize.isEmpty())
+				return se.toRegularize.get( 0 );
 		}
 		
 		return null;

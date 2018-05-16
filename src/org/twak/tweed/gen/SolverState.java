@@ -146,9 +146,9 @@ public class SolverState implements Serializable
 							break;
 						
 						SuperEdge se = (SuperEdge) e;
-						if ( se.mini == null )
+						if ( se.toRegularize == null )
 							continue;
-						List<MiniFacade> mfs = new ArrayList( se.mini );
+						List<MiniFacade> mfs = new ArrayList( se.toRegularize );
 						//					while (mfs .size() < 2)
 						//						mfs.add(null);
 						

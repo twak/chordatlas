@@ -19,7 +19,7 @@ public class SuperEdge extends HalfEdge {
 	public Prof prof;
 	public int profI;
 	public boolean debug;
-	public List<MiniFacade> mini;
+	public List<MiniFacade> toRegularize;
 	public MiniFacade toEdit;
 	
 	public SuperEdge( Point2d s, Point2d e, HalfEdge parent ) {
@@ -40,7 +40,7 @@ public class SuperEdge extends HalfEdge {
 		this.profLine   = o.profLine;
 		this.prof       = o.prof;
 		this.profI      = o.profI;
-		this.mini       = o.mini;
+		this.toRegularize       = o.toRegularize;
 	}
 
 	public void addMini( MiniFacade m ) {
@@ -48,18 +48,18 @@ public class SuperEdge extends HalfEdge {
 		if (m== null)
 			return;
 		
-		if (mini==null)
-			mini = new ArrayList<>();
+		if (toRegularize==null)
+			toRegularize = new ArrayList<>();
 		
-		mini.add(m);
+		toRegularize.add(m);
 	}
 
 	public double[] findRange() {
 		
-		if ( mini == null || mini.isEmpty() || mini.get( 0 ).imageFeatures == null)
+		if ( toRegularize == null || toRegularize.isEmpty() || toRegularize.get( 0 ).imageFeatures == null)
 			return null;
 		
- 	    Line mf = mini.get(0).imageFeatures.mega.megafacade; // todo: bad place for this method.
+ 	    Line mf = toRegularize.get(0).imageFeatures.mega.megafacade; // todo: bad place for this method.
 		double mfL = mf.length();
 		return new double[] { mf.findPPram( start ) * mfL, mf.findPPram( end ) * mfL };
 	}

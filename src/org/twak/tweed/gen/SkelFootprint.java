@@ -402,8 +402,8 @@ public class SkelFootprint {
 						prof = se.prof;
 					}
 					
-					if (se.mini != null)
-						allMinis.addAll(se.mini);
+					if (se.toRegularize != null)
+						allMinis.addAll(se.toRegularize);
 				}
 				
 				List<MiniFacade> allMinisL = new ArrayList(allMinis);
@@ -412,7 +412,7 @@ public class SkelFootprint {
 					SuperEdge se = ( (SuperEdge) e );
 					se.profI = profI;
 					se.prof = prof;
-					se.mini = allMinisL;
+					se.toRegularize = allMinisL;
 				}
 			}
 	}
