@@ -12,6 +12,7 @@ import javax.vecmath.Point2d;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
+import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
@@ -177,16 +178,22 @@ public class CGAMini extends FeatureGenerator {
 
 		DRectangle all = mf.getAsRect();
 		
-		
-//		if  ( mf.postState != null ) {
-//			
-//			all = new DRectangle ( all );
-//			
-//			OptionalDouble od = mf.postState.skelFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
-//			
-//			if (od.isPresent())
-//				all.height = od.getAsDouble();
-//		}
+		if  ( mf.postState != null ) {
+			
+			all = new DRectangle ( all );
+			
+			OptionalDouble od = mf.postState.skelFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
+			
+			if (od.isPresent())
+				all.height = od.getAsDouble();
+			
+			double[] bounds = mf.postState.skelFaces.stream()
+					.flatMap( e -> e.stream() )
+					.collect( new InaxPoint2dCollector() );
+			
+			all.height = bounds[3] - bounds[2];
+			all.width  = bounds[1] - bounds[0];
+		}
 		
 		List<DRectangle> occlusions = Collections.EMPTY_LIST;
 		

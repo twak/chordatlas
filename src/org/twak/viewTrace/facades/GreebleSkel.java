@@ -132,6 +132,7 @@ public class GreebleSkel {
 		
 		List<List<Face>> chains = Campz.findChains( output );
 
+		Set<MiniFacade> seen = new HashSet<>();
 		
 		// give each minifacade a chance to update its features based on the skeleton result
 		for (List<Face> chain : chains) {
@@ -164,6 +165,11 @@ public class GreebleSkel {
 				}
 				
 				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
+				
+				if ( seen.add( mf ) ) {
+					mf.width = chain.get( 0 ).edge.length();
+				}
+				
 				mf.featureGen.update();
 			}
 		}
@@ -219,8 +225,6 @@ public class GreebleSkel {
 			for (QuadF q1 : allFeatures)
 				mf2.postState.generatedWindows.add(q1.original);
 			
-			System.out.println( "size "+ mf2.postState.generatedWindows.size() );
-			
 			if ( TweedSettings.settings.createDormers ) {
 				Iterator<QuadF> quit = processedFeatures.iterator();
 				while ( quit.hasNext() ) {
@@ -231,8 +235,6 @@ public class GreebleSkel {
 					}
 				}
 			}
-
-
 			
 			edges( output, roofColor );
 			

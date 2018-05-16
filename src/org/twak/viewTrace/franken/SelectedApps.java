@@ -1,7 +1,7 @@
 package org.twak.viewTrace.franken;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,21 +10,20 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
 
 import org.twak.tweed.TweedFrame;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
 import org.twak.utils.ui.ColourPicker;
-import org.twak.utils.ui.FileDrop;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.NSliders;
-import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.style.ConstantStyle;
+import org.twak.viewTrace.franken.style.GaussStyle;
+import org.twak.viewTrace.franken.style.StyleSource;
 
 
 public class SelectedApps extends ArrayList<App>{
@@ -83,7 +82,7 @@ public class SelectedApps extends ArrayList<App>{
 		App.computeWithChildren( this, 0, globalUpdate );
 	}
 	
-	public JPanel createUI( Runnable globalUpdate ) {
+	public JPanel createUI( Runnable update ) {
 
 		JPanel top = new JPanel(new ListDownLayout() );
 		JPanel main = new JPanel(new BorderLayout() );
@@ -98,7 +97,7 @@ public class SelectedApps extends ArrayList<App>{
 		
 		if ( !ups.isEmpty() ) {
 			JButton up   = new JButton("↑" + ups.exemplar.name);
-			up.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findUp().createUI ( globalUpdate) ));
+			up.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findUp().createUI ( update) ));
 			upDown.add( up, BorderLayout.WEST);
 		}
 		
@@ -108,7 +107,7 @@ public class SelectedApps extends ArrayList<App>{
 		for (String wayDown : downs.keySet()) {
 			JButton down = new JButton("↓ "+wayDown+"("+downs.get( wayDown ).size()+")");
 			upDown.add( down, BorderLayout.EAST);
-			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( globalUpdate) ) );
+			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( update) ) );
 		}
 		
 		top.add(upDown);
@@ -123,19 +122,19 @@ public class SelectedApps extends ArrayList<App>{
 				
 				options.setLayout( new ListDownLayout() );
 
-				buildLayout(exemplar.appMode, options, () -> SelectedApps.this.computeAll( globalUpdate ) );
+				buildLayout(exemplar.appMode, options, () -> refresh ( update ) );
 				
 				options.repaint();
 				options.revalidate();
 				
 				new Thread("combo app select") {
 					public void run() {
-						SelectedApps.this.computeAll( globalUpdate );
+						refresh( update );
 					};
 				}.start();
 			}
-		} );
-		buildLayout(exemplar.appMode, options, () -> SelectedApps.this.computeAll( globalUpdate ) );
+		}, "texture", exemplar.getValidAppModes() );
+		buildLayout(exemplar.appMode, options, () -> refresh( update ) );
 		
 		if (exemplar.resolution > 0)
 			top.add(combo); // building doesn't have options yet
@@ -146,7 +145,11 @@ public class SelectedApps extends ArrayList<App>{
 		return main;
 	}
 
-	private void buildLayout( AppMode appMode, JPanel out, Runnable whenDone ) {
+	protected void refresh( Runnable update ) {
+		new Thread ( () -> SelectedApps.this.computeAll(update) ).start();
+	}
+
+	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
 		
 		for (App a : this)
 			a.appMode = appMode;
@@ -166,7 +169,7 @@ public class SelectedApps extends ArrayList<App>{
 						a.color = color;
 						a.texture = null;
 					}
-					whenDone.run();
+					update.run();
 				}
 			} );
 			out.add( col );
@@ -176,38 +179,63 @@ public class SelectedApps extends ArrayList<App>{
 			out.add( new JLabel("no options") );
 			break;
 		case Net:
-
-			NSliders sliders = new NSliders( exemplar.styleZ, new Runnable() {
-				
-				@Override
-				public void run() {
-					for (App a : SelectedApps.this)
-						a.styleZ = exemplar.styleZ;
-					whenDone.run();
-				}
-			} );
-			
-			FileDrop drop = new FileDrop( "style" ) {
-				public void process(java.io.File f) {
-					new Pix2Pix().encode( f, exemplar.resolution, exemplar.netName, exemplar.styleZ, new Runnable() {
-						@Override
-						public void run() {
-//							for (App a : SelectedApps.this)
-//								a.styleZ = exemplar.styleZ;
-							
-							sliders.setValues (exemplar.styleZ);
-							
-//							whenDone.run();
-						}
-					} );
-				};
-			};
-
-			out.add( exemplar.createUI( whenDone, this ) );
-			out.add( sliders );
-			out.add( drop );
+			out.add( createDistEditor(update) );
 			
 			break;
 		}
+	}
+
+	private enum StyleSources {
+		Gaussian (GaussStyle.class), Constant (ConstantStyle.class);
+		
+		Class<? extends StyleSource> klass;
+		
+		StyleSources (Class<?> klass) {
+			this.klass = (Class<? extends StyleSource> ) klass;
+		}
+		
+		public StyleSource instance(App app) {
+			try {
+				return klass.getConstructor( App.class ).newInstance( app );
+			} catch ( Throwable e ) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+	
+	private Component createDistEditor( Runnable update ) {
+		
+		JPanel out = new JPanel( new BorderLayout() );
+		JPanel options = new JPanel();
+		
+		AutoEnumCombo combo = new AutoEnumCombo( StyleSources.Constant, new ValueSet() {
+			public void valueSet( Enum num ) {
+				
+				StyleSources sss = (StyleSources) num;
+				StyleSource ss;
+				
+				if (exemplar.styleSource.getClass() == sss.klass)
+					ss = exemplar.styleSource;
+				else
+					ss = sss.instance(exemplar);
+
+				for (App a : SelectedApps.this)
+					a.styleSource = ss;
+				
+				options.removeAll();
+				options.setLayout( new BorderLayout() );
+				options.add( ss.getUI(update), BorderLayout.CENTER );
+				options.repaint();
+				options.revalidate();
+			}
+		}, "distribution:" );
+		
+		combo.fire();
+		
+		out.add( combo, BorderLayout.NORTH );
+		out.add( options, BorderLayout.CENTER );
+		
+		return out;
 	}
 }

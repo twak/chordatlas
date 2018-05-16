@@ -30,6 +30,7 @@ import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.CMPLabel;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
+import org.twak.viewTrace.franken.App.AppMode;
 
 public class FacadeApp extends App {
 
@@ -193,7 +194,7 @@ public class FacadeApp extends App {
 
 		for ( FRect r : rects ) {
 
-			if ( mini.contains( r ) ) {
+			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
 
 				DRectangle w = bounds.scale( mini.normalize( r ) );
 
@@ -213,5 +214,9 @@ public class FacadeApp extends App {
 			this.name = name;
 			this.mask = mask;
 		}
+	}
+	
+	public Enum[] getValidAppModes() {
+		return new Enum[] {AppMode.Color, AppMode.Net};
 	}
 }

@@ -16,6 +16,7 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.StyleSource;
 
 public abstract class App /*earance*/ implements Cloneable {
@@ -41,9 +42,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	String name;
 	
 	// GAN optoins
-	String netName;
-	int sizeZ;
-	int resolution;
+	public String netName;
+	public int sizeZ = -1;
+	public int resolution;
 	public DRectangle textureRect;
 	
 	public App( App a ) {
@@ -57,6 +58,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.sizeZ = a.sizeZ;
 		this.resolution = a.resolution;
 		this.name = a.name;
+		this.styleSource = new ConstantStyle(this);
 	}
 	
 	public App( HasApp ha, String name, String netName, int sizeZ, int resolution ) {
@@ -66,7 +68,9 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.hasA = ha; 
 		this.netName = netName;
 		this.styleZ = new double[sizeZ];
+		this.sizeZ = sizeZ;
 		this.resolution = resolution;
+		this.styleSource = new ConstantStyle(this);
 	}
 
 	public static App createFor(HasApp ha) {
@@ -158,6 +162,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract App getUp();
 	public abstract MultiMap<String, App> getDown();
 	public abstract void computeBatch(Runnable whenDone, List<App> batch);
+
+	public Enum[] getValidAppModes() {
+		return new Enum[] {AppMode.Color};
+	}
 	
 	
 }

@@ -128,16 +128,19 @@ public class PanesTexApp extends App implements HasApp {
 		} ) );
 	}
 
+	private static class Meta {
+		String name;
+		DRectangle mask;
+		BufferedImage labels;
 
-private static class Meta {
-	String name;
-	DRectangle mask;
-	BufferedImage labels;
-	
-	private Meta(String name, DRectangle mask, BufferedImage labels) {
-		this.name = name;
-		this.mask = mask;
-		this.labels = labels;
+		private Meta( String name, DRectangle mask, BufferedImage labels ) {
+			this.name = name;
+			this.mask = mask;
+			this.labels = labels;
+		}
 	}
-}
+
+	public Enum[] getValidAppModes() {
+		return new Enum[] { AppMode.Color, AppMode.Net };
+	}
 }

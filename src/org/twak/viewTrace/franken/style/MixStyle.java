@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.JPanel;
+
 
 public class MixStyle implements StyleSource {
 
@@ -38,6 +40,11 @@ public class MixStyle implements StyleSource {
 				return w.ss.draw( random );
 
 		throw new Error();
+	}
+
+	@Override
+	public JPanel getUI( Runnable update ) {
+		return new JPanel();
 	}
 
 }

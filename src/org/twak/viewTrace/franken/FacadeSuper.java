@@ -277,14 +277,7 @@ public class FacadeSuper extends App implements HasApp {
 		}
 	}
 	
-	
-	private static class Meta {
-		String name;
-		DRectangle mask;
-
-		private Meta( String name, DRectangle mask ) {
-			this.name = name;
-			this.mask = mask;
-		}
+	public Enum[] getValidAppModes() {
+		return new Enum[] {AppMode.Color, AppMode.Net};
 	}
 }

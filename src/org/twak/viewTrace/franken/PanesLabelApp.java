@@ -229,14 +229,18 @@ public class PanesLabelApp extends App {
 					crop.setRGB( x, y, frame );
 			}
 	}
-	
 
-private static class Meta {
-	String name;
-	DRectangle mask;
-	private Meta(String name, DRectangle mask) {
-		this.name = name;
-		this.mask = mask;
+	private static class Meta {
+		String name;
+		DRectangle mask;
+
+		private Meta( String name, DRectangle mask ) {
+			this.name = name;
+			this.mask = mask;
+		}
 	}
-}
+
+	public Enum[] getValidAppModes() {
+		return new Enum[] { AppMode.Color, AppMode.Net };
+	}
 }

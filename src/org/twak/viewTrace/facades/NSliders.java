@@ -35,6 +35,7 @@ public class NSliders extends JPanel {
 			int i_ = i;
 			JSlider s = new JSlider( 0, 1000, 500 );
 			s.setPreferredSize( new Dimension (100, s.getPreferredSize().height) );
+			s.setValue( (int)( result[i] * 250 + 500) );
 //			s.setOrientation( SwingConstants.HORIZONTAL );
 			sliders[i] = s;
 			add( s );

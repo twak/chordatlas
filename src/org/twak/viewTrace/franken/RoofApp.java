@@ -148,4 +148,8 @@ public class RoofApp extends App {
 			g.draw( p );
 		
 	}
+	
+	public Enum[] getValidAppModes() {
+		return new Enum[] {AppMode.Color, AppMode.Net, AppMode.Bitmap};
+	}
 }
