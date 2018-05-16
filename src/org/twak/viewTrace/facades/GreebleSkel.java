@@ -122,6 +122,7 @@ public class GreebleSkel {
 //						roofBounds.envelop( Pointz.to2( se.start ) );
 //						roofBounds.envelop( Pointz.to2( se.end ) );
 //					}
+				wt.miniFacade.postState = new PostProcessState();
 			}
 		}
 		
@@ -143,8 +144,6 @@ public class GreebleSkel {
 			for (WallTag wt : opt) {
 				
 				MiniFacade mf = wt.miniFacade;
-				
-				mf.postState = new PostProcessState();
 				
 				Edge e = chain.get( 0 ).edge;
 				Line megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y );
