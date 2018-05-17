@@ -263,9 +263,10 @@ public class Pix2Pix {
 			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "/val/" );
 			dir.mkdirs();
 			String nameWithZ = name + zAsString( styleZ );
-			inputs.put( key, nameWithZ );
 			
 			ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
+			inputs.put( key, nameWithZ );
+			
 			
 		} catch ( IOException e ) {
 			e.printStackTrace();

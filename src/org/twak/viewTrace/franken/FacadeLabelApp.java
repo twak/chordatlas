@@ -2,18 +2,16 @@ package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -25,7 +23,6 @@ import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -79,9 +76,8 @@ public class FacadeLabelApp extends App {
 		for ( MiniFacade mf : mfb ) {
 			
 			if (mf.featureGen instanceof CGAMini)
-				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
+				mf.featureGen = new FeatureGenerator( mf );
 
-			DRectangle bounds = new DRectangle( resolution, 0, resolution, resolution );
 			DRectangle mini = Pix2Pix.findBounds( mf );
 
 			g.setColor( Color.black );
@@ -90,7 +86,6 @@ public class FacadeLabelApp extends App {
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
-//			mask = mask.centerSquare();
 
 			{
 				mask = mask.scale( resolution / Math.max( mini.height, mini.width ) );
@@ -98,11 +93,12 @@ public class FacadeLabelApp extends App {
 				mask.y = 0; 
 			}
 
-			g.setColor( CMPLabel.Facade.rgb );
 
 			if ( mf.postState == null ) {
-				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
+				Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
 			} else {
+				g.setColor( Color.blue );
+				
 				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
 					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 
@@ -114,7 +110,7 @@ public class FacadeLabelApp extends App {
 
 			mask.x -= resolution;
 
-			Meta meta = new Meta( mf, name, mask );
+			Meta meta = new Meta( mf, mask );
 
 			p2.addInput( bi, meta, mf.app.styleZ );
 		}
@@ -131,10 +127,12 @@ public class FacadeLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
+						importLabels(meta.mf, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
 
 						if ( dest != null ) {
-							meta.mf.app.coarse = meta.mf.app.texture = dest;
+							meta.mf.appLabel.texture = meta.mf.app.texture = dest;
 						}
 					}
 
@@ -143,16 +141,28 @@ public class FacadeLabelApp extends App {
 				}
 				whenDone.run();
 			}
+
 		} ) );
+	}
+	
+	
+	//{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
+	//"wall": [[62, 196, 0, 255]], 
+	// "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
+	private void importLabels( MiniFacade mf, File file ) {
+		
+		if (file.exists()) {
+			
+//			JsonObject jObj = new JsonObject(Files.readAllLines( file.toPath() ).get( arg0 )[0]);
+			
+		}
 	}
 
 	private static class Meta {
-		String name;
 		DRectangle mask;
 		MiniFacade mf;
 		
-		private Meta( MiniFacade mf, String name, DRectangle mask ) {
-			this.name = name;
+		private Meta( MiniFacade mf, DRectangle mask ) {
 			this.mask = mask;
 			this.mf = mf;
 		}

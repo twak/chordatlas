@@ -139,7 +139,7 @@ public class FacadeTexApp extends App {
 
 //			String name = System.nanoTime() + "@" + index.size();
 
-			Meta meta = new Meta( mf, name, mask );
+			Meta meta = new Meta( mf, mask );
 //			index.put( mf, meta );
 
 			p2.addInput( bi, meta, mf.app.styleZ );
@@ -173,12 +173,10 @@ public class FacadeTexApp extends App {
 	}
 
 	private static class Meta {
-		String name;
 		DRectangle mask;
 		MiniFacade mf;
 		
-		private Meta( MiniFacade mf, String name, DRectangle mask ) {
-			this.name = name;
+		private Meta( MiniFacade mf, DRectangle mask ) {
 			this.mask = mask;
 			this.mf = mf;
 		}

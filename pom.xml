@@ -269,6 +269,7 @@
 			<artifactId>yamlbeans</artifactId>
 			<version>1.09</version>
 		</dependency>
+		
 	</dependencies>
 
 	<organization>
