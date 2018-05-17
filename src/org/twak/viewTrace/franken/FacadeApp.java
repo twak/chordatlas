@@ -20,13 +20,13 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.CGAMini;
+import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Pix2Pix;
-import org.twak.viewTrace.facades.Pix2Pix.CMPLabel;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
 
@@ -73,19 +73,20 @@ public class FacadeApp extends App {
 
 	final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
-		specLookup.put( Pix2Pix.CMPLabel.Window.rgb, Color.white );
-		specLookup.put( Pix2Pix.CMPLabel.Shop.rgb  , Color.darkGray );
-		specLookup.put( Pix2Pix.CMPLabel.Door.rgb  , Color.gray );
+		specLookup.put( CMPLabel.Window.rgb, Color.white );
+		specLookup.put( CMPLabel.Shop.rgb  , Color.darkGray );
+		specLookup.put( CMPLabel.Door.rgb  , Color.gray );
 	}
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
+		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
 		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
-		Map<MiniFacade, Meta> index = new HashMap<>();
+//		Map<MiniFacade, Meta> index = new HashMap<>();
 		
 		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
 
@@ -134,29 +135,30 @@ public class FacadeApp extends App {
 
 			mask.x -= resolution;
 
-			String name = System.nanoTime() + "@" + index.size();
+//			String name = System.nanoTime() + "@" + index.size();
 
-			index.put( mf, new Meta( name, mask ) );
+			Meta meta = new Meta( mf, name, mask );
+//			index.put( mf, meta );
 
-			Pix2Pix.addInput( bi, name, netName, mf.app.styleZ );
+			p2.addInput( bi, meta, mf.app.styleZ );
 		}
 
-		Pix2Pix.submit( new Job( netName, new JobResult() {
+		p2.submit( new Job( new JobResult() {
 
 			@Override
-			public void finished( File f ) {
+			public void finished( Map<Object, File> results ) {
 
 				String dest;
 				try {
 
-					new File( Tweed.SCRATCH ).mkdirs();
+					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-					for ( Map.Entry<MiniFacade, Meta> e : index.entrySet() ) {
-
-						dest = Pix2Pix.importTexture( f, e.getValue().name, -1, specLookup, e.getValue().mask );
+						Meta meta = (Meta)e.getKey();
+						
+						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask );
 
 						if ( dest != null ) {
-							e.getKey().app.coarse = e.getKey().app.texture = dest;
+							meta.mf.app.coarse = meta.mf.app.texture = dest;
 						}
 					}
 
@@ -165,9 +167,7 @@ public class FacadeApp extends App {
 				}
 				whenDone.run();
 			}
-
 		} ) );
-		//			whenDone );
 	}
 
 	private static Polygon toPoly( MiniFacade toEdit, DRectangle bounds, DRectangle mini, Loop<? extends Point2d> loop ) {
@@ -207,10 +207,12 @@ public class FacadeApp extends App {
 	private static class Meta {
 		String name;
 		DRectangle mask;
-
-		private Meta( String name, DRectangle mask ) {
+		MiniFacade mf;
+		
+		private Meta( MiniFacade mf, String name, DRectangle mask ) {
 			this.name = name;
 			this.mask = mask;
+			this.mf = mf;
 		}
 	}
 	

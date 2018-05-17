@@ -122,6 +122,8 @@ public class FacadeSuper extends App implements HasApp {
 
 		int MAX_CONCURRENT = 32;
 
+		Pix2Pix p2 = new Pix2Pix (todo.keySet().iterator().next().app );
+		
 		int count = 0;
 		for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {
 			try {
@@ -138,7 +140,7 @@ public class FacadeSuper extends App implements HasApp {
 
 					BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 
-					TileState ts = new TileState( System.nanoTime() + "_" + x + "_" + y + "_" + count, x, y );
+					TileState ts = new TileState( state, System.nanoTime() + "_" + x + "_" + y + "_" + count, x, y );
 					state.nextTiles.add( ts );
 					{
 						Graphics2D g = toProcess.createGraphics();
@@ -150,7 +152,7 @@ public class FacadeSuper extends App implements HasApp {
 						g.dispose();
 					}
 					
-					Pix2Pix.addInput( toProcess, ts.nextTile, netName, e.getKey().app.zuper.styleZ );
+					p2.addInput( toProcess, ts, e.getKey().app.zuper.styleZ );
 
 					System.out.println( "++" + x + ", " + y );
 					count++;
@@ -166,17 +168,22 @@ public class FacadeSuper extends App implements HasApp {
 			}
 		}
 			
-			Pix2Pix.submit ( new Job ( netName,  new JobResult() {
+		p2.submit ( new Job ( new JobResult() {
 				@Override
-				public void finished( File f ) {
+				public void finished( Map<Object, File> results ) {
 					
 					
 					// patch images with new tiles...
-					for ( FacState state : todo.values() ) {
-						for ( TileState tile : state.nextTiles ) {
+					for ( Map.Entry<Object, File> e : results.entrySet() ) {
+
+						TileState tile = (TileState) e.getKey();
+						FacState state = tile.state;
+//					for ( FacState state : todo.values() ) {
+//						for ( TileState tile : state.nextTiles ) 
+						{
 						try {
 							
-							File texture = new File( f, tile.nextTile + ".png" );
+							File texture = e.getValue();//new File( f, tile.nextTile + ".png" );
 							if ( texture.exists() && texture.length() > 0 ) {
 
 								BufferedImage rgb = ImageIO.read( texture );
@@ -238,11 +245,11 @@ public class FacadeSuper extends App implements HasApp {
 						}
 					}
 					
-					try {
-						FileUtils.deleteDirectory( f );
-					} catch ( IOException e1 ) {
-						e1.printStackTrace();
-					}
+//					try {
+//						FileUtils.deleteDirectory( f );
+//					} catch ( IOException e1 ) {
+//						e1.printStackTrace();
+//					}
 
 					facadeContinue( todo, whenDone );
 				}
@@ -269,8 +276,10 @@ public class FacadeSuper extends App implements HasApp {
 		
 		int nextX = 0, nextY = 0;
 		public String nextTile;
+		FacState state;
 		
-		public TileState( String name, int x, int y ) {
+		public TileState( FacState state, String name, int x, int y ) {
+			this.state = state;
 			this.nextX = x;
 			this.nextY = y;
 			this.nextTile = name;

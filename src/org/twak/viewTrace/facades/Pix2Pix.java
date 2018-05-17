@@ -7,23 +7,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.tools.FacadeTool;
 import org.twak.utils.Imagez;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App.TextureUVs;
-
-import redis.clients.jedis.params.sortedset.ZAddParams;
+import org.twak.viewTrace.franken.App;
 
 /**
  * Utilties to synthesize facade using Pix2Pix network
@@ -31,59 +25,49 @@ import redis.clients.jedis.params.sortedset.ZAddParams;
 
 public class Pix2Pix {
 
-	public static final int LATENT_SIZE = 8;
-
-	public enum CMPLabel { //sequence is  z-order
-		Background (1, 0,0, 170 ),
-		Facade     (2, 0,0, 255 ),
-		Molding    (10, 255, 85, 0 ),
-		Cornice    (5, 0, 255, 255 ),
-		Pillar     (11, 255,0, 0 ),
-		Window     (3, 0, 255, 0 ),
-//		Window     (3, 0, 85, 255 ),
-		Door       (4, 0,170, 255 ),
-		Sill       (6, 85,255, 170 ),
-		Blind      (8, 255,255, 0 ),
-		Balcony    (7, 170,255, 85 ),
-		Shop       (12, 170,0, 0 ),
-		Deco       (9, 255,170, 0 );
-		
-		final int index;
-		public final Color rgb;
-		
-		CMPLabel (int index, int r, int g, int b) {
-			this.rgb = new Color (r,g,b);
-			this.index = index;
-		}
+	String netName;
+	int resolution;
+	
+	public Pix2Pix (App exemplar) {
+		this.netName = exemplar.netName;
+		this.resolution = exemplar.resolution;
 	}
 	
 	public interface JobResult {
-		public void finished(File folder);
+		public void finished ( Map<Object, File>  results);
 	}
 	
 	public static class Job {
-		String network;
 		JobResult finished;
 		public String name;
+		boolean encode= false;
 		
-		public Job (String network, JobResult finished) {
-			
-			this.network = network;
+		public Job (JobResult finished) {
 			this.finished = finished;
 			this.name = System.nanoTime() +":"+ Math.random();
 		}
+		
+		public Job (JobResult finished, boolean encode) {
+			this (finished);
+			this.encode = encode;
+		}
 	}
 	
-	public static void submit( Job job ) {
+	public void submit( Job job ) {
 //		synchronized (job.network.intern()) {
 			submitSafe(job);
 //		}
 	}
 	
-	public static void submitSafe( Job job ) {
+	public void submitSafe( Job job ) {
 		
-		File go     = new File( "/home/twak/code/bikegan/input/"  + job.network + "/val/go" );
-		File outDir = new File( "/home/twak/code/bikegan/output/" + job.network +"/" + job.name );
+		String network = netName;
+		if (job.encode)
+			network = network+"_e";
+			
+		
+		File go     = new File( "/home/twak/code/bikegan/input/"  + netName + "/val/go" );
+		File outDir = new File( "/home/twak/code/bikegan/output/" + netName +"/" + job.name );
 		
 		try {
 			FileWriter  fos = new FileWriter( go );
@@ -123,7 +107,13 @@ public class Pix2Pix {
 			if ( outDir.exists() ) {
 				
 				System.out.println( "processing "+job.name );
-				job.finished.finished( outDir );
+				
+				Map<Object, File> done =new HashMap<>();
+				
+				for (Map.Entry<Object, String> e : inputs.entrySet())
+					done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
+				
+				job.finished.finished( done );
 				
 				try {
 					FileUtils.deleteDirectory( outDir );
@@ -139,7 +129,7 @@ public class Pix2Pix {
 		
 	}
 	
-	public void encode(File f, int resolution, String netName, double[] values, Runnable update ) {
+	public void encode(File f, double[] values, Runnable update ) {
 
 		try {
 			
@@ -151,11 +141,11 @@ public class Pix2Pix {
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
-			submit( new Job( netName+"_e", new JobResult() {
+			submit( new Job( new JobResult() {
 
 				@Override
-				public void finished( File f ) {
-					for ( File zf : f.listFiles() ) {
+				public void finished( Map<Object, File> results ) {
+					for ( File zf : results.values() ) {
 						String[] ss = zf.getName().split( "_" );
 						for ( int i = 0; i < ss.length; i++ )
 							values[ i ] = Double.parseDouble( ss[ i ] );
@@ -164,7 +154,7 @@ public class Pix2Pix {
 						
 					}
 				}
-			} ) );
+			}, true ) );
 
 		} catch ( Throwable e ) {
 			e.printStackTrace();
@@ -172,15 +162,19 @@ public class Pix2Pix {
 		
 	}
 
-	public static String importTexture( File f, String name, int specular, Map<Color, Color> specLookup, DRectangle crop ) throws IOException {
+	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, DRectangle crop ) throws IOException {
 		
-		File texture = new File( f, name + ".png" );
+//		String name = f.get
+
+		new File( Tweed.SCRATCH ).mkdirs();
+
+//		File texture = new File( f, name + ".png" );
 		String dest = "missing";
 		if ( texture.exists() && texture.length() > 0 ) {
 
 			BufferedImage rgb = ImageIO.read( texture );
 			
-			BufferedImage labels = ImageIO.read( new File( f, name + ".png_label" ) ); 
+			BufferedImage labels = ImageIO.read( new File( texture.getParentFile(), texture.getName() + "_label" ) ); 
 
 			if (crop != null) {
 				
@@ -197,7 +191,7 @@ public class Pix2Pix {
 				g.dispose();
 			}
 
-			dest =  "scratch/" + name ;
+			dest =  "scratch/" + UUID.randomUUID();
 			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
@@ -207,8 +201,6 @@ public class Pix2Pix {
 		return dest + ".png";
 	}
 	
-
-
 	public static BufferedImage scaleToFill( BufferedImage rgb, DRectangle crop ) {
 		
 		BufferedImage out = new BufferedImage (rgb.getWidth(), rgb.getHeight(), rgb.getType() );
@@ -233,17 +225,21 @@ public class Pix2Pix {
 		else 
 			return toEdit.postState.outerFacadeRect;
 	}
+
+	Map<Object, String> inputs = new HashMap<>();
 	
-	public static void addInput( BufferedImage bi, String name, String netName, double[] styleZ ) {
+	public void addInput( BufferedImage bi, Object key, double[] styleZ ) {
 		try {
-			
-			if (name.contains( "_" )) 
-				throw new Error();
-			
+
+			String name = UUID.randomUUID() +"";
 			
 			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "/val/" );
 			dir.mkdirs();
-			ImageIO.write( bi, "png", new File( dir, name + zAsString( styleZ ) + ".png" ) );
+			String nameWithZ = name + zAsString( styleZ );
+			inputs.put( key, nameWithZ );
+			
+			ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
+			
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

@@ -711,9 +711,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		pf.addActionListener( l -> cgaAll() );
 		ui.add( pf );
 		
-		JButton tf = new JButton( "texture all facades" );
-		tf.addActionListener( l -> textureAll() );
-		ui.add( tf );
+//		JButton tf = new JButton( "texture all facades" );
+//		tf.addActionListener( l -> textureAll() );
+//		ui.add( tf );
 		
 		return ui;
 	}
@@ -783,25 +783,24 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		calculateOnJmeThread();
 	}
 	
-	private void textureAll() {
-		
-		List<MiniFacade> mfs = new ArrayList<>();
-		
-		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
-		
-		for (int i = 0; i < style.length; i++)
-			style[i] = Math.random() - 0.5;
-		
-		for (HalfFace hf : block )
-			for (HalfEdge he : hf) {
-				SuperEdge se = (SuperEdge) he;
-				
-				ensureMF((SuperFace)hf, se);
-				mfs.add( se.toEdit );
-				se.toEdit.featureGen.facadeStyle = style;
-				se.toEdit.featureGen.update();
-			}
-		
+//	private void textureAll() {
+//		
+//		List<MiniFacade> mfs = new ArrayList<>();
+//		
+//		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
+//		
+//		for (int i = 0; i < style.length; i++)
+//			style[i] = Math.random() - 0.5;
+//		
+//		for (HalfFace hf : block )
+//			for (HalfEdge he : hf) {
+//				SuperEdge se = (SuperEdge) he;
+//				
+//				ensureMF((SuperFace)hf, se);
+//				mfs.add( se.toEdit );
+//				se.toEdit.featureGen.facadeStyle = style;
+//				se.toEdit.featureGen.update();
+//			}
 //		new Thread( new Runnable() {
 //			@Override
 //			public void run() {
@@ -819,8 +818,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 //				} );
 //			}
 //		} ).start();
-		
-	}
+//		
+//	}
 
 	public static void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
 		

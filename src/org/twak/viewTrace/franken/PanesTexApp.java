@@ -57,6 +57,8 @@ public class PanesTexApp extends App implements HasApp {
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {
 
+		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+		
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
 
@@ -91,9 +93,10 @@ public class PanesTexApp extends App implements HasApp {
 //				g.dispose();
 
 				String wName = name + "@" + count + "@" + System.nanoTime();
-				Pix2Pix.addInput( toProcess, wName, netName, a.styleZ );
+				Meta meta = new Meta( pta, wName, mask, labels ); 
+				p2.addInput( toProcess, meta, a.styleZ );
 
-				names.put( pta, new Meta( wName, mask, labels ) );
+//				names.put( pta, );
 				count++;
 
 			} catch ( IOException e1 ) {
@@ -101,21 +104,21 @@ public class PanesTexApp extends App implements HasApp {
 			}
 		}
 		
-		Pix2Pix.submit( new Job( netName, new JobResult() {
+		p2.submit( new Job( new JobResult() {
+			
 			@Override
-			public void finished( File f ) {
+			public void finished( Map<Object, File> results ) {
 
 				try {
+					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-					for ( Map.Entry<PanesTexApp, Meta> e : names.entrySet() ) {
-
-						Meta meta = e.getValue();
+						Meta meta = (Meta) e.getKey();
 						
-						String dest = Pix2Pix.importTexture( f, meta.name, -1, specLookup, null );
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, null );
 
 						if ( dest != null ) {
-							e.getKey().texture = dest;
-							e.getKey().parent.texture = dest;
+							meta.pta.texture = dest;
+							meta.pta.parent.texture = dest;
 						}
 					}
 
@@ -132,8 +135,10 @@ public class PanesTexApp extends App implements HasApp {
 		String name;
 		DRectangle mask;
 		BufferedImage labels;
-
-		private Meta( String name, DRectangle mask, BufferedImage labels ) {
+		PanesTexApp pta;
+		
+		private Meta( PanesTexApp pta, String name, DRectangle mask, BufferedImage labels ) {
+			this.pta = pta;
 			this.name = name;
 			this.mask = mask;
 			this.labels = labels;

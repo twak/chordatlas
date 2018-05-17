@@ -57,9 +57,11 @@ public class RoofApp extends App {
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
-		Map<MiniRoof, String> index = new HashMap<>();
+//		Map<MiniRoof, String> index = new HashMap<>();
 
 		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
+		
+		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
 		
 		for ( MiniRoof toEdit : mrb ) {
 
@@ -67,27 +69,26 @@ public class RoofApp extends App {
 
 			draw (g, drawTo, toEdit);
 
-			String name = System.nanoTime() + "@" + index.size();
+//			String name = System.nanoTime() + "@" + index.size();
+//
+//			index.put( toEdit, name );
 
-			index.put( toEdit, name );
-
-			Pix2Pix.addInput( bi, name, netName, toEdit.app.styleZ );
+			p2.addInput( bi, toEdit, toEdit.app.styleZ );
 		}
 
-		Pix2Pix.submit( new Job( netName, new JobResult() {
+		p2.submit( new Job( new JobResult() {
 			
 			@Override
-			public void finished( File f ) {
+			public void finished( Map<Object, File> results ) {
 				try {
 
-					new File( Tweed.SCRATCH ).mkdirs();
+					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-					for ( Map.Entry<MiniRoof, String> e : index.entrySet() ) {
-
-						String dest = Pix2Pix.importTexture( f, e.getValue(), -1, null,  null );
+						
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, null,  null );
 
 						if ( dest != null ) 
-							e.getKey().app.texture = dest;
+							((MiniRoof)e.getKey()).app.texture = dest;
 					}
 
 				} catch ( Throwable e ) {

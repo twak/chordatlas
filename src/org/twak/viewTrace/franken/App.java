@@ -17,6 +17,7 @@ import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.style.ConstantStyle;
+import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.StyleSource;
 
 public abstract class App /*earance*/ implements Cloneable {
@@ -61,7 +62,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.sizeZ = a.sizeZ;
 		this.resolution = a.resolution;
 		this.name = a.name;
-		this.styleSource = new ConstantStyle(this);
+		this.styleSource = a.styleSource;
 	}
 	
 	public App( HasApp ha, String name, String netName, int sizeZ, int resolution ) {
@@ -73,7 +74,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.styleZ = new double[sizeZ];
 		this.sizeZ = sizeZ;
 		this.resolution = resolution;
-		this.styleSource = new ConstantStyle(this);
+		this.styleSource = new GaussStyle(this);
 	}
 
 	public static App createFor(HasApp ha) {

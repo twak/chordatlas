@@ -77,6 +77,8 @@ public class PanesLabelApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
+		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
 		
@@ -120,13 +122,12 @@ public class PanesLabelApp extends App {
 				g.drawImage( scaled, 256, 0, null );
 				g.dispose();
 
-				String wName = name + "@" + count + "@" + System.nanoTime();
-				Pix2Pix.addInput( toProcess, wName, netName, a.styleZ );
+				Meta meta = new Meta( r, mask );
+				p2.addInput( toProcess, meta, a.styleZ );
 
 				//					String name = System.nanoTime() + "_" + count;
 				//					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
 
-				names.put( r, new Meta( wName, mask ) );
 				count++;
 
 			} catch ( IOException e1 ) {
@@ -134,31 +135,28 @@ public class PanesLabelApp extends App {
 			}
 		}
 		
-		Pix2Pix.submit ( new Job ( netName, new JobResult() {
+		p2.submit ( new Job ( new JobResult() {
 			@Override
-			public void finished( File f ) {
+			public void finished( Map<Object, File> results ) {
 
 				try {
-
 					
-					for ( Map.Entry<FRect, Meta> e : names.entrySet() ) {
+					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-						Meta meta = e.getValue();
+						Meta meta = (Meta)e.getKey();
 						
-						File labelFile = new File( f, meta.name+ ".png" ) ;
-						BufferedImage labels = ImageIO.read( labelFile );
+//						File labelFile = new File( e.getValue(), meta.name+ ".png" ) ;
+						BufferedImage labels = ImageIO.read( e.getValue() );
 						
 						if (regularize) {
 							regularize ( labels, meta.mask, 0.006 );
-							ImageIO.write( labels, "png", labelFile );
+							ImageIO.write( labels, "png", e.getValue() );
 						}
 						
-						String dest = Pix2Pix.importTexture( f, meta.name, 255, null, meta.mask );
+						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask );
 						
-						if ( dest != null ) {  
-							e.getKey().app.texture = dest;
-							((PanesLabelApp ) e.getKey().app).label = dest;
-						}
+						if ( dest != null )   
+							 meta.r.app.texture = ((PanesLabelApp ) meta.r.app).label = dest;
 					}
 					
 				} catch (Throwable th) {
@@ -231,11 +229,12 @@ public class PanesLabelApp extends App {
 	}
 
 	private static class Meta {
-		String name;
+		
+		FRect r; // the HasApp
 		DRectangle mask;
 
-		private Meta( String name, DRectangle mask ) {
-			this.name = name;
+		private Meta( FRect r, DRectangle mask ) {
+			this.r = r;
 			this.mask = mask;
 		}
 	}

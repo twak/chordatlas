@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,6 +122,8 @@ public class SelectedApps extends ArrayList<App>{
 		
 		top.add(upDown);
 		
+		options.setLayout( new ListDownLayout() );
+		
 		AutoEnumCombo combo = new AutoEnumCombo( exemplar.appMode, new ValueSet() {
 			public void valueSet( Enum num ) {
 				
@@ -128,7 +131,6 @@ public class SelectedApps extends ArrayList<App>{
 					a.appMode = (AppMode) num;
 				
 				options.removeAll();
-				
 				options.setLayout( new ListDownLayout() );
 
 				buildLayout(exemplar.appMode, options, () -> refresh ( update ) );
@@ -213,12 +215,18 @@ public class SelectedApps extends ArrayList<App>{
 		}
 	}
 	
+	static Map<Class, StyleSources> ss2Klass = new HashMap<>();
+	static {
+		for (StyleSources ss : StyleSources.values()) 
+			ss2Klass.put( ss.klass, ss );
+	}
+	
 	private Component createDistEditor( Runnable update ) {
 		
 		JPanel out = new JPanel( new BorderLayout() );
 		JPanel options = new JPanel();
 		
-		AutoEnumCombo combo = new AutoEnumCombo( StyleSources.Constant, new ValueSet() {
+		AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get(exemplar.styleSource.getClass()), new ValueSet() {
 			public void valueSet( Enum num ) {
 				
 				StyleSources sss = (StyleSources) num;

@@ -41,7 +41,7 @@ public class UIVector extends JPanel {
 		if ( byExample ) {
 			FileDrop drop = new FileDrop( "style" ) {
 				public void process( java.io.File f ) {
-					new Pix2Pix().encode( f, exemplar.resolution, exemplar.netName, vector, update );
+					new Pix2Pix(exemplar).encode( f, vector, update );
 				};
 			};
 			out.add( drop );
