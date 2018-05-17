@@ -66,11 +66,11 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.FacadeApp;
+import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.scene.Node;

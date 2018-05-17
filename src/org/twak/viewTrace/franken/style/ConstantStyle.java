@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.style.ui.UIVector;
 
 public class ConstantStyle implements StyleSource {
 	
@@ -27,7 +28,7 @@ public class ConstantStyle implements StyleSource {
 
 		JPanel out = new JPanel(new ListDownLayout() );
 		
-		out.add( new UIVector (mean, app, update ) );
+		out.add( new UIVector (mean, app, true, update ) );
 		
 		return out;
 	}

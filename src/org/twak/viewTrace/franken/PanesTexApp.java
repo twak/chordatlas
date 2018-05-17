@@ -15,9 +15,8 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.Pix2Pix;
-import org.twak.viewTrace.facades.Pix2Pix.Job;
-import org.twak.viewTrace.facades.Pix2Pix.JobResult;
+import org.twak.viewTrace.franken.Pix2Pix.Job;
+import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class PanesTexApp extends App implements HasApp {
 

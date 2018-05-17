@@ -1,4 +1,4 @@
-package org.twak.viewTrace.facades;
+package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -17,7 +17,8 @@ import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Imagez;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.NormSpecGen;
 
 /**
  * Utilties to synthesize facade using Pix2Pix network
@@ -37,19 +38,29 @@ public class Pix2Pix {
 		public void finished ( Map<Object, File>  results);
 	}
 	
-	public static class Job {
+	public static class Job implements JobResult {
+		
 		JobResult finished;
 		public String name;
 		boolean encode= false;
 		
-		public Job (JobResult finished) {
-			this.finished = finished;
+		public Job () {
 			this.name = System.nanoTime() +":"+ Math.random();
+			this.finished = this;
+		}
+		public Job (JobResult finished) {
+			this();
+			this.finished = finished;
 		}
 		
 		public Job (JobResult finished, boolean encode) {
 			this (finished);
 			this.encode = encode;
+		}
+
+		@Override
+		public void finished( Map<Object, File> results ) {
+			finished.finished( results );
 		}
 	}
 	
@@ -66,8 +77,8 @@ public class Pix2Pix {
 			network = network+"_e";
 			
 		
-		File go     = new File( "/home/twak/code/bikegan/input/"  + netName + "/val/go" );
-		File outDir = new File( "/home/twak/code/bikegan/output/" + netName +"/" + job.name );
+		File go     = new File( "/home/twak/code/bikegan/input/"  + network + "/val/go" );
+		File outDir = new File( "/home/twak/code/bikegan/output/" + network +"/" + job.name );
 		
 		try {
 			FileWriter  fos = new FileWriter( go );
@@ -87,7 +98,7 @@ public class Pix2Pix {
 			} catch ( InterruptedException e ) {
 				e.printStackTrace();
 			}
-		} while ( go.exists() && System.currentTimeMillis() - startTime < 1e5 );
+		} while ( go.exists() && System.currentTimeMillis() - startTime < 1e4 );
 
 		startTime = System.currentTimeMillis();
 
@@ -110,6 +121,11 @@ public class Pix2Pix {
 				
 				Map<Object, File> done =new HashMap<>();
 				
+				if (job.encode) {
+					for (File f : outDir.listFiles()) 
+						done.put( null, f );
+				}
+				else
 				for (Map.Entry<Object, String> e : inputs.entrySet())
 					done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
 				
@@ -129,17 +145,21 @@ public class Pix2Pix {
 		
 	}
 	
-	public void encode(File f, double[] values, Runnable update ) {
+	public BufferedImage encode(File f, double[] values, Runnable update ) {
 
 		try {
 			
 			BufferedImage bi = ImageIO.read( f );
+			BufferedImage orig = bi;
 			bi = Imagez.scaleSquare( bi, resolution );
 			bi = Imagez.join( bi, bi );
 
 			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "_e/val/" );
 			dir.mkdirs();
-			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
+
+			addEInput( bi, new Object(), null );
+			
+//			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
 			submit( new Job( new JobResult() {
 
@@ -156,10 +176,12 @@ public class Pix2Pix {
 				}
 			}, true ) );
 
+			return orig;
+			
 		} catch ( Throwable e ) {
 			e.printStackTrace();
 		}
-		
+		return null;
 	}
 
 	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, DRectangle crop ) throws IOException {
@@ -245,7 +267,27 @@ public class Pix2Pix {
 		}
 	}
 	
+	public void addEInput ( BufferedImage bi, Object key, double[] styleZ ) {
+		try {
+			
+			String name = UUID.randomUUID() +"";
+			
+			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "_e/val/" );
+			dir.mkdirs();
+			inputs.put( key, name );
+			
+			ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
+			
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static String zAsString(double[] z) {
+		
+		if (z == null)
+			return "noz";
+		
 		String zs = "";
 		for ( double d : z )
 			zs += "_" + d;

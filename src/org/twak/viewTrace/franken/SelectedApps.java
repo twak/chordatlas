@@ -23,6 +23,7 @@ import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
+import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.StyleSource;
 
@@ -197,7 +198,8 @@ public class SelectedApps extends ArrayList<App>{
 	}
 
 	private enum StyleSources {
-		Gaussian (GaussStyle.class), Constant (ConstantStyle.class);
+		
+		Gaussian (GaussStyle.class), Constant (ConstantStyle.class), MultiModal (MultiModal.class);
 		
 		Class<? extends StyleSource> klass;
 		

@@ -12,10 +12,11 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.style.ui.UIVector;
 
 public class GaussStyle implements StyleSource {
 	
-	double[] mean;
+	public double[] mean;
 	double std;
 	App app;
 	
@@ -60,11 +61,11 @@ public class GaussStyle implements StyleSource {
 			}
 		} );
 		
-		JButton go = new JButton("resample");
-		go.addActionListener( e -> update.run() );
-		out.add( go );
+//		JButton go = new JButton("resample");
+//		go.addActionListener( e -> update.run() );
+//		out.add( go );
 		
-		out.add( new UIVector (mean, app, update ) );
+		out.add( new UIVector (mean, app, false, update ) );
 		
 		return out;
 	}

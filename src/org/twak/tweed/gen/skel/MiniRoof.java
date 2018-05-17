@@ -19,8 +19,8 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.RoofApp;
 
 public class MiniRoof implements HasApp {

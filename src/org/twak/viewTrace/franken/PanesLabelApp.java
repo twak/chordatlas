@@ -21,9 +21,8 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.Pix2Pix;
-import org.twak.viewTrace.facades.Pix2Pix.Job;
-import org.twak.viewTrace.facades.Pix2Pix.JobResult;
+import org.twak.viewTrace.franken.Pix2Pix.Job;
+import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class PanesLabelApp extends App {
 
