@@ -41,6 +41,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	HasApp hasA;
 	String name;
 	
+	// marks as needing geometry recreation
+	public boolean isDirty = false; 
+	
 	// GAN optoins
 	public String netName;
 	public int sizeZ = -1;
@@ -150,6 +153,13 @@ public abstract class App /*earance*/ implements Cloneable {
 //		}
 //	}
 
+	public void markDirty() {
+		isDirty = true;
+		App up = getUp();
+		if (up != null)
+			up.markDirty();
+	}
+	
 	public String zAsString() {
 		String zs = "";
 		for ( double d : styleZ )

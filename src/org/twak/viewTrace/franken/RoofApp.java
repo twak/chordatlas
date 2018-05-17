@@ -71,10 +71,10 @@ public class RoofApp extends App {
 
 			index.put( toEdit, name );
 
-			Pix2Pix.addInput( bi, name, netName );
+			Pix2Pix.addInput( bi, name, netName, toEdit.app.styleZ );
 		}
 
-		Pix2Pix.submit( new Job( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {
+		Pix2Pix.submit( new Job( netName, new JobResult() {
 			
 			@Override
 			public void finished( File f ) {

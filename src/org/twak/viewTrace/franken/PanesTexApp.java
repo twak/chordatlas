@@ -90,8 +90,8 @@ public class PanesTexApp extends App implements HasApp {
 //				g.drawImage( scaled, 256, 0, null );
 //				g.dispose();
 
-				String wName = name + "_" + count + "@" + System.nanoTime();
-				Pix2Pix.addInput( toProcess, wName, netName );
+				String wName = name + "@" + count + "@" + System.nanoTime();
+				Pix2Pix.addInput( toProcess, wName, netName, a.styleZ );
 
 				names.put( pta, new Meta( wName, mask, labels ) );
 				count++;
@@ -101,7 +101,7 @@ public class PanesTexApp extends App implements HasApp {
 			}
 		}
 		
-		Pix2Pix.submit( new Job( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {
+		Pix2Pix.submit( new Job( netName, new JobResult() {
 			@Override
 			public void finished( File f ) {
 

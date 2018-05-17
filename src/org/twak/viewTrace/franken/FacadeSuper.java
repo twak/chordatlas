@@ -149,8 +149,8 @@ public class FacadeSuper extends App implements HasApp {
 
 						g.dispose();
 					}
-
-					Pix2Pix.addInput( toProcess, ts.nextTile, netName );
+					
+					Pix2Pix.addInput( toProcess, ts.nextTile, netName, e.getKey().app.zuper.styleZ );
 
 					System.out.println( "++" + x + ", " + y );
 					count++;
@@ -166,7 +166,7 @@ public class FacadeSuper extends App implements HasApp {
 			}
 		}
 			
-			Pix2Pix.submit ( new Job ( netName,  System.nanoTime() + "_" + zAsString(), new JobResult() {
+			Pix2Pix.submit ( new Job ( netName,  new JobResult() {
 				@Override
 				public void finished( File f ) {
 					

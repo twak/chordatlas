@@ -243,6 +243,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				skel = skelS;
 		}
 
+		sf.mr.setOutline( skel.output );
+		sf.skel = skel;
+		
 		return skel;
 	}
 
@@ -375,35 +378,45 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	
 	Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
 
-	public synchronized void setSkel( PlanSkeleton skel, SuperFace sf, Map<Object, Face> occluderLookup ) {
+	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_, Map<Object, Face> occluderLookup ) {
 
-		removeGeometryFor( sf );
-
-		Node house;
-
-		OnClick onclick = new OnClick() {
-			@Override
-			public void selected( Output output, Node house2, SuperEdge se, HasApp ha ) {
+		sft_.app.isDirty = true; // todo: dirty hack! can remove sft from this interface
+		
+		for (HalfFace hf : block) {
+			
+			SuperFace sf = (SuperFace)hf;
+		
+			if ( sf.app.isDirty ) {  
 				
-				if (tweed.tool instanceof TextureTool)
-					SkelGen.this.textureSelected( skel, house2, sf, se, ha );
-				else
-					SkelGen.this.selected( skel, house2, sf, se );
+				sf.app.isDirty = false;
+				
+				removeGeometryFor( sf );
+
+				Node house;
+
+				OnClick onclick = new OnClick() {
+					@Override
+					public void selected( Output output, Node house2, SuperEdge se, HasApp ha ) {
+
+						if ( tweed.tool instanceof TextureTool )
+							SkelGen.this.textureSelected( sf.skel, house2, sf, se, ha );
+						else
+							SkelGen.this.selected( sf.skel, house2, sf, se );
+					}
+				};
+
+				GreebleSkel greeble = new GreebleSkel( tweed );
+
+				house = greeble.showSkeleton( sf.skel.output, onclick, occluderLookup, sf.mr );
+
+				gNode.attachChild( house );
+				geometry.get( sf ).set( house, sf.skel.output, sf.skel );
+
+				tweed.getRootNode().updateGeometricState();
+				tweed.getRootNode().updateModelBound();
+				tweed.gainFocus();
 			}
-		};
-
-		GreebleSkel greeble = new GreebleSkel( tweed );
-		
-		house = greeble.showSkeleton( skel.output, onclick, occluderLookup, sf.mr );
-
-		sf.mr.setOutline (skel.output);
-		
-		gNode.attachChild( house );
-		geometry.get( sf ).set (house, skel.output, skel );
-
-		tweed.getRootNode().updateGeometricState();
-		tweed.getRootNode().updateModelBound();
-		tweed.gainFocus();
+		}
 	}
 
 	private void removeGeometryFor( SuperFace sf ) {
@@ -447,7 +460,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				
 				siteplan = new Siteplan( skel.plan, false ) {
 
-					SuperFace workon = sf;
+//					SuperFace workon = sf;
 
 					public void show( Output output, Skeleton threadKey ) {
 
@@ -459,10 +472,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 							@Override
 							public void run() {
 
-								removeGeometryFor( workon );
+								removeGeometryFor( sf );
 								tweed.frame.setGenUI( null ); // current selection is invalid
-
-								setSkel( (PlanSkeleton) threadKey, workon, lastOccluders );
+								sf.skel = (PlanSkeleton) threadKey;
+								setSkel( (PlanSkeleton) threadKey, sf, lastOccluders );
 
 							}
 

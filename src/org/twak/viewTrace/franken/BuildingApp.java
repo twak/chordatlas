@@ -11,7 +11,7 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 public class BuildingApp extends App {
 
 	public SkelGen parent;
-
+	
 	public BuildingApp( SuperFace superFace ) {
 		super( superFace, "building", null, 0, 0 );
 	}

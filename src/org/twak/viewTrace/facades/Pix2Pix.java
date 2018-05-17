@@ -18,11 +18,12 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.tools.FacadeTool;
-import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App.TextureUVs;
+
+import redis.clients.jedis.params.sortedset.ZAddParams;
 
 /**
  * Utilties to synthesize facade using Pix2Pix network
@@ -65,11 +66,11 @@ public class Pix2Pix {
 		JobResult finished;
 		public String name;
 		
-		public Job (String network, String name, JobResult finished) {
+		public Job (String network, JobResult finished) {
 			
 			this.network = network;
 			this.finished = finished;
-			this.name = name;
+			this.name = System.nanoTime() +":"+ Math.random();
 		}
 	}
 	
@@ -150,7 +151,7 @@ public class Pix2Pix {
 			dir.mkdirs();
 			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
 
-			submit( new Job( netName+"_e", System.nanoTime() + "_" + Filez.stripExtn( f.getName() ), new JobResult() {
+			submit( new Job( netName+"_e", new JobResult() {
 
 				@Override
 				public void finished( File f ) {
@@ -233,13 +234,25 @@ public class Pix2Pix {
 			return toEdit.postState.outerFacadeRect;
 	}
 	
-	public static void addInput( BufferedImage bi, String name, String netName ) {
+	public static void addInput( BufferedImage bi, String name, String netName, double[] styleZ ) {
 		try {
+			
+			if (name.contains( "_" )) 
+				throw new Error();
+			
+			
 			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "/val/" );
 			dir.mkdirs();
-			ImageIO.write( bi, "png", new File( dir, name + ".png" ) );
+			ImageIO.write( bi, "png", new File( dir, name + zAsString( styleZ ) + ".png" ) );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static String zAsString(double[] z) {
+		String zs = "";
+		for ( double d : z )
+			zs += "_" + d;
+		return zs;
 	}
 }

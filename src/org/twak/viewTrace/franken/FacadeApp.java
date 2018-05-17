@@ -5,7 +5,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,11 +29,10 @@ import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.facades.Pix2Pix.CMPLabel;
 import org.twak.viewTrace.facades.Pix2Pix.Job;
 import org.twak.viewTrace.facades.Pix2Pix.JobResult;
-import org.twak.viewTrace.franken.App.AppMode;
 
 public class FacadeApp extends App {
 
-	FacadeSuper zuper = new FacadeSuper(this);
+	public FacadeSuper zuper = new FacadeSuper(this);
 	public SuperFace parent;
 	public String coarse;
 	
@@ -140,10 +138,10 @@ public class FacadeApp extends App {
 
 			index.put( mf, new Meta( name, mask ) );
 
-			Pix2Pix.addInput( bi, name, netName );
+			Pix2Pix.addInput( bi, name, netName, mf.app.styleZ );
 		}
 
-		Pix2Pix.submit( new Job( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {
+		Pix2Pix.submit( new Job( netName, new JobResult() {
 
 			@Override
 			public void finished( File f ) {
@@ -195,7 +193,7 @@ public class FacadeApp extends App {
 		for ( FRect r : rects ) {
 
 			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
-
+				
 				DRectangle w = bounds.scale( mini.normalize( r ) );
 
 				w.y = 256 - w.y - w.height;

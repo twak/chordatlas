@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import org.twak.utils.ui.FileDrop;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.NSliders;
 import org.twak.viewTrace.facades.Pix2Pix;
 import org.twak.viewTrace.franken.App;
@@ -22,7 +23,7 @@ public class UIVector extends JPanel {
 		
 		setLayout( new BorderLayout() );
 		JToggleButton method = new JToggleButton("by example");
-		JPanel options = new JPanel();
+		JPanel options = new JPanel(new ListDownLayout());
 		
 		method.addActionListener( e -> setUI (options, method.isSelected(), update ) );
 		
@@ -30,7 +31,7 @@ public class UIVector extends JPanel {
 		add (options, BorderLayout.CENTER );
 		
 		setUI (options, method.isSelected(), update );
-		setPreferredSize( new Dimension (200, 400) );
+//		setPreferredSize( new Dimension (200, 400) );
 	}
 	
 	public void setUI (JPanel out, boolean byExample, Runnable update) {

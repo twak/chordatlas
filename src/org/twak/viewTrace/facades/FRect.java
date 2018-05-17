@@ -261,6 +261,17 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	public void setObject( Object o ) {
 		if (o != this)
 			throw new Error("!");
+	}	
+	
+	@Override
+	public boolean equals( Object obj ) {
+		
+		if (!(obj instanceof FRect))
+			return false;
+		
+		FRect o = (FRect)obj;
+		
+		return super.equals( o ) && o.f == f;
 	}
 }
 

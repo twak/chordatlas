@@ -106,24 +106,19 @@ public class GreebleSkel {
 		
 		
 		roofColor = Colourz.toF4( HasApp.get( roofApp ).color );
+		Set<MiniFacade> allMFs = new HashSet<>();
+		
 		
 		for ( Face f : output.faces.values() )  {
+			WallTag wt = ((WallTag) GreebleHelper.getTag( f.profile, WallTag.class ));
 			
-			Tag t = GreebleHelper.getTag( f.profile, WallTag.class );
-			
-			WallTag wt = ((WallTag)t);
-			
-			if (t != null ) {
-				
-				wt.miniFacade.postState = null;
-				
-//				for ( Loop<SharedEdge> lc : f.edges )
-//					for ( SharedEdge se : lc ) {
-//						roofBounds.envelop( Pointz.to2( se.start ) );
-//						roofBounds.envelop( Pointz.to2( se.end ) );
-//					}
-				wt.miniFacade.postState = new PostProcessState();
-			}
+			if (wt != null ) 
+				allMFs.add( wt.miniFacade );
+		}
+		
+		for (MiniFacade mf : allMFs) {
+				mf.postState = null;
+				mf.postState = new PostProcessState();
 		}
 		
 //		roofBounds.grow( 2 );
@@ -133,8 +128,6 @@ public class GreebleSkel {
 		
 		List<List<Face>> chains = Campz.findChains( output );
 
-		Set<MiniFacade> seen = new HashSet<>();
-		
 		// give each minifacade a chance to update its features based on the skeleton result
 		for (List<Face> chain : chains) {
 			
@@ -163,13 +156,13 @@ public class GreebleSkel {
 							mf.postState.occluders.add( projectTo( megafacade, mfl, lf, f ) );
 				}
 				
-				
-				if ( seen.add( mf ) ) {
-					mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
-					mf.width = chain.get( 0 ).edge.length();
-					mf.featureGen.update();
-				}
+				mf.width = chain.get( 0 ).edge.length();
 			}
+		}
+		
+		for (MiniFacade mf : allMFs) {
+				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
+				mf.featureGen.update();
 		}
 		
 		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());

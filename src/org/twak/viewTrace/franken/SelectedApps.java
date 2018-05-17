@@ -28,7 +28,7 @@ import org.twak.viewTrace.franken.style.StyleSource;
 
 public class SelectedApps extends ArrayList<App>{
 	
-	App exemplar;
+	public App exemplar;
 	
 	public SelectedApps(App app) {
 		add(app);
@@ -82,8 +82,17 @@ public class SelectedApps extends ArrayList<App>{
 		App.computeWithChildren( this, 0, globalUpdate );
 	}
 	
-	public JPanel createUI( Runnable update ) {
+	public JPanel createUI( Runnable update_ ) {
 
+		Runnable update = new Runnable() {
+			@Override
+			public void run() {
+				for (App a : SelectedApps.this)
+					a.markDirty();
+				update_.run();
+			}
+		};
+		
 		JPanel top = new JPanel(new ListDownLayout() );
 		JPanel main = new JPanel(new BorderLayout() );
 		
@@ -214,20 +223,26 @@ public class SelectedApps extends ArrayList<App>{
 				
 				StyleSources sss = (StyleSources) num;
 				StyleSource ss;
-				
+
 				if (exemplar.styleSource.getClass() == sss.klass)
 					ss = exemplar.styleSource;
 				else
 					ss = sss.instance(exemplar);
 
-				for (App a : SelectedApps.this)
+				boolean changed = false;
+				for (App a : SelectedApps.this) {
+					changed |= a.styleSource != ss;
 					a.styleSource = ss;
+				}
 				
 				options.removeAll();
 				options.setLayout( new BorderLayout() );
 				options.add( ss.getUI(update), BorderLayout.CENTER );
 				options.repaint();
 				options.revalidate();
+				
+				if (changed)
+					update.run();
 			}
 		}, "distribution:" );
 		

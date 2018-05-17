@@ -120,8 +120,8 @@ public class PanesLabelApp extends App {
 				g.drawImage( scaled, 256, 0, null );
 				g.dispose();
 
-				String wName = name + "_" + count + "@" + System.nanoTime();
-				Pix2Pix.addInput( toProcess, wName, netName );
+				String wName = name + "@" + count + "@" + System.nanoTime();
+				Pix2Pix.addInput( toProcess, wName, netName, a.styleZ );
 
 				//					String name = System.nanoTime() + "_" + count;
 				//					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
@@ -134,7 +134,7 @@ public class PanesLabelApp extends App {
 			}
 		}
 		
-		Pix2Pix.submit ( new Job ( netName, System.nanoTime() + "_" + zAsString(), new JobResult() {
+		Pix2Pix.submit ( new Job ( netName, new JobResult() {
 			@Override
 			public void finished( File f ) {
 

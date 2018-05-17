@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
@@ -24,7 +25,8 @@ public class SuperFace extends HalfFace implements HasApp {
 	
 	public transient MiniRoof mr = new MiniRoof(this);
 	
-	public BuildingApp app = new BuildingApp(this); 
+	public BuildingApp app = new BuildingApp(this);
+	public PlanSkeleton skel; 
 	
 	public SuperFace() {
 		super(null);
