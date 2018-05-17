@@ -19,7 +19,8 @@ import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.FacadeApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class MiniFacade implements HasApp {
 	
@@ -44,7 +45,8 @@ public class MiniFacade implements HasApp {
 		}
 	}
 	
-	public FacadeApp app = new FacadeApp( this );
+	public FacadeLabelApp appLabel = new FacadeLabelApp( this );
+	public FacadeTexApp app = new FacadeTexApp( this );
 	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	

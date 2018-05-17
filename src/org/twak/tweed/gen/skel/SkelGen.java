@@ -69,8 +69,8 @@ import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
-import org.twak.viewTrace.franken.FacadeApp;
-import org.twak.viewTrace.franken.Pix2Pix;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.scene.Node;
@@ -594,8 +594,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		} 
 		
 		
-		if ( se.toEdit != null ) 
+		if ( se.toEdit != null )  {
 			se.toEdit.app.parent = sf;
+			se.toEdit.appLabel.superFace = sf;
+		}
 
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
 			roof = new RoofTag( sf.roofColor );
@@ -758,7 +760,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		
 		ensureMF(sf, se);
 		
-		se.toEdit.app = new FacadeApp( se.toEdit );
+		se.toEdit.appLabel = new FacadeLabelApp( se.toEdit );
+		se.toEdit.app = new FacadeTexApp( se.toEdit );
 		
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		se.toEdit.featureGen.update();

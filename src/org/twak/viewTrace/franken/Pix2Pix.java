@@ -2,21 +2,26 @@ package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Imagez;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
 
@@ -292,5 +297,40 @@ public class Pix2Pix {
 		for ( double d : z )
 			zs += "_" + d;
 		return zs;
+	}
+	
+	public static Polygon toPoly( MiniFacade toEdit, DRectangle bounds, DRectangle mini, Loop<? extends Point2d> loop ) {
+		Polygon p = new Polygon();
+
+		for ( Point2d pt : loop ) {
+			Point2d p2 = bounds.scale( mini.normalize( pt ) );
+			p.addPoint( (int) p2.x, (int) ( -p2.y + 256 ) );
+		}
+		return p;
+	}
+	
+
+	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
+
+		//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
+		//		
+		//		mini = new DRectangle(mini);
+		//		mini.scale( scale );
+		//		
+		//		mini.x = (1-mini.width) / 2;
+		//		mini.y = (1-mini.height) / 2;
+
+		for ( FRect r : rects ) {
+
+			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
+				
+				DRectangle w = bounds.scale( mini.normalize( r ) );
+
+				w.y = 256 - w.y - w.height;
+
+				g.setColor( col );
+				g.fillRect( (int) w.x, (int) w.y, (int) w.width, (int) w.height );
+			}
+		}
 	}
 }

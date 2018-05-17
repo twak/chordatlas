@@ -29,53 +29,40 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class FacadeApp extends App {
+public class FacadeLabelApp extends App {
 
-	public FacadeSuper zuper = new FacadeSuper(this);
-	public SuperFace parent;
+	public SuperFace superFace;
 	public String coarse;
 	
-	public FacadeApp( HasApp ha ) {
-		super( ha, "facade coarse", "bike_2", 8, 256 );
+	public FacadeLabelApp( HasApp ha ) {
+		super( ha, "facade labels", "blank", 8, 256 );
 	}
 
-	public FacadeApp( FacadeApp facadeCoarse ) {
+	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
 		super( facadeCoarse );
-		this.zuper = facadeCoarse.zuper;
 	}
 
 	@Override
 	public App getUp() {
-		return parent.app;
+		return superFace.app;
 	}
 
 	@Override
 	public MultiMap<String, App> getDown() {
 		
-		MiniFacade mf = (MiniFacade)hasA;
-		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		if (mf.postState != null)
-		for (FRect r : mf.postState.generatedWindows)
-			out.put( "window", r.app );
-		
-		out.put( "super", zuper );
+		MiniFacade mf = (MiniFacade)hasA;
+		out.put( "facade texture", mf.app );
 		
 		return out;
 	}
 
 	@Override
 	public App copy() {
-		return new FacadeApp( this );
+		return new FacadeLabelApp( this );
 	}
 
-	final static Map<Color, Color> specLookup = new HashMap<>();
-	static {
-		specLookup.put( CMPLabel.Window.rgb, Color.white );
-		specLookup.put( CMPLabel.Shop.rgb  , Color.darkGray );
-		specLookup.put( CMPLabel.Door.rgb  , Color.gray );
-	}
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
@@ -114,30 +101,20 @@ public class FacadeApp extends App {
 			g.setColor( CMPLabel.Facade.rgb );
 
 			if ( mf.postState == null ) {
-				cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
+				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
 			} else {
 				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
-					g.fill( toPoly( mf, mask, mini, l ) );
+					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 
 				g.setColor( CMPLabel.Background.rgb );
 				for ( LoopL<Point2d> ll : mf.postState.occluders )
 					for ( Loop<Point2d> l : ll )
-						g.fill( toPoly( mf, mask, mini, l ) );
+						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 			}
-
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-			cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
 
 			mask.x -= resolution;
 
-//			String name = System.nanoTime() + "@" + index.size();
-
 			Meta meta = new Meta( mf, name, mask );
-//			index.put( mf, meta );
 
 			p2.addInput( bi, meta, mf.app.styleZ );
 		}
@@ -154,7 +131,7 @@ public class FacadeApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask );
+						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
 
 						if ( dest != null ) {
 							meta.mf.app.coarse = meta.mf.app.texture = dest;
@@ -167,40 +144,6 @@ public class FacadeApp extends App {
 				whenDone.run();
 			}
 		} ) );
-	}
-
-	private static Polygon toPoly( MiniFacade toEdit, DRectangle bounds, DRectangle mini, Loop<? extends Point2d> loop ) {
-		Polygon p = new Polygon();
-
-		for ( Point2d pt : loop ) {
-			Point2d p2 = bounds.scale( mini.normalize( pt ) );
-			p.addPoint( (int) p2.x, (int) ( -p2.y + 256 ) );
-		}
-		return p;
-	}
-
-	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
-
-		//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
-		//		
-		//		mini = new DRectangle(mini);
-		//		mini.scale( scale );
-		//		
-		//		mini.x = (1-mini.width) / 2;
-		//		mini.y = (1-mini.height) / 2;
-
-		for ( FRect r : rects ) {
-
-			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
-				
-				DRectangle w = bounds.scale( mini.normalize( r ) );
-
-				w.y = 256 - w.y - w.height;
-
-				g.setColor( col );
-				g.fillRect( (int) w.x, (int) w.y, (int) w.width, (int) w.height );
-			}
-		}
 	}
 
 	private static class Meta {

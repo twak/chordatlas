@@ -27,9 +27,9 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class FacadeSuper extends App implements HasApp {
 
-	FacadeApp parent;
+	FacadeTexApp parent;
 	
-	public FacadeSuper( FacadeApp parent ) {
+	public FacadeSuper( FacadeTexApp parent ) {
 		super( null, "super-facade", "super3", 8, 256 );
 		this.hasA = this;
 		this.parent = parent;
@@ -66,7 +66,7 @@ public class FacadeSuper extends App implements HasApp {
 		{
 			try {
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeApp) parent).coarse ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
 //				src = Imagez.scaleLongest( src, 128 );
 //				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
 
