@@ -46,13 +46,22 @@ public class Regularizer {
 	
 	int ids = 0;
 	
+
+	public double alpha = 0.2;
+	public double scale = 1;
+	
 	final static Feature[] toReg = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
 	
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
 	
 	double targetWidth = -1;
 	
-	public static int miniFacadesUsed = 0, regularised = 0, totalFeature = 0;
+	public Regularizer () {}
+	public Regularizer (double alpha) {
+		this.alpha = alpha;
+	}
+	
+//	public static int miniFacadesUsed = 0, regularised = 0, totalFeature = 0;
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
@@ -61,23 +70,21 @@ public class Regularizer {
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return goDebug (in, 1, wantsFacade).get(0);
+		return go (in, 1, wantsFacade).get(0);
 		
 	}
 	
-	public List<MiniFacade> goDebug (List<MiniFacade> in, double targetS, double targetE, double debugFrac ) {
+	public List<MiniFacade> go (List<MiniFacade> in, double targetS, double targetE, double debugFrac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return goDebug(in, debugFrac, null);
+		return go(in, debugFrac, null);
 		
 	}
 	
-	public List<MiniFacade> goDebug( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures ) {
+	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures ) {
 		
-		miniFacadesUsed += in.size();
-		regularised++;
 		for (MiniFacade mf : in) 
 			if (mf.imageFeatures != null)
 				seenImages.add ( mf.imageFeatures.ortho );
@@ -86,10 +93,10 @@ public class Regularizer {
 			return Collections.singletonList( gridMini() );
 		
 		System.out.println("starting to regularize "  + in.size() +" facades...");
-		in = augmentWithTween( in, megaFeatures );
+		if (megaFeatures != null)
+			in = augmentWithTween( in, megaFeatures );
 		System.out.println(" adding tween for " + in.size() + " facades");
 		
-		double alpha = 0.2;
 		
 		List<MiniFacade> out;
 		
@@ -137,7 +144,7 @@ public class Regularizer {
 			
 			for (MiniFacade mf : out)
 				for (Feature f : toReg) 
-					cluster1 ( mf.featureGen.getRects(f), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
+					cluster1 ( mf.featureGen.getRects(f), 1 * scale,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
 			
 //			for (MiniFacade mf : out)
 //					cluster1 ( mf.getRects(toReg), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
@@ -151,17 +158,17 @@ public class Regularizer {
 			
 			for (Feature f : toReg) {
 				List<FRect> allF = out.stream().flatMap( mf -> mf.featureGen.get( f ).stream() ).collect( Collectors.toList() );
-				cluster1 ( allF, 0.5, alpha, Bounds.WIDTH, Bounds.HEIGHT);
+				cluster1 ( allF, 0.5 * scale, alpha, Bounds.WIDTH, Bounds.HEIGHT);
 			}
 			
-			cluster1 ( allRects, 0.3,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
+			cluster1 ( allRects, 0.2 * scale,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
 			
 			if (i % 5 == 0)
 				for (MiniFacade mf : out) 
 					findNeighbours(  mf.featureGen.getRects(Feature.WINDOW ) );
 			
 			for (Dir dir : Dir.values())
-				clusterDeltas(allRects, 0.2, alpha, dir );
+				clusterDeltas(allRects, 0.2* scale, alpha, dir );
 			
 			for ( MiniFacade mf : out ) { 
 				
@@ -178,7 +185,7 @@ public class Regularizer {
 
 					while ( rit.hasNext() ) {
 						FRect r = rit.next();
-						if ( r.width <= 0.4 || r.height <= 0.4 )
+						if ( r.width  <= 0.4* scale || r.height <= 0.4* scale )
 							rit.remove();
 						else
 							for ( FRect n : r.adjacent )
@@ -254,8 +261,6 @@ public class Regularizer {
 		
 		out.add(0, combine(out));
 		
-		totalFeature += out.get( 0 ).featureGen.getRects( Feature.values() ).size();
-		
 		System.out.println("done");
 		
 
@@ -320,12 +325,15 @@ public class Regularizer {
 					gridMF.featureGen.get(Feature.GRID).clear();
 					gridMF.featureGen.get(Feature.WINDOW).clear();
 
+					boolean found = false;
 					for ( FRect f : nmf.featureGen.get( Feature.GRID ) ) {
 						f.f = Feature.WINDOW;
 						gridMF.featureGen.put( f.f, f );
+						found = true;
 					}
 
-					out.add( gridMF );
+					if (found)
+						out.add( gridMF );
 				}
 			}
 		return out;
@@ -484,14 +492,15 @@ public class Regularizer {
 		mr.width -= 0.2; // ensure everything is comfortably within the bounds
 		mr.x += 0.1; 
 		
+		
 		for ( Feature f : Feature.values() ) { // clip to all
 			Iterator<FRect> rit = out.featureGen.get( f ).iterator();
 			while ( rit.hasNext() ) {
 				FRect r = rit.next();
 				DRectangle section = r.intersect( mr );
-				if ( section == null || section.area() < 0.5 )
-					rit.remove();
-				else
+//				if ( section == null || section.area() < 0.5 )
+//					rit.remove();
+//				else
 					r.setFrom( section );
 			}
 		}
@@ -1150,7 +1159,7 @@ public class Regularizer {
 				
 				FRect r = rit.next();
 				
-				if ( r.width <= 0.3 || r.height <= 0.3 ) {
+				if ( r.width <= 0.3 * scale || r.height <= 0.3 * scale ) {
 					rit.remove();
 					continue rit;
 				}
@@ -1185,7 +1194,6 @@ public class Regularizer {
 
 	private DRectangle average( FRect...rs_ ) {
 		
-		FRect out = new FRect( (FRect) null);
 		
 		List<FRect> rs= new ArrayList();
 
@@ -1215,8 +1223,6 @@ public class Regularizer {
 				}
 				
 			}
-			
-			
 		}
 		
 //		while (fit.hasNext()) {
@@ -1225,6 +1231,7 @@ public class Regularizer {
 //			for (FRect f : new Array)
 //			
 //		}
+		FRect out = new FRect(rs_[0].mf);
 		
 		boolean onlyInGrid = rs.stream().mapToInt( r -> r.outer == null ? 0 : 1 ).sum() >= 1;
 		

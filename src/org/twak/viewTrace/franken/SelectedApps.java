@@ -228,6 +228,8 @@ public class SelectedApps extends ArrayList<App>{
 		JPanel out = new JPanel( new BorderLayout() );
 		JPanel options = new JPanel();
 		
+		JPanel north = new JPanel( new ListDownLayout() );
+		
 		AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get(exemplar.styleSource.getClass()), new ValueSet() {
 			public void valueSet( Enum num ) {
 				
@@ -258,7 +260,10 @@ public class SelectedApps extends ArrayList<App>{
 		
 		combo.fire();
 		
-		out.add( combo, BorderLayout.NORTH );
+		north.add( exemplar.createUI( update, SelectedApps.this ) );
+		north.add( combo );
+		
+		out.add( north, BorderLayout.NORTH );
 		out.add( options, BorderLayout.CENTER );
 		
 		return out;

@@ -34,10 +34,11 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		this.facadeStyle = featureGen.facadeStyle;
 	}
 
-	public void add( Feature feat, DRectangle rect ) {
+	public FRect add( Feature feat, DRectangle rect ) {
 		FRect f = new FRect( rect, mf );
 		f.f = feat;
 		put( feat, f );
+		return f;
 	}
 
 	public void update() {/*override me*/}
@@ -63,5 +64,4 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		}
 		return out;
 	}
-
 }

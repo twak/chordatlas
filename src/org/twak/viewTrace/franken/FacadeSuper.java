@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
@@ -19,6 +21,8 @@ import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
@@ -28,9 +32,10 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class FacadeSuper extends App implements HasApp {
 
 	FacadeTexApp parent;
+	public double scale=40;
 	
 	public FacadeSuper( FacadeTexApp parent ) {
-		super( null, "super-facade", "super3", 8, 256 );
+		super( null, "super-facade", "super6", 8, 256 );
 		this.hasA = this;
 		this.parent = parent;
 	}
@@ -55,6 +60,21 @@ public class FacadeSuper extends App implements HasApp {
 	}
 	
 	@Override
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+		
+		JPanel out = new JPanel(new ListDownLayout());
+		
+		out.add ( new AutoDoubleSlider( this, "scale", "scale", 20, 200 ) {
+			public void updated() {
+				System.out.println( globalUpdate );
+//				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		return out;
+	}
+	
+	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		Map<MiniFacade, FacState> todo = new LinkedHashMap();
@@ -73,12 +93,12 @@ public class FacadeSuper extends App implements HasApp {
 				
 				DRectangle mini = Pix2Pix.findBounds( mf );
 				
-				BufferedImage tiny = Imagez.scaleTo( src, (int) ( mini.width * 10 ), (int) ( mini.width * 10 ) );
-				Imagez.gaussianNoise( tiny, 0.03 );
+//				BufferedImage tiny = Imagez.scaleTo( src, (int) ( mini.width * 10 ), (int) ( mini.width * 10 ) );
+//				Imagez.gaussianNoise( tiny, 0.03 );
 				
-				BufferedImage highRes = Imagez.scaleTo( tiny,
-						(int)( mini.width * FacadeTool.pixelsPerMeter),
-						(int)( mini.height * FacadeTool.pixelsPerMeter) );
+				BufferedImage highRes = Imagez.scaleTo( src,
+						(int)( mini.width * scale),
+						(int)( mini.height * scale) );
 						
 //						, BufferedImage.TYPE_3BYTE_BGR);
 //				{
@@ -110,7 +130,7 @@ public class FacadeSuper extends App implements HasApp {
 		facadeContinue (todo, whenDone );
 	}
 	
-	final static int overlap = 47, nonOverlap = 256 - overlap; 
+	final static int overlap = 0, nonOverlap = 256 - overlap; 
 	
 	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable whenDone ) {
 
@@ -121,7 +141,7 @@ public class FacadeSuper extends App implements HasApp {
 
 		int MAX_CONCURRENT = 32;
 
-		Pix2Pix p2 = new Pix2Pix (todo.keySet().iterator().next().app );
+		Pix2Pix p2 = new Pix2Pix ( this );
 		
 		int count = 0;
 		for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {

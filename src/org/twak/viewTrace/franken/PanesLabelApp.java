@@ -47,7 +47,7 @@ public class PanesLabelApp extends App {
 	public MultiMap<String, App> getDown() {
 		MultiMap<String, App>  out = new MultiMap<>();
 		
-		out.put( "facade texture", child );
+		out.put( "window texture", child );
 		
 		return out;
 	}
@@ -57,6 +57,7 @@ public class PanesLabelApp extends App {
 			return new PanesLabelApp( this );
 	}
 	
+	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		return new AutoCheckbox( this, "regularize", "regularize" ) {
@@ -91,7 +92,7 @@ public class PanesLabelApp extends App {
 				//			if (mf.featureGen instanceof CGAMini)
 				//				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.texture ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.coarse ) );
 				DRectangle mini = Pix2Pix.findBounds( mf );
 
 				FRect r = (FRect) a.hasA;
@@ -99,7 +100,7 @@ public class PanesLabelApp extends App {
 				if ( !mini.contains( r ) )
 					return;//continue;
 
-				DRectangle w = bounds.scale( mini.normalize( r ) );
+				DRectangle w = bounds.transform( mini.normalize( r ) );
 				w.y = bounds.getMaxY() - w.y - w.height;
 
 				BufferedImage dow =

@@ -21,7 +21,7 @@ public class NSliders extends JPanel {
 	boolean updating = false;
 	Runnable c;
 	
-	public NSliders (double[] result, Runnable update) {
+	public NSliders (double[] result, Runnable update, Runnable extraButton ) {
 		
 		this.results = result;
 		this.c = update;
@@ -74,12 +74,17 @@ public class NSliders extends JPanel {
 			}
 		}  );
 		add (rand);
+		
+		if (extraButton != null) {
+			JButton e = new JButton(extraButton.toString());
+			e.addActionListener( f -> extraButton.run() );
+			add(e);
+		}
 	}
 
 	public void setValues (double[] newValues) {
 		updating = true;
 		for (int i = 0; i < newValues.length; i ++) {
-			System.out.println( newValues[i] );
 			sliders[i].setValue( (int) ( (newValues[i] + 2) * 250 ) );
 		}
 		updating = false;

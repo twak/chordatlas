@@ -4,35 +4,46 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.nio.file.Files;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FacadeLabelApp extends App {
 
 	public SuperFace superFace;
 	public String coarse;
+	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
 	public FacadeLabelApp( HasApp ha ) {
-		super( ha, "facade labels", "blank", 8, 256 );
+		super( ha, "facade labels", "empty2windows_f005", 8, 256 );
 	}
 
 	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
@@ -60,6 +71,30 @@ public class FacadeLabelApp extends App {
 		return new FacadeLabelApp( this );
 	}
 
+	@Override
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+		JPanel out = new JPanel(new ListDownLayout());
+		
+		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+			public void updated() {
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+			public void updated() {
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+			public void updated() {
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		return out;
+	}
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
@@ -73,11 +108,13 @@ public class FacadeLabelApp extends App {
 		
 		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
 
-		for ( MiniFacade mf : mfb ) {
-			
-			if (mf.featureGen instanceof CGAMini)
-				mf.featureGen = new FeatureGenerator( mf );
+		for (App a : batch) {
+//		for ( MiniFacade mf : mfb ) {
 
+			MiniFacade mf = (MiniFacade) a.hasA;
+			
+			mf.postState.generatedWindows.clear();
+			
 			DRectangle mini = Pix2Pix.findBounds( mf );
 
 			g.setColor( Color.black );
@@ -110,7 +147,7 @@ public class FacadeLabelApp extends App {
 
 			mask.x -= resolution;
 
-			Meta meta = new Meta( mf, mask );
+			Meta meta = new Meta( mf, mask, mini, a );
 
 			p2.addInput( bi, meta, mf.app.styleZ );
 		}
@@ -127,7 +164,7 @@ public class FacadeLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						importLabels(meta.mf, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
 
@@ -135,6 +172,8 @@ public class FacadeLabelApp extends App {
 							meta.mf.appLabel.texture = meta.mf.app.texture = dest;
 						}
 					}
+					
+//					regularize
 
 				} catch ( Throwable e ) {
 					e.printStackTrace();
@@ -146,25 +185,60 @@ public class FacadeLabelApp extends App {
 	}
 	
 	
-	//{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
-	//"wall": [[62, 196, 0, 255]], 
-	// "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
-	private void importLabels( MiniFacade mf, File file ) {
+    private final static ObjectMapper om = new ObjectMapper();
+
+    //{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
+    //"wall": [[62, 196, 0, 255]], 
+    // "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
+	private void importLabels( Meta m,  File file ) {
 		
 		if (file.exists()) {
 			
-//			JsonObject jObj = new JsonObject(Files.readAllLines( file.toPath() ).get( arg0 )[0]);
-			
+			JsonNode root;
+			try {
+				
+				m.mf.featureGen = new FeatureGenerator( m.mf );
+				
+				root = om.readTree( FileUtils.readFileToString( file ) );
+				JsonNode node = root.get( "window" );
+				
+				for (int i = 0; i < node.size(); i++) {
+					
+					JsonNode rect = node.get( i );
+					
+					DRectangle f = new DRectangle( rect.get( 0 ).asDouble(), resolution - rect.get( 3 ).asDouble(),
+							rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(),
+							rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
+							
+					FRect window = m.mf.featureGen.add( Feature.WINDOW, m.mfBounds.transform ( m.mask.normalize( f ) ) );
+					
+				}
+				
+				if (regFrac > 0) {
+					Regularizer reg = new Regularizer();
+					reg.alpha = regAlpha;
+					reg.scale = regScale;
+					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 1 ).featureGen;
+				}
+				
+				m.mf.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
+				
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private static class Meta {
-		DRectangle mask;
+		DRectangle mask, mfBounds;
 		MiniFacade mf;
+		App a;
 		
-		private Meta( MiniFacade mf, DRectangle mask ) {
+		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds, App a ) {
 			this.mask = mask;
 			this.mf = mf;
+			this.mfBounds = mfBounds;
+			this.a = a;
 		}
 	}
 	

@@ -304,7 +304,7 @@ public class Pix2Pix {
 		Polygon p = new Polygon();
 
 		for ( Point2d pt : loop ) {
-			Point2d p2 = bounds.scale( mini.normalize( pt ) );
+			Point2d p2 = bounds.transform( mini.normalize( pt ) );
 			p.addPoint( (int) p2.x, (int) ( -p2.y + 256 ) );
 		}
 		return p;
@@ -325,7 +325,7 @@ public class Pix2Pix {
 
 			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
 				
-				DRectangle w = bounds.scale( mini.normalize( r ) );
+				DRectangle w = bounds.transform( mini.normalize( r ) );
 
 				w.y = 256 - w.y - w.height;
 

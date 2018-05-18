@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import org.twak.viewTrace.franken.style.StyleSource;
 public class NetExamples extends JComponent {
 
 	BufferedImage[][] images;
+	int[][] inputIdx;
 	List<Pair<Integer, Integer>> randomOrder = new ArrayList<>();
 	int randomLocation = 0;
 	
@@ -48,7 +50,23 @@ public class NetExamples extends JComponent {
 	
 	App exemplar;
 	
+	boolean mouseDown = false;
+	
 	long startTime = 0, endTime = 1000, lastChanged = 0;
+	
+	
+	static class UniqueInt {
+		
+		int i;
+		public UniqueInt (int i) {
+			this.i = i;
+		}
+
+		@Override
+		public boolean equals( Object obj ) {
+			return obj == this;
+		}
+	}
 	
 	public NetExamples ( StyleSource ss, int x, int y, App exemplar, File exampleFolder ) {
 		
@@ -56,6 +74,7 @@ public class NetExamples extends JComponent {
 		this.exemplar = exemplar;
 		
 		images = new BufferedImage [x][y];
+		inputIdx = new int[x][y];
 		
 		setPreferredSize( new Dimension ( 
 				(int)( x * exemplar.resolution * scale) ,
@@ -84,15 +103,18 @@ public class NetExamples extends JComponent {
 					
 					startTime = System.currentTimeMillis();
 					
-					for (int i = 0; i < BATCH_SIZE; i++) 
-						p2.addInput( inputs.get( randy.nextInt(inputs.size()) ), new Object(), styleSource.draw( randy ) );
+					for (int i = 0; i < BATCH_SIZE; i++) {
+						int index = randy.nextInt(inputs.size());
+						p2.addInput( inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy ) );
+					}
 					
 					p2.submitSafe( new Job() {
 						public void finished(java.util.Map<Object,File> results) {
 							
 							endTime = System.currentTimeMillis();
 							
-							addImages ( startTime, results.values().stream().map( i -> Imagez.read( i ) ).collect( Collectors.toList() ) );
+							
+							addImages ( startTime, results.entrySet().stream().map( e -> new Pair<Integer, BufferedImage>( ((UniqueInt)e.getKey()).i, Imagez.read( e.getValue() )  ) ).collect( Collectors.toList() ) );
 						}
 
 					} );
@@ -113,28 +135,35 @@ public class NetExamples extends JComponent {
 				hx = hy = -1;
 				repaint();
 			};
+			
+			public void mousePressed(MouseEvent e) {
+				mouseDown = true;
+			};
+			
+			public void mouseReleased(MouseEvent e) {
+				mouseDown = false;
+			};
 		};
 		
 		addMouseMotionListener( ml );
 		addMouseListener( ml );
 	}
 	
-	private void addImages( long startTime, List<BufferedImage> collect ) {
+	private void addImages( long startTime, List<Pair<Integer, BufferedImage>> values ) {
 		
-		int interval = Math.min ( 500, (int) ((endTime - startTime) / collect.size() )) ;
+		int interval = Math.min ( 500, (int) ((endTime - startTime) / values.size() )) ;
 		
 		new Thread() {
 			public void run() {
-				if (startTime < lastChanged)
-					return;
 				
-				for ( BufferedImage bi : collect ) {
-					addImage( bi );
+				for ( Pair<Integer, BufferedImage> e : values ) {
+					if (startTime < lastChanged)
+						return;
+					addImage( e.first(), e.second() );
 					try {
 						Thread.sleep( interval );
-					} catch ( InterruptedException e ) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					} catch ( InterruptedException f ) {
+						f.printStackTrace();
 					}
 				}
 
@@ -154,9 +183,10 @@ public class NetExamples extends JComponent {
 		repaint();
 	}
 	
-	private synchronized void addImage (BufferedImage b) {
+	private synchronized void addImage (int src, BufferedImage b) {
 		Pair<Integer, Integer> next = randomOrder.get( (randomLocation ++) % randomOrder.size() );
 		images[ next.first() ][ next.second() ] = b;
+		inputIdx[ next.first() ][ next.second() ] = src;
 		repaint();
 	}
 
@@ -188,7 +218,10 @@ public class NetExamples extends JComponent {
 			y = Mathz.clamp( y, 0, getHeight() - exemplar.resolution );
 			
 			g.drawRect( x-1, y-1, exemplar.resolution+1, exemplar.resolution+1 );
-			g.drawImage( images[hx][hy], x,y, exemplar.resolution, exemplar.resolution, null );
+			
+			BufferedImage toDraw = mouseDown ? inputs.get( inputIdx[hx][hy] ) : images[hx][hy];
+			
+			g.drawImage( toDraw, x,y, exemplar.resolution, exemplar.resolution, null );
 		}
 		
 	}

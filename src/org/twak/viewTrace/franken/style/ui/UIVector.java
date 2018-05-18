@@ -57,7 +57,16 @@ public class UIVector extends JPanel {
 			out.add( drop );
 		} else {
 
-			NSliders sliders = new NSliders( vector, update );
+			NSliders sliders = new NSliders( vector, update, new Runnable() {
+				@Override
+				public void run() {
+					method.doClick();
+				}
+				@Override
+				public String toString() {
+					return "from image";
+				}
+			} );
 			out.add( sliders );
 		}
 		

@@ -65,10 +65,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		plansIn.set( 0 );
 		plansOut.set( 0 );
 		
-		Regularizer.miniFacadesUsed = 0;
-		Regularizer.regularised  = 0; 
 		Regularizer.seenImages.clear();
-		Regularizer.totalFeature = 0;
 		
 		try {
 					
@@ -168,10 +165,6 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		}
 		
 		System.out.println(" before: " + plansIn.get() +" after " + plansOut.get() );
-		System.out.println(" minifacades read: " + Regularizer.miniFacadesUsed +" fac regularised " +
-				Regularizer.regularised + "  total images " + 
-				Regularizer.seenImages.size() );
-		System.out.println(" total features: " + Regularizer.totalFeature);
 		
 		gNode.updateModelBound();
 		gNode.updateGeometricState();
