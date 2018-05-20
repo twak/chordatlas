@@ -150,6 +150,6 @@ public class RoofApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Color, AppMode.Net, AppMode.Bitmap};
+		return new Enum[] {AppMode.Off, AppMode.Net, AppMode.Bitmap};
 	}
 }

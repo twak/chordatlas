@@ -342,7 +342,7 @@ public class GreebleSkel {
 				
 				switch ( mf.app.appMode ) {
 				
-				case Color:
+				case Off:
 					// hashcode to force unique for selection.
 					faceColor = greebleGrid.mbs.get( BRICK+mf.app.hashCode(), mf.app.color, mf );
 //					faceColor = greebleGrid.mbs.get( BRICK, mf.app.color != null ? Colourz mf.app.color : wallColor, mf );
@@ -363,7 +363,7 @@ public class GreebleSkel {
 				
 				switch ( ra.appMode ) {
 
-				case Color:
+				case Off:
 					faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
 					break;
 				case Bitmap:
@@ -631,7 +631,7 @@ public class GreebleSkel {
 				return;
 			}
 
-			if ( mf.app.appMode == AppMode.Color )
+			if ( mf.app.appMode == AppMode.Off )
 				
 				greebleGrid.buildGrid (
 					floorRect,
@@ -665,7 +665,7 @@ public class GreebleSkel {
 		App a = HasApp.get( roofApp );
 		
 		switch ( a.appMode ) {
-			case Color: 
+			case Off: 
 			default:
 				mmb = greebleGrid.mbs.get( TILE, roofColor, roofApp );
 				break;

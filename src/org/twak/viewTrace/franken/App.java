@@ -27,10 +27,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public enum AppMode {
-		Color, Bitmap, Parent, Net
+		Off, Bitmap, Parent, Net
 	}
 	
-	public AppMode appMode = AppMode.Color;
+	public AppMode appMode = AppMode.Off;
 	public TextureUVs textureUVs = TextureUVs.SQUARE;
 	public Color color = Color.gray;
 	
@@ -172,7 +172,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract void computeBatch(Runnable whenDone, List<App> batch);
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Color};
+		return new Enum[] {AppMode.Off};
 	}
 	
 	

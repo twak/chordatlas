@@ -22,6 +22,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class FRect extends DRectangle implements ICanEdit, HasApp {
 	
@@ -31,7 +32,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
-	public App app;
+	public PanesLabelApp app;
 	public MiniFacade mf;
 	
 	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
@@ -62,27 +63,27 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	
 	public FRect(MiniFacade mf) {
 		super();
-		app = App.createFor( this );
+		app = (PanesLabelApp) App.createFor( this );
 		this.mf = mf;
 	}
 	
 	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		app = App.createFor( this );
+		app = (PanesLabelApp) App.createFor( this );
 		this.mf = mf;
 	}
 
 
 	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
-		app = App.createFor( this );
+		app = (PanesLabelApp) App.createFor( this );
 		this.mf = mf;
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.f = feature;
-		app = App.createFor( this );
+		app = (PanesLabelApp) App.createFor( this );
 		this.mf = mf;
 	}
 

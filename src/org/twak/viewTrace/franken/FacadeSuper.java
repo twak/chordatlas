@@ -306,6 +306,6 @@ public class FacadeSuper extends App implements HasApp {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Color, AppMode.Net};
+		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 }

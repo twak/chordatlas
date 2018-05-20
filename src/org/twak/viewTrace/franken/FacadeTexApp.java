@@ -183,6 +183,6 @@ public class FacadeTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Color, AppMode.Net};
+		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 }

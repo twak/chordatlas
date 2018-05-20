@@ -117,7 +117,7 @@ public class SelectedApps extends ArrayList<App>{
 		if (downs != null)
 		for (String wayDown : downs.keySet()) {
 			JButton down = new JButton("↓ "+wayDown+"("+downs.get( wayDown ).size()+")");
-			upDown.add( down, BorderLayout.EAST);
+			upDown.add( down );
 			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( update) ) );
 		}
 		
@@ -167,7 +167,7 @@ public class SelectedApps extends ArrayList<App>{
 			a.appMode = appMode;
 		
 		switch (appMode) {
-		case Color:
+		case Off:
 			JButton col = new JButton("color");
 			
 			for (App a : SelectedApps.this) {

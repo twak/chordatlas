@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class PanesLabelApp extends App {
 	PanesTexApp child = new PanesTexApp( this );
 	public String label;
 	public boolean regularize = false;
+	public List<DRectangle> panes = null;
 	
 	public PanesLabelApp(HasApp ha) {
 		super(ha, "label windows", "dows2", 8, 256);
@@ -47,7 +49,7 @@ public class PanesLabelApp extends App {
 	public MultiMap<String, App> getDown() {
 		MultiMap<String, App>  out = new MultiMap<>();
 		
-		out.put( "window texture", child );
+		out.put( "texture", child );
 		
 		return out;
 	}
@@ -81,6 +83,8 @@ public class PanesLabelApp extends App {
 
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
+		
+		panes = null;
 		
 		Map<FRect, Meta> names = new HashMap<>();
 		
@@ -214,18 +218,77 @@ public class PanesLabelApp extends App {
 			frameY[frameY.length -1 -i] = frameY[i] = true;
 		}
 		
+		int fLen = 3;
+		
+//		for (boolean[] a : new boolean[][] {frameX, frameY}) // denoise
+//			for (int i = 0; i < a.length - fLen; i++) 
+//				if (!a[i] && ! a[i + fLen])
+//					for (int j = 0; j < fLen; j++)
+//						a[j] = false;
+		
+		panes = new ArrayList<>();
+		
 		Graphics2D g = crop.createGraphics();
 		
-		g.setColor( Color.blue );
+		g.setColor( Color.red );
 		g.fillRect( 0, 0, crop.getWidth(), crop.getHeight() );
+		g.setColor( Color.blue );
 			
-		g.dispose();
+		DRectangle bounds = new DRectangle(crop.getWidth(), crop.getHeight() );
 		
-		for (int x = 0; x < crop.getWidth(); x++) 
-			for (int y = 0; y < crop.getHeight(); y++) {
-				if (frameX[x] || frameY[y])
-					crop.setRGB( x, y, frame );
+		int x = 0, y = 0;
+		x:
+		do {
+			
+			while (frameX[x]) {
+				x++;
+				
+				if  ( x >= frameX.length )
+				break x;
 			}
+			int startX = x;
+			
+			while (x < frameX.length-1 && !frameX[x] )
+				x++;
+			
+			y=0;
+			y:
+			do {
+			
+				while (frameY[y] ) {
+					y++;
+					if (y >= frameY.length)
+						break y;
+				}
+				int startY = y;
+				
+				while (y < frameY.length-1 && !frameY[y])
+					y++;
+				
+				if ( isBlue ( startX, x, startY, y, crop, 0.5 ) ) {
+					panes.add( bounds.normalize( new DRectangle (startX, startY, x - startX -1, y - startY - 1) ) );
+					g.fillRect( startX, startY, x - startX -1, y - startY - 1 );
+				}
+			}
+			while (y < frameY.length);
+		}
+		while (x < frameX.length);
+		
+		g.dispose();
+	}
+
+	private boolean isBlue( int x1, int x2, int y1, int y2, BufferedImage crop, double frac ) {
+		
+		if (x2 - x1 < 2 || y2 - y1 < 2)
+			return false;
+		
+		int totalBlue = 0;
+		
+		for (int x = x1; x < x2; x++) 
+			for (int y = y1; y < y2; y++) 
+				totalBlue += (crop.getRGB( x, y ) & 0xff);
+		
+		return true; //totalBlue / (255 * (x2-x1) * (y2-y1) ) > frac;
 	}
 
 	private static class Meta {
@@ -240,6 +303,6 @@ public class PanesLabelApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Color, AppMode.Net };
+		return new Enum[] { AppMode.Off, AppMode.Net };
 	}
 }

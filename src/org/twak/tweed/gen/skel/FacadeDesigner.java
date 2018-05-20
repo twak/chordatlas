@@ -22,7 +22,7 @@ public class FacadeDesigner {
 			SkelGen.ensureMF( sf, se );
 		}
 		
-		if ( se.toEdit.app.appMode == AppMode.Color )
+		if ( se.toEdit.app.appMode == AppMode.Off )
 			se.toEdit.groundFloorHeight = 2;
 		else {
 			SkelGen.patchWallTag (skel, se, se.toEdit);

@@ -455,7 +455,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				for ( HalfEdge he : sf ) {
 					SuperEdge ee = (SuperEdge) he;
 					if ( ee.toEdit != null )
-						ee.toEdit.app.appMode = AppMode.Color;
+						ee.toEdit.app.appMode = AppMode.Off;
 				}
 				
 				siteplan = new Siteplan( skel.plan, false ) {

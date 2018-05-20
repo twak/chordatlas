@@ -120,7 +120,7 @@ public class HouseTool extends Tool {
 		mini.featureGen = new CGAMini( mini );
 
 		mini.imageFeatures = imf;
-		mini.app.appMode = AppMode.Color;//"tex.jpg";
+		mini.app.appMode = AppMode.Off;//"tex.jpg";
 		mini.app.color = Colourz.to4 ( GreebleSkel.BLANK_WALL );
 //		mini.normal = "normal.jpg";
 //		mini.spec = "spec.jpg";
