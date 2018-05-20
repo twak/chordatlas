@@ -19,7 +19,7 @@ public class ConstantStyle implements StyleSource {
 	}
 	
 	@Override
-	public double[] draw( Random random ) {
+	public double[] draw( Random random, App app ) {
 		return mean;
 	}
 	

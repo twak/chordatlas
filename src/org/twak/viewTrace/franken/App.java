@@ -119,7 +119,7 @@ public abstract class App /*earance*/ implements Cloneable {
 				if (app.appMode == AppMode.Net) {
 					
 					if (app.styleSource != null)
-						app.styleZ = app.styleSource.draw( randy );
+						app.styleZ = app.styleSource.draw( randy, app );
 					batch.add( todo.get( i ) );
 				}
 			}

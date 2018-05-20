@@ -41,24 +41,26 @@ public class MultiModalEditor extends JPanel {
 	App exemplar;
 	JFrame frame;
 	JPanel gList;
+	Runnable globalUpdate ;
 	
 	public MultiModalEditor( MultiModal mm, App exemplar, Runnable globalUpdate ) {
 		
 		this.mm = mm;
 		this.exemplar = exemplar;
+		this.globalUpdate = globalUpdate;
 		
 		
 		setLayout( new BorderLayout() );
 		egs = new NetExamples( mm, 8, 8, exemplar, new File ("/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/textureatlas/"+exemplar.netName) );
 		
-		Runnable localUpdate = () -> egs.changed();
-		
-		
-		JPanel controls = createControls(localUpdate);
+		JPanel controls = createControls(() -> egs.changed());
 
 		
 		add(controls, BorderLayout.EAST);
 		add(egs, BorderLayout.CENTER);
+	}
+	
+	public void openFrame() {
 		
 		frame = WindowManager.frame( "multi-modal editor",  this);
 		
@@ -70,7 +72,7 @@ public class MultiModalEditor extends JPanel {
 		} );
 		
 		if (mm.styles.isEmpty())
-			addG( localUpdate, null );
+			addG( () -> egs.changed(), null );
 		
 		frame.pack();
 		frame.setVisible( true );

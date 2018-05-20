@@ -27,7 +27,7 @@ public class GaussStyle implements StyleSource {
 	}
 	
 	@Override
-	public double[] draw( Random random ) {
+	public double[] draw( Random random, App app ) {
 		
 		double[] out = new double[mean.length];
 		

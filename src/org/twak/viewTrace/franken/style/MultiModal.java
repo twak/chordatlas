@@ -40,13 +40,13 @@ public class MultiModal implements StyleSource {
 	}
 	
 	@Override
-	public double[] draw( Random random ) {
+	public double[] draw( Random random, App app ) {
 		
 		double d = random.nextDouble() * totalProb;
 		
 		for (Wrapper w : styles) 
 			if (d < w.accumProb)
-				return w.ss.draw( random );
+				return w.ss.draw( random, app );
 
 		return new double[exemplar.sizeZ];
 	}
@@ -56,7 +56,7 @@ public class MultiModal implements StyleSource {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );
-		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update ) );
+		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update ).openFrame() );
 		out.add( but );
 		
 		return out;

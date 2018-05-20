@@ -105,7 +105,7 @@ public class NetExamples extends JComponent {
 					
 					for (int i = 0; i < BATCH_SIZE; i++) {
 						int index = randy.nextInt(inputs.size());
-						p2.addInput( inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy ) );
+						p2.addInput( inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy, null ) );
 					}
 					
 					p2.submitSafe( new Job() {
