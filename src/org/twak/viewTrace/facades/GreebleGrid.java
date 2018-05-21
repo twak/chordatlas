@@ -514,11 +514,11 @@ public class GreebleGrid {
 						@Override
 						public void instance( DRectangle rect ) {
 
-							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+w.hashCode(), mbs.wood,  w );
-							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+w.hashCode(), mbs.glass, w );
+//							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+w.hashCode(), mbs.wood,  w );
+//							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+w.hashCode(), mbs.glass, w );
 							
 							createWindow( rect, to3d, 
-									wallColorMat, wood, glass,
+									wallColorMat, mbs.WOOD, mbs.GLASS, // wood, glass,
 									wallTag.windowDepth, 
 									(float) wallTag.sillDepth, 
 									(float) w.attachedHeight.get(Feature.SILL).d, 
@@ -634,9 +634,8 @@ public class GreebleGrid {
 							else {
 								DRectangle uvs = allUV.normalize( rect );
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, false ); // walls around window
-								createWindowFromPanes (w.app.panes, rect, to3d, mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ), 0.25, 0.2 );
+								createWindowFromPanes (w.app.panes, rect, to3d, mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ), 0.3, 0.2 );
 							}
-								
 						}
 					} );
 			}

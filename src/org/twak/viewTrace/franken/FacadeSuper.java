@@ -32,7 +32,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class FacadeSuper extends App implements HasApp {
 
 	FacadeTexApp parent;
-	public double scale=40;
+	public double scale = 120;
 	
 	public FacadeSuper( FacadeTexApp parent ) {
 		super( null, "super-facade", "super6", 8, 256 );

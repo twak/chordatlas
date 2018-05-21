@@ -42,7 +42,9 @@ public class NetExamples extends JComponent {
 	StyleSource styleSource;
 	
 	final static int BATCH_SIZE = 16;
-	final static double scale = 0.5;
+//	final static double scale = 0.5;
+	
+	final static int DRAW_SIZE = 128;
 	
 	final static Random randy = new Random();
 	
@@ -77,8 +79,8 @@ public class NetExamples extends JComponent {
 		inputIdx = new int[x][y];
 		
 		setPreferredSize( new Dimension ( 
-				(int)( x * exemplar.resolution * scale) ,
-				(int)( y * exemplar.resolution * scale) ) );
+				(int)( x * DRAW_SIZE) ,
+				(int)( y * DRAW_SIZE) ) );
 		
 
 		for (int i = 0; i < images.length; i++)
@@ -88,7 +90,8 @@ public class NetExamples extends JComponent {
 		
 		for (File f : exampleFolder.listFiles() ) {
 			try {
-				inputs. add ( Imagez.scaleLongest( ImageIO.read( f ), exemplar.resolution ) );
+				BufferedImage bi = Imagez.scaleLongest( ImageIO.read( f ), exemplar.resolution ) ;
+				inputs. add ( Imagez.join( bi, bi ) );
 			} catch ( IOException e ) {
 				e.printStackTrace();
 			}
@@ -124,8 +127,8 @@ public class NetExamples extends JComponent {
 		
 		MouseAdapter ml = new MouseAdapter() {
 			public void mouseMoved(MouseEvent e) {
-				hx = Mathz.min ( images.length-1, (int)( e.getX() / (exemplar.resolution * scale ) ) );
-				hy = Mathz.min ( images[0].length-1, (int)( e.getY() / (exemplar.resolution * scale ) ) );
+				hx = Mathz.min ( images.length-1, (int)( e.getX() / (DRAW_SIZE ) ) );
+				hy = Mathz.min ( images[0].length-1, (int)( e.getY() / (DRAW_SIZE ) ) );
 				
 				hx = Mathz.clamp( hx, 0, images.length );
 				hy = Mathz.clamp( hy, 0, images[0].length );
@@ -202,26 +205,32 @@ public class NetExamples extends JComponent {
 		g.setColor( Color.black );
 		g.fillRect( 0, 0, getWidth(), getHeight() );
 		
-		int sf = (int ) (exemplar.resolution * scale );
 		
 		for (int i = 0; i < images.length; i++)
 			for (int j = 0; j < images[0].length; j++) {
-				g.drawImage( images[i][j], i * sf, j * sf, sf, sf, null );
+				if (images[i][j] != null)
+					g.drawImage( images[i][j], i * DRAW_SIZE, j * DRAW_SIZE, (i+1) * DRAW_SIZE, (j+1) * DRAW_SIZE,
+							0, 0, images[i][j].getWidth(), images[i][j].getHeight(), null );
 			}
+		
+		int previewSize = DRAW_SIZE * 2;
 		
 		if (hx >=0 && images[hx][hy] != null) {
 			g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
-			int x = hx * sf - (exemplar.resolution/4);
-			int y = hy * sf - (exemplar.resolution/4);
+			int x = hx * DRAW_SIZE - (previewSize/4);
+			int y = hy * DRAW_SIZE - (previewSize/4);
 
-			x = Mathz.clamp( x, 0, getWidth() - exemplar.resolution );
-			y = Mathz.clamp( y, 0, getHeight() - exemplar.resolution );
+			x = Mathz.clamp( x, 0, getWidth()  - previewSize );
+			y = Mathz.clamp( y, 0, getHeight() - previewSize );
 			
-			g.drawRect( x-1, y-1, exemplar.resolution+1, exemplar.resolution+1 );
+			g.drawRect( x-1, y-1, previewSize+1, previewSize+1 );
 			
-			BufferedImage toDraw = mouseDown ? inputs.get( inputIdx[hx][hy] ) : images[hx][hy];
+			if ( mouseDown )
+				g.drawImage( inputs.get( inputIdx[hx][hy] ).getSubimage( 0, 0, exemplar.resolution, exemplar.resolution ), 
+						x,y, x+previewSize, y+previewSize, 0,0, exemplar.resolution, exemplar.resolution, null );
+			else
+				g.drawImage( images[hx][hy], x,y,x+previewSize, y+previewSize, 0,0, exemplar.resolution, exemplar.resolution, null );
 			
-			g.drawImage( toDraw, x,y, exemplar.resolution, exemplar.resolution, null );
 		}
 		
 	}

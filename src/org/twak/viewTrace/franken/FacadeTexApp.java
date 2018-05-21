@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class FacadeTexApp extends App {
 	public String coarse;
 	
 	public FacadeTexApp( HasApp ha ) {
-		super( ha, "facade coarse", "bike_2", 8, 256 );
+		super( ha, "facade coarse", "facade_windows_f000", 8, 256 );
 	}
 
 	public FacadeTexApp( FacadeTexApp facadeCoarse ) {
@@ -118,6 +119,7 @@ public class FacadeTexApp extends App {
 
 			if ( mf.postState == null ) {
 				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
+				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
 			} else {
 				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
 					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
@@ -126,10 +128,11 @@ public class FacadeTexApp extends App {
 				for ( LoopL<Point2d> ll : mf.postState.occluders )
 					for ( Loop<Point2d> l : ll )
 						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
+				
+				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
 			}
 
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-			Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
 			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );

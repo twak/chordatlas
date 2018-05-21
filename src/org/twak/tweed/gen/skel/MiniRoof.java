@@ -65,5 +65,9 @@ public class MiniRoof implements HasApp {
 		for (Loop<Point2d> l : pitches)
 			for (Point2d p : l) 
 				bounds.envelop( p );
+		
+		for (Loop<Point2d> l : flats)
+			for (Point2d p : l) 
+				bounds.envelop( p );
 	}
 }

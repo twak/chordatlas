@@ -48,6 +48,11 @@ public class FacadeLabelApp extends App {
 
 	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
 		super( facadeCoarse );
+		this.superFace = facadeCoarse.superFace;
+		this.coarse    = facadeCoarse.coarse;
+		this.regFrac   = facadeCoarse.regFrac;
+		this.regAlpha  = facadeCoarse.regAlpha;
+		this.regScale  = facadeCoarse.regScale;
 	}
 
 	@Override

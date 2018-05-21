@@ -243,7 +243,6 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				skel = skelS;
 		}
 
-		sf.mr.setOutline( skel.output );
 		sf.skel = skel;
 		
 		return skel;
@@ -386,7 +385,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			
 			SuperFace sf = (SuperFace)hf;
 		
-			if ( sf.app.isDirty ) {  
+			if ( sf.app.isDirty ) {
+				
+
+				for (HalfEdge he : sf) { 
+					SuperEdge se = (SuperEdge) he;
+					ensureMF( sf, se );
+				}
 				
 				sf.app.isDirty = false;
 				
@@ -405,7 +410,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					}
 				};
 
-				GreebleSkel greeble = new GreebleSkel( tweed );
+				GreebleSkel greeble = new GreebleSkel( tweed, sf );
 
 				house = greeble.showSkeleton( sf.skel.output, onclick, occluderLookup, sf.mr );
 
@@ -529,6 +534,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		tweed.frame.setGenUI( ui );
 	}
 
+	public static void updateTexture (HasApp sf, Runnable update) {
+		new Thread( () -> new SelectedApps( HasApp.get( sf) ).computeAll( update ) ).start();
+	}
+	
 	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
 		if (ha == null)
 			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
@@ -593,12 +602,6 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			ensureMF( sf, se );
 		} 
 		
-		
-		if ( se.toEdit != null )  {
-			se.toEdit.app.parent = sf;
-			se.toEdit.appLabel.superFace = sf;
-		}
-
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
 			roof = new RoofTag( sf.roofColor );
 
@@ -741,6 +744,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			se.toEdit.left = 0;
 			se.toEdit.width = se.length();
 		}
+		
+		se.toEdit.app.parent = sf;
+		se.toEdit.appLabel.superFace = sf;
 		
 		if (se.toRegularize != null && !se.toRegularize.isEmpty())
 			se.toEdit.height = se.toRegularize.get( 0 ).height;

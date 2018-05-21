@@ -29,7 +29,7 @@ public class PanesLabelApp extends App {
 
 	PanesTexApp child = new PanesTexApp( this );
 	public String label;
-	public boolean regularize = false;
+	public boolean regularize = true;
 	public List<DRectangle> panes = null;
 	
 	public PanesLabelApp(HasApp ha) {
@@ -118,7 +118,7 @@ public class PanesLabelApp extends App {
 
 				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE, Color.black ), mask, resolution, resolution, Color.black );
 				
-				scaled = new FastBlur().processImage( scaled, 5 );
+//				scaled = new FastBlur().processImage( scaled, 5 );
 				
 				BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
 
@@ -126,7 +126,7 @@ public class PanesLabelApp extends App {
 				g.drawImage( scaled, 256, 0, null );
 				g.dispose();
 
-				Meta meta = new Meta( r, mask );
+				Meta meta = new Meta( (PanesLabelApp) a, r, mask );
 				p2.addInput( toProcess, meta, a.styleZ );
 
 				//					String name = System.nanoTime() + "_" + count;
@@ -153,7 +153,7 @@ public class PanesLabelApp extends App {
 						BufferedImage labels = ImageIO.read( e.getValue() );
 						
 						if (regularize) {
-							regularize ( labels, meta.mask, 0.006 );
+							regularize ( meta.app, labels, meta.mask, 0.006 );
 							ImageIO.write( labels, "png", e.getValue() );
 						}
 						
@@ -173,11 +173,11 @@ public class PanesLabelApp extends App {
 		} ) );
 	}
 
-	protected void regularize( BufferedImage labels, DRectangle mask, double d ) {
+	protected static void regularize( PanesLabelApp a, BufferedImage labels, DRectangle mask, double d ) {
 		
 		 BufferedImage crop = Imagez.clone ( Imagez.cropShared (labels, mask) );
 		
-		 regularize (crop, d);
+		 regularize (a, crop, d);
 		 Graphics2D g  = labels.createGraphics();
 			
 		 g.setColor( Color.red );
@@ -188,7 +188,7 @@ public class PanesLabelApp extends App {
 		 
 	}
 
-	private void regularize( BufferedImage crop, double threshold ) {
+	private static void regularize( PanesLabelApp a, BufferedImage crop, double threshold ) {
 		
 		
 		int frame= 0xff0000;
@@ -226,7 +226,7 @@ public class PanesLabelApp extends App {
 //					for (int j = 0; j < fLen; j++)
 //						a[j] = false;
 		
-		panes = new ArrayList<>();
+		a.panes = new ArrayList<>();
 		
 		Graphics2D g = crop.createGraphics();
 		
@@ -266,7 +266,8 @@ public class PanesLabelApp extends App {
 					y++;
 				
 				if ( isBlue ( startX, x, startY, y, crop, 0.5 ) ) {
-					panes.add( bounds.normalize( new DRectangle (startX, startY, x - startX -1, y - startY - 1) ) );
+					double height = y - startY - 1;
+					a.panes.add( bounds.normalize( new DRectangle (startX, bounds.height - startY - height, x - startX -1, height) ) );
 					g.fillRect( startX, startY, x - startX -1, y - startY - 1 );
 				}
 			}
@@ -277,7 +278,7 @@ public class PanesLabelApp extends App {
 		g.dispose();
 	}
 
-	private boolean isBlue( int x1, int x2, int y1, int y2, BufferedImage crop, double frac ) {
+	private static boolean isBlue( int x1, int x2, int y1, int y2, BufferedImage crop, double frac ) {
 		
 		if (x2 - x1 < 2 || y2 - y1 < 2)
 			return false;
@@ -295,10 +296,12 @@ public class PanesLabelApp extends App {
 		
 		FRect r; // the HasApp
 		DRectangle mask;
-
-		private Meta( FRect r, DRectangle mask ) {
+		PanesLabelApp app;
+		
+		private Meta( PanesLabelApp a, FRect r, DRectangle mask ) {
 			this.r = r;
 			this.mask = mask;
+			this.app = a;
 		}
 	}
 

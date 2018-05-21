@@ -1,6 +1,5 @@
 package org.twak.tweed.gen.skel;
 
-import org.twak.camp.Tag;
 import org.twak.siteplan.tags.PlanTag;
 import org.twak.viewTrace.facades.GreebleSkel;
 

@@ -19,7 +19,6 @@ import javax.vecmath.Vector3d;
 import org.twak.camp.Edge;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
-import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -53,8 +52,6 @@ import org.twak.viewTrace.franken.App.TextureUVs;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import smile.math.Math;
-
 public class GreebleSkel {
 
 	private static final double TILE_UV_SCALE = 0.4;
@@ -80,8 +77,11 @@ public class GreebleSkel {
 			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
 			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	
-	public GreebleSkel( Tweed tweed ) {
+	SuperFace sf;
+	
+	public GreebleSkel( Tweed tweed, SuperFace sf ) {
 		this.tweed = tweed;
+		this.sf = sf;
 	}
 
 	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup, HasApp roof ) {
@@ -104,16 +104,18 @@ public class GreebleSkel {
 		
 //		roofBounds = new DRectangle.Enveloper();
 		
-		
 		roofColor = Colourz.toF4( HasApp.get( roofApp ).color );
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
+		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
+		sf.mr.setOutline( output );
 		
 		for ( Face f : output.faces.values() )  {
 			WallTag wt = ((WallTag) GreebleHelper.getTag( f.profile, WallTag.class ));
 			
 			if (wt != null ) 
-				allMFs.add( wt.miniFacade );
+				if (wt.miniFacade != null)
+					allMFs.add( wt.miniFacade );
 		}
 		
 		for (MiniFacade mf : allMFs) {
@@ -124,7 +126,6 @@ public class GreebleSkel {
 //		roofBounds.grow( 2 );
 //		roofBounds.height = roofBounds.width = Math.max( roofBounds.width, roofBounds.height );
 		
-		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
 		
 		List<List<Face>> chains = Campz.findChains( output );
 
@@ -552,6 +553,24 @@ public class GreebleSkel {
 //			}
 			}
 		}
+		
+		DRectangle uvs;
+		
+		if (mf != null && mf.app.textureUVs == TextureUVs.SQUARE) {
+			uvs = new DRectangle(mf.postState.outerFacadeRect);
+
+			{ // for faces not at the bottom, move to the bottom's uv space
+				Face f2 = f;
+				while ( f2.parent != null )
+					f2 = f2.parent;
+				Point3d bottomS2 = new Point3d( f2.definingSE.iterator().next().getStart( f2 ) );
+				to2dXY.transform( bottomS2 );
+				uvs.x += bottomS2.x;
+				uvs.y -= bottomS.z;
+			}
+			
+		} else 
+			uvs = GreebleGrid.ZERO_ONE_UVS;
 
 		// find window locations in 3 space
 		
@@ -582,7 +601,7 @@ public class GreebleSkel {
 			floors.add( facadeRect );
 			materials.add( faceMaterial );
 			if (sides != null)
-				faceMaterial.add( sides, GreebleHelper.wallUVs(sides, mf.postState.outerFacadeRect), to3d );
+				faceMaterial.add( sides, GreebleHelper.wallUVs(sides, uvs), to3d );
 		}
 
 		for ( int j = 0; j < floors.size(); j++ ) {
@@ -640,14 +659,6 @@ public class GreebleSkel {
 					m,
 					wallTag );
 			else {
-				
-				DRectangle uvs;
-				
-				if (mf.app.textureUVs == TextureUVs.SQUARE) {
-					uvs = new DRectangle(mf.postState.outerFacadeRect);
-					uvs.y -= bottomS.z;
-				} else 
-					uvs = GreebleGrid.ZERO_ONE_UVS;
 				
 				greebleGrid.textureGrid (
 					floorRect,
