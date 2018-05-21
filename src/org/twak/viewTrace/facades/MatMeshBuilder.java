@@ -8,6 +8,11 @@ public class MatMeshBuilder extends MeshBuilder {
 	String name, texture;
 	public HasApp app;
 	
+	/**
+	 * TextureAtlas
+	 * 
+	 */
+	
 	public MatMeshBuilder (String name, float[] color) {
 		this.name = name;
 		this.color = color;

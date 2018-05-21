@@ -1,4 +1,4 @@
-package org.twak.viewTrace.franken.style.ui;
+package org.twak.viewTrace.franken.style;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,18 +13,18 @@ import org.apache.commons.collections.map.HashedMap;
 import org.twak.utils.collections.MultiMap;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
-import org.twak.viewTrace.franken.style.MultiModal;
-import org.twak.viewTrace.franken.style.StyleSource;
 
 public class JointDistribution implements StyleSource {
 
-	transient BlockApp root;
+	public transient BlockApp root;
 
 	double totalJointProbability = 0;
 
-	List<Joint> joints = new ArrayList<>();
+	public String name;
+	
+	public List<Joint> joints = new ArrayList<>();
 
-	static class Joint {
+	public static class Joint {
 		Map<Class, AppInfo> appInfo = new HashedMap();
 		double probability;
 	}
@@ -33,6 +33,7 @@ public class JointDistribution implements StyleSource {
 		MultiModal dist;
 		Class bakeWith;
 	}
+	
 
 	public JointDistribution( BlockApp app, Runnable globalUpdate ) {
 		init( app );
@@ -55,6 +56,10 @@ public class JointDistribution implements StyleSource {
 			install( Collections.singletonList( building ), drawJoint( randy ), randy, bakeWith );
 	}
 
+	public void updateJointProb() {
+		totalJointProbability = joints.stream().mapToDouble( j -> j.probability ).sum();
+	}
+	
 	public void findBake( Joint j, List<App> current, MultiMap<App, App> bakeWith, Map<Class, App> parents ) {
 
 		List<App> next = new ArrayList<>();

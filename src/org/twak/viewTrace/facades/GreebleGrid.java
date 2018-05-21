@@ -37,7 +37,9 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.texture.Texture;
+import com.jme3.texture.Texture.MinFilter;
 import com.jme3.texture.Texture.WrapMode;
 
 public class GreebleGrid {
@@ -60,6 +62,8 @@ public class GreebleGrid {
 		for (String mName : mbs.textures.cache.keySet())
 			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
 				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, texture ) ) );
+		
+		// texture atlas.dump
 	}
 	
 	private Geometry mb2Tex( Output output, List<Face> chain, String name, 
@@ -71,11 +75,28 @@ public class GreebleGrid {
 			geom = new Geometry( "material_" +texture, builder.getMesh() );
 			geom.setUserData( Jme3z.MAT_KEY, name );
 			
+			/*
+			 * if  (textureAtlas != null) {
+				xy = texutreAtlas.insert (texture)
+				geom.getMesh().getBuffer( Type.TexCoord ); / 16 + (xy) / 16
+				set edge clamp
+				set material texture to one given by atlas
+				
+				after all call dump on texture atlas. 
+
+				- mip-mapping needs to be disabled to avoid bleeding.
+				
+				
+			}
+			*/
+			
 			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
 			
 			if (new File( Tweed.DATA +"/" +texture ).exists()) {
 				Texture t = tweed.getAssetManager().loadTexture( texture );
 				t.setWrap( WrapMode.Repeat );
+//				t.setWrap( WrapMode.EdgeClamp );
+				
 				mat.setTexture( "DiffuseMap", t );
 				mat.setColor( "Diffuse", ColorRGBA.White );
 				mat.setBoolean( "UseMaterialColors", true );

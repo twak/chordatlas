@@ -331,6 +331,7 @@ public class TweedFrame {
 					public void heresTheFile( File f ) throws Throwable {
 
 						ObjDump dump = new ObjDump();
+						dump.REMOVE_DUPE_TEXTURES = true;
 
 						for ( Gen g : genList )
 							if ( g.visible && g instanceof IDumpObjs )
