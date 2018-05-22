@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.twak.utils.collections.MultiMap;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.SelectedApps;
+import org.twak.viewTrace.franken.style.ui.JointUI;
+import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
 
 public class JointDistribution implements StyleSource {
 
@@ -20,29 +24,44 @@ public class JointDistribution implements StyleSource {
 
 	double totalJointProbability = 0;
 
-	public String name;
 	
 	public List<Joint> joints = new ArrayList<>();
 
 	public static class Joint {
-		Map<Class, AppInfo> appInfo = new HashedMap();
-		double probability;
+		public String name;
+		public Map<Class, AppInfo> appInfo = new HashedMap();
+		double probability = 0.5;
+		public Joint( String name2, List<Class<?>> klasses ) {
+			this.name = name2;
+			for (Class k : klasses) {
+				appInfo.put( k, new AppInfo (null) );
+			}
+		}
 	}
 
-	static class AppInfo {
-		MultiModal dist;
-		Class bakeWith;
+	public static class AppInfo {
+		
+		public MultiModal dist;
+		public Class bakeWith;
+		
+		public AppInfo (Class bakeWith) {
+			this.bakeWith = bakeWith;
+		}
 	}
 	
-
-	public JointDistribution( BlockApp app, Runnable globalUpdate ) {
-		init( app );
+	public JointDistribution( App ignore ) {
+		init(null);
 	}
-
+	
 	private void init( BlockApp app ) {
 		this.root = app;
 	}
 
+	public boolean install( SelectedApps root ) {
+		init( (BlockApp) root.findRoots().iterator().next() );
+		return true;
+	}
+	
 	public void install() {
 
 		MultiMap<App, App> bakeWith = new MultiMap<>();
@@ -58,6 +77,13 @@ public class JointDistribution implements StyleSource {
 
 	public void updateJointProb() {
 		totalJointProbability = joints.stream().mapToDouble( j -> j.probability ).sum();
+	}
+	
+	public Joint rollJoint ( String name, List<Class<?>> klasses) {
+		Joint j = new Joint (name, klasses);
+		joints.add(j);
+		updateJointProb();
+		return j;
 	}
 	
 	public void findBake( Joint j, List<App> current, MultiMap<App, App> bakeWith, Map<Class, App> parents ) {
@@ -135,7 +161,13 @@ public class JointDistribution implements StyleSource {
 
 	@Override
 	public JPanel getUI( Runnable update ) {
-		return new JPanel();
+		JPanel out = new JPanel();
+		
+		JButton but = new JButton( "edit joint" );
+		but.addActionListener( e -> new JointUI(this, update ).openFrame() );
+		out.add( but );
+		
+		return out;
 	}
 
 }

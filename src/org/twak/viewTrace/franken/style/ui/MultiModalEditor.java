@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -62,11 +63,18 @@ public class MultiModalEditor extends JPanel {
 	
 	public void openFrame() {
 		
-		frame = WindowManager.frame( "multi-modal editor",  this);
+		JPanel panel = new JPanel(new BorderLayout() );
+		panel.add(this, BorderLayout.CENTER);
+		
+		JButton close = new JButton( "ok" );
+		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
+		panel.add( close, BorderLayout.SOUTH );
+		
+		frame = WindowManager.frame( "multi-modal editor",  panel);
 		
 		frame.addWindowListener( new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				egs.stop();
+				stop();
 				globalUpdate.run();
 			};
 		} );
@@ -74,8 +82,14 @@ public class MultiModalEditor extends JPanel {
 		if (mm.styles.isEmpty())
 			addG( () -> egs.changed(), null );
 		
+		
+		
 		frame.pack();
 		frame.setVisible( true );
+	}
+	
+	public void stop() {
+		egs.stop();
 	}
 
 	private JPanel createControls( Runnable localUpdate ) {
@@ -112,10 +126,7 @@ public class MultiModalEditor extends JPanel {
 		});
 		
 		out.add( add, BorderLayout.NORTH );
-		
-		JButton close = new JButton( "ok" );
-		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
-		out.add( close, BorderLayout.SOUTH );
+
 		
 		return out;
 	}
@@ -148,12 +159,14 @@ public class MultiModalEditor extends JPanel {
 		}
 	}
 	
+	public final static Border BORDER = BorderFactory.createCompoundBorder( BorderFactory.createEmptyBorder( 4, 4, 4, 4 ), BorderFactory.createEtchedBorder(EtchedBorder.RAISED) );
+	
 	private class GaussWrapper extends JPanel {
 		
 		public GaussWrapper (Wrapper w, Runnable localUpdate ) {
 			
 			setLayout(  new BorderLayout() );
-			setBorder( BorderFactory.createCompoundBorder( BorderFactory.createEmptyBorder( 4, 4, 4, 4 ), BorderFactory.createEtchedBorder(EtchedBorder.RAISED) ) );
+			setBorder( BORDER );
 			
 //			setBorder( new LineBorder( Color.darkGray, 2, true ) );
 			setOpaque( true );
@@ -162,7 +175,7 @@ public class MultiModalEditor extends JPanel {
 			JPanel closerP = new JPanel( new BorderLayout() );
 			JButton close  = new JButton ("x");
 			
-			JLabel pLabel = new JLabel("prob");
+			JLabel pLabel = new JLabel("p:");
 			
 			
 			JSlider pSlider = new JSlider (0, 1000, (int) ( w.prob * 1000 ) );

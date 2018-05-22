@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.NSliders;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.Pix2Pix;
 

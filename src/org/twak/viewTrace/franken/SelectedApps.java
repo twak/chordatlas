@@ -4,14 +4,16 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -23,8 +25,9 @@ import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
-import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.GaussStyle;
+import org.twak.viewTrace.franken.style.JointDistribution;
+import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.StyleSource;
 
 
@@ -199,7 +202,10 @@ public class SelectedApps extends ArrayList<App>{
 
 	private enum StyleSources {
 		
-		Gaussian (GaussStyle.class), Constant (ConstantStyle.class), MultiModal (MultiModal.class);
+		Gaussian (GaussStyle.class), 
+		Constant (ConstantStyle.class), 
+		MultiModal (MultiModal.class),
+		Joint (JointDistribution.class);
 		
 		Class<? extends StyleSource> klass;
 		
@@ -223,6 +229,24 @@ public class SelectedApps extends ArrayList<App>{
 			ss2Klass.put( ss.klass, ss );
 	}
 	
+	public Set<App> findRoots() {
+		
+		Set<App> current = new HashSet<>(this);
+		
+		while (true) {
+			Set<App> ups = new HashSet<>();
+			
+			for (App a : current)
+				if (a.getUp() != null)
+					ups.add(a.getUp());
+			
+			if (ups.isEmpty())
+				return current;
+			
+			current = ups;
+		}
+	}
+	
 	private Component createDistEditor( Runnable update ) {
 		
 		JPanel out = new JPanel( new BorderLayout() );
@@ -235,18 +259,22 @@ public class SelectedApps extends ArrayList<App>{
 				
 				StyleSources sss = (StyleSources) num;
 				StyleSource ss;
-
+				
 				if (exemplar.styleSource.getClass() == sss.klass)
 					ss = exemplar.styleSource;
 				else
 					ss = sss.instance(exemplar);
 
 				boolean changed = false;
-				for (App a : SelectedApps.this) {
-					changed |= a.styleSource != ss;
-					a.styleSource = ss;
-				}
 				
+				if ( !ss.install( SelectedApps.this ) ) {
+
+					for ( App a : SelectedApps.this ) {
+						changed |= a.styleSource != ss;
+						a.styleSource = ss;
+					}
+				}
+
 				options.removeAll();
 				options.setLayout( new BorderLayout() );
 				options.add( ss.getUI(update), BorderLayout.CENTER );
@@ -256,6 +284,7 @@ public class SelectedApps extends ArrayList<App>{
 				if (changed)
 					update.run();
 			}
+
 		}, "distribution:" );
 		
 		combo.fire();

@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.UIVector;
 
 public class ConstantStyle implements StyleSource {
@@ -31,5 +32,9 @@ public class ConstantStyle implements StyleSource {
 		out.add( new UIVector (mean, app, true, update ) );
 		
 		return out;
+	}
+	
+	public boolean install( SelectedApps next ) {
+		return false;
 	}
 }

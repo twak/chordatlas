@@ -1,62 +1,183 @@
 package org.twak.viewTrace.franken.style.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 import org.twak.utils.Mathz;
-import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoTextField;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.ListRightLayout;
+import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeSuper;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
+import org.twak.viewTrace.franken.RoofApp;
 import org.twak.viewTrace.franken.style.JointDistribution;
 import org.twak.viewTrace.franken.style.JointDistribution.Joint;
+import org.twak.viewTrace.franken.style.MultiModal;
+
 
 public class JointUI extends JPanel {
 
 	private JointDistribution jd;
 	private Joint selectedJoint;
+	JFrame frame;
+	Runnable globalUpdate;
 	
-	public JointUI (JointDistribution jd) {
+	final static List<NetSelect> nets = new ArrayList<>();
+	static NetSelect DEFAULT_NET;
+	
+	static {
+		nets.add (new NetSelect(BlockApp      .class, false ) );
+		nets.add (new NetSelect(BuildingApp   .class, false ) );
+		nets.add (new NetSelect(FacadeLabelApp.class, true  ) );
+		nets.add (new NetSelect(FacadeSuper   .class, true  ) );
+		nets.add (DEFAULT_NET = new NetSelect(FacadeTexApp  .class, true  ) );
+		nets.add (new NetSelect(PanesLabelApp .class, true  ) );
+		nets.add (new NetSelect(PanesTexApp   .class, true  ) );
+		nets.add (new NetSelect(RoofApp       .class, true  ) );
+	}
+	
+	static class NetSelect {
+		
+		Class<? extends App> klass;
+		boolean show;
+		
+		public NetSelect( Class<? extends App> k, boolean s ) {
+			this.klass = k;
+			this.show = s;
+		}
+
+		public App findExemplar (App root) {
+			return findExemplar( Collections.singletonList( root ) );
+		}
+		
+		public App findExemplar (List<App> root) {
+			
+			List<App> next = new ArrayList<>();
+			
+			for (App a : root)
+				for (App b : a.getDown().valueList())
+					if (b.getClass() == klass)
+						return b;
+					else
+						next.add(b);
+			
+			return findExemplar( next );
+		}
+		
+		public Component createUI(JointUI ui, ButtonGroup bg) {
+			
+			JPanel panel = new JPanel();
+			panel.setBorder( MultiModalEditor.BORDER );
+			
+			JToggleButton select = new JToggleButton ( klass.getSimpleName().toLowerCase());
+			bg.add( select );
+			
+			select.addActionListener(  e -> ui.netSelected (this) );
+			
+			panel.setPreferredSize( new Dimension (100, 40) );
+			
+			return panel;
+		}
+	}
+	
+	public JointUI (JointDistribution jd, Runnable globalUpdate) {
+		
 		this.jd = jd;
 		
-		updateUI();
+		if (jd.joints.isEmpty())
+			addJoint();
+		
+		this.globalUpdate = globalUpdate;
+		
+		this.selectedJoint = jd.joints.get(0);
+		buildUI();
+		
+		openFrame();
+	}
+
+	private Joint addJoint() {
+		Joint j = jd.rollJoint("joint", nets.stream().map( n -> n.klass ).collect(Collectors.toList()));
+		
+		for (NetSelect ns : nets) {
+			j.appInfo.get( ns.klass ).dist = new MultiModal( ns.findExemplar( jd.root ) );
+		}
+		
+		return j;
+		
 	}
 	
-	public void updateUI () {
+	private void selectJoint( Joint j ) {
+		if (j == selectedJoint)
+			return;
+		
+		this.selectedJoint = j;
+		buildUI();
+	}
+
+	JPanel modalPanel;
+	MultiModalEditor modal;
+
+	public void netSelected( NetSelect ns ) {
+		
+		modalPanel.removeAll();
+		if (modal != null)
+			modal.stop();
+		
+		modalPanel.add (modal = new MultiModalEditor( 
+				selectedJoint.appInfo.get( ns.klass ).dist, ns.findExemplar( jd.root ), globalUpdate ), 
+				BorderLayout.CENTER );
+	}
+
+	public void buildUI () {
+		
 		removeAll();
 		
-		setLayout( new BorderLayout() );;
+		JPanel top = new JPanel (new BorderLayout());
+		top.add (jointUI(), BorderLayout.WEST);
+		top.add (netsUI(), BorderLayout.CENTER);
 		
-		add (jointUI(), BorderLayout.WEST);
+		setLayout( new BorderLayout() );
+		add (top, BorderLayout.NORTH);
+		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.NORTH);
 		
-		add (classUI(), BorderLayout.CENTER);
-		
+		netSelected( DEFAULT_NET );
 	}
 	
-	private JPanel classUI() {
+	
+	private JPanel netsUI() {
 		
-		JPanel out = new JPanel();
+		JPanel out = new JPanel( new ListRightLayout() );
 
-		classUI (jd.root, out);
+		ButtonGroup netBG;
+		netBG = new ButtonGroup();
+		for (NetSelect c : nets) {
+			if (c.show)
+				out.add( c.createUI(this, netBG) );
+		}
 		
 		return out;
-	}
-
-	private void classUI( App root, JPanel out ) {
-		
-//		MultiMap<String, App> downs = root.getDown();
-//		for (String s : downs.keySet()) {
-//			App a = downs.get( s ).get( 0 );
-//			
-//			classUI ()
-//			
-//		}
-		
-		
 	}
 
 	public JPanel jointUI() {
@@ -65,14 +186,14 @@ public class JointUI extends JPanel {
 		
 		panel.setLayout( new ListDownLayout() );
 		
-		AutoTextField atf = new AutoTextField(selectedJoint == null ? new Joint() : selectedJoint, "name", "name");
+		AutoTextField atf = new AutoTextField(selectedJoint, "name", "name");
 		
 		panel.add( atf );
 		
 		JPanel newDelete = new JPanel(new FlowLayout( FlowLayout.CENTER ));
 		
 		JButton n = new JButton("+");
-		n.addActionListener( e -> newJoint() );
+		n.addActionListener( e -> { Joint j = addJoint(); selectJoint( j ); } );
 		
 		JButton d = new JButton("-");
 		n.addActionListener( e -> killJoint() );
@@ -81,6 +202,9 @@ public class JointUI extends JPanel {
 		lt.addActionListener( e -> deltaJoint(-1) );
 		JButton gt = new JButton(">");
 		gt.addActionListener( e -> deltaJoint(1) );
+		
+		JButton save = new JButton("save...");
+		save.addActionListener( e -> save(selectedJoint) );
 		
 		
 		newDelete.add(n);
@@ -98,7 +222,14 @@ public class JointUI extends JPanel {
 		
 		panel.add(newDelete);
 		
+		panel.add(save);
+		
 		return panel;
+	}
+
+	private Object save( Joint selectedJoint2 ) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private void deltaJoint( int i ) {
@@ -111,35 +242,39 @@ public class JointUI extends JPanel {
 		
 		si = ( si + i + jd.joints.size() ) % jd.joints.size();
 		
-		if (jd.joints.isEmpty())
-			selectedJoint = null;
-		else
-			selectedJoint = jd.joints.get(si);
-		
-		updateUI();
+		selectJoint( jd.joints.get(si) );
 	}
 
 	private void killJoint() {
 		
+		if ( jd.joints.size() == 1 ) {
+			JOptionPane.showMessageDialog( frame, "can't delete only distribution" );
+			return;
+		}
+		
 		int si = jd.joints.indexOf( selectedJoint ) ;
 		jd.joints.remove (selectedJoint);
 		
-		try {
-			selectedJoint = jd.joints.get (Mathz.clamp ( si + 1, 0, jd.joints.size()-1  ));
-		}
-		catch ( ArrayIndexOutOfBoundsException e ) {
-			selectedJoint = null;
-		}
-		
-		updateUI();
+		selectJoint( jd.joints.get (Mathz.clamp ( si + 1, 0, jd.joints.size()-1  )) );
 	}
 	
-	private void newJoint() {
-		selectedJoint =  new Joint();
-		jd.joints.add(selectedJoint);
-		jd.updateJointProb();
-		updateUI();
+	public void openFrame() {
+		
+		frame = WindowManager.frame( "joint-dist editor",  this);
+		
+		frame.addWindowListener( new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				if (modal != null)
+					modal.stop();
+				
+				globalUpdate.run();
+			};
+		} );
+		
+		frame.pack();
+		frame.setVisible( true );
 	}
+
 	
 	
 }

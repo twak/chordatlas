@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
 
 
@@ -72,5 +73,8 @@ public class MultiModal implements StyleSource {
 		
 		return out;
 	}
-
+	
+	public boolean install( SelectedApps next ) {
+		return false;
+	}
 }

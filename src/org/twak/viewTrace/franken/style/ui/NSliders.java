@@ -1,12 +1,12 @@
-package org.twak.viewTrace.facades;
+package org.twak.viewTrace.franken.style.ui;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -30,6 +30,8 @@ public class NSliders extends JPanel {
 
 		setLayout( new ListDownLayout() );
 		
+		add (new JLabel("μ:"));
+		
 		for (int i = 0; i < result.length; i++) {
 			
 			int i_ = i;
@@ -48,7 +50,7 @@ public class NSliders extends JPanel {
 			} );
 		}
 		
-		JButton zero = new JButton("zero");
+		JButton zero = new JButton("μ = 0");
 		zero.addActionListener( new ActionListener() {
 			
 			@Override
@@ -61,7 +63,7 @@ public class NSliders extends JPanel {
 		} );
 		add (zero);
 		
-		JButton rand = new JButton("random");
+		JButton rand = new JButton("μ = rand");
 		rand.addActionListener(  new ActionListener() {
 			Random randy = new Random();
 			@Override

@@ -12,6 +12,7 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.UIVector;
 
 public class GaussStyle implements StyleSource {
@@ -44,7 +45,7 @@ public class GaussStyle implements StyleSource {
 		
 		JPanel line = new JPanel(new BorderLayout() );
 		
-		line.add( new JLabel("std:"), BorderLayout.WEST );
+		line.add( new JLabel("σ:"), BorderLayout.WEST );
 		
 		JSlider deviation = new JSlider(0, 1000, 0);
 		
@@ -68,5 +69,9 @@ public class GaussStyle implements StyleSource {
 		out.add( new UIVector (mean, app, false, update ) );
 		
 		return out;
+	}
+	
+	public boolean install( SelectedApps next ) {
+		return false;
 	}
 }
