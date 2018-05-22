@@ -23,13 +23,13 @@ public class PanesTexApp extends App implements HasApp {
 	private PanesLabelApp parent;
 
 	public PanesTexApp(PanesLabelApp parent) {
-		super(null, "texture windows", "dows1", 8, 256);
+		super( (HasApp) null );
 		super.hasA = this;
 		this.parent = parent;
 	}
 	
 	public PanesTexApp(PanesTexApp t) {
-		super (t);
+		super ( (App ) t);
 	}
 	
 	@Override
@@ -56,7 +56,7 @@ public class PanesTexApp extends App implements HasApp {
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {
 
-		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
 		
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;

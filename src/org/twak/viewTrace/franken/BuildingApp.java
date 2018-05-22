@@ -13,7 +13,7 @@ public class BuildingApp extends App {
 	public SkelGen parent;
 	
 	public BuildingApp( SuperFace superFace ) {
-		super( superFace, "building", null, 0, 0 );
+		super( superFace );
 	}
 
 	public BuildingApp( BuildingApp buildingApp ) {

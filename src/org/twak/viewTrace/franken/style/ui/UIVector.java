@@ -8,17 +8,18 @@ import javax.swing.JToggleButton;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 
 public class UIVector extends JPanel {
 
-	App exemplar;
+	NetInfo netInfo;
 	double[] vector;
 	JToggleButton method ;
 	
-	public UIVector( double[] vector, App exemplar, boolean showManual, Runnable update ) {
+	public UIVector( double[] vector, NetInfo netInfo, boolean showManual, Runnable update ) {
 		
-		this.exemplar = exemplar;
+		this.netInfo = netInfo;
 		this.vector = vector;
 		
 		setLayout( new BorderLayout() );
@@ -44,7 +45,7 @@ public class UIVector extends JPanel {
 		if ( byExample ) {
 			ImageFileDrop drop = new ImageFileDrop() {
 				public BufferedImage process( java.io.File f ) {
-					return new Pix2Pix(exemplar).encode( f, vector, update );
+					return new Pix2Pix(netInfo).encode( f, vector, update );
 				};
 				
 				@Override

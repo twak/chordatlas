@@ -37,7 +37,7 @@ public class FacadeTexApp extends App {
 	public String coarse;
 	
 	public FacadeTexApp( HasApp ha ) {
-		super( ha, "facade coarse", "facade_windows_f000", 8, 256 );
+		super( ha );
 	}
 
 	public FacadeTexApp( FacadeTexApp facadeCoarse ) {
@@ -84,7 +84,10 @@ public class FacadeTexApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
-		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+		NetInfo ni =NetInfo.get(this) ;
+		int resolution = ni.resolution;
+		
+		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();

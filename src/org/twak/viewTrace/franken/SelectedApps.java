@@ -151,7 +151,7 @@ public class SelectedApps extends ArrayList<App>{
 		}, "texture", exemplar.getValidAppModes() );
 		buildLayout(exemplar.appMode, options, () -> refresh( update ) );
 		
-		if (exemplar.resolution > 0)
+		if ( NetInfo.get( exemplar ).resolution > 0)
 			top.add(combo); // building doesn't have options yet
 		
 		main.add( top, BorderLayout.NORTH );

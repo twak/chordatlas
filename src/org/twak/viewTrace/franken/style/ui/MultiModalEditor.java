@@ -31,6 +31,7 @@ import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.MultiModal.Wrapper;
@@ -39,12 +40,12 @@ public class MultiModalEditor extends JPanel {
 
 	NetExamples egs;
 	private MultiModal mm;
-	App exemplar;
+	NetInfo exemplar;
 	JFrame frame;
 	JPanel gList;
 	Runnable globalUpdate ;
 	
-	public MultiModalEditor( MultiModal mm, App exemplar, Runnable globalUpdate ) {
+	public MultiModalEditor( MultiModal mm, NetInfo exemplar, Runnable globalUpdate ) {
 		
 		this.mm = mm;
 		this.exemplar = exemplar;

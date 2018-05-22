@@ -14,7 +14,7 @@ public class BlockApp extends App {
 	}
 
 	public BlockApp( SkelGen skelGen ) {
-		super (skelGen, "block", null, 0, 0);
+		super (skelGen );
 	}
 
 	@Override

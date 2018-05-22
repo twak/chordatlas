@@ -29,6 +29,7 @@ import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.FacadeSuper;
 import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.PanesLabelApp;
 import org.twak.viewTrace.franken.PanesTexApp;
 import org.twak.viewTrace.franken.RoofApp;
@@ -69,6 +70,10 @@ public class JointUI extends JPanel {
 		}
 
 		public App findExemplar (App root) {
+			
+			if (root.getClass() == klass)
+				return root;
+			
 			return findExemplar( Collections.singletonList( root ) );
 		}
 		
@@ -82,6 +87,9 @@ public class JointUI extends JPanel {
 						return b;
 					else
 						next.add(b);
+			
+			if (next.isEmpty())
+				return null;
 			
 			return findExemplar( next );
 		}
@@ -121,7 +129,8 @@ public class JointUI extends JPanel {
 		Joint j = jd.rollJoint("joint", nets.stream().map( n -> n.klass ).collect(Collectors.toList()));
 		
 		for (NetSelect ns : nets) {
-			j.appInfo.get( ns.klass ).dist = new MultiModal( ns.findExemplar( jd.root ) );
+			System.out.println(">>>> " + ns.klass);
+			j.appInfo.get( ns.klass ).dist = new MultiModal( NetInfo.get( ns.klass ) );
 		}
 		
 		return j;
@@ -146,7 +155,7 @@ public class JointUI extends JPanel {
 			modal.stop();
 		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, ns.findExemplar( jd.root ), globalUpdate ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), globalUpdate ), 
 				BorderLayout.CENTER );
 	}
 

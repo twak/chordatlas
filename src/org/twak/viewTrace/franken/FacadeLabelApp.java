@@ -43,7 +43,7 @@ public class FacadeLabelApp extends App {
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
 	public FacadeLabelApp( HasApp ha ) {
-		super( ha, "facade labels", "empty2windows_f005", 8, 256 );
+		super( ha );
 	}
 
 	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
@@ -104,9 +104,11 @@ public class FacadeLabelApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
-		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+		NetInfo ni = NetInfo.get(this);
 		
-		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Pix2Pix p2 = new Pix2Pix( ni );
+		
+		BufferedImage bi = new BufferedImage( ni.resolution * 2, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
@@ -123,15 +125,15 @@ public class FacadeLabelApp extends App {
 			DRectangle mini = Pix2Pix.findBounds( mf );
 
 			g.setColor( Color.black );
-			g.fillRect( resolution, 0, resolution, resolution );
+			g.fillRect( ni.resolution, 0, ni.resolution, ni.resolution );
 
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
 
 			{
-				mask = mask.scale( resolution / Math.max( mini.height, mini.width ) );
-				mask.x = ( resolution - mask.width ) * 0.5 + resolution;
+				mask = mask.scale( ni.resolution / Math.max( mini.height, mini.width ) );
+				mask.x = ( ni.resolution - mask.width ) * 0.5 + ni.resolution;
 				mask.y = 0; 
 			}
 
@@ -150,7 +152,7 @@ public class FacadeLabelApp extends App {
 						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 			}
 
-			mask.x -= resolution;
+			mask.x -= ni.resolution;
 
 			Meta meta = new Meta( mf, mask, mini, a );
 
@@ -211,7 +213,7 @@ public class FacadeLabelApp extends App {
 					
 					JsonNode rect = node.get( i );
 					
-					DRectangle f = new DRectangle( rect.get( 0 ).asDouble(), resolution - rect.get( 3 ).asDouble(),
+					DRectangle f = new DRectangle( rect.get( 0 ).asDouble(), NetInfo.get(this).resolution - rect.get( 3 ).asDouble(),
 							rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(),
 							rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
 							

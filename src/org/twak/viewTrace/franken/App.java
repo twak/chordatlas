@@ -46,9 +46,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	public boolean isDirty = false; 
 	
 	// GAN optoins
-	public String netName;
-	public int sizeZ = -1;
-	public int resolution;
+//	public String netName;
+//	public int sizeZ = -1;
+//	public int resolution;
 	public DRectangle textureRect;
 	
 	public App( App a ) {
@@ -58,23 +58,18 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.color = a.color;
 		this.texture = a.texture;
 		this.styleZ = a.styleZ;
-		this.netName = a.netName;
-		this.sizeZ = a.sizeZ;
-		this.resolution = a.resolution;
 		this.name = a.name;
 		this.styleSource = a.styleSource;
 	}
 	
-	public App( HasApp ha, String name, String netName, int sizeZ, int resolution ) {
+	public App( HasApp ha ) {
 		
-		this.name = name;
-		this.netName = name;
+		NetInfo ni = NetInfo.index.get(this.getClass());
+		
+		this.name = ni.name;
 		this.hasA = ha; 
-		this.netName = netName;
-		this.styleZ = new double[sizeZ];
-		this.sizeZ = sizeZ;
-		this.resolution = resolution;
-		this.styleSource = new GaussStyle(this);
+		this.styleZ = new double[ni.sizeZ];
+		this.styleSource = new GaussStyle(NetInfo.get(this));
 	}
 
 	public static App createFor(HasApp ha) {

@@ -28,7 +28,7 @@ public class RoofApp extends App {
 	public SuperFace parent;
 
 	public RoofApp(HasApp ha) {
-		super(ha, "roof", "roofs6", 8, 512);
+		super(ha );
 	}
 
 	public RoofApp( RoofApp ruf ) {
@@ -53,6 +53,10 @@ public class RoofApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
+		NetInfo ni = NetInfo.get(this);
+		
+		int resolution = ni.resolution;
+		
 		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
@@ -60,7 +64,7 @@ public class RoofApp extends App {
 
 		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
 		
-		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		for ( MiniRoof toEdit : mrb ) {
 

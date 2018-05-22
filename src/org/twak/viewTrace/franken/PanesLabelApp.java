@@ -33,7 +33,7 @@ public class PanesLabelApp extends App {
 	public List<DRectangle> panes = null;
 	
 	public PanesLabelApp(HasApp ha) {
-		super(ha, "label windows", "dows2", 8, 256);
+		super(ha );
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -78,8 +78,9 @@ public class PanesLabelApp extends App {
 
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
-		
-		Pix2Pix p2 = new Pix2Pix( batch.get( 0 ) );
+
+		NetInfo ni = NetInfo.get(this); 
+		Pix2Pix p2 = new Pix2Pix( ni );
 
 		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
 		int count = 0;
@@ -116,7 +117,8 @@ public class PanesLabelApp extends App {
 
 				DRectangle mask = new DRectangle();
 
-				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE, Color.black ), mask, resolution, resolution, Color.black );
+				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE, Color.black ), 
+						mask, ni.resolution, ni.resolution, Color.black );
 				
 //				scaled = new FastBlur().processImage( scaled, 5 );
 				

@@ -35,13 +35,13 @@ public class FacadeSuper extends App implements HasApp {
 	public double scale = 120;
 	
 	public FacadeSuper( FacadeTexApp parent ) {
-		super( null, "super-facade", "super6", 8, 256 );
+		super( (HasApp) null );
 		this.hasA = this;
 		this.parent = parent;
 	}
 
 	public FacadeSuper( FacadeSuper facadeCoarse ) {
-		super( facadeCoarse );
+		super( (App) facadeCoarse );
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class FacadeSuper extends App implements HasApp {
 
 		int MAX_CONCURRENT = 32;
 
-		Pix2Pix p2 = new Pix2Pix ( this );
+		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
 		int count = 0;
 		for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {

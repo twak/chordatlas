@@ -12,6 +12,7 @@ import javax.swing.event.ChangeListener;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.UIVector;
 
@@ -19,12 +20,14 @@ public class GaussStyle implements StyleSource {
 	
 	public double[] mean;
 	double std;
-	App app;
+//	App app;
+	NetInfo ni;
 	
-	public GaussStyle(App app) {
-		this.mean = new double[app.sizeZ];
+	public GaussStyle(NetInfo ni) {
+		this.mean = new double[ni.sizeZ];
 		this.std = 0;
-		this.app = app;
+		this.ni = ni;
+//		this.app = app;
 	}
 	
 	@Override
@@ -66,7 +69,7 @@ public class GaussStyle implements StyleSource {
 //		go.addActionListener( e -> update.run() );
 //		out.add( go );
 		
-		out.add( new UIVector (mean, app, false, update ) );
+		out.add( new UIVector (mean, ni, false, update ) );
 		
 		return out;
 	}

@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
 
@@ -25,9 +26,9 @@ public class MultiModal implements StyleSource {
 	
 	public double totalProb;
 	
-	App exemplar;
+	NetInfo exemplar;
 	
-	public MultiModal(App ex) {
+	public MultiModal(NetInfo ex) {
 		this.exemplar = ex;
 	}
 	

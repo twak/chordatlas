@@ -34,9 +34,9 @@ public class Pix2Pix {
 	String netName;
 	int resolution;
 	
-	public Pix2Pix (App exemplar) {
-		this.netName = exemplar.netName;
-		this.resolution = exemplar.resolution;
+	public Pix2Pix (NetInfo ni) {
+		this.netName = ni.netName;
+		this.resolution = ni.resolution;
 	}
 	
 	public interface JobResult {

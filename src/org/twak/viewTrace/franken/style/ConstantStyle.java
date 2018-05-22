@@ -6,15 +6,16 @@ import javax.swing.JPanel;
 
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.UIVector;
 
 public class ConstantStyle implements StyleSource {
 	
 	double[] mean;
-	App app;
+	NetInfo app;
 	
-	public ConstantStyle(App app) {
+	public ConstantStyle(NetInfo app) {
 		this.mean = new double[app.sizeZ];
 		this.app = app;
 	}

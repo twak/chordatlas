@@ -26,6 +26,7 @@ import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.style.StyleSource;
@@ -50,7 +51,7 @@ public class NetExamples extends JComponent {
 	
 	int hx = -1, hy = -1;
 	
-	App exemplar;
+	NetInfo exemplar;
 	
 	boolean mouseDown = false;
 	
@@ -70,7 +71,7 @@ public class NetExamples extends JComponent {
 		}
 	}
 	
-	public NetExamples ( StyleSource ss, int x, int y, App exemplar, File exampleFolder ) {
+	public NetExamples ( StyleSource ss, int x, int y, NetInfo exemplar, File exampleFolder ) {
 		
 		this.styleSource = ss;
 		this.exemplar = exemplar;
