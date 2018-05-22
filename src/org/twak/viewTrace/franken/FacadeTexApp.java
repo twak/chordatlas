@@ -106,6 +106,9 @@ public class FacadeTexApp extends App {
 
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
+			if (mini == null)
+				continue;
+			
 			DRectangle mask = new DRectangle( mini );
 //			mask = mask.centerSquare();
 

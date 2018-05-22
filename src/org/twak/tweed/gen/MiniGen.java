@@ -281,6 +281,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	public void clip ( Loop<Point3d> in, File objLocation ) {
 		
 		ObjDump obj = new ObjDump();
+		obj.REMOVE_DUPE_TEXTURES = true;
 		
 		double[] bounds = Loopz.minMaxXZ(in);
 		

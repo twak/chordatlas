@@ -62,8 +62,6 @@ public class ObjGen extends Gen implements IDumpObjs {
 		}
 
 		Spatial mesh = tweed.getAssetManager().loadModel(filename);
-
-
 		
 		Material mat = null;
 		
