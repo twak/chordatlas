@@ -215,7 +215,7 @@ public class SelectedApps extends ArrayList<App>{
 		
 		public StyleSource instance(App app) {
 			try {
-				return klass.getConstructor( App.class ).newInstance( app );
+				return klass.getConstructor( NetInfo.class ).newInstance( NetInfo.get( app ) );
 			} catch ( Throwable e ) {
 				e.printStackTrace();
 				return null;

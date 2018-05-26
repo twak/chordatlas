@@ -26,6 +26,7 @@ import javax.swing.JComponent;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
@@ -95,7 +96,7 @@ public class NetExamples extends JComponent {
 		
 		for (File f : exampleFolder.listFiles() ) {
 			try {
-				BufferedImage bi = Imagez.scaleLongest( ImageIO.read( f ), exemplar.resolution ) ;
+				BufferedImage bi = Imagez.scaleSquare( ImageIO.read( f ), exemplar.resolution ) ;
 				inputs. add ( Imagez.join( bi, bi ) );
 			} catch ( IOException e ) {
 				e.printStackTrace();
@@ -113,7 +114,7 @@ public class NetExamples extends JComponent {
 					
 					for (int i = 0; i < BATCH_SIZE; i++) {
 						int index = randy.nextInt(inputs.size());
-						p2.addInput( inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy, null ) );
+						p2.addInput(  inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy, null ) );
 					}
 					
 					p2.submitSafe( new Job() {
@@ -129,6 +130,25 @@ public class NetExamples extends JComponent {
 				}
 			}
 		}.start();
+		
+		{
+			List<Pair<Integer, BufferedImage>> warmup = new ArrayList<>();
+			
+			for (int i = 0; i < 32; i++) {
+				
+				BufferedImage tmp = new BufferedImage( 256, 256, BufferedImage.TYPE_3BYTE_BGR );
+				Graphics2D g = tmp.createGraphics();
+				int col = (int) (Math.random() * 100) + 50;
+				g.setColor( new Color (col, col, col) );
+				g.fillRect( 0, 0, 256, 256 );
+				g.dispose();
+				
+				warmup.add ( new Pair ( i % inputs.size(), tmp) );
+			}
+		
+			lastChanged = System.currentTimeMillis() - 5000;
+			addImages( System.currentTimeMillis(), warmup );
+		}
 		
 		MouseAdapter ml = new MouseAdapter() {
 			public void mouseMoved(MouseEvent e) {
@@ -159,7 +179,7 @@ public class NetExamples extends JComponent {
 	
 	private void addImages( long startTime, List<Pair<Integer, BufferedImage>> values ) {
 		
-		int interval = Math.min ( 500, (int) ((endTime - startTime) / values.size() )) ;
+		int interval = Mathz.clamp  ( (int) ((endTime - startTime) / values.size() ), 50, 500);
 		
 		new Thread() {
 			public void run() {
@@ -193,6 +213,10 @@ public class NetExamples extends JComponent {
 	
 	private synchronized void addImage (int src, BufferedImage b) {
 		Pair<Integer, Integer> next = randomOrder.get( (randomLocation ++) % randomOrder.size() );
+		
+		if (next.first() == hx && next.second() == hy)
+			return; // don't updat the thing we're hovering over
+		
 		images[ next.first() ][ next.second() ] = b;
 		inputIdx[ next.first() ][ next.second() ] = src;
 		repaint();
@@ -231,6 +255,7 @@ public class NetExamples extends JComponent {
 		int previewSize = DRAW_SIZE * 2;
 		
 		if (hx >=0 && images[hx][hy] != null) {
+			
 			g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
 			int x = hx * DRAW_SIZE - (previewSize/4);
 			int y = hy * DRAW_SIZE - (previewSize/4);

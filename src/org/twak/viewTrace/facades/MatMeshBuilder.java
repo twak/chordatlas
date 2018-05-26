@@ -27,7 +27,7 @@ public class MatMeshBuilder extends MeshBuilder {
 		this.texture = texture;
 		
 		if (texture == null)
-			throw new Error("bad texture");
+			throw new Error("bad texture " + name);
 	}
 
 //	public static Cache<float[], MatMeshBuilder> buildCache(Map <float[], MatMeshBuilder> store,  String mat ) {

@@ -1,22 +1,30 @@
 package org.twak.viewTrace.franken.style;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.twak.utils.collections.MultiMap;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ui.JointUI;
-import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
+import org.twak.viewTrace.franken.style.ui.JointUI.NetSelect;
 
 public class JointDistribution implements StyleSource {
 
@@ -28,13 +36,16 @@ public class JointDistribution implements StyleSource {
 	public List<Joint> joints = new ArrayList<>();
 
 	public static class Joint {
+		
 		public String name;
+		
 		public Map<Class, AppInfo> appInfo = new HashedMap();
 		public double probability = 0.5;
+		
 		public Joint( String name2, List<Class<?>> klasses ) {
 			this.name = name2;
 			for (Class k : klasses) {
-				appInfo.put( k, new AppInfo (null) );
+				appInfo.put( k, new AppInfo (k) );
 			}
 		}
 	}
@@ -46,23 +57,42 @@ public class JointDistribution implements StyleSource {
 		
 		public AppInfo (Class bakeWith) {
 			this.bakeWith = bakeWith;
+			this.dist = new MultiModal( NetInfo.get( bakeWith ) );
+			this.dist.newMode();
 		}
 	}
 	
-	public JointDistribution( App ignore ) {
-		init(null);
+	public JointDistribution( NetInfo ignore ) {
+		rollJoint();
 	}
 	
-	private void init( BlockApp app ) {
-		this.root = app;
+//	private void install( BlockApp app ) {
+//		this.root = app;
+//		install (Collections.singletonList( app ));
+//	}
+	
+	private void install (List<App> apps) {
+		
+		List<App> children = new ArrayList();
+
+		for (App a : apps) {
+			a.appMode = AppMode.Net;
+			a.styleSource = this;
+			children.addAll( a.getDown().valueList() );
+		}
+		
+		if (!children.isEmpty())
+			install (children);
 	}
 
 	public boolean install( SelectedApps root ) {
-		init( (BlockApp) root.findRoots().iterator().next() );
+		this.root =  (BlockApp) root.findRoots().iterator().next();
+		install (Collections.singletonList( this.root ));
+		
 		return true;
 	}
 	
-	public void install() {
+	public void redraw() {
 
 		MultiMap<App, App> bakeWith = new MultiMap<>();
 
@@ -72,15 +102,33 @@ public class JointDistribution implements StyleSource {
 		Random randy = new Random();
 
 		for ( App building : root.getDown().valueList() )
-			install( Collections.singletonList( building ), drawJoint( randy ), randy, bakeWith );
+			redraw( Collections.singletonList( building ), new HashSet<>(), drawJoint( randy ), randy, bakeWith );
 	}
 
 	public void updateJointProb() {
 		totalJointProbability = joints.stream().mapToDouble( j -> j.probability ).sum();
 	}
 	
-	public Joint rollJoint ( String name, List<Class<?>> klasses) {
-		Joint j = new Joint (name, klasses);
+	public Joint rollJoint () {
+		
+		int ni = 1;
+		
+		String name = "joint";
+		
+		while (true) {
+			
+			boolean exists = false;
+			for (Joint j : joints)
+				exists |= j.name.equals( name );
+			
+			if (!exists)
+				break;
+			
+			name= "joint " + ni++;
+		};
+		
+		Joint j = new Joint (name,  JointUI.nets.stream().map( n -> n.klass ).collect(Collectors.toList()) );
+		
 		joints.add(j);
 		updateJointProb();
 		return j;
@@ -91,8 +139,6 @@ public class JointDistribution implements StyleSource {
 		List<App> next = new ArrayList<>();
 
 		for ( App a : current ) {
-			
-			a.styleSource = null;
 			
 			parents.put( a.getClass(), a );
 			Class bw = j.appInfo.get( a.getClass() ).bakeWith;
@@ -107,19 +153,21 @@ public class JointDistribution implements StyleSource {
 			next.addAll( a.getDown().valueList() );
 		}
 
-		findBake( j, next, bakeWith, parents );
+		if (!next.isEmpty())
+			findBake( j, next, bakeWith, parents );
 	}
 
-	private void install( List<App> as, Joint j, Random random, MultiMap<App, App> bakeWith ) {
+	private void redraw( List<App> as, Set<App> drawn, Joint j, Random random, MultiMap<App, App> bakeWith ) {
 
 		List<App> next = new ArrayList<>();
 
 		for ( App a : as ) {
 			
-			if (a.styleSource == this)
+			if (drawn.contains ( a ) )
 				continue; // pre-baked
 			
-			a.styleSource = this;
+			drawn.add( a );
+			
 			a.styleZ = j.appInfo.get( a.getClass() ).dist.draw( random, a );
 
 			MultiMap<Class, App> bakeTogether = new MultiMap<>();
@@ -129,7 +177,6 @@ public class JointDistribution implements StyleSource {
 			for (Class c : bakeTogether.keySet()) {
 				double[] val = j.appInfo.get( c ).dist.draw( random, null );
 				for (App b : bakeTogether.get( c ) ) {
-					b.styleSource = this;
 					a.styleZ = val;
 				}
 			}
@@ -137,7 +184,8 @@ public class JointDistribution implements StyleSource {
 			next.addAll( a.getDown().valueList() );
 		}
 
-		install( next, j, random, bakeWith );
+		if (!next.isEmpty() )
+			redraw( next, drawn, j, random, bakeWith );
 	}
 
 	private Joint drawJoint( Random random ) {
@@ -161,12 +209,22 @@ public class JointDistribution implements StyleSource {
 
 	@Override
 	public JPanel getUI( Runnable update ) {
-		JPanel out = new JPanel();
+		JPanel out = new JPanel(new ListDownLayout() );
 		
 		JButton but = new JButton( "edit joint" );
 		but.addActionListener( e -> new JointUI(this, update ).openFrame() );
 		out.add( but );
-		
+
+		JButton redaw = new JButton( "redraw" );
+		redaw.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				redraw();
+				update.run();
+			}
+		} );
+		out.add( redaw );
+
 		return out;
 	}
 

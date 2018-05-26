@@ -71,9 +71,8 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	
 	public  transient List<ImagePlaneGen> planes = new ArrayList<>();
 	
-	public PanoGen() {
-		System.out.println( ">>>>" );
-	}
+	public PanoGen() {}
+	
 	public PanoGen(File folder, Tweed tweed, String sourceCRS ) {
 		super ("panos "+folder.getName(), tweed);
 		this.folder = folder;

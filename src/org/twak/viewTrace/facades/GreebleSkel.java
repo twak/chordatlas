@@ -352,7 +352,10 @@ public class GreebleSkel {
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED+mf.app.hashCode(), TILE_JPG, mf );
 					break;
 				case Net:
-					faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture+mf.app.hashCode() , mf.app.texture, mf );
+					if (mf.app.texture == null)
+						faceColor = greebleGrid.mbs.get( BRICK+mf.app.hashCode(), mf.app.color, mf );
+					else
+						faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture+mf.app.hashCode() , mf.app.texture, mf );
 					break;
 				}
 
@@ -371,7 +374,10 @@ public class GreebleSkel {
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, roofApp );
 					break;
 				case Net:
-					faceColor = greebleGrid.mbs.getTexture( "texture_" + ra.texture, ra.texture, roofApp );
+					if (ra.texture == null)
+						faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
+					else
+						faceColor = greebleGrid.mbs.getTexture( "texture_" + ra.texture, ra.texture, roofApp );
 					break;
 				}
 			}

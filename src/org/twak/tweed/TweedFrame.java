@@ -179,7 +179,7 @@ public class TweedFrame {
 		frame.setJMenuBar( menuBar );
 
 		//Build the first menu.
-		JMenu menu = new JMenu( "File" );
+		JMenu menu = new JMenu( "file" );
 		menuBar.add( menu );
 
 		JMenuItem save = new JMenuItem( "save", KeyEvent.VK_S );

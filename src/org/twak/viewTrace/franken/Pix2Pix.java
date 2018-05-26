@@ -36,7 +36,7 @@ public class Pix2Pix {
 	int resolution;
 	
 	public Pix2Pix (NetInfo ni) {
-		this.netName = ni.netName;
+		this.netName = ni.name;//netName;
 		this.resolution = ni.resolution;
 	}
 	
@@ -79,6 +79,7 @@ public class Pix2Pix {
 	public void submitSafe( Job job ) {
 		
 		String network = netName;
+		
 		if (job.encode)
 			network = network+"_e";
 			
@@ -100,9 +101,6 @@ public class Pix2Pix {
 
 		do {
 			try {
-				
-				System.out.println("file: " + go+" exists:" + go.exists() );
-				
 				Thread.sleep( 50 );
 				
 			} catch ( InterruptedException e ) {

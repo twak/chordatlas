@@ -35,7 +35,7 @@ import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.style.MultiModal;
-import org.twak.viewTrace.franken.style.MultiModal.Wrapper;
+import org.twak.viewTrace.franken.style.MultiModal.Mode;
 
 public class MultiModalEditor extends JPanel {
 
@@ -81,7 +81,7 @@ public class MultiModalEditor extends JPanel {
 			};
 		} );
 		
-		if (mm.styles.isEmpty())
+		if (mm.modes.isEmpty())
 			addG( () -> egs.changed(), null );
 		
 		
@@ -135,7 +135,7 @@ public class MultiModalEditor extends JPanel {
 	
 	public void addG(Runnable localUpdate, File meanImage ) {
 		
-		Wrapper w = mm.newWrapper();
+		Mode w = mm.newMode();
 
 		if (meanImage == null) {
 			GaussWrapper c = new GaussWrapper( w, localUpdate );
@@ -156,7 +156,7 @@ public class MultiModalEditor extends JPanel {
 	}
 	
 	public void buildControls(JPanel gauss, Runnable localUpdate) {
-		for (Wrapper gsw : mm.styles) {
+		for (Mode gsw : mm.modes) {
 			gauss.add (new GaussWrapper( gsw, localUpdate ));
 		}
 	}
@@ -165,7 +165,7 @@ public class MultiModalEditor extends JPanel {
 	
 	private class GaussWrapper extends JPanel {
 		
-		public GaussWrapper (Wrapper w, Runnable localUpdate ) {
+		public GaussWrapper (Mode w, Runnable localUpdate ) {
 			
 			setLayout(  new BorderLayout() );
 			setBorder( BORDER );
@@ -186,7 +186,7 @@ public class MultiModalEditor extends JPanel {
 				public void stateChanged( ChangeEvent e ) {
 					if (!pSlider.getValueIsAdjusting()) {
 						w.prob = pSlider.getValue() / 1000.;
-						mm.updateStyles();
+						mm.updateModes();
 						localUpdate.run();
 					}
 				}
@@ -201,7 +201,7 @@ public class MultiModalEditor extends JPanel {
 				
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					mm.styles.remove( w );
+					mm.modes.remove( w );
 					GaussWrapper.this.getParent().remove (GaussWrapper.this);
 					new Thread () {
 						public void run() {
@@ -214,7 +214,7 @@ public class MultiModalEditor extends JPanel {
 						}
 					}.start();
 					
-					mm.updateStyles();
+					mm.updateModes();
 					localUpdate.run();
 				}
 			} );

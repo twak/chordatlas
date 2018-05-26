@@ -16,13 +16,13 @@ import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
 
 public class MultiModal implements StyleSource {
 
-	public static class Wrapper{
+	public static class Mode{
 		public GaussStyle ss;
 		public double prob = 0.5;
 		public double accumProb;
 	}
 	
-	public List<Wrapper> styles = new ArrayList<>();
+	public List<Mode> modes = new ArrayList<>();
 	
 	public double totalProb;
 	
@@ -32,10 +32,10 @@ public class MultiModal implements StyleSource {
 		this.exemplar = ex;
 	}
 	
-	public void updateStyles() {
+	public void updateModes() {
 		totalProb = 0;
 		
-		for ( Wrapper w : styles ) {
+		for ( Mode w : modes ) {
 			totalProb += w.prob;
 			w.accumProb = totalProb;
 		}
@@ -46,7 +46,7 @@ public class MultiModal implements StyleSource {
 		
 		double d = random.nextDouble() * totalProb;
 		
-		for (Wrapper w : styles) 
+		for (Mode w : modes) 
 			if (d < w.accumProb)
 				return w.ss.draw( random, app );
 
@@ -64,13 +64,13 @@ public class MultiModal implements StyleSource {
 		return out;
 	}
 
-	public Wrapper newWrapper() {
+	public Mode newMode() {
 		
-		Wrapper out = new Wrapper();
+		Mode out = new Mode();
 		out.ss = new GaussStyle( exemplar );
-		styles.add( out );
+		modes.add( out );
 		
-		updateStyles();
+		updateModes();
 		
 		return out;
 	}

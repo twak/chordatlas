@@ -4,8 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,16 +18,21 @@ import java.util.stream.Collectors;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
+import org.twak.utils.Filez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.AutoTextField;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
+import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
@@ -38,6 +47,9 @@ import org.twak.viewTrace.franken.RoofApp;
 import org.twak.viewTrace.franken.style.JointDistribution;
 import org.twak.viewTrace.franken.style.JointDistribution.Joint;
 import org.twak.viewTrace.franken.style.MultiModal;
+import org.twak.viewTrace.franken.style.MultiModal.Mode;
+
+import com.thoughtworks.xstream.XStream;
 
 
 public class JointUI extends JPanel {
@@ -47,7 +59,7 @@ public class JointUI extends JPanel {
 	JFrame frame;
 	Runnable globalUpdate;
 	
-	final static List<NetSelect> nets = new ArrayList<>();
+	public final static List<NetSelect> nets = new ArrayList<>();
 	static NetSelect DEFAULT_NET;
 	
 	JPanel modalPanel;
@@ -64,10 +76,10 @@ public class JointUI extends JPanel {
 		nets.add (new NetSelect(RoofApp       .class, true  ) );
 	}
 	
-	static class NetSelect {
+	public static class NetSelect {
 		
-		Class<? extends App> klass;
-		boolean show;
+		public Class<? extends App> klass;
+		public boolean show;
 		
 		public NetSelect( Class<? extends App> k, boolean s ) {
 			this.klass = k;
@@ -99,13 +111,15 @@ public class JointUI extends JPanel {
 			return findExemplar( next );
 		}
 		
-		public Component createUI(JointUI ui, ButtonGroup bg) {
+		public Component createUI(JointUI ui, boolean selected, ButtonGroup bg) {
 			
 			JPanel panel = new JPanel();
 			panel.setBorder( MultiModalEditor.BORDER );
 			
 			JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( klass.getSimpleName() ) );
 			bg.add( select );
+			
+			select.setSelected( selected );
 			
 			select.addActionListener(  e -> ui.netSelected (this) );
 			panel.setPreferredSize( new Dimension (140, 40) );
@@ -121,24 +135,19 @@ public class JointUI extends JPanel {
 		this.jd = jd;
 		
 		if (jd.joints.isEmpty())
-			addJoint();
+			jd.rollJoint();
 		
-		this.globalUpdate = globalUpdate;
+		this.globalUpdate = new Runnable() {
+			
+			@Override
+			public void run() {
+				jd.redraw();
+				globalUpdate.run();		
+			}
+		};
 		
 		this.selectedJoint = jd.joints.get(0);
 		buildUI();
-	}
-
-	private Joint addJoint() {
-		Joint j = jd.rollJoint("joint", nets.stream().map( n -> n.klass ).collect(Collectors.toList()));
-		
-		for (NetSelect ns : nets) {
-			System.out.println(">>>> " + ns.klass);
-			j.appInfo.get( ns.klass ).dist = new MultiModal( NetInfo.get( ns.klass ) );
-		}
-		
-		return j;
-		
 	}
 	
 	private void selectJoint( Joint j ) {
@@ -175,6 +184,11 @@ public class JointUI extends JPanel {
 		add (top, BorderLayout.NORTH);
 		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
 		
+		JButton close = new JButton( "ok" );
+		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
+		add( close, BorderLayout.SOUTH );
+
+		
 		netSelected( DEFAULT_NET );
 	}
 	
@@ -187,7 +201,7 @@ public class JointUI extends JPanel {
 		netBG = new ButtonGroup();
 		for (NetSelect c : nets) {
 			if (c.show)
-				out.add( c.createUI(this, netBG) );
+				out.add( c.createUI(this, c == DEFAULT_NET, netBG) );
 		}
 		
 		return out;
@@ -206,10 +220,10 @@ public class JointUI extends JPanel {
 		JPanel newDelete = new JPanel(new FlowLayout( FlowLayout.CENTER ));
 		
 		JButton n = new JButton("+");
-		n.addActionListener( e -> { Joint j = addJoint(); selectJoint( j ); } );
+		n.addActionListener( e -> { Joint j = jd.rollJoint(); selectJoint( j ); } );
 		
 		JButton d = new JButton("-");
-		n.addActionListener( e -> killJoint() );
+		d.addActionListener( e -> killJoint() );
 		
 		JButton lt = new JButton("<");
 		lt.addActionListener( e -> deltaJoint(-1) );
@@ -220,17 +234,10 @@ public class JointUI extends JPanel {
 			public void updated( double p ) {
 				selectedJoint.probability = p;
 				jd.updateJointProb();
-				globalUpdate.run();
 			}
 		};
 		
-		
-		JButton save = new JButton("save...");
-		save.addActionListener( e -> save(selectedJoint) );
-		
-		
 		newDelete.add(n);
-		
 		newDelete.add(d);
 		newDelete.add(lt);
 		newDelete.add(gt);
@@ -245,9 +252,7 @@ public class JointUI extends JPanel {
 		panel.add(newDelete);
 		panel.add(prob);
 		
-		panel.add(save);
-		
-		panel.setPreferredSize( new Dimension (200, 60) );
+		panel.setPreferredSize( new Dimension (200, (int) panel.getPreferredSize().getHeight()) );
 		
 		return panel;
 	}
@@ -296,8 +301,55 @@ public class JointUI extends JPanel {
 			};
 		} );
 		
+		
+		JMenuBar bar = new JMenuBar();
+		
+		JMenu ls = new JMenu("file");
+		bar.add( ls );
+		
+		JMenuItem load = new JMenuItem("load...");
+		load.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				System.out.println("here");
+				new SimpleFileChooser(frame) {
+					@Override
+					public void heresTheFile( File f ) throws Throwable {
+						BlockApp editing = jd.root;
+						jd = (JointDistribution) new XStream().fromXML( f );
+						jd.root = editing;
+						jd.redraw();
+						buildUI();
+					}
+				};
+			}
+		});
+		ls.add( load );
+		
+		JMenuItem save = new JMenuItem("save...");
+		load.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				new SimpleFileChooser(frame, true, "select file to save to", null, "xml") {
+					@Override
+					public void heresTheFile( File f ) throws Throwable {
+//						f = new File (f.getParentFile(), Filez.stripExtn( f.getName() ) +".xml");
+						new XStream().toXML( jd, new FileOutputStream( f ) );
+					}
+				};
+			}
+		});
+		ls.add( save );
+		frame.setJMenuBar( bar );
+		
 		frame.pack();
 		frame.setVisible( true );
+	}
+
+	private Object load() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	
