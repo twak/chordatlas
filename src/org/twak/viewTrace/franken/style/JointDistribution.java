@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -19,12 +18,18 @@ import org.apache.commons.collections.map.HashedMap;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.BlockApp;
-import org.twak.viewTrace.franken.NetInfo;
-import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeSuper;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.NetInfo;
+import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
+import org.twak.viewTrace.franken.RoofApp;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.JointUI;
-import org.twak.viewTrace.franken.style.ui.JointUI.NetSelect;
 
 public class JointDistribution implements StyleSource {
 
@@ -32,67 +37,118 @@ public class JointDistribution implements StyleSource {
 
 	double totalJointProbability = 0;
 
-	
 	public List<Joint> joints = new ArrayList<>();
 
-	public static class Joint {
+	public class Joint {
 		
 		public String name;
 		
 		public Map<Class, AppInfo> appInfo = new HashedMap();
 		public double probability = 0.5;
 		
-		public Joint( String name2, List<Class<?>> klasses ) {
-			this.name = name2;
-			for (Class k : klasses) {
-				appInfo.put( k, new AppInfo (k) );
-			}
+		public Joint( String name ) {
+			this.name = name;
+			for ( NetSelect ns : nets ) 
+				appInfo.put( ns.klass, new AppInfo (ns ) );
 		}
 	}
 
 	public static class AppInfo {
 		
+		NetSelect ns;
 		public MultiModal dist;
 		public Class bakeWith;
 		
-		public AppInfo (Class bakeWith) {
-			this.bakeWith = bakeWith;
-			this.dist = new MultiModal( NetInfo.get( bakeWith ) );
+		public AppInfo (NetSelect ns) {
+			this.ns = ns;
+			this.bakeWith = ns.klass;
+			this.dist = new MultiModal( NetInfo.get( ns.klass ) );
 			this.dist.newMode();
+		}
+	}
+
+	public List<NetSelect> nets = new ArrayList<>();
+	public NetSelect defaultNet;
+	{
+		nets.add (new NetSelect(BlockApp      .class, false, false ) );
+		nets.add (new NetSelect(BuildingApp   .class, false, false ) );
+		nets.add (new NetSelect(FacadeLabelApp.class, true , false ) );
+		nets.add (new NetSelect(FacadeSuper   .class, true , false ) );
+		nets.add (defaultNet = new NetSelect(FacadeTexApp  .class, true , true ) );
+		nets.add (new NetSelect(PanesLabelApp .class, true , false ) );
+		nets.add (new NetSelect(PanesTexApp   .class, true , false ) );
+		nets.add (new NetSelect(RoofApp       .class, true , true  ) );
+	}
+	
+	public static class NetSelect {
+		
+		public Class<? extends App> klass;
+		public boolean show;
+		public boolean on;
+		
+		public NetSelect( Class<? extends App> k, boolean s, boolean onByDefault ) {
+			this.klass = k;
+			this.show = s;
+			this.on = onByDefault;
+		}
+
+		public App findExemplar (App root) {
+			
+			if (root.getClass() == klass)
+				return root;
+			
+			return findExemplar( Collections.singletonList( root ) );
+		}
+		
+		public App findExemplar (List<App> root) {
+			
+			List<App> next = new ArrayList<>();
+			
+			for (App a : root)
+				for (App b : a.getDown().valueList())
+					if (b.getClass() == klass)
+						return b;
+					else
+						next.add(b);
+			
+			if (next.isEmpty())
+				return null;
+			
+			return findExemplar( next );
 		}
 	}
 	
 	public JointDistribution( NetInfo ignore ) {
 		rollJoint();
 	}
-	
-//	private void install( BlockApp app ) {
-//		this.root = app;
-//		install (Collections.singletonList( app ));
-//	}
-	
-	private void install (List<App> apps) {
-		
-		List<App> children = new ArrayList();
 
-		for (App a : apps) {
-			a.appMode = AppMode.Net;
-			a.styleSource = this;
-			children.addAll( a.getDown().valueList() );
-		}
-		
-		if (!children.isEmpty())
-			install (children);
-	}
+//	private void install (List<App> apps) {
+//		
+//		List<App> children = new ArrayList();
+//
+//		for (App a : apps) {
+//			
+//			a.appMode = AppMode.Net;
+//			a.styleSource = this;
+//			children.addAll( a.getDown().valueList() );
+//		}
+//		
+//		if (!children.isEmpty())
+//			install (children);
+//	}
 
 	public boolean install( SelectedApps root ) {
 		this.root =  (BlockApp) root.findRoots().iterator().next();
-		install (Collections.singletonList( this.root ));
+		
+		redraw();
+//		install (Collections.singletonList( this.root ));
 		
 		return true;
 	}
 	
 	public void redraw() {
+		
+//		install(Collections.singletonList( this.root ));
 
 		MultiMap<App, App> bakeWith = new MultiMap<>();
 
@@ -127,7 +183,7 @@ public class JointDistribution implements StyleSource {
 			name= "joint " + ni++;
 		};
 		
-		Joint j = new Joint (name,  JointUI.nets.stream().map( n -> n.klass ).collect(Collectors.toList()) );
+		Joint j = new Joint (name);
 		
 		joints.add(j);
 		updateJointProb();
@@ -141,7 +197,9 @@ public class JointDistribution implements StyleSource {
 		for ( App a : current ) {
 			
 			parents.put( a.getClass(), a );
-			Class bw = j.appInfo.get( a.getClass() ).bakeWith;
+			
+			AppInfo ai = j.appInfo.get( a.getClass() );
+			Class bw = ai.bakeWith;
 			if ( bw != null ) {
 
 				if ( parents.get( bw ) == null )
@@ -149,6 +207,9 @@ public class JointDistribution implements StyleSource {
 
 				bakeWith.put( parents.get( bw ), a );
 			}
+			
+			a.styleSource = this;
+			a.appMode = ai.ns.on ? AppMode.Net : AppMode.Off;
 
 			next.addAll( a.getDown().valueList() );
 		}

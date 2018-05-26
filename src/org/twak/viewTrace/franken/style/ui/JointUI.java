@@ -10,10 +10,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -25,7 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
-import org.twak.utils.Filez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
@@ -34,20 +29,11 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.WindowManager;
-import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
-import org.twak.viewTrace.franken.BuildingApp;
-import org.twak.viewTrace.franken.FacadeLabelApp;
-import org.twak.viewTrace.franken.FacadeSuper;
-import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.NetInfo;
-import org.twak.viewTrace.franken.PanesLabelApp;
-import org.twak.viewTrace.franken.PanesTexApp;
-import org.twak.viewTrace.franken.RoofApp;
 import org.twak.viewTrace.franken.style.JointDistribution;
 import org.twak.viewTrace.franken.style.JointDistribution.Joint;
-import org.twak.viewTrace.franken.style.MultiModal;
-import org.twak.viewTrace.franken.style.MultiModal.Mode;
+import org.twak.viewTrace.franken.style.JointDistribution.NetSelect;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -59,76 +45,9 @@ public class JointUI extends JPanel {
 	JFrame frame;
 	Runnable globalUpdate;
 	
-	public final static List<NetSelect> nets = new ArrayList<>();
-	static NetSelect DEFAULT_NET;
 	
 	JPanel modalPanel;
 	MultiModalEditor modal;
-	
-	static {
-		nets.add (new NetSelect(BlockApp      .class, false ) );
-		nets.add (new NetSelect(BuildingApp   .class, false ) );
-		nets.add (new NetSelect(FacadeLabelApp.class, true  ) );
-		nets.add (new NetSelect(FacadeSuper   .class, true  ) );
-		nets.add (DEFAULT_NET = new NetSelect(FacadeTexApp  .class, true  ) );
-		nets.add (new NetSelect(PanesLabelApp .class, true  ) );
-		nets.add (new NetSelect(PanesTexApp   .class, true  ) );
-		nets.add (new NetSelect(RoofApp       .class, true  ) );
-	}
-	
-	public static class NetSelect {
-		
-		public Class<? extends App> klass;
-		public boolean show;
-		
-		public NetSelect( Class<? extends App> k, boolean s ) {
-			this.klass = k;
-			this.show = s;
-		}
-
-		public App findExemplar (App root) {
-			
-			if (root.getClass() == klass)
-				return root;
-			
-			return findExemplar( Collections.singletonList( root ) );
-		}
-		
-		public App findExemplar (List<App> root) {
-			
-			List<App> next = new ArrayList<>();
-			
-			for (App a : root)
-				for (App b : a.getDown().valueList())
-					if (b.getClass() == klass)
-						return b;
-					else
-						next.add(b);
-			
-			if (next.isEmpty())
-				return null;
-			
-			return findExemplar( next );
-		}
-		
-		public Component createUI(JointUI ui, boolean selected, ButtonGroup bg) {
-			
-			JPanel panel = new JPanel();
-			panel.setBorder( MultiModalEditor.BORDER );
-			
-			JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( klass.getSimpleName() ) );
-			bg.add( select );
-			
-			select.setSelected( selected );
-			
-			select.addActionListener(  e -> ui.netSelected (this) );
-			panel.setPreferredSize( new Dimension (140, 40) );
-			
-			panel.add (select);
-			
-			return panel;
-		}
-	}
 	
 	public JointUI (JointDistribution jd, Runnable globalUpdate) {
 		
@@ -147,7 +66,7 @@ public class JointUI extends JPanel {
 		};
 		
 		this.selectedJoint = jd.joints.get(0);
-		buildUI();
+		buildNetSelectUI();
 	}
 	
 	private void selectJoint( Joint j ) {
@@ -155,7 +74,7 @@ public class JointUI extends JPanel {
 			return;
 		
 		this.selectedJoint = j;
-		buildUI();
+		buildNetSelectUI();
 	}
 
 	public void netSelected( NetSelect ns ) {
@@ -172,13 +91,14 @@ public class JointUI extends JPanel {
 		modalPanel.revalidate();
 	}
 
-	public void buildUI () {
+	public void buildNetSelectUI () {
 		
 		removeAll();
 		
 		JPanel top = new JPanel (new BorderLayout());
-		top.add (jointUI(), BorderLayout.WEST);
-		top.add (netsUI(), BorderLayout.CENTER);
+		
+		top.add ( jointUI(), BorderLayout.WEST   );
+		top.add ( netsUI() , BorderLayout.CENTER );
 		
 		setLayout( new BorderLayout() );
 		add (top, BorderLayout.NORTH);
@@ -189,9 +109,39 @@ public class JointUI extends JPanel {
 		add( close, BorderLayout.SOUTH );
 
 		
-		netSelected( DEFAULT_NET );
+		netSelected( jd.defaultNet );
 	}
 	
+
+	public Component createNetUI(NetSelect ns, JointUI ui, boolean selected, ButtonGroup bg) {
+		
+		JPanel panel = new JPanel();
+		panel.setBorder( MultiModalEditor.BORDER );
+		
+		JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( ns.klass.getSimpleName() ) );
+		bg.add( select );
+		
+		select.setSelected( selected );
+		select.addActionListener(  e -> netSelected (ns) );
+		
+		panel.setPreferredSize( new Dimension (140, 40) );
+		panel.add (select, BorderLayout.NORTH );
+
+		JPanel southPanel = new JPanel(new BorderLayout());
+		JToggleButton on = new JToggleButton("on");
+		on.setSelected( ns.on );
+		on.addActionListener( e -> ns.on = on.isSelected() );
+		
+		southPanel.add( on, BorderLayout.WEST );
+		
+		
+		
+		
+		panel.add (southPanel, BorderLayout.NORTH );
+		
+		
+		return panel;
+	}
 	
 	private JPanel netsUI() {
 		
@@ -199,9 +149,9 @@ public class JointUI extends JPanel {
 
 		ButtonGroup netBG;
 		netBG = new ButtonGroup();
-		for (NetSelect c : nets) {
+		for (NetSelect c : jd.nets) {
 			if (c.show)
-				out.add( c.createUI(this, c == DEFAULT_NET, netBG) );
+				out.add( createNetUI( c, this, c == jd.defaultNet, netBG) );
 		}
 		
 		return out;
@@ -320,7 +270,7 @@ public class JointUI extends JPanel {
 						jd = (JointDistribution) new XStream().fromXML( f );
 						jd.root = editing;
 						jd.redraw();
-						buildUI();
+						buildNetSelectUI();
 					}
 				};
 			}

@@ -16,7 +16,7 @@ import org.twak.viewTrace.franken.style.ui.MultiModalEditor;
 
 public class MultiModal implements StyleSource {
 
-	public static class Mode{
+	public static class Mode {
 		public GaussStyle ss;
 		public double prob = 0.5;
 		public double accumProb;

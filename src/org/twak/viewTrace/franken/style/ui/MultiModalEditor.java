@@ -107,8 +107,11 @@ public class MultiModalEditor extends JPanel {
 		out.setLayout( new BorderLayout() );
 		out.add (scroll, BorderLayout.CENTER);
 		
+		JPanel northPanel = new JPanel(new BorderLayout());
 		JButton add = new JButton ("+");
 		add.addActionListener( e -> addG( localUpdate, null ) );
+		northPanel.add( add, BorderLayout.EAST );
+		northPanel.add( new JLabel("modes:"), BorderLayout.WEST );
 		
 		add.setDropTarget(new DropTarget() {
 		    public synchronized void drop(DropTargetDropEvent evt) {
@@ -127,7 +130,9 @@ public class MultiModalEditor extends JPanel {
 		    }
 		});
 		
-		out.add( add, BorderLayout.NORTH );
+		
+		
+		out.add( northPanel, BorderLayout.NORTH );
 
 		
 		return out;
