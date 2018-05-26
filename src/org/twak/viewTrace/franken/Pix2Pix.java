@@ -18,6 +18,7 @@ import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
@@ -82,8 +83,8 @@ public class Pix2Pix {
 			network = network+"_e";
 			
 		
-		File go     = new File( "/home/twak/code/bikegan/input/"  + network + "/val/go" );
-		File outDir = new File( "/home/twak/code/bikegan/output/" + network +"/" + job.name );
+		File go     = new File( TweedSettings.settings.bikeGanRoot + "/input/"  + network + "/val/go" );
+		File outDir = new File( TweedSettings.settings.bikeGanRoot + "/output/" + network +"/" + job.name );
 		
 		try {
 			FileWriter  fos = new FileWriter( go );
@@ -159,7 +160,7 @@ public class Pix2Pix {
 			bi = Imagez.scaleSquare( bi, resolution );
 			bi = Imagez.join( bi, bi );
 
-			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "_e/val/" );
+			File dir = new File( TweedSettings.settings.bikeGanRoot + "input/" + netName + "_e/val/" );
 			dir.mkdirs();
 
 			addEInput( bi, new Object(), null );
@@ -260,7 +261,7 @@ public class Pix2Pix {
 
 			String name = UUID.randomUUID() +"";
 			
-			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "/val/" );
+			File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + "/val/" );
 			dir.mkdirs();
 			String nameWithZ = name + zAsString( styleZ );
 			
@@ -278,7 +279,7 @@ public class Pix2Pix {
 			
 			String name = UUID.randomUUID() +"";
 			
-			File dir = new File( "/home/twak/code/bikegan/input/" + netName + "_e/val/" );
+			File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + "_e/val/" );
 			dir.mkdirs();
 			inputs.put( key, name );
 			

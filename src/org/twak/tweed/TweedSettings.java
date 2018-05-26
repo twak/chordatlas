@@ -24,9 +24,12 @@ import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider
 
 public class TweedSettings {
 
+	
 	public static TweedSettings settings = new TweedSettings();
 	public static RecentFiles recentFiles;
 	static File folder; // location of data file
+	
+	public String bikeGanRoot = "/home/twak/code/bikegan";
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
