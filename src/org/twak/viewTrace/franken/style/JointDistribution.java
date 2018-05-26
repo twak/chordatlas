@@ -30,7 +30,7 @@ public class JointDistribution implements StyleSource {
 	public static class Joint {
 		public String name;
 		public Map<Class, AppInfo> appInfo = new HashedMap();
-		double probability = 0.5;
+		public double probability = 0.5;
 		public Joint( String name2, List<Class<?>> klasses ) {
 			this.name = name2;
 			for (Class k : klasses) {

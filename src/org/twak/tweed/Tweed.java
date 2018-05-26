@@ -158,7 +158,7 @@ public class Tweed extends SimpleApplication {
 		
 		getFlyByCamera().setDragToRotate(true);
 
-		setTool(tools[0]);
+		setTool(tools[1]);
 
 		debug = new Node( "dbg" );
 		rootNode.attachChild( debug );

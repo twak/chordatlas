@@ -118,7 +118,7 @@
 		<jme3_g>org.jmonkeyengine</jme3_g>
 		<jme3_v>3.1.0-stable</jme3_v>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<geotools.version>15.1</geotools.version>
+		<geotools.version>19.1</geotools.version>
 
 	</properties>
 

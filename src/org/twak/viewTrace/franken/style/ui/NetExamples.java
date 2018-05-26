@@ -3,6 +3,7 @@ package org.twak.viewTrace.franken.style.ui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -89,6 +90,9 @@ public class NetExamples extends JComponent {
 				randomOrder.add( new Pair (i, j) );
 		Collections.shuffle( randomOrder );
 		
+		if (!exampleFolder.exists())
+			exampleFolder.mkdirs();
+		
 		for (File f : exampleFolder.listFiles() ) {
 			try {
 				BufferedImage bi = Imagez.scaleLongest( ImageIO.read( f ), exemplar.resolution ) ;
@@ -101,7 +105,7 @@ public class NetExamples extends JComponent {
 		new Thread () {
 			@Override
 			public void run() {
-				while (go && isVisible()) {
+				while (inputs.size() > 0 && go && isVisible()) {
 					
 					Pix2Pix p2 = new Pix2Pix( exemplar );
 					
@@ -203,9 +207,19 @@ public class NetExamples extends JComponent {
 		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 		
+		if (inputs.isEmpty()) {
+			
+			g.setColor( Color.white );
+		
+			String ohno = "no inputs available";
+			FontMetrics fm = g.getFontMetrics();
+			g.drawString( ohno, ( getWidth() - fm.stringWidth( ohno ) ) / 2, getHeight() / 2 );
+			
+			return;
+		}
+		
 		g.setColor( Color.black );
 		g.fillRect( 0, 0, getWidth(), getHeight() );
-		
 		
 		for (int i = 0; i < images.length; i++)
 			for (int j = 0; j < images[0].length; j++) {

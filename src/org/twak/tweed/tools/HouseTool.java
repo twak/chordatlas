@@ -107,6 +107,9 @@ public class HouseTool extends Tool {
 		HalfMesh2 mesh = builder.done();
 		SkelGen sg = new SkelGen( mesh, tweed, null );
 		tweed.frame.addGen( sg, true );
+		
+		 tweed.setTool( new TextureTool( tweed ) );
+		
 	}
 	
 	private MiniFacade newMini(ImageFeatures imf, double length) {

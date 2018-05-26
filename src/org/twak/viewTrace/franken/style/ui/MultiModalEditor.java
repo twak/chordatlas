@@ -27,6 +27,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
@@ -53,7 +54,7 @@ public class MultiModalEditor extends JPanel {
 		
 		
 		setLayout( new BorderLayout() );
-		egs = new NetExamples( mm, 8, 8, exemplar, new File ("/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/textureatlas/"+exemplar.netName) );
+		egs = new NetExamples( mm, 8, 8, exemplar, new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + exemplar.name) );
 		
 		JPanel controls = createControls(() -> egs.changed());
 

@@ -30,6 +30,7 @@ public class TweedSettings {
 	static File folder; // location of data file
 	
 	public String bikeGanRoot = "/home/twak/code/bikegan";
+	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
@@ -64,7 +65,7 @@ public class TweedSettings {
 	public int fov = 0;
 
 	public boolean calculateFootprintNormals = true;
-	public double snapFootprintVert = 0;
+	public double  snapFootprintVert = 0;
 	public boolean SSAO = true;
 	
 	public double megaFacadeAreaThreshold = 30; // 23 for regent
@@ -77,13 +78,13 @@ public class TweedSettings {
 	public double miniSoftTol = 2.5;
 	
 	public boolean useGis = true;
-	public double miniWidthThreshold = 2;
-	public int profileCount = 30;
-	public double exposedFaceThreshold = 0.4;
-	public double heightThreshold = 4;
-	public double gisThreshold = 0.8;
-	public double megafacacadeClusterGradient = 3;
-	public double lowOccluderFilter = 4; // "bus filter"
+	public double  miniWidthThreshold = 2;
+	public int     profileCount = 30;
+	public double  exposedFaceThreshold = 0.4;
+	public double  heightThreshold = 4;
+	public double  gisThreshold = 0.8;
+	public double  megafacacadeClusterGradient = 3;
+	public double  lowOccluderFilter = 4; // "bus filter"
 	public boolean snapFacadeWidth = true;
 	public boolean useGreedyProfiles = false;
 	public boolean roofColours = true;
@@ -91,6 +92,7 @@ public class TweedSettings {
 	public List<Gen> genList = new ArrayList<>();
 	public boolean LOD = true;
 	public boolean createDormers = false;
+
 	
 	
 	public TweedSettings() {

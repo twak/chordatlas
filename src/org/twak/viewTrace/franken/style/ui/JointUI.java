@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import org.twak.utils.Mathz;
+import org.twak.utils.Stringz;
+import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.AutoTextField;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
@@ -47,6 +49,9 @@ public class JointUI extends JPanel {
 	
 	final static List<NetSelect> nets = new ArrayList<>();
 	static NetSelect DEFAULT_NET;
+	
+	JPanel modalPanel;
+	MultiModalEditor modal;
 	
 	static {
 		nets.add (new NetSelect(BlockApp      .class, false ) );
@@ -99,12 +104,13 @@ public class JointUI extends JPanel {
 			JPanel panel = new JPanel();
 			panel.setBorder( MultiModalEditor.BORDER );
 			
-			JToggleButton select = new JToggleButton ( klass.getSimpleName().toLowerCase());
+			JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( klass.getSimpleName() ) );
 			bg.add( select );
 			
 			select.addActionListener(  e -> ui.netSelected (this) );
+			panel.setPreferredSize( new Dimension (140, 40) );
 			
-			panel.setPreferredSize( new Dimension (100, 40) );
+			panel.add (select);
 			
 			return panel;
 		}
@@ -121,8 +127,6 @@ public class JointUI extends JPanel {
 		
 		this.selectedJoint = jd.joints.get(0);
 		buildUI();
-		
-		openFrame();
 	}
 
 	private Joint addJoint() {
@@ -145,18 +149,18 @@ public class JointUI extends JPanel {
 		buildUI();
 	}
 
-	JPanel modalPanel;
-	MultiModalEditor modal;
-
 	public void netSelected( NetSelect ns ) {
 		
 		modalPanel.removeAll();
+		
 		if (modal != null)
 			modal.stop();
 		
 		modalPanel.add (modal = new MultiModalEditor( 
 				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), globalUpdate ), 
 				BorderLayout.CENTER );
+		
+		modalPanel.revalidate();
 	}
 
 	public void buildUI () {
@@ -169,7 +173,7 @@ public class JointUI extends JPanel {
 		
 		setLayout( new BorderLayout() );
 		add (top, BorderLayout.NORTH);
-		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.NORTH);
+		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
 		
 		netSelected( DEFAULT_NET );
 	}
@@ -212,6 +216,15 @@ public class JointUI extends JPanel {
 		JButton gt = new JButton(">");
 		gt.addActionListener( e -> deltaJoint(1) );
 		
+		AutoDoubleSlider prob = new AutoDoubleSlider( selectedJoint, "probability", "p", 0, 1 ) {
+			public void updated( double p ) {
+				selectedJoint.probability = p;
+				jd.updateJointProb();
+				globalUpdate.run();
+			}
+		};
+		
+		
 		JButton save = new JButton("save...");
 		save.addActionListener( e -> save(selectedJoint) );
 		
@@ -230,8 +243,11 @@ public class JointUI extends JPanel {
 		}
 		
 		panel.add(newDelete);
+		panel.add(prob);
 		
 		panel.add(save);
+		
+		panel.setPreferredSize( new Dimension (200, 60) );
 		
 		return panel;
 	}

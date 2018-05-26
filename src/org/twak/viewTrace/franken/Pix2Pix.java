@@ -51,7 +51,7 @@ public class Pix2Pix {
 		boolean encode= false;
 		
 		public Job () {
-			this.name = System.nanoTime() +":"+ Math.random();
+			this.name = System.nanoTime() +"--"+ Math.random();
 			this.finished = this;
 		}
 		public Job (JobResult finished) {
@@ -100,7 +100,11 @@ public class Pix2Pix {
 
 		do {
 			try {
+				
+				System.out.println("file: " + go+" exists:" + go.exists() );
+				
 				Thread.sleep( 50 );
+				
 			} catch ( InterruptedException e ) {
 				e.printStackTrace();
 			}

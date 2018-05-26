@@ -65,7 +65,7 @@ public class FacadeSuper extends App implements HasApp {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		out.add ( new AutoDoubleSlider( this, "scale", "scale", 20, 200 ) {
-			public void updated() {
+			public void updated(double value) {
 				System.out.println( globalUpdate );
 //				globalUpdate.run();
 			};
