@@ -194,28 +194,30 @@ public class FacadeSuperApp extends App implements HasApp {
 
 								BufferedImage rgb = ImageIO.read( texture );
 								
-//								rgb = createAlphaFeather (0, overlap, rgb);
+								rgb = createAlphaFeather (5, overlap-5, rgb);
 								
 								Graphics2D g = state.bigFine.createGraphics();
 								
 								g.drawImage( rgb, //ts.coarse, 
 										
-										tileWidth * ts.nextX     + overlap,
-										tileWidth * ts.nextY     + overlap,
-										tileWidth * (ts.nextX+1) + overlap,
-										tileWidth * (ts.nextY+1) + overlap,
+										tileWidth *  ts.nextX    ,
+										tileWidth *  ts.nextY    ,
+										tileWidth * (ts.nextX+1) + overlap * 2,
+										tileWidth * (ts.nextY+1) + overlap * 2,
 										
-										overlap,
-										overlap,
-										tileWidth + overlap,
-										tileWidth + overlap,
+										0,0,rgb.getWidth(), rgb.getHeight(),
+										
+//										overlap,
+//										overlap,
+//										tileWidth + overlap,
+//										tileWidth + overlap,
 										
 										null );
 										
-								g.setStroke( new BasicStroke( 4 ) );
-								g.drawRect( tileWidth * ts.nextX     + overlap,
-										tileWidth * ts.nextY     + overlap,
-										tileWidth, tileWidth );
+//								g.setStroke( new BasicStroke( 4 ) );
+//								g.drawRect( tileWidth * ts.nextX     + overlap,
+//										tileWidth * ts.nextY     + overlap,
+//										tileWidth, tileWidth );
 								
 								g.dispose();
 							}
@@ -289,29 +291,47 @@ public class FacadeSuperApp extends App implements HasApp {
 	}
 	
 	private BufferedImage createAlphaFeather( int nothing, int linear, BufferedImage rgb ) {
+		
 		BufferedImage withAlpha = new BufferedImage( rgb.getWidth(), rgb.getHeight(), BufferedImage.TYPE_4BYTE_ABGR );
+//		BufferedImage withAlpha = new BufferedImage( rgb.getWidth(), rgb.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
 		
 
 //		Graphics2D g = withAlpha.createGraphics();
 //		g.drawImage( rgb, 0, 0, rgb.getWidth(), rgb.getHeight(), null );
 //		g.dispose();
 
+//		if (false)
 		for (int x = 0; x < rgb.getWidth(); x++)
 			for (int y = 0; y < rgb.getHeight(); y++) {
 				
 				int col = rgb.getRGB( x, y );
 				
-				int alpha = Math.min( fade(x, rgb.getWidth(), nothing,linear), fade(y, rgb.getHeight(), nothing,linear) ) ;
+				int alpha = Math.min( fade(x, rgb.getWidth(), nothing, linear), fade(y, rgb.getHeight(), nothing,linear) ) ;
 				
-				col = col & 0xFFFFFF + alpha << 24;
+//				System.out.println(alpha);
+//				(255- + 
+				col = col & 0xffffff | (alpha << 24 );
+//						0x77 << 24 +
+//					  alpha << 16 +
+//					  alpha << 8 +
+//					  alpha << 0;
 				
 				withAlpha.setRGB( x, y, col );
 			}
 		
 		return withAlpha;
 	}
+	
+	public static void main (String[] args ) {
 		
-	private int fade( int x, int max, int nothing, int linear ) {
+		for (int i = 0; i < 256; i++) {
+			
+			System.out.println ( i+" >> "+ fade(i, 256, 0, 20) );
+		}
+		
+	}
+		
+	private static int fade( int x, int max, int nothing, int linear ) {
 		
 		int middle = max / 2;
 		
