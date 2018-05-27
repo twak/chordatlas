@@ -127,7 +127,8 @@ public class JointUI extends JPanel {
 		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
 		add( close, BorderLayout.SOUTH );
 
-		selectedJoint = jd.joints.get( 0 );
+		if (selectedJoint == null)
+			selectedJoint = jd.joints.get( 0 );
 		netSelected( jd.defaultNet );
 	}
 	
@@ -259,6 +260,7 @@ public class JointUI extends JPanel {
 		si = ( si + i + jd.joints.size() ) % jd.joints.size();
 		
 		selectJoint( jd.joints.get(si) );
+//		buildNetSelectUI();
 	}
 
 	private void killJoint() {
