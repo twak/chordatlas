@@ -147,7 +147,7 @@ public class Pix2Pix {
 				return;
 			}
 			
-		} while ( System.currentTimeMillis() - startTime < 3000 );
+		} while ( System.currentTimeMillis() - startTime < 6000 );
 		
 		System.out.println( "timeout trying to get result "+ job.name );
 		

@@ -28,7 +28,7 @@ public class ImageFileDrop extends JComponent {
 	
 	boolean hover;
 	
-	public ImageFileDrop() {
+	public ImageFileDrop(BufferedImage image) {
 //		super (label);
 		
 		setPreferredSize( new Dimension( 200,80) );
@@ -63,9 +63,7 @@ public class ImageFileDrop extends JComponent {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
 						BufferedImage read = process(f);
-						if (read != null) {
-							dropped = Imagez.scaleLongest( read, ImageFileDrop.this.getHeight() );
-						}
+						setImage( read );
 					}
 				}; }
 			}
@@ -86,10 +84,8 @@ public class ImageFileDrop extends JComponent {
 		            			dropped = null;
 		            			ImageFileDrop.this.repaint();
 								BufferedImage read = process(file);
-								if (read != null) {
-									dropped = Imagez.scaleLongest( read, ImageFileDrop.this.getHeight() );
-									ImageFileDrop.this.repaint();
-								}
+								
+								setImage( read );
 		            		}
 		            	};
 		            }.start();
@@ -98,6 +94,15 @@ public class ImageFileDrop extends JComponent {
 		        }
 		    }
 		});
+		
+		setImage( image );
+	}
+
+	private void setImage( BufferedImage read ) {
+		if (read != null ) {
+			dropped = Imagez.scaleLongest( read, 80 );
+			repaint();
+		}
 	}
 	
 	@Override

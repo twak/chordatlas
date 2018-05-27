@@ -46,6 +46,7 @@ import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -62,6 +63,7 @@ import org.twak.viewTrace.SuperMeshPainter;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
+import com.thoughtworks.xstream.XStream;
 
 public class TweedFrame {
 
@@ -467,6 +469,25 @@ public class TweedFrame {
 						public void heresTheFile( File oneOfMany ) throws Throwable {
 							//						removeGens( PanoGen.class );
 							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
+						};
+					};
+				}
+			} );
+			
+			sp.add( "+ skel", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select skeleton to load", new File( Tweed.JME ), "xml" ) {
+						public void heresTheFile( File skelGen ) throws Throwable {
+							try {
+								SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
+								sg.onLoad( tweed );
+								addGen( sg, true  );
+							}
+							catch (Throwable th ) {
+								th.printStackTrace();
+								JOptionPane.showMessageDialog( frame, "failed to load "+skelGen.getName() );
+							}
 						};
 					};
 				}

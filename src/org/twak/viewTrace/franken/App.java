@@ -167,7 +167,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract void computeBatch(Runnable whenDone, List<App> batch);
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off};
+		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 	
 	

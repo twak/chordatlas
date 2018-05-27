@@ -32,7 +32,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class FacadeTexApp extends App {
 
-	public FacadeSuper zuper = new FacadeSuper(this);
+	public FacadeSuperApp zuper = new FacadeSuperApp(this);
 	public SuperFace parent; // for non-label pipeline
 	public String coarse;
 	

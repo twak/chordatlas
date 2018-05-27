@@ -2,6 +2,8 @@ package org.twak.tweed.gen.skel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,6 +62,7 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -75,6 +78,7 @@ import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.thoughtworks.xstream.XStream;
 
 public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
@@ -82,11 +86,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 	public HalfMesh2 block = null;
 
-	public SkelFootprint skelFootprint;
+	public transient SkelFootprint skelFootprint;
 	protected List<Line> footprint;
-	Map<Object, Face> lastOccluders = new HashMap<>();
+	transient Map<Object, Face> lastOccluders = new HashMap<>();
 
 	public BlockApp app = new BlockApp( this );
+
+	transient Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
 	
 	static {
 		PlanSkeleton.TAGS = new String[][]
@@ -375,8 +381,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		}
 	}
 	
-	Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
-
+	@Override
+	public void onLoad( Tweed tweed ) {
+		// TODO Auto-generated method stub
+		super.onLoad( tweed );
+		this.geometry = new Cach<> (sf -> new Rendered() );
+	}
+	
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_, Map<Object, Face> occluderLookup ) {
 
 		sft_.app.isDirty = true; // todo: dirty hack! can remove sft from this interface
@@ -715,6 +726,20 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		JButton pf = new JButton( "procedural all facades" );
 		pf.addActionListener( l -> cgaAll() );
 		ui.add( pf );
+		
+		JButton save = new JButton ("save...");
+		save.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				new SimpleFileChooser(tweed.frame.frame, true, "select location", null, "xml" ) {
+					@Override
+					public void heresTheFile( File f ) throws Throwable {
+						new XStream().toXML( SkelGen.this, new FileOutputStream( f ) );
+					}
+				};
+			}
+		} );
+		ui.add(save);
 		
 //		JButton tf = new JButton( "texture all facades" );
 //		tf.addActionListener( l -> textureAll() );

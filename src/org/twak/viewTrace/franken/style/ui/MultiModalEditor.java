@@ -28,10 +28,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.TweedSettings;
-import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
-import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.style.MultiModal;
@@ -166,7 +164,10 @@ public class MultiModalEditor extends JPanel {
 		}
 	}
 	
-	public final static Border BORDER = BorderFactory.createCompoundBorder( BorderFactory.createEmptyBorder( 4, 4, 4, 4 ), BorderFactory.createEtchedBorder(EtchedBorder.RAISED) );
+	public final static Border BORDER = BorderFactory.createCompoundBorder( 
+			BorderFactory.createEmptyBorder( 4, 4, 4, 4 ), 
+			BorderFactory.createCompoundBorder( BorderFactory.createEtchedBorder(EtchedBorder.RAISED),
+					BorderFactory.createEmptyBorder( 2, 2, 2, 2 ) ) );
 	
 	private class GaussWrapper extends JPanel {
 		

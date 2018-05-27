@@ -29,18 +29,18 @@ import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class FacadeSuper extends App implements HasApp {
+public class FacadeSuperApp extends App implements HasApp {
 
 	FacadeTexApp parent;
 	public double scale = 120;
 	
-	public FacadeSuper( FacadeTexApp parent ) {
+	public FacadeSuperApp( FacadeTexApp parent ) {
 		super( (HasApp) null );
 		this.hasA = this;
 		this.parent = parent;
 	}
 
-	public FacadeSuper( FacadeSuper facadeCoarse ) {
+	public FacadeSuperApp( FacadeSuperApp facadeCoarse ) {
 		super( (App) facadeCoarse );
 	}
 
@@ -56,7 +56,7 @@ public class FacadeSuper extends App implements HasApp {
 
 	@Override
 	public App copy() {
-		return new FacadeSuper( this );
+		return new FacadeSuperApp( this );
 	}
 	
 	@Override
@@ -79,7 +79,7 @@ public class FacadeSuper extends App implements HasApp {
 		
 		Map<MiniFacade, FacState> todo = new LinkedHashMap();
 		
-		FacadeSuper fs = (FacadeSuper ) batch.get( 0 );
+		FacadeSuperApp fs = (FacadeSuperApp ) batch.get( 0 );
 		
 		MiniFacade mf = (MiniFacade) fs.parent.hasA;
 		

@@ -232,13 +232,7 @@ public class SolverState implements Serializable
 		try {
 
 			if ( clean )
-				for ( HalfFace f : mesh ) {
-					for ( HalfEdge e : f ) {
-						SuperEdge se = (SuperEdge) e;
-						if ( se.profLine != null )
-							( (SuperLine) se.profLine ).mega = null;
-					}
-				}
+				cleanMegas();
 
 			System.out.print( "writing state to " + location +" ..." );
    		    location.getAbsoluteFile().getParentFile().mkdirs();
@@ -246,6 +240,16 @@ public class SolverState implements Serializable
 			System.out.println( "done!" );
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();
+		}
+	}
+
+	private void cleanMegas() {
+		for ( HalfFace f : mesh ) {
+			for ( HalfEdge e : f ) {
+				SuperEdge se = (SuperEdge) e;
+				if ( se.profLine != null )
+					( (SuperLine) se.profLine ).mega = null;
+			}
 		}
 	}
 }

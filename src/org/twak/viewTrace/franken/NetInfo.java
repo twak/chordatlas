@@ -23,7 +23,7 @@ public class NetInfo {
 		index.put ( FacadeLabelApp.class, new NetInfo ( "facade labels", 8, 256 ) );
 		index.put ( BlockApp.class      , new NetInfo ( "block", 0, 0 ) );
 		index.put ( BuildingApp.class   , new NetInfo ( "building", 0, 0  ) );
-		index.put ( FacadeSuper.class   , new NetInfo ( "facade super", 8, 256 ) );
+		index.put ( FacadeSuperApp.class   , new NetInfo ( "facade super", 8, 256 ) );
 		index.put ( FacadeTexApp.class  , new NetInfo ( "facade textures", 8, 256 ) );
 		index.put ( PanesLabelApp.class , new NetInfo ( "pane labels", 8, 256 ) );
 		index.put ( PanesTexApp.class   , new NetInfo ( "pane textures", 8, 256 ) );

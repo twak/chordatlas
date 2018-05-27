@@ -1,16 +1,20 @@
 package org.twak.viewTrace.franken.style.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,10 +24,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.border.EmptyBorder;
 
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.AutoListCombo;
 import org.twak.utils.ui.AutoTextField;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.ListRightLayout;
@@ -33,7 +39,7 @@ import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.style.JointDistribution;
 import org.twak.viewTrace.franken.style.JointDistribution.Joint;
-import org.twak.viewTrace.franken.style.JointDistribution.NetSelect;
+import org.twak.viewTrace.franken.style.JointDistribution.NetProperties;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -56,14 +62,15 @@ public class JointUI extends JPanel {
 		if (jd.joints.isEmpty())
 			jd.rollJoint();
 		
-		this.globalUpdate = new Runnable() {
-			
-			@Override
-			public void run() {
-				jd.redraw();
-				globalUpdate.run();		
-			}
-		};
+		this.globalUpdate = globalUpdate;
+//		Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				jd.redraw();
+//				globalUpdate.run();		
+//			}
+//		};
 		
 		this.selectedJoint = jd.joints.get(0);
 		buildNetSelectUI();
@@ -77,15 +84,23 @@ public class JointUI extends JPanel {
 		buildNetSelectUI();
 	}
 
-	public void netSelected( NetSelect ns ) {
+	public void netSelected( NetProperties ns ) {
 		
 		modalPanel.removeAll();
 		
 		if (modal != null)
 			modal.stop();
 		
+		Runnable modalUpdate = new Runnable() {
+			@Override
+			public void run() {
+				jd.redraw();
+				globalUpdate.run();
+			}
+		};
+		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), globalUpdate ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate ), 
 				BorderLayout.CENTER );
 		
 		modalPanel.revalidate();
@@ -100,6 +115,10 @@ public class JointUI extends JPanel {
 		top.add ( jointUI(), BorderLayout.WEST   );
 		top.add ( netsUI() , BorderLayout.CENTER );
 		
+//		top.setPreferredSize( new Dimension( top.getPreferredSize().width, 100 ) );
+		
+		top.setBorder( BorderFactory.createMatteBorder( 0, 0, 4, 0, Color.black ) );
+		
 		setLayout( new BorderLayout() );
 		add (top, BorderLayout.NORTH);
 		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
@@ -108,37 +127,56 @@ public class JointUI extends JPanel {
 		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
 		add( close, BorderLayout.SOUTH );
 
-		
+		selectedJoint = jd.joints.get( 0 );
 		netSelected( jd.defaultNet );
 	}
 	
 
-	public Component createNetUI(NetSelect ns, JointUI ui, boolean selected, ButtonGroup bg) {
+	public Component createNetUI(NetProperties ns, JointUI ui, boolean selected, ButtonGroup bg) {
 		
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder( MultiModalEditor.BORDER );
 		
-		JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( ns.klass.getSimpleName() ) );
+		JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( ns.klass.getSimpleName() ).replaceAll( " App", "" ) );
 		bg.add( select );
 		
 		select.setSelected( selected );
 		select.addActionListener(  e -> netSelected (ns) );
 		
-		panel.setPreferredSize( new Dimension (140, 40) );
-		panel.add (select, BorderLayout.NORTH );
+//		panel.setPreferredSize( new Dimension (140, 40) );
 
-		JPanel southPanel = new JPanel(new BorderLayout());
+		JPanel northPanel = new JPanel(new BorderLayout());
+		
 		JToggleButton on = new JToggleButton("on");
 		on.setSelected( ns.on );
 		on.addActionListener( e -> ns.on = on.isSelected() );
 		
-		southPanel.add( on, BorderLayout.WEST );
+		northPanel.add (select, BorderLayout.CENTER );
+		northPanel.add( on, BorderLayout.EAST );
+		
+		panel.add (northPanel, BorderLayout.NORTH );
 		
 		
+		List<Class> options = new ArrayList<>();
 		
+		for ( NetProperties np : jd.nets)
+			if (np.klass != BlockApp.class )
+				options.add( np.klass );
 		
-		panel.add (southPanel, BorderLayout.NORTH );
+		AutoListCombo<Class> lc = new AutoListCombo<Class> ( selectedJoint.appInfo.get( ns.klass ), "bakeWith", "fixZ", options ) {
+			
+			public void fire(Class e) {
+				jd.redraw();
+			}
+
+			@Override
+			public String getName(Class o2) {
+				return Stringz.splitCamelCase( o2.getSimpleName() ).replaceAll( " App", "" ).toLowerCase();
+			};
+		};
 		
+		panel.setPreferredSize( new Dimension( 180, panel.getPreferredSize().height ) );
+		panel.add(lc, BorderLayout.CENTER);
 		
 		return panel;
 	}
@@ -149,7 +187,7 @@ public class JointUI extends JPanel {
 
 		ButtonGroup netBG;
 		netBG = new ButtonGroup();
-		for (NetSelect c : jd.nets) {
+		for (NetProperties c : jd.nets) {
 			if (c.show)
 				out.add( createNetUI( c, this, c == jd.defaultNet, netBG) );
 		}
@@ -163,11 +201,12 @@ public class JointUI extends JPanel {
 		
 		panel.setLayout( new ListDownLayout() );
 		
+		
 		AutoTextField atf = new AutoTextField(selectedJoint, "name", "name");
 		
 		panel.add( atf );
 		
-		JPanel newDelete = new JPanel(new FlowLayout( FlowLayout.CENTER ));
+		JPanel newDelete = new JPanel(new GridLayout( 1, 4 ));
 		
 		JButton n = new JButton("+");
 		n.addActionListener( e -> { Joint j = jd.rollJoint(); selectJoint( j ); } );
@@ -202,14 +241,11 @@ public class JointUI extends JPanel {
 		panel.add(newDelete);
 		panel.add(prob);
 		
-		panel.setPreferredSize( new Dimension (200, (int) panel.getPreferredSize().getHeight()) );
+		panel.setPreferredSize( new Dimension (150, (int) panel.getPreferredSize().getHeight()) );
+		
+		panel.setBorder( new EmptyBorder( 2, 2, 2, 2 ) );
 		
 		return panel;
-	}
-
-	private Object save( Joint selectedJoint2 ) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private void deltaJoint( int i ) {
@@ -234,19 +270,23 @@ public class JointUI extends JPanel {
 		
 		int si = jd.joints.indexOf( selectedJoint ) ;
 		jd.joints.remove (selectedJoint);
+		jd.updateJointProb();
 		
 		selectJoint( jd.joints.get (Mathz.clamp ( si + 1, 0, jd.joints.size()-1  )) );
 	}
 	
 	public void openFrame() {
 		
-		frame = WindowManager.frame( "joint-dist editor",  this);
+		frame = WindowManager.frame( "joint distriubtion editor",  this);
+		frame.setResizable( false );
 		
 		frame.addWindowListener( new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				
 				if (modal != null)
 					modal.stop();
 				
+				jd.redraw();
 				globalUpdate.run();
 			};
 		} );
@@ -267,10 +307,15 @@ public class JointUI extends JPanel {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
 						BlockApp editing = jd.root;
+						try {
 						jd = (JointDistribution) new XStream().fromXML( f );
 						jd.root = editing;
 						jd.redraw();
 						buildNetSelectUI();
+						}
+						catch (Throwable th) {
+							JOptionPane.showMessageDialog( frame, "an error occured while loading " + f.getName() );
+						}
 					}
 				};
 			}
@@ -278,7 +323,7 @@ public class JointUI extends JPanel {
 		ls.add( load );
 		
 		JMenuItem save = new JMenuItem("save...");
-		load.addActionListener( new ActionListener() {
+		save.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				new SimpleFileChooser(frame, true, "select file to save to", null, "xml") {
@@ -296,12 +341,4 @@ public class JointUI extends JPanel {
 		frame.pack();
 		frame.setVisible( true );
 	}
-
-	private Object load() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-	
 }

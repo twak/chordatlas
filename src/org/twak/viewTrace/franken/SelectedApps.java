@@ -18,11 +18,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.twak.tweed.TweedFrame;
+import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
@@ -56,13 +58,16 @@ public class SelectedApps extends ArrayList<App>{
 	
 	private SelectedApps findUp() {
 		
-		SelectedApps sa = new SelectedApps();
+		Set<App> ups = new LinkedHashSet<>();
 		
 		for (App a : this) {
 			App up = a.getUp();
 			if (up != null)
-				sa.add(up);
+				ups.add(up);
 		}
+		SelectedApps sa = new SelectedApps();
+		for (App a : ups)
+			sa.add( a );
 		
 		return sa;
 	}
@@ -81,6 +86,10 @@ public class SelectedApps extends ArrayList<App>{
 	}
 	
 	public void computeAll(Runnable globaUpdate) {
+		
+//		if (exemplar.styleSource instanceof JointDistribution)
+//			new SelectedApps( findRoots() ).computeAll (globalUpdate);
+		
 		computeAll_( globaUpdate, 0 );
 	}
 	private void computeAll_(Runnable globalUpdate, int i) {
@@ -92,8 +101,14 @@ public class SelectedApps extends ArrayList<App>{
 		Runnable update = new Runnable() {
 			@Override
 			public void run() {
-				for (App a : SelectedApps.this)
-					a.markDirty();
+				
+				if (exemplar instanceof BlockApp)
+					for (App building : exemplar.getDown().valueList())
+						building.isDirty = true;
+				else
+					for (App a : SelectedApps.this)
+						a.markDirty();
+				
 				update_.run();
 			}
 		};
@@ -151,8 +166,8 @@ public class SelectedApps extends ArrayList<App>{
 		}, "texture", exemplar.getValidAppModes() );
 		buildLayout(exemplar.appMode, options, () -> refresh( update ) );
 		
-		if ( NetInfo.get( exemplar ).resolution > 0)
-			top.add(combo); // building doesn't have options yet
+//		if ( NetInfo.get( exemplar ).resolution > 0)
+		top.add(combo); // building doesn't have options yet
 		
 		main.add( top, BorderLayout.NORTH );
 		main.add( options, BorderLayout.CENTER );
