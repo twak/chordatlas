@@ -363,6 +363,8 @@ public class Pix2Pix {
 		//		mini.x = (1-mini.width) / 2;
 		//		mini.y = (1-mini.height) / 2;
 
+		g.setColor( col );
+		
 		for ( FRect r : rects ) {
 
 			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
@@ -371,7 +373,6 @@ public class Pix2Pix {
 
 				w.y = 256 - w.y - w.height;
 
-				g.setColor( col );
 				g.fillRect( (int) w.x, (int) w.y, (int) w.width, (int) w.height );
 			}
 		}

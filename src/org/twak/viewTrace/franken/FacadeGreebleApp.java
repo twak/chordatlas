@@ -141,7 +141,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 				Meta meta = new Meta( mf, maskLabel, mini );
 
-				p2.addInput( rgb, labels, empty, meta, new double[0], FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
+				p2.addInput( rgb, empty, labels, meta, new double[0], FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
 
 			} catch ( Throwable th ) {
 				th.printStackTrace();
@@ -184,7 +184,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 			JsonNode root;
 			try {
 
-				m.mf.featureGen = new FeatureGenerator( m.mf );
+//				m.mf.featureGen = new FeatureGenerator( m.mf );
 
 				root = om.readTree( FileUtils.readFileToString( file ) );
 
