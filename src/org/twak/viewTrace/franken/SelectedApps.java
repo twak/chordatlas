@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -120,9 +121,11 @@ public class SelectedApps extends ArrayList<App>{
 
 		top.add( new JLabel( exemplar.name +" ("+size()+" selected)"), BorderLayout.NORTH );
 		
-		JPanel upDown = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		
 		SelectedApps ups = findUp();
+		Map<String, SelectedApps> downs = findDown();
+		
+		JPanel upDown = new JPanel(new GridLayout(1, 1 + downs.size() ) );
 		
 		if ( !ups.isEmpty() ) {
 			JButton up   = new JButton("↑" + ups.exemplar.name);
@@ -130,7 +133,6 @@ public class SelectedApps extends ArrayList<App>{
 			upDown.add( up, BorderLayout.WEST);
 		}
 		
-		Map<String, SelectedApps> downs = findDown();
 		
 		if (downs != null)
 		for (String wayDown : downs.keySet()) {

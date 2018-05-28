@@ -34,6 +34,8 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class FacadeTexApp extends App {
 
 	public FacadeSuperApp zuper = new FacadeSuperApp(this);
+	public FacadeGreebleApp greeble = new FacadeGreebleApp( this );
+	
 	public SuperFace parent; // for non-label pipeline
 	public String coarse;
 	
@@ -62,10 +64,13 @@ public class FacadeTexApp extends App {
 		MultiMap<String, App> out = new MultiMap<>();
 		
 		if (mf.postState != null)
+			
 		for (FRect r : mf.featureGen.get( Feature.WINDOW ))
 			out.put( "window", r.app );
 		
 		out.put( "super", zuper );
+		
+		out.put( "greeble", greeble );
 		
 		return out;
 	}
@@ -110,6 +115,7 @@ public class FacadeTexApp extends App {
 
 			gL.setColor( CMPLabel.Background.rgb );
 			gL.fillRect( 0, 0, resolution, resolution );
+			
 			gE.setColor( CMPLabel.Background.rgb );
 			gE.fillRect( 0, 0, resolution, resolution );
 
@@ -121,12 +127,12 @@ public class FacadeTexApp extends App {
 			DRectangle maskLabel = new DRectangle( mini );
 //			mask = mask.centerSquare();
 
-			double scale = resolution / Math.max( mini.height, mini.width );
+			double scale = resolution / ( Math.max( mini.height, mini.width ) + 0.4);
 			
 			{
 				maskLabel = maskLabel.scale( scale );
-				maskLabel.x = ( resolution - maskLabel.width ) * 0.5;
-				maskLabel.y = 0; 
+				maskLabel.x = ( resolution - maskLabel.width  ) * 0.5;
+				maskLabel.y = ( resolution - maskLabel.height ) * 0.5;
 			}
 			
 //			DRectangle maskEmpty = new DRectangle(maskLabel);
@@ -145,6 +151,7 @@ public class FacadeTexApp extends App {
 				gE.setColor( CMPLabel.Facade.rgb );
 				
 				Stroke stroke = new BasicStroke( 3 );
+				
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				

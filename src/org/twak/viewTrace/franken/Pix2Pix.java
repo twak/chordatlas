@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,9 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
@@ -262,6 +265,23 @@ public class Pix2Pix {
 		else 
 			return toEdit.postState.outerFacadeRect;
 	}
+	
+	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask ) {
+		if ( mf.postState == null ) {
+			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
+		} else {
+			g.setColor( Color.blue );
+			
+			for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
+				g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
+
+			g.setColor( CMPLabel.Background.rgb );
+			for ( LoopL<Point2d> ll : mf.postState.occluders )
+				for ( Loop<Point2d> l : ll )
+					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
+		}
+	}
+
 
 	Map<Object, String> inputs = new HashMap<>();
 	static final String [] inputMapNames = new String[] {"", "_empty", "_mlabels" }; 

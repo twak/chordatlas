@@ -41,7 +41,6 @@ public class FacadeLabelApp extends App {
 	public static final double FLOOR_HEIGHT = 2.5;
 	
 	public SuperFace superFace;
-	public String coarse;
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
 	public FacadeLabelApp( HasApp ha ) {
@@ -51,7 +50,6 @@ public class FacadeLabelApp extends App {
 	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
 		super( facadeCoarse );
 		this.superFace = facadeCoarse.superFace;
-		this.coarse    = facadeCoarse.coarse;
 		this.regFrac   = facadeCoarse.regFrac;
 		this.regAlpha  = facadeCoarse.regAlpha;
 		this.regScale  = facadeCoarse.regScale;
@@ -141,20 +139,7 @@ public class FacadeLabelApp extends App {
 				mask.y = 0; 
 			}
 
-
-			if ( mf.postState == null ) {
-				Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
-			} else {
-				g.setColor( Color.blue );
-				
-				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
-					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
-
-				g.setColor( CMPLabel.Background.rgb );
-				for ( LoopL<Point2d> ll : mf.postState.occluders )
-					for ( Loop<Point2d> l : ll )
-						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
-			}
+			Pix2Pix.drawFacadeBoundary( g, mf, mini, mask );
 
 			Meta meta = new Meta( mf, mask, mini, a );
 
@@ -179,13 +164,10 @@ public class FacadeLabelApp extends App {
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
 
-						if ( dest != null ) {
+						if ( dest != null ) 
 							meta.mf.appLabel.texture = meta.mf.app.texture = dest;
-						}
 					}
 					
-//					regularize
-
 				} catch ( Throwable e ) {
 					e.printStackTrace();
 				}
@@ -194,8 +176,7 @@ public class FacadeLabelApp extends App {
 
 		} ) );
 	}
-	
-	
+
     private final static ObjectMapper om = new ObjectMapper();
 
     //{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 

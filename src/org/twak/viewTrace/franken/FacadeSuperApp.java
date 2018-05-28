@@ -50,7 +50,6 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		mf.app.texture = dest + ".png";
 	}
 	
-	
 	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, MiniFacade mf ) throws IOException {
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
