@@ -121,7 +121,12 @@ public class PanesLabelApp extends App {
 				Meta meta = new Meta( (PanesLabelApp) a, r, imBounds );
 				
 				PanesLabelApp pla =  (PanesLabelApp)a;
+				
+				
 				pla.frameScale = pla.frameWidth * scale / ni.resolution;
+				
+				if (r.width > 3) // small frame sizes start to look strange 
+					pla.frameScale *= 3;
 				
 				p2.addInput( bi, bi, null, meta, a.styleZ, pla.frameScale );
 

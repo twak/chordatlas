@@ -1,7 +1,10 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -141,12 +144,25 @@ public class FacadeTexApp extends App {
 				gL.setColor( CMPLabel.Facade.rgb );
 				gE.setColor( CMPLabel.Facade.rgb );
 				
+				Stroke stroke = new BasicStroke( 3 );
+				gL.setStroke( stroke );
+				gE.setStroke( stroke );
+				
 				for ( Loop<? extends Point2d> l : mf.postState.skelFaces ) {
-					gL.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
-					gE.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+					
+					Polygon p = Pix2Pix.toPoly( mf, maskLabel, mini, l ) ; 
+					
+					gL.fill( p );
+					gL.draw( p );
+					gE.fill( p );
+					gE.draw( p );
 				}
 
 				gE.setColor( CMPLabel.Background.rgb );
+				
+				stroke = new BasicStroke( 1 );
+				gL.setStroke( stroke );
+				gE.setStroke( stroke );
 				
 				for ( LoopL<Point2d> ll : mf.postState.occluders )
 					for ( Loop<Point2d> l : ll ) {
