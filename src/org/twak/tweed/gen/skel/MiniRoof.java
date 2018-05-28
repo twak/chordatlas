@@ -21,7 +21,7 @@ import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.Pix2Pix;
-import org.twak.viewTrace.franken.RoofApp;
+import org.twak.viewTrace.franken.RoofTexApp;
 
 public class MiniRoof implements HasApp {
 
@@ -29,7 +29,7 @@ public class MiniRoof implements HasApp {
 	public LoopL<Point2d> pitches, flats;
 	public DRectangle bounds;
 	
-	public RoofApp app = new RoofApp( this );
+	public RoofTexApp app = new RoofTexApp( this );
 	
 	public MiniRoof( SuperFace superFace ) {
 		app.parent = superFace;

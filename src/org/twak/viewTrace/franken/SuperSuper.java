@@ -28,24 +28,24 @@ import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class FacadeSuperApp extends App implements HasApp {
+public class SuperSuper extends App implements HasApp {
 
-	FacadeTexApp parent;
+	App parent;
 	public double scale = 120;
 	
-	public FacadeSuperApp( FacadeTexApp parent ) {
+	public SuperSuper( App parent ) {
 		super( (HasApp) null );
 		this.hasA = this;
 		this.parent = parent;
 	}
 
-	public FacadeSuperApp( FacadeSuperApp facadeCoarse ) {
+	public SuperSuper( SuperSuper facadeCoarse ) {
 		super( (App) facadeCoarse );
 	}
 
 	@Override
 	public App getUp() {
-		return parent;
+		return (App) parent;
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class FacadeSuperApp extends App implements HasApp {
 
 	@Override
 	public App copy() {
-		return new FacadeSuperApp( this );
+		return new SuperSuper( this );
 	}
 	
 	@Override
@@ -78,7 +78,7 @@ public class FacadeSuperApp extends App implements HasApp {
 		
 		Map<MiniFacade, FacState> todo = new LinkedHashMap();
 		
-		FacadeSuperApp fs = (FacadeSuperApp ) batch.get( 0 );
+		SuperSuper fs = (SuperSuper ) batch.get( 0 );
 		
 		MiniFacade mf = (MiniFacade) fs.parent.hasA;
 		
@@ -104,11 +104,7 @@ public class FacadeSuperApp extends App implements HasApp {
 
 				int w = bigCoarse.getWidth() - 2 * overlap, h = bigCoarse.getHeight() - 2 * overlap;
 
-				for ( int wi = -1; wi <= 1; wi++ )
-					for ( int hi = -1; hi <= 1; hi++ )
-						g.drawImage( src, 
-								overlap + wi * w, overlap + hi * h, 
-								w, h, null );
+				drawCoarse( src, g, w, h );
 
 //				g.drawImage( src, overlap, overlap, bigCoarse.getWidth() - 2 * overlap, bigCoarse.getHeight() - 2 * overlap, null );
 
@@ -129,6 +125,8 @@ public class FacadeSuperApp extends App implements HasApp {
 		
 		facadeContinue (todo, whenDone );
 	}
+
+	abstract void drawCoarse( BufferedImage src, Graphics2D g, int w, int h );
 	
 	final static int overlap = 20, tileWidth = 256 - overlap * 2; 
 	int MAX_CONCURRENT = 32;

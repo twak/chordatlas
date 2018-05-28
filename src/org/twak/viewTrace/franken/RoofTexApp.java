@@ -23,15 +23,15 @@ import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class RoofApp extends App {
+public class RoofTexApp extends App {
 
 	public SuperFace parent;
 
-	public RoofApp(HasApp ha) {
+	public RoofTexApp(HasApp ha) {
 		super(ha );
 	}
 
-	public RoofApp( RoofApp ruf ) {
+	public RoofTexApp( RoofTexApp ruf ) {
 		super( ruf );
 	}
 
@@ -47,7 +47,7 @@ public class RoofApp extends App {
 
 	@Override
 	public App copy() {
-		return new RoofApp( this );
+		return new RoofTexApp( this );
 	}
 	
 	@Override

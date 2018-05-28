@@ -27,7 +27,7 @@ public class NetInfo {
 		index.put ( FacadeTexApp.class  , new NetInfo ( "facade textures", 8, 256 ) );
 		index.put ( PanesLabelApp.class , new NetInfo ( "pane labels", 8, 256 ) );
 		index.put ( PanesTexApp.class   , new NetInfo ( "pane textures", 8, 256 ) );
-		index.put ( RoofApp.class       , new NetInfo ( "roof", 8, 512 ) );
+		index.put ( RoofTexApp.class       , new NetInfo ( "roof", 8, 512 ) );
 	}
 	
 	public static NetInfo get( App exemplar ) {

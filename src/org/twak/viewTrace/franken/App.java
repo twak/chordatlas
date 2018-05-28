@@ -75,7 +75,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public static App createFor(HasApp ha) {
 		
 		if (ha.getClass() == MiniRoof.class) {
-			return new RoofApp(ha);
+			return new RoofTexApp(ha);
 		} else if (ha.getClass() == FRect.class) {
 			return new PanesLabelApp(ha);
 		}		

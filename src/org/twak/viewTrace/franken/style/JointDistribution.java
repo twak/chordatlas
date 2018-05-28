@@ -26,7 +26,7 @@ import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.PanesLabelApp;
 import org.twak.viewTrace.franken.PanesTexApp;
-import org.twak.viewTrace.franken.RoofApp;
+import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.JointUI;
 
@@ -76,7 +76,7 @@ public class JointDistribution implements StyleSource {
 		nets.add (defaultNet = new NetProperties(FacadeTexApp  .class, true , true ) );
 		nets.add (new NetProperties(PanesLabelApp .class, true , false ) );
 		nets.add (new NetProperties(PanesTexApp   .class, true , false ) );
-		nets.add (new NetProperties(RoofApp       .class, true , true  ) );
+		nets.add (new NetProperties(RoofTexApp       .class, true , true  ) );
 	}
 	
 	public static class NetProperties {
