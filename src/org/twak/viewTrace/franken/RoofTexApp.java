@@ -25,24 +25,33 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class RoofTexApp extends App {
 
+	public RoofSuperApp zuper = new RoofSuperApp(this);
+
 	public SuperFace parent;
 
 	public RoofTexApp(HasApp ha) {
-		super(ha );
+		
+		super( ha );
 	}
 
 	public RoofTexApp( RoofTexApp ruf ) {
+		
 		super( ruf );
+		this.zuper = ruf.zuper;
 	}
 
 	@Override
 	public App getUp() {
+		
 		return parent.app;
 	}
 
 	@Override
 	public MultiMap<String, App> getDown() {
-		return new MultiMap<>();
+		
+		MultiMap<String, App> out = new MultiMap<>();
+		out.put( "super", zuper );
+		return out;	
 	}
 
 	@Override

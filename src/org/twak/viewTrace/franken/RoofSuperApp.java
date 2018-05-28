@@ -4,21 +4,22 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 
-public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
+public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 
-	FacadeTexApp parent;
+	RoofTexApp parent;
 	
-	public FacadeSuperApp( FacadeTexApp parent ) {
+	public RoofSuperApp( RoofTexApp parent ) {
 		super( parent );
 		this.hasA = this;
 		this.parent = parent;
 	}
 
-	public FacadeSuperApp( FacadeSuperApp o ) {
+	public RoofSuperApp( RoofSuperApp o ) {
 
 		super( (SuperSuper) o );
 
@@ -27,7 +28,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 
 	@Override
 	public App copy() {
-		return new FacadeSuperApp( this );
+		return new RoofSuperApp( this );
 	}
 
 	@Override
@@ -39,17 +40,17 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 								w, h, null );
 	}
 
-	public double[] getZFor( Map.Entry<MiniFacade, FacState> e ) {
+	public double[] getZFor( Map.Entry<MiniRoof, FacState> e ) {
 		return e.getKey().app.zuper.styleZ;
 	}
 
 	@Override
-	public DRectangle boundsInMeters( MiniFacade a ) {
-		return Pix2Pix.findBounds( a );
+	public DRectangle boundsInMeters( MiniRoof a ) {
+		return null; // Pix2Pix.findBounds( a );
 	}
 
 	@Override
-	public void setTexture( MiniFacade mf, String dest ) {
+	public void setTexture( MiniRoof mf, String dest ) {
 		mf.app.textureUVs = TextureUVs.SQUARE;
 		mf.app.texture = dest + ".png";
 	}

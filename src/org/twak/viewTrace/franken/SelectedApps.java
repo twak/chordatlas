@@ -28,7 +28,7 @@ import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
-import org.twak.viewTrace.franken.style.JointDistribution;
+import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.StyleSource;
 
@@ -220,7 +220,7 @@ public class SelectedApps extends ArrayList<App>{
 		Gaussian (GaussStyle.class), 
 		Constant (ConstantStyle.class), 
 		MultiModal (MultiModal.class),
-		Joint (JointDistribution.class);
+		Joint (JointStyle.class);
 		
 		Class<? extends StyleSource> klass;
 		

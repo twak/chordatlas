@@ -8,7 +8,7 @@ import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
-import org.twak.viewTrace.franken.style.JointDistribution;
+import org.twak.viewTrace.franken.style.JointStyle;
 
 public class BlockApp extends App {
 

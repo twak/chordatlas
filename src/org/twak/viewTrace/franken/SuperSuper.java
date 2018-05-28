@@ -23,12 +23,11 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class SuperSuper extends App implements HasApp {
+public abstract class SuperSuper <A extends HasApp> extends App implements HasApp {
 
 	App parent;
 	public double scale = 120;
@@ -54,9 +53,15 @@ public class SuperSuper extends App implements HasApp {
 	}
 
 	@Override
-	public App copy() {
-		return new SuperSuper( this );
-	}
+	public abstract App copy();
+	
+	public abstract void drawCoarse( BufferedImage src, Graphics2D g, int w, int h );
+	
+	public abstract DRectangle boundsInMeters( A a);
+
+	public abstract void setTexture( A mf, String dest );
+	
+	public abstract double[] getZFor(Map.Entry<A, FacState> e);
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
@@ -76,18 +81,18 @@ public class SuperSuper extends App implements HasApp {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
-		Map<MiniFacade, FacState> todo = new LinkedHashMap();
+		Map<A, FacState> todo = new LinkedHashMap();
 		
 		SuperSuper fs = (SuperSuper ) batch.get( 0 );
 		
-		MiniFacade mf = (MiniFacade) fs.parent.hasA;
+		A mf = (A) fs.parent.hasA;
 		
 		{
 			try {
 
 				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
 
-				DRectangle mini = Pix2Pix.findBounds( mf );
+				DRectangle mini = boundsInMeters( mf );
 				
 				int 
 					outWidth  =   (int) Math.ceil ( ( mini.width  * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
@@ -105,8 +110,6 @@ public class SuperSuper extends App implements HasApp {
 				int w = bigCoarse.getWidth() - 2 * overlap, h = bigCoarse.getHeight() - 2 * overlap;
 
 				drawCoarse( src, g, w, h );
-
-//				g.drawImage( src, overlap, overlap, bigCoarse.getWidth() - 2 * overlap, bigCoarse.getHeight() - 2 * overlap, null );
 
 				g.dispose();
 				
@@ -126,26 +129,23 @@ public class SuperSuper extends App implements HasApp {
 		facadeContinue (todo, whenDone );
 	}
 
-	abstract void drawCoarse( BufferedImage src, Graphics2D g, int w, int h );
-	
 	final static int overlap = 20, tileWidth = 256 - overlap * 2; 
 	int MAX_CONCURRENT = 32;
 	
-	private synchronized void facadeContinue( Map<MiniFacade, FacState> todo, Runnable whenDone ) {
+	private synchronized void facadeContinue( Map<A, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
 			return;
 		}
 
-
 		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
 		int count = 0;
-		for ( Map.Entry<MiniFacade, FacState> e : todo.entrySet() ) {
+		for ( Map.Entry<A, FacState> e : todo.entrySet() ) {
 			try {
 
-				FacState state = e.getValue();
+				FacState<A> state = e.getValue();
 				
 				while ( count < MAX_CONCURRENT && !state.nextTiles.isEmpty() ) {
 					
@@ -163,7 +163,7 @@ public class SuperSuper extends App implements HasApp {
 						
 						ts.coarse = toProcess.getSubimage( 256, 0, 256, 256 );
 						
-						p2.addInput( toProcess, ts, e.getKey().app.zuper.styleZ );
+						p2.addInput( toProcess, ts, getZFor( e ) );
 					}
 					count++;
 				}
@@ -222,10 +222,10 @@ public class SuperSuper extends App implements HasApp {
 					
 //					update.run();
 					
-					Map<MiniFacade, FacState> nextTime = new HashMap<>();
+					Map<A, FacState> nextTime = new HashMap<>();
 					
 					// finished - import texture!
-					for (MiniFacade mf : new ArrayList<> (todo.keySet())) {
+					for (A mf : new ArrayList<> (todo.keySet())) {
 						
 						FacState state = todo.get( mf );
 						
@@ -234,7 +234,7 @@ public class SuperSuper extends App implements HasApp {
 						}
 						else {
 							
-							DRectangle mfb = Pix2Pix.findBounds( mf );
+							DRectangle mfb = boundsInMeters( mf );
 							
 							int dim = Mathz.nextPower2( (int)  Math.max( mfb.width * 40, mfb.height * 40)  );
 							
@@ -269,8 +269,7 @@ public class SuperSuper extends App implements HasApp {
 								ImageIO.write( ns.norm  , "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 //								ImageIO.write( ns.spec  , "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
 								
-								mf.app.textureUVs = TextureUVs.SQUARE;
-								mf.app.texture = dest + ".png";
+								setTexture( mf, dest );
 								
 							} catch ( IOException e1 ) {
 								e1.printStackTrace();
@@ -280,6 +279,7 @@ public class SuperSuper extends App implements HasApp {
 
 					facadeContinue( nextTime, whenDone );
 				}
+
 			} ) );
 	}
 	
@@ -322,15 +322,15 @@ public class SuperSuper extends App implements HasApp {
 		return Mathz.clamp ( (-Math.abs ( -x + middle ) + (middle - nothing)) * 255 / linear, 0, 255 );
 	}
 
-	private static class FacState {
+	static class FacState<A> {
 		
-		protected MiniFacade mf;
+		public A mf;
 
 		BufferedImage bigCoarse, bigFine;
 		
 		public List<TileState> nextTiles = new ArrayList<>();
 		
-		public FacState( BufferedImage coarse, MiniFacade mf ) {
+		public FacState( BufferedImage coarse, 	A mf ) {
 			
 			this.bigCoarse = coarse;
 			this.mf = mf;

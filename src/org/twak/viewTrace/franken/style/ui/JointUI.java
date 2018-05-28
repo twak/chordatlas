@@ -37,16 +37,16 @@ import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.NetInfo;
-import org.twak.viewTrace.franken.style.JointDistribution;
-import org.twak.viewTrace.franken.style.JointDistribution.Joint;
-import org.twak.viewTrace.franken.style.JointDistribution.NetProperties;
+import org.twak.viewTrace.franken.style.JointStyle;
+import org.twak.viewTrace.franken.style.JointStyle.Joint;
+import org.twak.viewTrace.franken.style.JointStyle.NetProperties;
 
 import com.thoughtworks.xstream.XStream;
 
 
 public class JointUI extends JPanel {
 
-	private JointDistribution jd;
+	private JointStyle jd;
 	private Joint selectedJoint;
 	JFrame frame;
 	Runnable globalUpdate;
@@ -55,7 +55,7 @@ public class JointUI extends JPanel {
 	JPanel modalPanel;
 	MultiModalEditor modal;
 	
-	public JointUI (JointDistribution jd, Runnable globalUpdate) {
+	public JointUI (JointStyle jd, Runnable globalUpdate) {
 		
 		this.jd = jd;
 		
@@ -310,7 +310,7 @@ public class JointUI extends JPanel {
 					public void heresTheFile( File f ) throws Throwable {
 						BlockApp editing = jd.root;
 						try {
-						jd = (JointDistribution) new XStream().fromXML( f );
+						jd = (JointStyle) new XStream().fromXML( f );
 						jd.root = editing;
 						jd.redraw();
 						buildNetSelectUI();

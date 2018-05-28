@@ -30,7 +30,7 @@ import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.JointUI;
 
-public class JointDistribution implements StyleSource {
+public class JointStyle implements StyleSource {
 
 	public transient BlockApp root;
 
@@ -117,7 +117,7 @@ public class JointDistribution implements StyleSource {
 		}
 	}
 	
-	public JointDistribution( NetInfo ignore ) {
+	public JointStyle( NetInfo ignore ) {
 		rollJoint();
 	}
 
