@@ -90,62 +90,48 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static void computeWithChildren (List<App> todo, int first, Runnable globalUpdate ) {
+	public static void computeWithChildren (int first, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
+		if (todo.get( stage ).isEmpty())
+			return;
 		
 		if (first >= todo.size()) {
 			System.out.println( "finishing "+ todo.get( 0 ).getClass().getSimpleName() );
 			
 			globalUpdate.run();
 			
-			MultiMap< String, App> downs = new MultiMap<>();
-			for (App a : todo) 
-				downs.putAll ( a.getDown() );
+			for (App a : new ArrayList<> ( todo.get( stage )) )
+				todo.put( NetInfo.evaluationOrder.indexOf( a.getClass() ), a );
 			
-			for (String d : downs.keySet()) 
-				new Thread( () ->  App.computeWithChildren( downs.get( d ), 0, globalUpdate ) ).start();
+			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
 			
 		} else {
 		
+			List<App> all = todo.get( stage );
 			List<App> batch = new ArrayList<>();
 			
-			for ( int i = first; i < Math.min( todo.size(), first + Batch_Size ); i++ ) {
-				App app = todo.get( i );
+			for ( int i = first; i < Math.min( all.size(), first + Batch_Size ); i++ ) {
+				App app = all.get( i );
 				if (app.appMode == AppMode.Net) {
 					
 					if (app.styleSource != null)
 						app.styleZ = app.styleSource.draw( randy, app );
-					batch.add( todo.get( i ) );
+					
+					batch.add( app );
 				}
 			}
 
 			if (!batch.isEmpty()) {
-				System.out.println( "batch " + first + " "+ todo.get( 0 ).getClass().getSimpleName() );
-				batch.get( 0 ).computeBatch ( () -> App.computeWithChildren( todo, first + Batch_Size, globalUpdate ), 
+				System.out.println( "batch " + first +"/"+ all.size() + " "+ todo.get( 0 ).getClass().getSimpleName() );
+				batch.get( 0 ).computeBatch ( () -> 
+				App.computeWithChildren( first + Batch_Size, stage, todo, globalUpdate ), 
 					batch );
 			}
 			else
-				App.computeWithChildren( todo, first + Batch_Size, globalUpdate );
+				App.computeWithChildren( 0, stage+1, todo, globalUpdate );
 		}
 		
 	}
-	
-	
-//	public void computeWithChildren( Runnable globalUpdate, Runnable whenDone ) {
-//
-//		switch ( appMode ) {
-//
-//		case Color:
-//			whenDone.run();
-//			break;
-//		case Net:
-//			
-//			break;
-//		default:
-//			color = Color.red;
-//			whenDone.run();
-//		}
-//	}
 
 	public void markDirty() {
 		isDirty = true;

@@ -659,7 +659,7 @@ public class GreebleSkel {
 				return;
 			}
 
-			if ( mf.app.appMode == AppMode.Off )
+			if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
 				
 				greebleGrid.buildGrid (
 					floorRect,

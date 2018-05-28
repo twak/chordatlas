@@ -86,15 +86,13 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	public void computeAll(Runnable globaUpdate) {
+	public void computeAll( Runnable globalUpdate ) {
 		
-//		if (exemplar.styleSource instanceof JointDistribution)
-//			new SelectedApps( findRoots() ).computeAll (globalUpdate);
+		MultiMap<Integer, App> todo = new MultiMap<>();
+		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
+		todo.putAll( i , this );
 		
-		computeAll_( globaUpdate, 0 );
-	}
-	private void computeAll_(Runnable globalUpdate, int i) {
-		App.computeWithChildren( this, 0, globalUpdate );
+		App.computeWithChildren( 0, i, todo, globalUpdate );
 	}
 	
 	public JPanel createUI( Runnable update_ ) {

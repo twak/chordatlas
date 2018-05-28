@@ -27,6 +27,8 @@ public class UIVector extends JPanel {
 		setLayout( new BorderLayout() );
 		
 		method = new JToggleButton("manual");
+
+		method.setSelected( imageFile.getMeanImage() == null );
 		
 		JPanel options = new JPanel(new ListDownLayout());
 		
@@ -63,7 +65,7 @@ public class UIVector extends JPanel {
 			out.add( drop );
 		} else {
 
-			imageFile.setMeanImage( null );
+//			imageFile.setMeanImage( null );
 			
 			NSliders sliders = new NSliders( vector, update, new Runnable() {
 				@Override
