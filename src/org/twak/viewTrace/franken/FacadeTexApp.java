@@ -2,7 +2,6 @@ package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -61,7 +59,7 @@ public class FacadeTexApp extends App {
 		MultiMap<String, App> out = new MultiMap<>();
 		
 		if (mf.postState != null)
-		for (FRect r : mf.postState.generatedWindows)
+		for (FRect r : mf.featureGen.get( Feature.WINDOW ))
 			out.put( "window", r.app );
 		
 		out.put( "super", zuper );
@@ -89,8 +87,12 @@ public class FacadeTexApp extends App {
 		
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
-		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D g = (Graphics2D) bi.getGraphics();
+		BufferedImage 
+			labels = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR ),
+			empty  = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		
+		Graphics2D gL = labels.createGraphics(),
+				gE = empty.createGraphics();
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
 		
@@ -101,58 +103,67 @@ public class FacadeTexApp extends App {
 			if (mf.featureGen instanceof CGAMini)
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 
-			DRectangle bounds = new DRectangle( resolution, 0, resolution, resolution );
 			DRectangle mini = Pix2Pix.findBounds( mf );
 
-			g.setColor( Color.black );
-			g.fillRect( resolution, 0, resolution, resolution );
+			gL.setColor( CMPLabel.Background.rgb );
+			gL.fillRect( 0, 0, resolution, resolution );
+			gE.setColor( CMPLabel.Background.rgb );
+			gE.fillRect( 0, 0, resolution, resolution );
 
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			if (mini == null)
 				continue;
 			
-			DRectangle mask = new DRectangle( mini );
+			DRectangle maskLabel = new DRectangle( mini );
 //			mask = mask.centerSquare();
 
+			double scale = resolution / Math.max( mini.height, mini.width );
+			
 			{
-				mask = mask.scale( resolution / Math.max( mini.height, mini.width ) );
-				mask.x = ( resolution - mask.width ) * 0.5 + resolution;
-				mask.y = 0; 
+				maskLabel = maskLabel.scale( scale );
+				maskLabel.x = ( resolution - maskLabel.width ) * 0.5;
+				maskLabel.y = 0; 
 			}
+			
+//			DRectangle maskEmpty = new DRectangle(maskLabel);
+//			maskEmpty.x -= resolution;
 
-			g.setColor( CMPLabel.Facade.rgb );
+			
 
 			if ( mf.postState == null ) {
-				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
-				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
-			} else {
-				for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
-					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
-
-				g.setColor( CMPLabel.Background.rgb );
-				for ( LoopL<Point2d> ll : mf.postState.occluders )
-					for ( Loop<Point2d> l : ll )
-						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 				
-				Pix2Pix.cmpRects( mf, g, mask, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
+				
+			} else {
+				
+				gL.setColor( CMPLabel.Facade.rgb );
+				gE.setColor( CMPLabel.Facade.rgb );
+				
+				for ( Loop<? extends Point2d> l : mf.postState.skelFaces ) {
+					gL.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+					gE.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+				}
+
+				gE.setColor( CMPLabel.Background.rgb );
+				
+				for ( LoopL<Point2d> ll : mf.postState.occluders )
+					for ( Loop<Point2d> l : ll ) {
+						gL.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+						gE.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+					}
+				
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
 			}
 
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Window .rgb, toEdit.featureGen.getRects( Feature.DOOR  ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Molding.rgb, toEdit.featureGen.getRects( Feature.MOULDING ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Cornice.rgb, toEdit.featureGen.getRects( Feature.CORNICE  ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Sill   .rgb, toEdit.featureGen.getRects( Feature.SILL     ) );
-			//			cmpRects( toEdit, g, mask, mini, CMPLabel.Shop   .rgb, toEdit.featureGen.getRects( Feature.SHOP     ) );
+			Meta meta = new Meta( mf, maskLabel );
 
-			mask.x -= resolution;
-
-//			String name = System.nanoTime() + "@" + index.size();
-
-			Meta meta = new Meta( mf, mask );
-//			index.put( mf, meta );
-
-			p2.addInput( bi, meta, mf.app.styleZ );
+			p2.addInput( labels, empty, null, meta, mf.app.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
 		}
+		
+		gL.dispose();
+		gE.dispose();
 
 		p2.submit( new Job( new JobResult() {
 

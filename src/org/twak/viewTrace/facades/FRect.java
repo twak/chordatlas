@@ -56,8 +56,8 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
 		
-//		if (o.app != null)
 		app = o.app;//.copy();
+		
 		this.mf = o.mf;
 	}
 	

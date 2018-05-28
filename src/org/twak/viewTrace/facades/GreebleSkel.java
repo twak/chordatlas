@@ -48,6 +48,7 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.franken.RoofTexApp;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -640,16 +641,18 @@ public class GreebleSkel {
 				
 				LoopL<Point2d> roofUVs;
 				
-				App ra = HasApp.get( roofApp );
+				RoofTexApp ra = (RoofTexApp) HasApp.get( roofApp );
 				
 				switch ( ra.appMode ) {
-				default:
-					roofUVs = null;
-				case Net:
-					if ( ra.textureUVs != TextureUVs.Rectangle )
-						roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
-					else 
-						roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
+					default:
+						roofUVs = null;
+						break;
+					case Net:
+						if ( ra.textureUVs != TextureUVs.Rectangle )
+							roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
+						else
+							roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
+						break;
 				}
 						
 				m.add( loop, roofUVs, to3d );

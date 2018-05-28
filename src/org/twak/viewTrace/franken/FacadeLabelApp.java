@@ -38,6 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FacadeLabelApp extends App {
 
+	public static final double FLOOR_HEIGHT = 2.5;
+	
 	public SuperFace superFace;
 	public String coarse;
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
@@ -108,7 +110,7 @@ public class FacadeLabelApp extends App {
 		
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
-		BufferedImage bi = new BufferedImage( ni.resolution * 2, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
@@ -125,15 +127,17 @@ public class FacadeLabelApp extends App {
 			DRectangle mini = Pix2Pix.findBounds( mf );
 
 			g.setColor( Color.black );
-			g.fillRect( ni.resolution, 0, ni.resolution, ni.resolution );
+			g.fillRect( 0, 0, ni.resolution, ni.resolution );
 
 			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
 
+			double scale = ni.resolution / Math.max( mini.height, mini.width );
+			
 			{
-				mask = mask.scale( ni.resolution / Math.max( mini.height, mini.width ) );
-				mask.x = ( ni.resolution - mask.width ) * 0.5 + ni.resolution;
+				mask = mask.scale( scale );
+				mask.x = ( ni.resolution - mask.width ) * 0.5;
 				mask.y = 0; 
 			}
 
@@ -152,13 +156,13 @@ public class FacadeLabelApp extends App {
 						g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 			}
 
-			mask.x -= ni.resolution;
-
 			Meta meta = new Meta( mf, mask, mini, a );
 
-			p2.addInput( bi, meta, mf.app.styleZ );
+			p2.addInput( bi, bi, null, meta, mf.app.styleZ, FLOOR_HEIGHT * scale / 255.  );
 		}
 
+		g.dispose();
+		
 		p2.submit( new Job( new JobResult() {
 
 			@Override

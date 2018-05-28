@@ -651,8 +651,7 @@ public class GreebleGrid {
 							else if (w.app.panes == null) {
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, false ); 
 								mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
-							}
-							else {
+							} else {
 								DRectangle uvs = allUV.normalize( rect );
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, false ); // walls around window
 								createWindowFromPanes (w.app.panes, rect, to3d, mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ), 0.3, 0.2 );

@@ -200,13 +200,18 @@ public class Pix2Pix {
 
 //		File texture = new File( f, name + ".png" );
 		String dest = "missing";
+		
 		if ( texture.exists() && texture.length() > 0 ) {
+			
+			dest =  "scratch/" + UUID.randomUUID();
 
 			BufferedImage rgb = ImageIO.read( texture );
 			
 			BufferedImage labels = ImageIO.read( new File( texture.getParentFile(), texture.getName() + "_label" ) ); 
 
 			if (crop != null) {
+
+				ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + "_nocrop.png" ) ) );
 				
 				rgb = scaleToFill ( rgb, crop );//   .getSubimage( (int) crop.x, (int) crop.y, (int) crop.width, (int) crop.height );
 				labels = scaleToFill ( labels, crop );
@@ -221,13 +226,15 @@ public class Pix2Pix {
 				g.dispose();
 			}
 
-			dest =  "scratch/" + UUID.randomUUID();
 			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
 			ImageIO.write ( labels, "png", new File( Tweed.DATA + "/" + ( dest + "_lab.png" ) ) );
+			
+			
 			texture.delete();
 		}
+		
 		return dest + ".png";
 	}
 	
@@ -257,22 +264,34 @@ public class Pix2Pix {
 	}
 
 	Map<Object, String> inputs = new HashMap<>();
+	static final String [] inputMapNames = new String[] {"", "_empty", "_mlabels" }; 
 	
-	public void addInput( BufferedImage bi, Object key, double[] styleZ ) {
-		try {
+	public void addInput( BufferedImage input, BufferedImage empty, BufferedImage mLabels, Object key, double[] styleZ, Double scale ) {
+		
+		BufferedImage[] bis = new BufferedImage[] {input, empty, mLabels};
+		String name = UUID.randomUUID() +  ( scale == null? "" : ("@" + scale ));
+		
+		for ( int i = 0; i < bis.length; i++ ) {
+			try {
 
-			String name = UUID.randomUUID() +"";
-			
-			File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + "/val/" );
-			dir.mkdirs();
-			String nameWithZ = name + zAsString( styleZ );
-			
-			ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
-			inputs.put( key, nameWithZ );
-			
-			
-		} catch ( IOException e ) {
-			e.printStackTrace();
+				BufferedImage bi = bis[ i ];
+				
+				if ( bi == null )
+					continue;
+
+				if (i == 0)
+					bi = Imagez.join( bi, bi ); // main channel is aligned
+				
+				File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + inputMapNames[i] + "/val/" );
+				dir.mkdirs();
+				String nameWithZ = name + zAsString( styleZ );
+
+				ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
+				inputs.put( key, nameWithZ );
+
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

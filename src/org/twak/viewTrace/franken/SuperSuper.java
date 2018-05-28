@@ -1,13 +1,12 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,8 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 	App parent;
 	public double scale = 120;
 	
+	final static int overlap = 20, tileWidth = 256 - overlap * 2, outputPPM = 40, MAX_CONCURRENT = 32;
+	
 	public SuperSuper( App parent ) {
 		super( (HasApp) null );
 		this.hasA = this;
@@ -54,14 +55,15 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 
 	@Override
 	public abstract App copy();
+
+	// add to the todo list; remember to pad coarse by overlap in all directions
+	public abstract void drawCoarse( MultiMap<A, FacState> todo, A mf ) throws IOException;
 	
-	public abstract void drawCoarse( BufferedImage src, Graphics2D g, int w, int h );
-	
-	public abstract DRectangle boundsInMeters( A a);
+	public abstract DRectangle boundsInMeters( FacState<A> state);
 
 	public abstract void setTexture( A mf, String dest );
 	
-	public abstract double[] getZFor(Map.Entry<A, FacState> e);
+	public abstract double[] getZFor( A a );
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
@@ -81,45 +83,15 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
-		Map<A, FacState> todo = new LinkedHashMap();
+		MultiMap<A, FacState> todo = new MultiMap<>();
 		
-		SuperSuper fs = (SuperSuper ) batch.get( 0 );
-		
-		A mf = (A) fs.parent.hasA;
-		
+		for (App a : batch)
 		{
+			SuperSuper fs = (SuperSuper ) a;
+			A mf = (A) fs.parent.hasA;
+			
 			try {
-
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
-
-				DRectangle mini = boundsInMeters( mf );
-				
-				int 
-					outWidth  =   (int) Math.ceil ( ( mini.width  * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
-					outHeight =   (int) Math.ceil ( ( mini.height * scale ) / tileWidth ) * tileWidth;
-						
-				
-				BufferedImage bigCoarse = new BufferedImage(
-						outWidth  + overlap * 2,
-						outHeight + overlap * 2, BufferedImage.TYPE_3BYTE_BGR );
-
-				Graphics2D g = bigCoarse.createGraphics();
-				g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
-				g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
-
-				int w = bigCoarse.getWidth() - 2 * overlap, h = bigCoarse.getHeight() - 2 * overlap;
-
-				drawCoarse( src, g, w, h );
-
-				g.dispose();
-				
-				FacState state = new FacState( bigCoarse, mf );
-				
-				for (int x =0; x <= w / tileWidth; x ++)
-					for (int y =0; y <= h / tileWidth; y ++)
-						state.nextTiles.add( new TileState( state, x, y ) );
-
-				todo.put( mf, state );
+				drawCoarse( todo, mf );
 				
 			} catch ( Throwable e ) {
 				e.printStackTrace();
@@ -129,10 +101,8 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		facadeContinue (todo, whenDone );
 	}
 
-	final static int overlap = 20, tileWidth = 256 - overlap * 2; 
-	int MAX_CONCURRENT = 32;
 	
-	private synchronized void facadeContinue( Map<A, FacState> todo, Runnable whenDone ) {
+	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
@@ -142,28 +112,28 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
 		int count = 0;
-		for ( Map.Entry<A, FacState> e : todo.entrySet() ) {
+		for (A a : todo.keySet() ) 
+			for (FacState<A> state : todo.get(a)) {
 			try {
 
-				FacState<A> state = e.getValue();
-				
 				while ( count < MAX_CONCURRENT && !state.nextTiles.isEmpty() ) {
 					
 					TileState ts = state.nextTiles.remove( 0 );
 					
 					{
-						BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+						BufferedImage toProcess = new BufferedImage( 256, 256, BufferedImage.TYPE_3BYTE_BGR );
 						
 						Graphics2D g = toProcess.createGraphics();
+						
 						g.drawImage( state.bigCoarse, 
-								- tileWidth * ts.nextX  + 256,
+								- tileWidth * ts.nextX ,
 								- tileWidth * ts.nextY ,
 								null );
 						g.dispose();
 						
-						ts.coarse = toProcess.getSubimage( 256, 0, 256, 256 );
+						ts.coarse = toProcess;
 						
-						p2.addInput( toProcess, ts, getZFor( e ) );
+						p2.addInput( toProcess, null, null, ts, getZFor( a ), null );
 					}
 					count++;
 				}
@@ -220,23 +190,21 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 						}
 					}
 					
-//					update.run();
-					
-					Map<A, FacState> nextTime = new HashMap<>();
+					MultiMap<A, FacState> nextTime = new MultiMap<>();
 					
 					// finished - import texture!
-					for (A mf : new ArrayList<> (todo.keySet())) {
+					for (A mf : new ArrayList<> (todo.keySet())) 
 						
-						FacState state = todo.get( mf );
+						for (FacState<A> state : todo.get (mf) ) {
 						
 						if (!state.nextTiles.isEmpty()) {
 							nextTime.put( mf, state );
 						}
 						else {
 							
-							DRectangle mfb = boundsInMeters( mf );
+							DRectangle mfb = boundsInMeters( state );
 							
-							int dim = Mathz.nextPower2( (int)  Math.max( mfb.width * 40, mfb.height * 40)  );
+							int dim = Mathz.nextPower2( (int)  Math.max( mfb.width * outputPPM, mfb.height * outputPPM)  );
 							
 							try {
 								ImageIO.write( state.bigFine, "png", new File ("/home/twak/Desktop/blah_fine.png") );
@@ -338,7 +306,7 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		}
 	}
 	
-	private static class TileState {
+	static class TileState {
 		
 		public BufferedImage coarse;
 		int nextX = 0, nextY = 0;

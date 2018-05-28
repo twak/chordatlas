@@ -37,6 +37,10 @@ public class Grid implements ICanPaint {
 	}
 	
 	public void insert( DRectangle win, Griddable griddable ) {
+		
+		if (win.width < tol || win.height < tol)
+			return;
+		
 		insert (win.x, win.y, win.width, win.height, griddable);
 	}
 	

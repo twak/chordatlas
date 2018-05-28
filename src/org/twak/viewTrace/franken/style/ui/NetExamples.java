@@ -17,12 +17,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -41,7 +43,11 @@ public class NetExamples extends JComponent {
 	int randomLocation = 0;
 	
 	boolean go = true;
-	List<BufferedImage> inputs = new ArrayList<>();
+	
+	List<BufferedImage> inputs  = new ArrayList<>();
+	List<BufferedImage> inputsE = new ArrayList<>();
+	List<Double> scales = new ArrayList<>();
+	
 	StyleSource styleSource;
 	
 	final static int BATCH_SIZE = 16;
@@ -95,9 +101,28 @@ public class NetExamples extends JComponent {
 			exampleFolder.mkdirs();
 		
 		for (File f : exampleFolder.listFiles() ) {
+			
+			if (f.getName().contains( "_empty" ))
+				continue;
+			
 			try {
+				
 				BufferedImage bi = Imagez.scaleSquare( ImageIO.read( f ), exemplar.resolution ) ;
-				inputs. add ( Imagez.join( bi, bi ) );
+				inputs . add ( Imagez.join( bi, bi ) );
+
+				String n = f.getName();
+				
+				Pattern p = Pattern.compile( "[^@]*@([^_]*)_" );
+				
+				scales.add (Double.parseDouble(  p.matcher( n ).group( 1 )   ));
+				
+				BufferedImage biE = Imagez.scaleSquare( ImageIO.read ( 
+							new File (f.getParentFile(), 
+							Filez.stripExtn( n ) +"_empty" + Filez.getExtn( n ) ) 
+						), exemplar.resolution );
+				
+				inputsE. add ( biE );
+				
 			} catch ( IOException e ) {
 				e.printStackTrace();
 			}
@@ -113,8 +138,13 @@ public class NetExamples extends JComponent {
 					startTime = System.currentTimeMillis();
 					
 					for (int i = 0; i < BATCH_SIZE; i++) {
+						
 						int index = randy.nextInt(inputs.size());
-						p2.addInput(  inputs.get( index ), new UniqueInt ( index ), styleSource.draw( randy, null ) );
+						
+						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
+								new UniqueInt ( index ),
+								styleSource.draw( randy, null ), scales.get(index) );
+						
 					}
 					
 					p2.submitSafe( new Job() {

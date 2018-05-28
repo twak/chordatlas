@@ -1,4 +1,4 @@
-package org.twak.viewTrace.franken;
+package org.twak.viewTrace.franken.junk;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -26,6 +26,13 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
+import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.NetInfo;
+import org.twak.viewTrace.franken.Pix2Pix;
+import org.twak.viewTrace.franken.SelectedApps;
+import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -171,7 +178,7 @@ public class FacadeSuperAppOld extends App implements HasApp {
 						g.dispose();
 					}
 					
-					p2.addInput( toProcess, ts, e.getKey().app.zuper.styleZ );
+					p2.addInput( toProcess, null, null, ts, e.getKey().app.zuper.styleZ, null );
 
 					System.out.println( "++" + x + ", " + y );
 					count++;

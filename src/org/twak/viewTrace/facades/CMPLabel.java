@@ -3,7 +3,8 @@ package org.twak.viewTrace.facades;
 import java.awt.Color;
 
 public enum CMPLabel { //sequence is  z-order
-		Background (1, 0,0, 170 ),
+		Background (1, 0,0, 0 ),
+//		Background (1, 0,0, 170 ),
 		Facade     (2, 0,0, 255 ),
 		Molding    (10, 255, 85, 0 ),
 		Cornice    (5, 0, 255, 255 ),

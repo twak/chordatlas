@@ -1,5 +1,8 @@
 package org.twak.tweed.gen.skel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
@@ -19,8 +22,11 @@ import org.twak.viewTrace.franken.RoofTexApp;
 
 public class MiniRoof implements HasApp {
 
+	public Map<LoopL<Point2d>, Face> origins = new HashMap<>();
+	
 	public LoopL<Point2d> boundary;
 	public LoopL<Point2d> pitches, flats;
+	
 	public DRectangle bounds;
 	
 	public RoofTexApp app = new RoofTexApp( this );
@@ -42,12 +48,16 @@ public class MiniRoof implements HasApp {
 			
 			LoopL<Point2d> k = f.edge.uphill.angle( Mathz.Z_UP ) > Math.PI * 0.4 ? flats : pitches;
 			
-			k.addAll( f.points.new Map<Point2d>() {
+			LoopL<Point2d> loop = f.points.new Map<Point2d>() {
 				@Override
 				public Point2d map( Loopable<Point3d> input ) {
 					return Pointz.to2XY( input.get() );
 				}
-			}.run() );
+			}.run();
+			
+			origins.put (loop, f);
+			
+			k.addAll( loop );
 		}
 		
 		LoopL<Point2d> all = new LoopL<>();
@@ -66,4 +76,15 @@ public class MiniRoof implements HasApp {
 			for (Point2d p : l) 
 				bounds.envelop( p );
 	}
+
+	public LoopL<Point2d> getAllFaces() {
+		
+		LoopL<Point2d> out = new LoopL();
+		
+		out.addAll( pitches );
+		out.addAll( flats);
+		
+		return out;
+	}
+	
 }

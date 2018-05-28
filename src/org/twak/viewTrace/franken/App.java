@@ -39,7 +39,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public double[] styleZ;
 	public StyleSource styleSource;
 	
-	HasApp hasA;
+	public HasApp hasA;
 	String name;
 	
 	// marks as needing geometry recreation

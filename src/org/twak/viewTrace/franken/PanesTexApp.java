@@ -1,6 +1,7 @@
 package org.twak.viewTrace.franken;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,9 +12,11 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.twak.tweed.Tweed;
+import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
@@ -56,52 +59,55 @@ public class PanesTexApp extends App implements HasApp {
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {
 
+		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
+
+		BufferedImage lBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D lg =  lBi.createGraphics();
 		
-		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
-		int count = 0;
-
-		Map<PanesTexApp, Meta> names = new HashMap<>();
-
+		BufferedImage eBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D eg =  eBi.createGraphics();
+		
 		for ( App a : batch ) {
 
 			try {
 				
 				PanesTexApp pta = (PanesTexApp)a;
+				PanesLabelApp pla = pta.parent;
+				
+				BufferedImage labelSrc = ImageIO.read( Tweed.toWorkspace( pla.label ) );
 
-				BufferedImage labels = ImageIO.read( Tweed.toWorkspace( pta.parent.label ) );
+				FRect r = (FRect) pla.hasA;
+				
+				double scale = ( ni.resolution - 2 * PanesLabelApp.pad ) / Math.max( r.width, r.height );
+				
+				DRectangle imBounds = new DRectangle(r);
+				
+				imBounds = r.scale( scale );
+				imBounds.x = (ni.resolution - imBounds.width) / 2;
+				imBounds.y = (ni.resolution - imBounds.height) / 2;
 
-//				FRect r = (FRect) a.hasA;
-//				DRectangle w = bounds.scale( mini.normalize( r ) );
-//				w.y = bounds.getMaxY() - w.y - w.height;
-//
-//				BufferedImage dow =
-//							src.getSubimage(  
-//								(int) w.x, 
-//								(int) w.y,
-//								(int) w.width , 
-//								(int) w.height );
+				lg.setColor( Color.black );
+				lg.fillRect( 0, 0, ni.resolution, ni.resolution );
+				eg.setColor( Color.black );
+				eg.fillRect( 0, 0, ni.resolution, ni.resolution );
+				
+				lg.drawImage( labelSrc, (int) imBounds.x, (int) imBounds.y, (int) imBounds.width, (int)imBounds.height, null);
+				eg.setColor( Color.red );
+				eg.fillRect( (int) imBounds.x, (int) imBounds.y, (int) imBounds.width, (int)imBounds.height);
+				
+				Meta meta = new Meta( pta, imBounds ); 
+				
+				p2.addInput( lBi, eBi, null, meta, a.styleZ, pta.parent.frameScale );
 
-				DRectangle mask = new DRectangle();
-
-				BufferedImage scaled = Imagez.scaleSquare( labels, 256 );
-				BufferedImage toProcess = Imagez.join( scaled, scaled );
-
-//				Graphics2D g = toProcess.createGraphics();
-//				g.drawImage( scaled, 256, 0, null );
-//				g.dispose();
-
-				String wName = name + "@" + count + "@" + System.nanoTime();
-				Meta meta = new Meta( pta, wName, mask, labels ); 
-				p2.addInput( toProcess, meta, a.styleZ );
-
-//				names.put( pta, );
-				count++;
 
 			} catch ( IOException e1 ) {
 				e1.printStackTrace();
 			}
 		}
+		
+		lg.dispose();
+		eg.dispose();
 		
 		p2.submit( new Job( new JobResult() {
 			
@@ -113,7 +119,7 @@ public class PanesTexApp extends App implements HasApp {
 
 						Meta meta = (Meta) e.getKey();
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, null );
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.imBounds );
 
 						if ( dest != null ) {
 							meta.pta.texture = dest;
@@ -131,16 +137,12 @@ public class PanesTexApp extends App implements HasApp {
 	}
 
 	private static class Meta {
-		String name;
-		DRectangle mask;
-		BufferedImage labels;
 		PanesTexApp pta;
+		DRectangle imBounds;
 		
-		private Meta( PanesTexApp pta, String name, DRectangle mask, BufferedImage labels ) {
+		private Meta( PanesTexApp pta, DRectangle imBounds ) {
 			this.pta = pta;
-			this.name = name;
-			this.mask = mask;
-			this.labels = labels;
+			this.imBounds = imBounds;
 		}
 	}
 

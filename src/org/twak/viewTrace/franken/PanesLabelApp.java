@@ -28,9 +28,13 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class PanesLabelApp extends App {
 
 	PanesTexApp child = new PanesTexApp( this );
+	
 	public String label;
+	public double frameScale = 0.1;
+	
 	public boolean regularize = true;
 	public List<DRectangle> panes = null;
+	public double frameWidth = 0.07 /*cm */;
 	
 	public PanesLabelApp(HasApp ha) {
 		super(ha );
@@ -75,71 +79,58 @@ public class PanesLabelApp extends App {
 		
 	}
 
-
+	public final static int pad = 20;
+	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
 
-		DRectangle bounds = new DRectangle( 0, 0, 256, 256 );
-		int count = 0;
-		
 		panes = null;
 		
-		Map<FRect, Meta> names = new HashMap<>();
+		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D g = (Graphics2D) bi.getGraphics();
 		
-//		for ( MiniFacade mf : subfeatures ) {
+		
 		for ( App a : batch ) {
 			try {
 				MiniFacade mf = ( (FRect) a.hasA ).mf;
 
-				//			if (mf.featureGen instanceof CGAMini)
-				//				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
-
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( mf.app.coarse ) );
 				DRectangle mini = Pix2Pix.findBounds( mf );
 
 				FRect r = (FRect) a.hasA;
 
 				if ( !mini.contains( r ) )
 					return;//continue;
-
-				DRectangle w = bounds.transform( mini.normalize( r ) );
-				w.y = bounds.getMaxY() - w.y - w.height;
-
-				BufferedImage dow =
-							src.getSubimage(  
-								(int) w.x, 
-								(int) w.y,
-								(int) w.width , 
-								(int) w.height );
-
-				DRectangle mask = new DRectangle();
-
-				BufferedImage scaled = Imagez.padTo ( Imagez.scaleSquare( dow, 120, mask, Double.MAX_VALUE, Color.black ), 
-						mask, ni.resolution, ni.resolution, Color.black );
 				
-//				scaled = new FastBlur().processImage( scaled, 5 );
+				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
 				
-				BufferedImage toProcess = new BufferedImage( 512, 256, BufferedImage.TYPE_3BYTE_BGR );
+				DRectangle imBounds = new DRectangle(r);
+				
+				imBounds = r.scale( scale );
+				imBounds.x = (ni.resolution - imBounds.width) / 2;
+				imBounds.y = (ni.resolution - imBounds.height) / 2;
 
-				Graphics2D g = toProcess.createGraphics();
-				g.drawImage( scaled, 256, 0, null );
-				g.dispose();
+				g.setColor( Color.black );
+				g.fillRect( 0, 0, ni.resolution, ni.resolution );
+				
+				g.setColor( Color.red );
+				g.fillRect ( (int) imBounds.x, (int)imBounds.y, (int)imBounds.width, (int) imBounds.height);
+				
+				Meta meta = new Meta( (PanesLabelApp) a, r, imBounds );
+				
+				PanesLabelApp pla =  (PanesLabelApp)a;
+				pla.frameScale = pla.frameWidth * scale / ni.resolution;
+				
+				p2.addInput( bi, bi, null, meta, a.styleZ, pla.frameScale );
 
-				Meta meta = new Meta( (PanesLabelApp) a, r, mask );
-				p2.addInput( toProcess, meta, a.styleZ );
-
-				//					String name = System.nanoTime() + "_" + count;
-				//					ImageIO.write( toProcess, "png", new File( "/home/twak/code/pix2pix-interactive/input/"+WINDOW+"/test/" + name + ".png" ) );					
-
-				count++;
-
-			} catch ( IOException e1 ) {
+			} catch ( Throwable e1 ) {
 				e1.printStackTrace();
 			}
 		}
+		
+		g.dispose();
 		
 		p2.submit ( new Job ( new JobResult() {
 			@Override
@@ -155,7 +146,7 @@ public class PanesLabelApp extends App {
 						BufferedImage labels = ImageIO.read( e.getValue() );
 						
 						if (regularize) {
-							regularize ( meta.app, labels, meta.mask, 0.006 );
+							regularize ( meta.app, labels, meta.mask, 0.5 );
 							ImageIO.write( labels, "png", e.getValue() );
 						}
 						
@@ -179,7 +170,8 @@ public class PanesLabelApp extends App {
 		
 		 BufferedImage crop = Imagez.clone ( Imagez.cropShared (labels, mask) );
 		
-		 regularize (a, crop, d);
+		 crop = regularize (a, crop, d);
+		 
 		 Graphics2D g  = labels.createGraphics();
 			
 		 g.setColor( Color.red );
@@ -187,10 +179,9 @@ public class PanesLabelApp extends App {
 		 g.drawImage( crop, (int) mask.x, (int) mask.y, null );
 		 
 		 g.dispose();
-		 
 	}
 
-	private static void regularize( PanesLabelApp a, BufferedImage crop, double threshold ) {
+	private static BufferedImage regularize( PanesLabelApp a, BufferedImage crop, double threshold ) {
 		
 		
 		int frame= 0xff0000;
@@ -210,74 +201,78 @@ public class PanesLabelApp extends App {
 		int full  = 256 * crop.getWidth() * crop.getHeight();
 		
 		for (int x = 0; x < frameX.length; x++) 
-			frameX[x] = redX[x] > full * threshold;
+			frameX[x] = redX[x] / crop.getHeight() > 256 * threshold;
 			
 		for (int y = 0; y < frameY.length; y++) 
-			frameY[y] = redY[y] > full * threshold;
+			frameY[y] = redY[y] / crop.getWidth() > 256 * threshold;
 			
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 2; i++) { // ensure at least 1 pixel of frame....
 			frameX[frameX.length -1 -i] = frameX[i] = true;
 			frameY[frameY.length -1 -i] = frameY[i] = true;
 		}
 		
 		int fLen = 3;
-		
-//		for (boolean[] a : new boolean[][] {frameX, frameY}) // denoise
-//			for (int i = 0; i < a.length - fLen; i++) 
-//				if (!a[i] && ! a[i + fLen])
-//					for (int j = 0; j < fLen; j++)
-//						a[j] = false;
+		for (boolean[] aa : new boolean[][] {frameX, frameY}) // denoise...
+			for (int i = 0; i < aa.length - fLen; i++) 
+				if (!aa[i] && ! aa[i + fLen])
+					for (int j = 0; j < fLen; j++)
+						aa[i+j] = false;
 		
 		a.panes = new ArrayList<>();
 		
-		Graphics2D g = crop.createGraphics();
+		BufferedImage out = new BufferedImage( crop.getWidth(), crop.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
+		
+		Graphics2D g = out.createGraphics();
 		
 		g.setColor( Color.red );
 		g.fillRect( 0, 0, crop.getWidth(), crop.getHeight() );
 		g.setColor( Color.blue );
 			
-		DRectangle bounds = new DRectangle(crop.getWidth(), crop.getHeight() );
-		
-		int x = 0, y = 0;
-		x:
-		do {
-			
-			while (frameX[x]) {
-				x++;
-				
-				if  ( x >= frameX.length )
-				break x;
-			}
-			int startX = x;
-			
-			while (x < frameX.length-1 && !frameX[x] )
-				x++;
-			
-			y=0;
-			y:
-			do {
-			
-				while (frameY[y] ) {
-					y++;
-					if (y >= frameY.length)
-						break y;
+		DRectangle bounds = new DRectangle( crop.getWidth(), crop.getHeight() );
+		{
+			int x = 0, y = 0;
+			x: do {
+
+				while ( frameX[ x ] ) {
+					x++;
+
+					if ( x >= frameX.length )
+						break x;
 				}
-				int startY = y;
-				
-				while (y < frameY.length-1 && !frameY[y])
-					y++;
-				
-				if ( isBlue ( startX, x, startY, y, crop, 0.5 ) ) {
-					double height = y - startY - 1;
-					a.panes.add( bounds.normalize( new DRectangle (startX, bounds.height - startY - height, x - startX -1, height) ) );
-					g.fillRect( startX, startY, x - startX -1, y - startY - 1 );
-				}
-			}
-			while (y < frameY.length);
+				int startX = x;
+
+				while ( x < frameX.length - 1 && !frameX[ x ] )
+					x++;
+
+				y = 0;
+				y: do {
+
+					while ( frameY[ y ] ) {
+						y++;
+						if ( y >= frameY.length )
+							break y;
+					}
+					int startY = y;
+
+					while ( y < frameY.length && !frameY[ y ] )
+						y++;
+
+					if ( isBlue( startX, x, startY, y, crop, 0.5 ) ) {
+						double height = y - startY - 1;
+						a.panes.add( bounds.normalize( new DRectangle( startX, bounds.height - startY - height, x - startX - 1, height ) ) );
+						g.fillRect( startX, startY, x - startX - 1, y - startY - 1 );
+					}
+				} while ( y <= frameY.length );
+			} while ( x <= frameX.length );
 		}
-		while (x < frameX.length);
-		
+
+		for ( int x = 0; x < crop.getWidth(); x++ )
+			for ( int y = 0; y < crop.getHeight(); y++ )
+				if ( ( ( crop.getRGB( x, y ) & 0xff00 ) >> 8 ) > 128 ) // every one likes pot (plants)
+					out.setRGB( x, y, 0xff00 );
+
 		g.dispose();
+		return out;
 	}
 
 	private static boolean isBlue( int x1, int x2, int y1, int y2, BufferedImage crop, double frac ) {

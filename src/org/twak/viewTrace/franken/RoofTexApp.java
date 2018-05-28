@@ -6,20 +6,16 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -28,6 +24,8 @@ public class RoofTexApp extends App {
 	public RoofSuperApp zuper = new RoofSuperApp(this);
 
 	public SuperFace parent;
+	
+	public String coarse;
 
 	public RoofTexApp(HasApp ha) {
 		
@@ -66,26 +64,25 @@ public class RoofTexApp extends App {
 		
 		int resolution = ni.resolution;
 		
-		BufferedImage bi = new BufferedImage( resolution * 2, resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D g = (Graphics2D) bi.getGraphics();
+		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gL = (Graphics2D) label.getGraphics();
+		
+		BufferedImage empty = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gE = (Graphics2D) empty.getGraphics();
 
-//		Map<MiniRoof, String> index = new HashMap<>();
-
+		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
+		
 		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
 		
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
+		
 		for ( MiniRoof toEdit : mrb ) {
 
-			DRectangle drawTo = new DRectangle( resolution, 0, resolution, resolution );
-
-			draw (g, drawTo, toEdit);
-
-//			String name = System.nanoTime() + "@" + index.size();
-//
-//			index.put( toEdit, name );
-
-			p2.addInput( bi, toEdit, toEdit.app.styleZ );
+			DRectangle bounds = draw (gL, drawTo, toEdit);
+			drawEmpty (gE, drawTo, toEdit, bounds);
+			
+			p2.addInput( label, empty, null, toEdit, toEdit.app.styleZ, null );
 		}
 
 		p2.submit( new Job( new JobResult() {
@@ -96,11 +93,14 @@ public class RoofTexApp extends App {
 
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
+						MiniRoof mr = ((MiniRoof)e.getKey());
 						
 						String dest = Pix2Pix.importTexture( e.getValue(), -1, null,  null );
 
-						if ( dest != null ) 
-							((MiniRoof)e.getKey()).app.texture = dest;
+						if ( dest != null ) {
+							mr.app.coarse = mr.app.texture = dest;
+							mr.app.textureUVs = TextureUVs.Rectangle;
+						}
 					}
 
 				} catch ( Throwable e ) {
@@ -112,7 +112,8 @@ public class RoofTexApp extends App {
 		} ) );
 	}
 	
-	private void draw( Graphics2D g, DRectangle drawTo, MiniRoof mr ) {
+	private DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr ) {
+		
 		
 		DRectangle bounds = new DRectangle(mr.bounds);
 		
@@ -128,7 +129,6 @@ public class RoofTexApp extends App {
 
 		bounds.grow( 2 );
 		
-		mr.app.textureUVs = TextureUVs.Rectangle;
 		mr.app.textureRect = new DRectangle ( bounds );
 		
 		bounds.y += bounds.height;
@@ -137,6 +137,9 @@ public class RoofTexApp extends App {
 		List<Polygon> boundary = Loopz.toPolygon (mr.boundary, bounds, drawTo );
 		List<Polygon> pitches  = Loopz.toPolygon (mr.pitches , bounds, drawTo );
 		List<Polygon> flats    = Loopz.toPolygon (mr.flats   , bounds, drawTo );
+		
+		g.setColor( Color.black );
+		g.fillRect( (int) drawTo.x, (int) drawTo.x, (int) drawTo.width, (int) drawTo.height );
 		
 		g.setColor( Color.cyan );
 		for (Polygon p : boundary) 
@@ -159,6 +162,21 @@ public class RoofTexApp extends App {
 			g.draw( p );
 		for (Polygon p : boundary) 
 			g.draw( p );
+		
+		return bounds;
+	}
+	
+	private void drawEmpty( Graphics2D g, DRectangle drawTo, MiniRoof mr, DRectangle bounds ) {
+		
+		g.setColor( Color.black );
+		g.fillRect( (int) drawTo.x, (int) drawTo.x, (int) drawTo.width, (int) drawTo.height );
+		
+		List<Polygon> boundary = Loopz.toPolygon (mr.boundary, bounds, drawTo );
+		
+		g.setColor( Color.blue );
+		
+		for (Polygon p : boundary) 
+			g.fill( p );
 		
 	}
 	
