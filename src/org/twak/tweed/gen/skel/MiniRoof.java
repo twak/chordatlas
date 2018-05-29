@@ -1,7 +1,7 @@
 package org.twak.tweed.gen.skel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -10,11 +10,14 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.Line;
 import org.twak.utils.Mathz;
+import org.twak.utils.collections.DHash;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
@@ -22,7 +25,7 @@ import org.twak.viewTrace.franken.RoofTexApp;
 
 public class MiniRoof implements HasApp {
 
-	public Map<Loop<Point2d>, Face> origins = new HashMap<>();
+	public DHash<Loop<Point2d>, Face> origins = new DHash<>();
 	
 	public LoopL<Point2d> boundary = new LoopL<>();
 	public LoopL<Point2d> pitches = new LoopL<>(), flats = new LoopL<>();
@@ -31,19 +34,51 @@ public class MiniRoof implements HasApp {
 	
 	public RoofTexApp app = new RoofTexApp( this );
 	
+	public MultiMap<Loop<Point2d>, FCircle> greebles;
+	
 	public MiniRoof( SuperFace superFace ) {
-		app.parent = superFace;
+		app.superFace = superFace;
+	}
+	
+	public void addFeature( RoofGreeble f, double radius, Point2d worldXY ) {
+		
+		for (Loop<Point2d> face : getAllFaces() ) {
+			if (Loopz.inside( worldXY, face )) {
+				
+				FCircle circ = new FCircle (worldXY, radius, f );
+				
+				for (Loopable<Point2d> pt : face.loopableIterator()) {
+					Line l = new Line (pt.get(), pt.getNext().get()) ;
+					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
+				}
+				
+				circ.radius -= 0.01;
+				
+				if (circ.radius < 0.1)
+					return;
+//				
+//				DRectangle bounds = circ.toRect();
+//				for (Point2d p : bounds.points()) {
+//					if (!Loopz.inside( p, face )) 
+//						return;
+//				}
+				
+				greebles.put (face, circ );
+			}
+		}
+		
 	}
 
 	public void setOutline( Output output ) {
 		
 		pitches = new LoopL<>();
 		flats = new LoopL<>();
-		
 		origins.clear();
 		boundary.clear();
 		pitches.clear();
 		flats.clear();
+		
+		clearGreebles();		
 		
 		for (Face f : output.faces.values() ) {
 			
@@ -82,6 +117,14 @@ public class MiniRoof implements HasApp {
 				bounds.envelop( p );
 	}
 
+
+	public void clearGreebles() {
+		if (greebles != null)
+			greebles.clear();
+		else
+			greebles = new MultiMap<>();
+	}
+
 	public LoopL<Point2d> getAllFaces() {
 		
 		LoopL<Point2d> out = new LoopL();
@@ -91,5 +134,12 @@ public class MiniRoof implements HasApp {
 		
 		return out;
 	}
-	
+
+	public List<FCircle> getGreebles( Face f ) {
+
+		if (greebles == null || origins.teg(f) == null )
+			return Collections.emptyList();
+			
+		return greebles.get( origins.teg( f ) );
+	}
 }

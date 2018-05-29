@@ -11,9 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.vecmath.Point2d;
+
+import org.twak.camp.Output.Face;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -27,7 +32,7 @@ public class RoofTexApp extends App {
 
 	public RoofGreebleApp greebles = new RoofGreebleApp( this );
 	
-	public SuperFace parent;
+	public SuperFace superFace;
 	
 	public String coarse;
 
@@ -44,8 +49,7 @@ public class RoofTexApp extends App {
 
 	@Override
 	public App getUp() {
-		
-		return parent.app;
+		return greebles;
 	}
 
 	@Override
@@ -53,7 +57,6 @@ public class RoofTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		out.put( "super", zuper );
-		out.put( "greebles", greebles );
 		return out;	
 	}
 
@@ -83,7 +86,7 @@ public class RoofTexApp extends App {
 		
 		int resolution = ni.resolution;
 		
-		addCoarseRoofInputs( batch, p2, resolution );
+		addCoarseRoofInputs( batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() ), p2, resolution );
 
 		p2.submit( new Job( new JobResult() {
 			
@@ -113,7 +116,7 @@ public class RoofTexApp extends App {
 		} ) );
 	}
 
-	public static void addCoarseRoofInputs( List<App> batch, Pix2Pix p2, int resolution ) {
+	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution ) {
 		
 		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D gL = (Graphics2D) label.getGraphics();
@@ -122,10 +125,6 @@ public class RoofTexApp extends App {
 		Graphics2D gE = (Graphics2D) empty.getGraphics();
 
 		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
-		
-		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
-		
-		
 		
 		for ( MiniRoof toEdit : mrb ) {
 
@@ -190,6 +189,32 @@ public class RoofTexApp extends App {
 			g.draw( p );
 		for (Polygon p : boundary) 
 			g.draw( p );
+		
+		g.setStroke( new BasicStroke( 2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
+		
+		for (Face f : mr.origins.ab.values()) 
+			for (FCircle greeble : mr.getGreebles( f ) ) {
+				
+				double  radiusW = greeble.radius, 
+						radiusH = greeble.radius *  Math.cos ( f.edge.getAngle() );
+				
+				Loop<Point2d> loop = new Loop<>();
+				
+				this needs to take face orientation into account!
+				
+				loop.append( new Point2d (greeble.loc.x + radiusW, greeble.loc.y + radiusH ) );
+				loop.append( new Point2d (greeble.loc.x + radiusW, greeble.loc.y - radiusH ) );
+				loop.append( new Point2d (greeble.loc.x - radiusW, greeble.loc.y - radiusH ) );
+				loop.append( new Point2d (greeble.loc.x - radiusW, greeble.loc.y + radiusH ) );
+				
+				Polygon p = Loopz.toPolygon (loop.singleton() , bounds, drawTo ).get(0);
+				
+				g.setColor( greeble.f.colour );
+				g.fill(p);
+				
+				
+				
+			}
 		
 		return bounds;
 	}

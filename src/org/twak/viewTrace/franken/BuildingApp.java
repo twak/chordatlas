@@ -38,7 +38,7 @@ public class BuildingApp extends App {
 		
 		SuperFace sf = (SuperFace)hasA;
 		
-		down.put( "roof", sf.mr.app ); 
+		down.put( "roof greebles",  sf.mr.app.greebles ); 
 		
 		for (HalfEdge e : sf) 
 			down.put ( "facade", ((SuperEdge)e).toEdit.app );

@@ -27,6 +27,8 @@ import com.jme3.scene.Spatial;
 
 public class WindowGen extends Gen implements IDumpObjs {
 
+	public static final float WINDOW_FRAME_WIDTH = 0.2f;
+
 	public transient List<List<Window>> windows = new ArrayList();
 
 	BlockGen block;
@@ -159,13 +161,13 @@ public class WindowGen extends Gen implements IDumpObjs {
 		float f2Width = 0.05f;
 		
 		// bottom, top
-		wood.addCube( w.loc, up, along, norm, fWidth, w.width, 0.2f );
-		wood.addCube( w.loc.add(up.mult(w.height - fWidth)) , up, along, norm, fWidth, w.width, 0.2f );
+		wood.addCube( w.loc, up, along, norm, fWidth, w.width, WINDOW_FRAME_WIDTH );
+		wood.addCube( w.loc.add(up.mult(w.height - fWidth)) , up, along, norm, fWidth, w.width, WINDOW_FRAME_WIDTH );
 		
 		
 		// sides
 		wood.addCube( w.loc, up, along, norm, w.height, fWidth, 0.2f );
-		wood.addCube( w.loc.add(along.mult(w.width-fWidth)), up, along, norm, w.height, fWidth, 0.2f );
+		wood.addCube( w.loc.add(along.mult(w.width-fWidth)), up, along, norm, w.height, fWidth, WINDOW_FRAME_WIDTH );
 		
 		
 		// cross

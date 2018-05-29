@@ -251,6 +251,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		sf.skel = skel;
 		
+		sf.mr.setOutline( sf.skel.output );
+		
 		return skel;
 	}
 
@@ -403,7 +405,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					SuperEdge se = (SuperEdge) he;
 					ensureMF( sf, se );
 				}
-				
+
 				sf.app.isDirty = false;
 				
 				removeGeometryFor( sf );

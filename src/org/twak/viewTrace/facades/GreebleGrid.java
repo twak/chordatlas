@@ -173,7 +173,7 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void createWindow( DRectangle winPanel, Matrix4d to3d, 
+	public static void createWindow( DRectangle winPanel, Matrix4d to3d, 
 			MeshBuilder wall, 
 			MeshBuilder window, 
 			MeshBuilder glass, 
@@ -213,7 +213,8 @@ public class GreebleGrid {
 		
 		Vector3f u = Jme3z.to(up), o = Jme3z.to( out );
 		
-		wall.addInsideRect( Jme3z.to ( ptt[0] ), o, Jme3z.to(along), u,  
+		if (wall != null)
+			wall.addInsideRect( Jme3z.to ( ptt[0] ), o, Jme3z.to(along), u,  
 				 (float)depth, (float)winPanel.width,(float) winPanel.height, null, true  );
 		
 		if (sillDepth > 0 && sillHeight > 0)
@@ -295,7 +296,7 @@ public class GreebleGrid {
 	}
 	
 
-	protected void moulding( Matrix4d to3d, DRectangle rect, MeshBuilder mb ) {
+	public static void moulding( Matrix4d to3d, DRectangle rect, MeshBuilder mb ) {
 		
 		double hh = rect.height/2;
 		

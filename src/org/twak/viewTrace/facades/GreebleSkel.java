@@ -29,6 +29,8 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.WindowGen;
+import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.tweed.gen.skel.SETag;
@@ -110,7 +112,7 @@ public class GreebleSkel {
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
-		sf.mr.setOutline( output );
+		
 		
 		for ( Face f : output.faces.values() )  {
 			WallTag wt = ((WallTag) GreebleHelper.getTag( f.profile, WallTag.class ));
@@ -565,6 +567,13 @@ public class GreebleSkel {
 			}
 		}
 		
+		if ( wallTag == null || toRecess == null ) {
+			
+			greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
+			
+			return;
+		}
+		
 		DRectangle uvs;
 		
 		if (mf != null && mf.app.textureUVs == TextureUVs.SQUARE) {
@@ -640,35 +649,6 @@ public class GreebleSkel {
 				}
 			}
 
-			if ( wallTag == null || toRecess == null || floorRect == null ) {
-				LoopL<LPoint2d> loop = flat.singleton();
-				
-				LoopL<Point2d> roofUVs;
-				
-				RoofTexApp ra = (RoofTexApp) HasApp.get( roofApp );
-				MiniRoof mr = (MiniRoof) ra.hasA;
-				
-				switch ( ra.appMode ) {
-					default:
-						roofUVs = null;
-						break;
-					case Net:
-						if ( ra.texture != null && ra.textureUVs == TextureUVs.SQUARE )
-							roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
-						
-						else if ( ra.zuper.appMode == AppMode.Net && ra.zuper.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
-							roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ) );
-						}
-						else
-							roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
-						break;
-				}
-						
-				m.add( loop, roofUVs, to3d );
-				
-				return;
-			}
-
 			if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
 				
 				greebleGrid.buildGrid (
@@ -686,6 +666,64 @@ public class GreebleSkel {
 					toRecess );
 			}
 		}
+	}
+
+	private void greebleRoof( Face f, Loop<LPoint3d> ll, MatMeshBuilder faceMaterial, 
+			Point3d start, Point3d end, Loop<LPoint2d> flat, Matrix4d to3d, Matrix4d to2d ) {
+		LoopL<LPoint2d> loop = flat.singleton();
+		
+		LoopL<Point2d> roofUVs;
+		
+		RoofTexApp ra = (RoofTexApp) HasApp.get( roofApp );
+		MiniRoof mr = (MiniRoof) ra.hasA;
+		
+		switch ( ra.appMode ) {
+			default:
+				roofUVs = null;
+				break;
+			case Net:
+				if ( ra.texture != null && ra.textureUVs == TextureUVs.SQUARE )
+					roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
+				
+				else if ( ra.zuper.appMode == AppMode.Net && ra.zuper.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
+					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ) );
+				}
+				else
+					roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
+				break;
+		}
+		
+		faceMaterial.add( loop, roofUVs, to3d );
+		
+//		if (false)
+		for (FCircle feature : mr.getGreebles(f) ) {
+			
+			Point3d onRoof = f.edge.linearForm.collide( new Point3d(feature.loc.x, feature.loc.y, 0 ), Mathz.Z_UP );
+			onRoof.set(onRoof.x, onRoof.z, onRoof.y);
+			to2d.transform( onRoof );
+			
+			DRectangle r = feature.toRect();
+			
+			r.x = onRoof.x - r.width / 2;
+			r.y = onRoof.z - r.height / 2;
+			
+			switch ( feature.f ) {
+
+			case Chimney:
+			case Velux:
+
+				r.x += WindowGen.WINDOW_FRAME_WIDTH ;
+				r.y += WindowGen.WINDOW_FRAME_WIDTH ;
+				r.width -= WindowGen.WINDOW_FRAME_WIDTH * 2;
+				r.height -= WindowGen.WINDOW_FRAME_WIDTH * 2;
+
+//				if (r.width > WindowGen.WINDOW_FRAME_WIDTH && r.height > WindowGen.WINDOW_FRAME_WIDTH )
+				GreebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
+
+				break;
+			}
+		}
+				
 	}
 	
 	public void edges( Output output, float[] roofColor ) {
