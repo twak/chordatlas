@@ -29,6 +29,7 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.tweed.gen.skel.SETag;
 import org.twak.tweed.gen.skel.WallTag;
@@ -362,9 +363,9 @@ public class GreebleSkel {
 
 			} else if ( t instanceof RoofTag ) {
 				
-//				RoofTag rt = (RoofTag)t;
+				RoofTag rt = (RoofTag)t;
 				
-				App ra = HasApp.get ( roofApp );
+				RoofTexApp ra = (RoofTexApp) HasApp.get ( roofApp );
 				
 				switch ( ra.appMode ) {
 
@@ -375,10 +376,13 @@ public class GreebleSkel {
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, roofApp );
 					break;
 				case Net:
-					if (ra.texture == null)
+					if ( ra.texture == null )
 						faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
-					else
-						faceColor = greebleGrid.mbs.getTexture( "texture_" + ra.texture, ra.texture, roofApp );
+					
+					else {
+						String texture = ra.getTexture (rt);
+						faceColor = greebleGrid.mbs.getTexture( "roof_" + texture, texture, roofApp );
+					}
 					break;
 				}
 			}
@@ -642,20 +646,26 @@ public class GreebleSkel {
 				LoopL<Point2d> roofUVs;
 				
 				RoofTexApp ra = (RoofTexApp) HasApp.get( roofApp );
+				MiniRoof mr = (MiniRoof) ra.hasA;
 				
 				switch ( ra.appMode ) {
 					default:
 						roofUVs = null;
 						break;
 					case Net:
-						if ( ra.textureUVs != TextureUVs.Rectangle )
+						if ( ra.texture != null && ra.textureUVs == TextureUVs.SQUARE )
 							roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
+						
+						else if ( ra.zuper.appMode == AppMode.Net && ra.zuper.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
+							roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ) );
+						}
 						else
 							roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
 						break;
 				}
 						
 				m.add( loop, roofUVs, to3d );
+				
 				return;
 			}
 

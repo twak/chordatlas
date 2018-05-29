@@ -22,10 +22,10 @@ import org.twak.viewTrace.franken.RoofTexApp;
 
 public class MiniRoof implements HasApp {
 
-	public Map<LoopL<Point2d>, Face> origins = new HashMap<>();
+	public Map<Loop<Point2d>, Face> origins = new HashMap<>();
 	
-	public LoopL<Point2d> boundary;
-	public LoopL<Point2d> pitches, flats;
+	public LoopL<Point2d> boundary = new LoopL<>();
+	public LoopL<Point2d> pitches = new LoopL<>(), flats = new LoopL<>();
 	
 	public DRectangle bounds;
 	
@@ -40,24 +40,29 @@ public class MiniRoof implements HasApp {
 		pitches = new LoopL<>();
 		flats = new LoopL<>();
 		
+		origins.clear();
+		boundary.clear();
+		pitches.clear();
+		flats.clear();
 		
 		for (Face f : output.faces.values() ) {
 			
 			if ( GreebleHelper.getTag( f.profile, RoofTag.class ) == null )
 				continue;
 			
-			LoopL<Point2d> k = f.edge.uphill.angle( Mathz.Z_UP ) > Math.PI * 0.4 ? flats : pitches;
+			LoopL<Point2d> category = f.edge.uphill.angle( Mathz.Z_UP ) > Math.PI * 0.4 ? flats : pitches;
 			
-			LoopL<Point2d> loop = f.points.new Map<Point2d>() {
+			LoopL<Point2d> loopl = f.points.new Map<Point2d>() {
 				@Override
 				public Point2d map( Loopable<Point3d> input ) {
 					return Pointz.to2XY( input.get() );
 				}
 			}.run();
 			
-			origins.put (loop, f);
+			for (Loop<Point2d> lop : loopl)
+				origins.put (lop, f);
 			
-			k.addAll( loop );
+			category.addAll( loopl );
 		}
 		
 		LoopL<Point2d> all = new LoopL<>();

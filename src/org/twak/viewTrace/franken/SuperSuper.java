@@ -14,7 +14,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
@@ -59,9 +61,7 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 	// add to the todo list; remember to pad coarse by overlap in all directions
 	public abstract void drawCoarse( MultiMap<A, FacState> todo, A mf ) throws IOException;
 	
-	public abstract DRectangle boundsInMeters( FacState<A> state);
-
-	public abstract void setTexture( A mf, String dest );
+	public abstract void setTexture( A mf, FacState<A> state, String dest );
 	
 	public abstract double[] getZFor( A a );
 	
@@ -202,17 +202,17 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 						}
 						else {
 							
-							DRectangle mfb = boundsInMeters( state );
+							DRectangle mfb = state.boundsInMeters;
 							
 							int dim = Mathz.nextPower2( (int)  Math.max( mfb.width * outputPPM, mfb.height * outputPPM)  );
 							
-							try {
-								ImageIO.write( state.bigFine, "png", new File ("/home/twak/Desktop/blah_fine.png") );
-								ImageIO.write( state.bigCoarse, "png", new File ("/home/twak/Desktop/blah_coarse.png") );
-								ImageIO.write( ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) ), "png", new File ("/home/twak/Desktop/blah_low.png") );
-							} catch ( IOException e2 ) {
-								e2.printStackTrace();
-							}
+//							try {
+//								ImageIO.write( state.bigFine, "png", new File ("/home/twak/Desktop/blah_fine.png") );
+//								ImageIO.write( state.bigCoarse, "png", new File ("/home/twak/Desktop/blah_coarse.png") );
+//								ImageIO.write( ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) ), "png", new File ("/home/twak/Desktop/blah_low.png") );
+//							} catch ( IOException e2 ) {
+//								e2.printStackTrace();
+//							}
 							
 							BufferedImage cropped = new BufferedImage( dim, dim, BufferedImage.TYPE_3BYTE_BGR );
 							{
@@ -237,7 +237,7 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 								ImageIO.write( ns.norm  , "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 //								ImageIO.write( ns.spec  , "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
 								
-								setTexture( mf, dest );
+								setTexture( mf, state, dest );
 								
 							} catch ( IOException e1 ) {
 								e1.printStackTrace();
@@ -297,12 +297,18 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		BufferedImage bigCoarse, bigFine;
 		
 		public List<TileState> nextTiles = new ArrayList<>();
+
+		public DRectangle boundsInMeters;
+
+		public Tag tag;
 		
-		public FacState( BufferedImage coarse, 	A mf ) {
+		public FacState( BufferedImage coarse, 	A mf, DRectangle boundsInMeters, Tag tag ) {
 			
 			this.bigCoarse = coarse;
 			this.mf = mf;
+			this.boundsInMeters = boundsInMeters;
 			this.bigFine = Imagez.clone( coarse );
+			this.tag = tag; // only roofs
 		}
 	}
 	

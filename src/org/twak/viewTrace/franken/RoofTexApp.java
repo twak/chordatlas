@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
+import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -23,6 +25,8 @@ public class RoofTexApp extends App {
 
 	public RoofSuperApp zuper = new RoofSuperApp(this);
 
+	public RoofGreebleApp greebles = new RoofGreebleApp( this );
+	
 	public SuperFace parent;
 	
 	public String coarse;
@@ -49,6 +53,7 @@ public class RoofTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		out.put( "super", zuper );
+		out.put( "greebles", greebles );
 		return out;	
 	}
 
@@ -57,33 +62,28 @@ public class RoofTexApp extends App {
 		return new RoofTexApp( this );
 	}
 	
+	public String getTexture( RoofTag rt ) {
+		
+		String out = null;
+		
+		if ( zuper.appMode == AppMode.Net && zuper.textures != null) 
+			out = zuper.textures.get( rt );
+		
+		if (out == null) 
+			out = texture;
+		
+		return out;
+	}
+	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		NetInfo ni = NetInfo.get(this);
+		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		int resolution = ni.resolution;
 		
-		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D gL = (Graphics2D) label.getGraphics();
-		
-		BufferedImage empty = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D gE = (Graphics2D) empty.getGraphics();
-
-		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
-		
-		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
-		
-		Pix2Pix p2 = new Pix2Pix( ni );
-		
-		
-		for ( MiniRoof toEdit : mrb ) {
-
-			DRectangle bounds = draw (gL, drawTo, toEdit);
-			drawEmpty (gE, drawTo, toEdit, bounds);
-			
-			p2.addInput( label, empty, null, toEdit, toEdit.app.styleZ, null );
-		}
+		addCoarseRoofInputs( batch, p2, resolution );
 
 		p2.submit( new Job( new JobResult() {
 			
@@ -95,9 +95,10 @@ public class RoofTexApp extends App {
 
 						MiniRoof mr = ((MiniRoof)e.getKey());
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, null,  null );
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, null,  null, new RescaleOp(0.5f, 1.5f, null ) );
 
 						if ( dest != null ) {
+							zuper.textures = null;
 							mr.app.coarse = mr.app.texture = dest;
 							mr.app.textureUVs = TextureUVs.Rectangle;
 						}
@@ -111,19 +112,40 @@ public class RoofTexApp extends App {
 			}
 		} ) );
 	}
+
+	public static void addCoarseRoofInputs( List<App> batch, Pix2Pix p2, int resolution ) {
+		
+		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gL = (Graphics2D) label.getGraphics();
+		
+		BufferedImage empty = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gE = (Graphics2D) empty.getGraphics();
+
+		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
+		
+		List<MiniRoof> mrb = batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() );
+		
+		
+		
+		for ( MiniRoof toEdit : mrb ) {
+
+			DRectangle bounds = draw (gL, drawTo, toEdit);
+			drawEmpty (gE, drawTo, toEdit, bounds);
+			
+			p2.addInput( label, empty, null, toEdit, toEdit.app.styleZ, null );
+		}
+	}
 	
-	private DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr ) {
+	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr ) {
 		
 		
 		DRectangle bounds = new DRectangle(mr.bounds);
 		
 		if ( bounds.width > bounds.height ) {
-			bounds.y -= (bounds.width - bounds.height) / 2;
+			bounds.y -= ( bounds.width - bounds.height ) / 2;
 			bounds.height = bounds.width;
-		}
-		else
-		{
-			bounds.x -= (bounds.height - bounds.width) / 2;
+		} else {
+			bounds.x -= ( bounds.height - bounds.width ) / 2;
 			bounds.width = bounds.height;
 		}
 
@@ -141,13 +163,19 @@ public class RoofTexApp extends App {
 		g.setColor( Color.black );
 		g.fillRect( (int) drawTo.x, (int) drawTo.x, (int) drawTo.width, (int) drawTo.height );
 		
+		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
+		
 		g.setColor( Color.cyan );
-		for (Polygon p : boundary) 
+		for (Polygon p : boundary) {
 			g.fill( p );
+			g.draw( p );
+		}
 		
 		g.setColor( Color.red );
-		for (Polygon p : flats) 
+		for (Polygon p : flats) { 
 			g.fill( p );
+			g.draw( p );
+		}
 		
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		g.setColor( Color.magenta );
@@ -166,7 +194,7 @@ public class RoofTexApp extends App {
 		return bounds;
 	}
 	
-	private void drawEmpty( Graphics2D g, DRectangle drawTo, MiniRoof mr, DRectangle bounds ) {
+	private static void drawEmpty( Graphics2D g, DRectangle drawTo, MiniRoof mr, DRectangle bounds ) {
 		
 		g.setColor( Color.black );
 		g.fillRect( (int) drawTo.x, (int) drawTo.x, (int) drawTo.width, (int) drawTo.height );
@@ -174,13 +202,17 @@ public class RoofTexApp extends App {
 		List<Polygon> boundary = Loopz.toPolygon (mr.boundary, bounds, drawTo );
 		
 		g.setColor( Color.blue );
+		g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		
-		for (Polygon p : boundary) 
+		for (Polygon p : boundary) {
 			g.fill( p );
+			g.draw( p );
+		}
 		
 	}
 	
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net, AppMode.Bitmap};
 	}
+
 }

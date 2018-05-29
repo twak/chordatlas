@@ -162,7 +162,7 @@ public class FacadeLabelApp extends App {
 						
 						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 						
-						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
+						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null );
 
 						if ( dest != null ) 
 							meta.mf.appLabel.texture = meta.mf.app.texture = dest;

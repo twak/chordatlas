@@ -155,7 +155,7 @@ public class PanesLabelApp extends App {
 							ImageIO.write( labels, "png", e.getValue() );
 						}
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask );
+						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null );
 						
 						if ( dest != null )   
 							 meta.r.app.texture = ((PanesLabelApp ) meta.r.app).label = dest;

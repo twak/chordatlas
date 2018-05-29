@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -195,7 +196,7 @@ public class Pix2Pix {
 		return null;
 	}
 
-	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, DRectangle crop ) throws IOException {
+	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, DRectangle crop, RescaleOp rgbRescale ) throws IOException {
 		
 //		String name = f.get
 
@@ -209,6 +210,9 @@ public class Pix2Pix {
 			dest =  "scratch/" + UUID.randomUUID();
 
 			BufferedImage rgb = ImageIO.read( texture );
+
+			if (rgbRescale != null)
+				rgb = rgbRescale.filter( rgb, null );
 			
 			BufferedImage labels = ImageIO.read( new File( texture.getParentFile(), texture.getName() + "_label" ) ); 
 

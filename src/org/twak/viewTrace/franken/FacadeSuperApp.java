@@ -40,12 +40,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 	}
 
 	@Override
-	public DRectangle boundsInMeters( FacState<MiniFacade> a ) {
-		return Pix2Pix.findBounds( a.mf );
-	}
-
-	@Override
-	public void setTexture( MiniFacade mf, String dest ) {
+	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, String dest ) {
 		mf.app.textureUVs = TextureUVs.SQUARE;
 		mf.app.texture = dest + ".png";
 	}
@@ -80,7 +75,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 
 		g.dispose();
 		
-		FacState state = new FacState( bigCoarse, mf );
+		FacState state = new FacState( bigCoarse, mf, mini, null );
 		
 		for (int x =0; x <= w / tileWidth; x ++)
 			for (int y =0; y <= h / tileWidth; y ++)

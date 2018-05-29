@@ -18,6 +18,7 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.DRectangle.Enveloper;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 
@@ -119,6 +120,36 @@ public class GreebleHelper {
 				return bounds.normalize( Pointz.to2XY( input.get() ) );
 			}
 		}.run();
+	}
+	
+	public static LoopL<Point2d> zeroOneRoofUVs ( LoopL<LPoint2d> coords, Point2d s, Point2d e ) {
+		
+		Line l = new Line (s, e);
+		double ll =  l.length();
+
+		Enveloper env = new Enveloper();
+		
+		LoopL<Point2d> uvs = coords.new Map<Point2d>() {
+			@Override
+			public Point2d map( Loopable<LPoint2d> input ) {
+				
+				Point2d ol = l.project( input.get(), false );
+				
+				double x = l.findPPram( ol ) * ll;
+				double y = input.get().distance( ol );
+				
+				Point2d out = new Point2d (x,y);
+				
+				env.envelop( out );
+				
+				return out;
+			}
+		}.run();
+		
+		for (Point2d uv : uvs.eIterator()) 
+			uv.set ( env.normalize( uv ) );
+		
+		return uvs;
 	}
 	
 	public static LoopL<Point2d> roofPitchUVs ( LoopL<LPoint2d> coords, Point2d s, Point2d e, double d ) {

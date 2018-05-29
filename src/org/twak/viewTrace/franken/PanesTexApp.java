@@ -119,7 +119,7 @@ public class PanesTexApp extends App implements HasApp {
 
 						Meta meta = (Meta) e.getKey();
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.imBounds );
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.imBounds, null );
 
 						if ( dest != null ) {
 							meta.pta.texture = dest;
