@@ -46,10 +46,11 @@ public class MiniRoof implements HasApp {
 		for (Loop<Point2d> face : getAllFaces() ) {
 			if (Loopz.inside( worldXY, face )) {
 				
-				FCircle circ = new FCircle (worldXY, Math.min (0.5, radius * 0.6 ), f );
+				FCircle circ = new FCircle (worldXY, Mathz.clamp (radius * 0.6, 0.1, 0.4 ), f );
 
 				
 				// 1. try moving the feature away from the edge
+//				if (false)
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
@@ -59,7 +60,7 @@ public class MiniRoof implements HasApp {
 					if (dist < circ.radius) {
 						Vector2d perp = new Vector2d(l.dir());
 						perp.set (-perp.y, perp.x);
-						perp.scale (dist / perp.length());
+						perp.scale ( (circ.radius - dist) / perp.length());
 						
 						circ.loc.add( perp );
 					}
@@ -67,6 +68,7 @@ public class MiniRoof implements HasApp {
 
 				
 				// 2. shrink the feature
+				if (false)
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
 					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
@@ -74,12 +76,12 @@ public class MiniRoof implements HasApp {
 				
 				circ.radius -= 0.01;
 
-				for (FCircle c : greebles.valueList()) 
-					if (c.loc.distance( circ.loc ) < circ.radius + c.radius)
-						return;
-				
-				if (circ.radius < 0.1)
-					return;
+//				for (FCircle c : greebles.valueList()) 
+//					if (c.loc.distance( circ.loc ) <  2*(circ.radius + c.radius) )
+//						return;
+//				
+//				if (circ.radius < 0.1)
+//					return;
 //				
 //				DRectangle bounds = circ.toRect();
 //				for (Point2d p : bounds.points()) {

@@ -792,14 +792,17 @@ public class GreebleGrid {
 	public void createChimney( Point3d onRoof, FCircle feature, Vector2d along, LinearForm3D pitch ) {
 		
 		MatMeshBuilder mat =
-				feature.radius > 0.4 ?
+				feature.radius > 0.2 ?
 				mbs.get( "chimney_brown", new float[] { 78f/255, 51f / 255, 31f / 255, 1f }  ) :
 				mbs.GRAY ;
 		
 		along = new Vector2d(along);
 		along.normalize();
+
+		
 		
 		Vector2d al = new Vector2d (along), up = new Vector2d( -al.y, al.x ); // up the roof
+		
 
 		al.scale (feature.radius / al.length());
 		up.scale (feature.radius / up.length());
@@ -824,16 +827,33 @@ public class GreebleGrid {
 
 		double height = Math.max (0.5, (max - min) * 2 );
 		
-//		System.out.println (feature.loc + "<<<" );
-		
 		mat.addCube( new Point3d(a[1].x, min + height, a[1].y), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
 				-height, feature.radius * 2, feature.radius * 2 );
+
+		double step = 0.1;// Math.min ( feature.radius / 2, 0.1 );
+		
+		if (feature.radius > 2*step) {
 		
 		
-		double step = Math.min ( feature.radius / 2, 0.1 );
+		Point3d offset = new Point3d(a[1].x , min + height + step, a[1].y );
 		
-		mat.addCube( new Point3d(a[1].x + step, min + height + step, a[1].y+step), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
-				-height, feature.radius * 2 - step * 2, feature.radius * 2 - step * 2 );
+		double sl =feature.radius * 2 - step * 2;
+		
+		Vector3d upp = new Vector3d( -along.y, 0, along.x ),
+				 alg = new Vector3d( along.x, 0, along.y );
+		
+			offset.scaleAdd (-step, upp, offset);
+			offset.scaleAdd (step, alg, offset);
+		
+			mat.addCube( offset, Mathz.Y_UP, alg, -step, sl, step );
+			mat.addCube( offset, Mathz.Y_UP, alg, -step, step, sl );
+			
+			offset.scaleAdd (-sl, upp, offset);
+			offset.scaleAdd (sl, alg, offset);
+			
+			mat.addCube( offset, Mathz.Y_UP, alg, -step, -sl, -step );
+			mat.addCube( offset, Mathz.Y_UP, alg, -step, -step, -sl );
+		}
 	}
 	
 }
