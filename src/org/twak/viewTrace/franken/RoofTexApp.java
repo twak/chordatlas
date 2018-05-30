@@ -232,6 +232,7 @@ public class RoofTexApp extends App {
 			}
 		
 		
+		g.setColor( Color.magenta );
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		for (HalfEdge e : mr.app.superFace) {
 			MiniFacade mf = ((SuperEdge)e).toEdit; 
