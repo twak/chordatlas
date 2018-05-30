@@ -111,12 +111,10 @@ public class FacadeLabelApp extends App {
 		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
-//		Map<MiniFacade, Meta> index = new HashMap<>();
 		
 		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
 
 		for (App a : batch) {
-//		for ( MiniFacade mf : mfb ) {
 
 			MiniFacade mf = (MiniFacade) a.hasA;
 			

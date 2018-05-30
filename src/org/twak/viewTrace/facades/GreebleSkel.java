@@ -712,10 +712,10 @@ public class GreebleSkel {
 			case Chimney:
 			case Velux:
 
-				r.x += WindowGen.WINDOW_FRAME_WIDTH ;
-				r.y += WindowGen.WINDOW_FRAME_WIDTH ;
-				r.width -= WindowGen.WINDOW_FRAME_WIDTH * 2;
-				r.height -= WindowGen.WINDOW_FRAME_WIDTH * 2;
+//				r.x += WindowGen.WINDOW_FRAME_WIDTH ;
+//				r.y += WindowGen.WINDOW_FRAME_WIDTH ;
+//				r.width -= WindowGen.WINDOW_FRAME_WIDTH * 2;
+//				r.height -= WindowGen.WINDOW_FRAME_WIDTH * 2;
 
 //				if (r.width > WindowGen.WINDOW_FRAME_WIDTH && r.height > WindowGen.WINDOW_FRAME_WIDTH )
 				GreebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );

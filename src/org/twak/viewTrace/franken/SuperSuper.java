@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -16,6 +17,7 @@ import javax.swing.JPanel;
 
 import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
@@ -222,6 +224,14 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 								g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 								
 								g.drawImage( state.bigFine,
+										0, 0,
+										cropped.getWidth(), cropped.getHeight(), 
+										overlap, overlap,
+										state.bigFine.getWidth() - overlap, state.bigFine.getHeight() - overlap, null );
+								
+								g.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, (float) TweedSettings.settings.superResolutionBlend ) );
+								
+								g.drawImage( state.bigCoarse,
 										0, 0,
 										cropped.getWidth(), cropped.getHeight(), 
 										overlap, overlap,

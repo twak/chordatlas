@@ -489,22 +489,22 @@ public class GreebleGrid {
 		Vector3f loc = ptf[0];
 
 		
-		float bg = 0.08f, sm = 0.03f, height  = balc.heightF(), 
+		float bg = 0.04f, sm = 0.01f, height  = balc.heightF(), 
 				depth = (float) _depth, width = balc.widthF(),
-				spacing = 0.3f, bgsm = (bg - sm) / 2;
+				spacing = 0.1f, bgsm = (bg - sm) / 2;
 		
 		// floor
 		mat.addCube(loc, up, along, out, bg, width, (float) depth );
 		
 		// top railings
-		mat.addCube(loc.add(up.mult( height )), up, along, out, bg, bg, depth );
-		mat.addCube(loc.add(up.mult( height ).add(along.mult(width-bg))), up, along, out, bg, bg, depth );
-		mat.addCube( loc.add( up.mult( height ).add( out.mult( depth - bg ) ) ), up, along, out, bg, width, bg );
+		mat.addCube(loc.add(up.mult( height )), up, along, out, bg, bg * 2, depth );
+		mat.addCube(loc.add(up.mult( height ).add(along.mult(width-2*bg))), up, along, out, bg, bg*2, depth );
+		mat.addCube( loc.add( up.mult( height ).add( out.mult( depth - bg ) ) ), up, along, out, bg, width, bg*2 );
 		
 		int count = (int)(depth/spacing);
 		
-		// side decorations
-		for (int c = 0; c< count+1; c++) {
+		// side bars
+		for (int c = 0; c< count; c++) {
 			mat.addCube(loc.add(out.mult(c * spacing)).add(along.mult(bgsm)) , up, along, out, height, sm, sm );
 			mat.addCube(loc.add(out.mult(c * spacing)).add(along.mult(width - sm - bgsm)) , up, along, out, height, sm, sm );
 		}
@@ -512,7 +512,7 @@ public class GreebleGrid {
 		count = (int) ( width / spacing);
 		spacing = (width - sm -2*bgsm) / count;
 				
-		// top decorations
+		// front bars
 		for (int c = 0; c< count+1; c++) {
 			
 			mat.addCube(loc.add(out.mult(depth - sm-bgsm)).add(along.mult(bgsm + spacing * c)) , up, along, out, height, sm, sm);
@@ -696,12 +696,12 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( DRectangle b : mf.featureGen.get( Feature.BALCONY ) ) {
+			for ( FRect b : mf.featureGen.get( Feature.BALCONY ) ) {
 				if ( allGeom.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createBalcony( rect, to3d, mbs.BALCONY,0.3 );
+							createBalcony( rect, to3d, mbs.get( "balcony_"+b.app.color, b.app.color, mf ) , 0.3 );
 						}
 
 						@Override

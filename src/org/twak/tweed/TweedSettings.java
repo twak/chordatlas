@@ -92,6 +92,7 @@ public class TweedSettings {
 	public List<Gen> genList = new ArrayList<>();
 	public boolean LOD = true;
 	public boolean createDormers = false;
+	public double superResolutionBlend = 0.4;
 
 	
 	

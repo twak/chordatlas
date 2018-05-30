@@ -20,6 +20,7 @@ import javax.vecmath.Point2d;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Filez;
+import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
@@ -91,12 +92,10 @@ public class FacadeGreebleApp extends App implements HasApp {
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		BufferedImage 
-			rgb    = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR ),
 			labels = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR ),
 			empty  = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		
 		Graphics2D 
-			gR = rgb   .createGraphics(),
 			gL = labels.createGraphics(),
 			gE = empty .createGraphics();
 
@@ -104,6 +103,8 @@ public class FacadeGreebleApp extends App implements HasApp {
 		for (App a : batch) {
 			
 			try {
+				BufferedImage rgb    = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+				Graphics2D gR = rgb   .createGraphics();
 
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
 				MiniFacade mf = (MiniFacade) fga.parent.hasA;
@@ -139,16 +140,17 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel );
 
-				Meta meta = new Meta( mf, maskLabel, mini );
+				Meta meta = new Meta( mf, maskLabel, mini, rgb );
 
 				p2.addInput( rgb, empty, labels, meta, new double[0], FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
 
+				gR.dispose();
+				
 			} catch ( Throwable th ) {
 				th.printStackTrace();
 			}
 		}
 		
-		gR.dispose();
 		gL.dispose();
 		gE.dispose();
 
@@ -195,14 +197,24 @@ public class FacadeGreebleApp extends App implements HasApp {
 					if ( node == null )
 						continue;
 
+					List<DRectangle> frects = new ArrayList<>();
+					
 					for ( int i = 0; i < node.size(); i++ ) {
 
 						JsonNode rect = node.get( i );
 
-						DRectangle r = new DRectangle( rect.get( 0 ).asDouble(), NetInfo.get( this ).resolution - rect.get( 3 ).asDouble(), rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(), rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
-
-						m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
-
+						DRectangle fr = new DRectangle( rect.get( 0 ).asDouble(),
+								NetInfo.get( this ).resolution - rect.get( 3 ).asDouble(), rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(), 
+								rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
+						
+						frects.add( fr );
+					}
+					
+					Color avgCol = mean (m.rgb, frects );
+					for (DRectangle r : frects) {
+						FRect fr = m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
+						m.mf.featureGen.add( f, fr );
+						fr.app.color = avgCol;
 					}
 				}
 
@@ -215,15 +227,46 @@ public class FacadeGreebleApp extends App implements HasApp {
 	private static class Meta {
 		DRectangle mask, mfBounds;
 		MiniFacade mf;
+		private BufferedImage rgb;
 		
-		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds ) {
+		
+		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds, BufferedImage rgb ) {
 			this.mask = mask;
 			this.mf = mf;
 			this.mfBounds = mfBounds;
+			this.rgb = rgb;
 		}
 	}
 	
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net};
+	}
+	
+
+	public static Color mean( BufferedImage rgb, List<? extends DRectangle> frects ) {
+		
+		int count = 0;
+		long[] values = new long[3];
+		
+		
+		for (DRectangle f : frects)
+			for (int x = (int) f.x; x < f.x + f.width; x++)
+				for (int y = rgb.getHeight() - (int)  (f.y + f.height); y < rgb.getHeight() - (f.y ); y++) 
+				{
+					int val = rgb.getRGB( x, y );
+					values[0] += ( val & 0xff0000 ) >> 16;
+					values[1] += ( val & 0x00ff00 ) >> 8;
+					values[2] += ( val & 0x0000ff ) >> 0;
+        			count++;
+				}
+		
+		if (count > 0) {
+			values[0] /= count;
+			values[1] /= count;
+			values[2] /= count;
+		}
+		
+		return new Color( (int) ( (values[0] <<16) + (values[1] <<8) + values[2]  ) );
+		
 	}
 }

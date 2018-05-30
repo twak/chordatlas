@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
 import org.twak.tweed.gen.SuperFace;
@@ -200,12 +202,28 @@ public class RoofTexApp extends App {
 				
 				Loop<Point2d> loop = new Loop<>();
 				
-				this needs to take face orientation into account!
+
+				Vector3d e3 = f.edge.direction();
+				e3.normalize();
 				
-				loop.append( new Point2d (greeble.loc.x + radiusW, greeble.loc.y + radiusH ) );
-				loop.append( new Point2d (greeble.loc.x + radiusW, greeble.loc.y - radiusH ) );
-				loop.append( new Point2d (greeble.loc.x - radiusW, greeble.loc.y - radiusH ) );
-				loop.append( new Point2d (greeble.loc.x - radiusW, greeble.loc.y + radiusH ) );
+				Vector2d 
+						x = new Vector2d (  e3.x, e3.y), 
+						y = new Vector2d ( -e3.y, e3.x );
+//						, 
+//						c1 = new Vector2d(),
+//						c2 = new Vector2d(),
+//						c3 = new Vector2d(),
+//						c4 = new Vector2d();
+//				
+//				c1.scaleAdd( radiusW, x, greeble.loc  );
+//				c1.scaleAdd( radiusH, y, c1  );
+				
+				
+				
+				loop.append( new Point2d (greeble.loc.x + x.x * radiusW + y.x * radiusH, greeble.loc.y + x.y * radiusW + y.y * radiusH ) );
+				loop.append( new Point2d (greeble.loc.x - x.x * radiusW + y.x * radiusH, greeble.loc.y - x.y * radiusW + y.y * radiusH ) );
+				loop.append( new Point2d (greeble.loc.x - x.x * radiusW - y.x * radiusH, greeble.loc.y - x.y * radiusW - y.y * radiusH ) );
+				loop.append( new Point2d (greeble.loc.x + x.x * radiusW - y.x * radiusH, greeble.loc.y + x.y * radiusW - y.y * radiusH ) );
 				
 				Polygon p = Loopz.toPolygon (loop.singleton() , bounds, drawTo ).get(0);
 				
