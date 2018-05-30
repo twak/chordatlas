@@ -15,21 +15,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
-import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.utils.ui.Colourz;
-import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -108,20 +104,32 @@ public class NetExamples extends JComponent {
 			try {
 				
 				BufferedImage bi = Imagez.scaleSquare( ImageIO.read( f ), exemplar.resolution ) ;
-				inputs . add ( Imagez.join( bi, bi ) );
+				inputs . add ( bi );
 
 				String n = f.getName();
 				
-				Pattern p = Pattern.compile( "[^@]*@([^_]*)_" );
+				try {
+					Pattern p = Pattern.compile( "[^@]*@([^\\.]*)\\." );
+					double d = Double.parseDouble( p.matcher( n ).group( 1 ) );
+					scales.add( d );
+				} catch ( Throwable th ) {
+					scales.add( 0.2 );
+				}
 				
-				scales.add (Double.parseDouble(  p.matcher( n ).group( 1 )   ));
 				
-				BufferedImage biE = Imagez.scaleSquare( ImageIO.read ( 
-							new File (f.getParentFile(), 
-							Filez.stripExtn( n ) +"_empty" + Filez.getExtn( n ) ) 
-						), exemplar.resolution );
-				
-				inputsE. add ( biE );
+				if ( exemplar.emptyColour != null ) {
+					BufferedImage empty = new BufferedImage( exemplar.resolution, exemplar.resolution, BufferedImage.TYPE_3BYTE_BGR );
+					for ( int xx = 0; xx < exemplar.resolution; xx++ )
+						for ( int yy = 0; yy < exemplar.resolution; yy++ ) {
+
+							if ( Colourz.distance( bi.getRGB( xx, yy ), 0 ) > 10 )
+								empty.setRGB( xx, yy, exemplar.emptyColour.getRGB() );
+
+						}
+
+					inputsE.add( empty );
+				}
+				else inputsE.add(null);
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();
@@ -143,7 +151,7 @@ public class NetExamples extends JComponent {
 						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
 								new UniqueInt ( index ),
-								styleSource.draw( randy, null ), scales.get(index) );
+								styleSource.draw( randy, null ), exemplar.name == "roof" ? null : 0.1 ) ;//scales.get(index) );
 						
 					}
 					
@@ -161,24 +169,7 @@ public class NetExamples extends JComponent {
 			}
 		}.start();
 		
-		{
-			List<Pair<Integer, BufferedImage>> warmup = new ArrayList<>();
-			
-			for (int i = 0; i < 32; i++) {
-				
-				BufferedImage tmp = new BufferedImage( 256, 256, BufferedImage.TYPE_3BYTE_BGR );
-				Graphics2D g = tmp.createGraphics();
-				int col = (int) (Math.random() * 100) + 50;
-				g.setColor( new Color (col, col, col) );
-				g.fillRect( 0, 0, 256, 256 );
-				g.dispose();
-				
-				warmup.add ( new Pair ( i % inputs.size(), tmp) );
-			}
-		
-			lastChanged = System.currentTimeMillis() - 5000;
-			addImages( System.currentTimeMillis(), warmup );
-		}
+		showLoading();
 		
 		MouseAdapter ml = new MouseAdapter() {
 			public void mouseMoved(MouseEvent e) {
@@ -206,6 +197,27 @@ public class NetExamples extends JComponent {
 		addMouseMotionListener( ml );
 		addMouseListener( ml );
 	}
+
+	private void showLoading() {
+		{
+			List<Pair<Integer, BufferedImage>> warmup = new ArrayList<>();
+
+			for ( int i = 0; i < 32; i++ ) {
+
+				BufferedImage tmp = new BufferedImage( exemplar.resolution, exemplar.resolution, BufferedImage.TYPE_3BYTE_BGR );
+				Graphics2D g = tmp.createGraphics();
+				int col = (int) ( Math.random() * 100 ) + 50;
+				g.setColor( new Color( col, col, col ) );
+				g.fillRect( 0, 0, exemplar.resolution, exemplar.resolution );
+				g.dispose();
+
+				warmup.add( new Pair( i % inputs.size(), tmp ) );
+			}
+
+//			lastChanged = System.currentTimeMillis() - 5000;
+			addImages( System.currentTimeMillis(), warmup );
+		}
+	}
 	
 	private void addImages( long startTime, List<Pair<Integer, BufferedImage>> values ) {
 		
@@ -215,6 +227,9 @@ public class NetExamples extends JComponent {
 			public void run() {
 				
 				for ( Pair<Integer, BufferedImage> e : values ) {
+					
+					System.out.println(" >> " + ( startTime - lastChanged) );
+					
 					if (startTime < lastChanged)
 						return;
 					addImage( e.first(), e.second() );
@@ -237,6 +252,8 @@ public class NetExamples extends JComponent {
 		for (int i = 0; i < images.length; i++)
 			for (int j = 0; j < images[0].length; j++)
 				images[i][j] = null;
+		
+		showLoading();
 		
 		repaint();
 	}
@@ -308,5 +325,4 @@ public class NetExamples extends JComponent {
 	public void stop() {
 		go = false;
 	}
-	
 }

@@ -50,12 +50,10 @@ public class MultiModalEditor extends JPanel {
 		this.exemplar = exemplar;
 		this.globalUpdate = globalUpdate;
 		
-		
 		setLayout( new BorderLayout() );
-		egs = new NetExamples( mm, 8, 8, exemplar, new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + exemplar.name) );
+		egs = new NetExamples( mm, 10, 6, exemplar, new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + exemplar.name) );
 		
 		JPanel controls = createControls(() -> egs.changed());
-
 		
 		add(controls, BorderLayout.EAST);
 		add(egs, BorderLayout.CENTER);

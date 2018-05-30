@@ -28,7 +28,7 @@ public class UIVector extends JPanel {
 		
 		method = new JToggleButton("manual");
 
-		method.setSelected( imageFile.getMeanImage() == null );
+		method.setSelected( false );//imageFile.getMeanImage() == null );
 		
 		JPanel options = new JPanel(new ListDownLayout());
 		

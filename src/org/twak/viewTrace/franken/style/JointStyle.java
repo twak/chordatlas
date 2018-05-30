@@ -20,12 +20,15 @@ import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.FacadeGreebleApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.FacadeSuperApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.PanesLabelApp;
 import org.twak.viewTrace.franken.PanesTexApp;
+import org.twak.viewTrace.franken.RoofGreebleApp;
+import org.twak.viewTrace.franken.RoofSuperApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.JointUI;
@@ -69,14 +72,17 @@ public class JointStyle implements StyleSource {
 	public List<NetProperties> nets = new ArrayList<>();
 	public NetProperties defaultNet;
 	{
-		nets.add (new NetProperties(BlockApp      .class, false, false ) );
-		nets.add (new NetProperties(BuildingApp   .class, false, false ) );
-		nets.add (new NetProperties(FacadeLabelApp.class, true , false ) );
-		nets.add (new NetProperties(FacadeSuperApp.class, true , false ) );
-		nets.add (defaultNet = new NetProperties(FacadeTexApp  .class, true , true ) );
-		nets.add (new NetProperties(PanesLabelApp .class, true , false ) );
-		nets.add (new NetProperties(PanesTexApp   .class, true , false ) );
-		nets.add (new NetProperties(RoofTexApp       .class, true , true  ) );
+		nets.add (new NetProperties(BlockApp                 .class, false, false ) );
+		nets.add (new NetProperties(BuildingApp              .class, false, false ) );
+		nets.add (new NetProperties(FacadeLabelApp           .class, true , false ) );
+		nets.add (new NetProperties(FacadeGreebleApp         .class, true , false  ) );
+		nets.add (new NetProperties(FacadeSuperApp           .class, true , false ) );
+		nets.add (defaultNet = new NetProperties(FacadeTexApp.class, true , true ) );
+		nets.add (new NetProperties(PanesLabelApp            .class, true , false ) );
+		nets.add (new NetProperties(PanesTexApp              .class, true , false ) );
+		nets.add (new NetProperties(RoofTexApp               .class, true , true  ) );
+		nets.add (new NetProperties(RoofGreebleApp           .class, false, false  ) );
+		nets.add (new NetProperties(RoofSuperApp             .class, true , false  ) );
 	}
 	
 	public static class NetProperties {

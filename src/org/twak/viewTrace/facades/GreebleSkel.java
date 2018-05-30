@@ -700,7 +700,7 @@ public class GreebleSkel {
 					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( end ), Pointz.to2XZ( start ) );
 				}
 				else
-					roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
+					roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect == null ? new DRectangle(0,0,1,1 ) : ra.textureRect );
 				break;
 		}
 		
