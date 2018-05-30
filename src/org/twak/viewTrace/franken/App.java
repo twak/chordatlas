@@ -92,20 +92,22 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static void computeWithChildren (int first, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		if (todo.get( stage ).isEmpty())
+		if (stage >= NetInfo.index.size())
 			return;
 		
+		if (todo.get( stage ).isEmpty()) {
+			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
+			return;
+		}
 		
-		if (first >= todo.size()) {
+		if (first >= todo.get(stage).size()) {
 			System.out.println( "finishing "+ todo.get( stage ).get( 0 ).getClass().getSimpleName() );
-			
 			
 			globalUpdate.run();
 			
 			for (App a : new ArrayList<> ( todo.get( stage )) )
 				for (App next : a.getDown().valueList())
 					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
-			
 			
 			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
 			

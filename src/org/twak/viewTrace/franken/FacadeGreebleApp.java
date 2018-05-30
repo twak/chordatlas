@@ -120,7 +120,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 				gE.setColor( CMPLabel.Background.rgb );
 				gE.fillRect( 0, 0, resolution, resolution );
 
-				DRectangle mini = Pix2Pix.findBounds( mf );
+				DRectangle mini = Pix2Pix.findBounds( mf, false );
 
 				DRectangle maskLabel = new DRectangle( mini );
 
@@ -135,10 +135,10 @@ public class FacadeGreebleApp extends App implements HasApp {
 				BufferedImage src = ImageIO.read( Tweed.toWorkspace( fga.parent.coarse ) );
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
-				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel );
+				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );
 
-				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel );
+				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
 
 				Meta meta = new Meta( mf, maskLabel, mini, rgb );
 
@@ -165,7 +165,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 						Meta meta = (Meta)e.getKey();
 						
-//						Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask );
+//						Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null );
 
 						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 					}

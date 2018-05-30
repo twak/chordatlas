@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
@@ -38,6 +39,8 @@ public class FacadeTexApp extends App {
 	
 	public SuperFace parent; // for non-label pipeline
 	public String coarse;
+	
+	public boolean dormer = true;
 	
 	public FacadeTexApp( HasApp ha ) {
 		super( ha );
@@ -67,6 +70,10 @@ public class FacadeTexApp extends App {
 			
 		for (FRect r : mf.featureGen.get( Feature.WINDOW ))
 			out.put( "window", r.app );
+		
+//		MiniRoof mr = (MiniRoof) ( (MiniFacade)hasA ).appLabel.hasA;
+//		for (mr.greebles.get( mf.postState. ))
+//			out.put("window")
 		
 		out.put( "super", zuper );
 		
@@ -111,7 +118,7 @@ public class FacadeTexApp extends App {
 			if (mf.featureGen instanceof CGAMini)
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 
-			DRectangle mini = Pix2Pix.findBounds( mf );
+			DRectangle mini = Pix2Pix.findBounds( mf, false );
 
 			gL.setColor( CMPLabel.Background.rgb );
 			gL.fillRect( 0, 0, resolution, resolution );
@@ -119,7 +126,7 @@ public class FacadeTexApp extends App {
 			gE.setColor( CMPLabel.Background.rgb );
 			gE.fillRect( 0, 0, resolution, resolution );
 
-			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
+			mini = Pix2Pix.findBounds( mf, false );
 
 			if (mini == null)
 				continue;
@@ -155,7 +162,7 @@ public class FacadeTexApp extends App {
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				
-				for ( Loop<? extends Point2d> l : mf.postState.skelFaces ) {
+				for ( Loop<? extends Point2d> l : mf.postState.wallFaces ) {
 					
 					Polygon p = Pix2Pix.toPoly( mf, maskLabel, mini, l ) ; 
 					

@@ -20,6 +20,7 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CGAMini;
@@ -98,6 +99,12 @@ public class FacadeLabelApp extends App {
 			};
 		}.notWhileDragging() );
 		
+		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
+			public void updated(boolean selected) {
+				globalUpdate.run();
+			}
+		} );
+		
 		return out;
 	}
 	
@@ -120,12 +127,10 @@ public class FacadeLabelApp extends App {
 			
 			mf.postState.generatedWindows.clear();
 			
-			DRectangle mini = Pix2Pix.findBounds( mf );
+			DRectangle mini = Pix2Pix.findBounds( mf, mf.app.dormer );
 
 			g.setColor( Color.black );
 			g.fillRect( 0, 0, ni.resolution, ni.resolution );
-
-			mini = mf.postState == null ? mf.getAsRect() : mf.postState.outerFacadeRect;
 
 			DRectangle mask = new DRectangle( mini );
 
@@ -137,9 +142,9 @@ public class FacadeLabelApp extends App {
 				mask.y = 0; 
 			}
 
-			Pix2Pix.drawFacadeBoundary( g, mf, mini, mask );
+			Pix2Pix.drawFacadeBoundary( g, mf, mini, mask, mf.app.dormer );
 
-			Meta meta = new Meta( mf, mask, mini, a );
+			Meta meta = new Meta( mf, mask, mini );
 
 			p2.addInput( bi, bi, null, meta, mf.app.styleZ, FLOOR_HEIGHT * scale / 255.  );
 		}
@@ -163,7 +168,7 @@ public class FacadeLabelApp extends App {
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null );
 
 						if ( dest != null ) 
-							meta.mf.appLabel.texture = meta.mf.app.texture = dest;
+							meta.mf.appLabel.texture = dest; //= meta.mf.app.texture  doesn't work because of the dormer windows
 					}
 					
 				} catch ( Throwable e ) {
@@ -222,13 +227,11 @@ public class FacadeLabelApp extends App {
 	private static class Meta {
 		DRectangle mask, mfBounds;
 		MiniFacade mf;
-		App a;
 		
-		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds, App a ) {
+		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds ) {
 			this.mask = mask;
 			this.mf = mf;
 			this.mfBounds = mfBounds;
-			this.a = a;
 		}
 	}
 	

@@ -98,7 +98,7 @@ public class FacadeSuperAppOld extends App implements HasApp {
 //				ImageIO.write( src, "png", new File( "/home/twak/Desktop/foo/" + System.nanoTime() + "_orig.png" ) );
 
 				
-				DRectangle mini = Pix2Pix.findBounds( mf );
+				DRectangle mini = Pix2Pix.findBounds( mf, false );
 				
 //				BufferedImage tiny = Imagez.scaleTo( src, (int) ( mini.width * 10 ), (int) ( mini.width * 10 ) );
 //				Imagez.gaussianNoise( tiny, 0.03 );

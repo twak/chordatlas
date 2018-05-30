@@ -210,13 +210,16 @@ public class GreebleHelper {
 				bounds[3] - bounds[2] );
 		
 		return all;
-		
 	}
-	public static DRectangle findRect( List<Loop<? extends Point2d>> skelFaces ) {
+	
+
+	public static DRectangle findRect( List<Loop<? extends Point2d>> ... in ) {
 		
 		DRectangle bounds = null;
 		
-		for (Loop<? extends Point2d> loop : skelFaces) {
+		for ( List<Loop<? extends Point2d>> list : in )
+		
+		for (Loop<? extends Point2d> loop : list) {
 			for (Loopable<? extends Point2d> pt : loop.loopableIterator())
 				if (bounds == null)
 					bounds = new DRectangle(pt.get().x, pt.get().y, 0, 0);
@@ -225,6 +228,20 @@ public class GreebleHelper {
 		}
 		return bounds;
 	}
+	
+//	public static DRectangle findRect( List<Loop<? extends Point2d>> skelFaces ) {
+//		
+//		DRectangle bounds = null;
+//		
+//		for (Loop<? extends Point2d> loop : skelFaces) {
+//			for (Loopable<? extends Point2d> pt : loop.loopableIterator())
+//				if (bounds == null)
+//					bounds = new DRectangle(pt.get().x, pt.get().y, 0, 0);
+//				else
+//					bounds.envelop( pt.get() );
+//		}
+//		return bounds;
+//	}
 	
 	public static LoopL<Point2d> findRectagle( Loop<LPoint2d> flat, Point2d s, Point2d e ) {
 
@@ -415,4 +432,5 @@ public class GreebleHelper {
 		
 		return null;
 	}
+
 }

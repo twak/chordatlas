@@ -76,7 +76,6 @@ public class PanesLabelApp extends App {
 				apps.computeAll(globalUpdate);
 			}
 		};
-		
 	}
 
 	public final static int pad = 20;
@@ -97,12 +96,12 @@ public class PanesLabelApp extends App {
 			try {
 				MiniFacade mf = ( (FRect) a.hasA ).mf;
 
-				DRectangle mini = Pix2Pix.findBounds( mf );
+				DRectangle mini = Pix2Pix.findBounds( mf, false );
 
 				FRect r = (FRect) a.hasA;
 
-				if ( !mini.contains( r ) )
-					return;//continue;
+//				if ( !mini.contains( r ) )
+//					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
 				
@@ -154,6 +153,8 @@ public class PanesLabelApp extends App {
 							regularize ( meta.app, labels, meta.mask, 0.5 );
 							ImageIO.write( labels, "png", e.getValue() );
 						}
+						else
+							meta.app.panes = null;
 						
 						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null );
 						

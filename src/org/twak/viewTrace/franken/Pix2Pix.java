@@ -27,6 +27,7 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.NormSpecGen;
 
@@ -262,22 +263,28 @@ public class Pix2Pix {
 		return out;
 	}
 
-	public static DRectangle findBounds( MiniFacade toEdit ) {
+	public static DRectangle findBounds( MiniFacade toEdit, boolean includeRoof ) {
 		
 		if ( toEdit.postState == null ) 
 			return toEdit.getAsRect();
-		else 
-			return toEdit.postState.outerFacadeRect;
+		else if ( includeRoof )
+			return  GreebleHelper.findRect( toEdit.postState.wallFaces, toEdit.postState.roofFaces );
+		else
+			return toEdit.postState.outerWallRect;
 	}
 	
-	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask ) {
+	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask, boolean drawRoofs ) {
 		if ( mf.postState == null ) {
 			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
 		} else {
 			g.setColor( Color.blue );
 			
-			for ( Loop<? extends Point2d> l : mf.postState.skelFaces )
+			for ( Loop<? extends Point2d> l : mf.postState.wallFaces )
 				g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
+			
+			if (drawRoofs)
+				for ( Loop<? extends Point2d> l : mf.postState.roofFaces )
+					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 
 			g.setColor( CMPLabel.Background.rgb );
 			for ( LoopL<Point2d> ll : mf.postState.occluders )

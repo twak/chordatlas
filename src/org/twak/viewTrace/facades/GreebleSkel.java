@@ -150,9 +150,11 @@ public class GreebleSkel {
 				LinearForm3D lf = new LinearForm3D( new Vector3d(-dir.y, dir.x, 0), e.start );
 				
 				for (Face f : chain) 
-					if (GreebleHelper.getTag( f.profile, WallTag.class ) != null)
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
-							mf.postState.skelFaces.add( face );
+							if (GreebleHelper.getTag( f.profile, WallTag.class ) != null)
+								mf.postState.wallFaces.add( face );
+							else
+								mf.postState.roofFaces.add( face );
 				
 				if ( occluderLookup != null )
 					for ( Object o : wt.occlusions ) {
@@ -166,7 +168,7 @@ public class GreebleSkel {
 		}
 		
 		for (MiniFacade mf : allMFs) {
-				mf.postState.outerFacadeRect = GreebleHelper.findRect(mf.postState.skelFaces);
+				mf.postState.outerWallRect = GreebleHelper.findRect(mf.postState.wallFaces);
 				mf.featureGen.update();
 		}
 		
@@ -221,12 +223,17 @@ public class GreebleSkel {
 			for (QuadF q1 : allFeatures)
 				mf2.postState.generatedWindows.add(q1.original);
 			
-			if ( TweedSettings.settings.createDormers ) {
+			if ( ( wt != null && wt.miniFacade.app.dormer) ||  
+					TweedSettings.settings.createDormers ) {
+				
 				Iterator<QuadF> quit = processedFeatures.iterator();
 				while ( quit.hasNext() ) {
 					QuadF w = quit.next();
 					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
-						greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, (float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+						
+						greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
+								(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+						
 						quit.remove();
 					}
 				}
@@ -567,17 +574,10 @@ public class GreebleSkel {
 			}
 		}
 		
-		if ( wallTag == null || toRecess == null ) {
-			
-			greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
-			
-			return;
-		}
-		
 		DRectangle uvs;
 		
 		if (mf != null && mf.app.textureUVs == TextureUVs.SQUARE) {
-			uvs = new DRectangle(mf.postState.outerFacadeRect);
+			uvs = new DRectangle(mf.postState.outerWallRect);
 
 			{ // for faces not at the bottom, move to the bottom's uv space
 				Face f2 = f;
@@ -611,7 +611,7 @@ public class GreebleSkel {
 				Loop<Point2d>[] cut = Loopz.cutConvex( loop, new LinearForm( 0, 1, mf.groundFloorHeight ) );
 				faceMaterial.add( cut[ 1 ].singleton(), to3d );
 				LoopL<Point2d> pts = cut[ 0 ].singleton();
-				gfm.add( pts, GreebleHelper.wallUVs(pts, mf.postState.outerFacadeRect), to3d );
+				gfm.add( pts, GreebleHelper.wallUVs(pts, mf.postState.outerWallRect), to3d );
 			}
 			
 			materials.add( gfm );
@@ -648,7 +648,11 @@ public class GreebleSkel {
 					}
 				}
 			}
-
+			
+			if ( wallTag == null || toRecess == null ) {
+				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
+			}
+			else
 			if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
 				
 				greebleGrid.buildGrid (
@@ -686,7 +690,7 @@ public class GreebleSkel {
 					roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 				
 				else if ( ra.zuper.appMode == AppMode.Net && ra.zuper.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
-					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ) );
+					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( end ), Pointz.to2XZ( start ) );
 				}
 				else
 					roofUVs = GreebleHelper.wholeRoofUVs( ll.singleton(), ra.textureRect );
@@ -710,16 +714,11 @@ public class GreebleSkel {
 			switch ( feature.f ) {
 
 			case Chimney:
+				greebleGrid.createChimney ( onRoof, feature, f.edge.projectDown().dir() , f.edge.linearForm );
+				break;
+				
 			case Velux:
-
-//				r.x += WindowGen.WINDOW_FRAME_WIDTH ;
-//				r.y += WindowGen.WINDOW_FRAME_WIDTH ;
-//				r.width -= WindowGen.WINDOW_FRAME_WIDTH * 2;
-//				r.height -= WindowGen.WINDOW_FRAME_WIDTH * 2;
-
-//				if (r.width > WindowGen.WINDOW_FRAME_WIDTH && r.height > WindowGen.WINDOW_FRAME_WIDTH )
 				GreebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
-
 				break;
 			}
 		}

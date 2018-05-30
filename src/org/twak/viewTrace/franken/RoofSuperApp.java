@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -126,7 +127,13 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 		
 		NetInfo ni = NetInfo.get( parent );
 		
+		int count = 0;
+		
 		for ( Loop<Point2d> verticalPts : mr.getAllFaces() ) {
+			
+//			count++;
+//			if (count ++  != 1)
+//				continue;
 			
 			TwoRects toPix = new TwoRects( mr.app.textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
 			
@@ -156,7 +163,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			t.preConcatenate( deslope );
 			
 			double[] bounds = Loopz.minMax2d( Loopz.transform( verticalPts, rot ) ); // bad location, but scale-in-meters.
-			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, t ) ); // bad location, but scale-in-meters.
+			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, t ) ); 
 			
 			int 
 			outWidth  =   (int) Math.ceil ( ( (bounds[1] - bounds[0] ) * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
@@ -171,24 +178,31 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
 			g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 	
+			t.preConcatenate( AffineTransform.getTranslateInstance ( - pixBounds[0], 0 ));
 			t.preConcatenate( AffineTransform.getScaleInstance ( outWidth / (pixBounds[1] - pixBounds[0] ), outHeight / (pixBounds[3] - pixBounds[2] ) ) );
 			t.preConcatenate( AffineTransform.getTranslateInstance ( overlap, outHeight + overlap ) );
 //			t.preConcatenate( AffineTransform.getTranslateInstance ( 256,256 ) );
 
-			AffineTransform orig = g.getTransform();
-			
 			
 			g.setTransform( t );
 			
-//			g.setColor( Color.magenta );
-//			g.drawLine( (int) start.x, (int) start.y, (int) end.x, (int) end.y );
-			
 			g.drawImage (src, 0, 0, null);
 			
-			g.setTransform( orig );
-//			g.fillRect( 256, 256, 100, 5 );
-	
-//			new Show( bigCoarse );
+			
+			if ( true ) { // pad edges
+				
+				
+				
+				Color c = new Color( bigCoarse.getRGB( bigCoarse.getWidth() / 2, bigCoarse.getHeight() / 2 ) );
+
+				g.setColor( c );
+				g.setStroke( new BasicStroke( overlap / 2 ) );
+
+				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
+					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );
+				}
+			}
+			
 			
 			g.dispose();
 			
@@ -200,8 +214,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 					state.nextTiles.add( new TileState( state, x, y ) );
 	
 			todo.put( mr, state );
-
-//			break;
 		}
 	}
 

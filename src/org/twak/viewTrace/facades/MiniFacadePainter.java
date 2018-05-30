@@ -142,7 +142,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		g.setStroke( new BasicStroke( 3 ) );
 		if ( mf.postState != null ) {
 			g.setColor( Color.gray );
-			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.skelFaces ) )
+			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.wallFaces ) )
 				paintPolygon( l, g, ma );
 			
 			g.setColor( Color.red );

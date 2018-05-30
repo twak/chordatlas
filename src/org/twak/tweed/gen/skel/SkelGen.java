@@ -489,10 +489,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 							@Override
 							public void run() {
-
+								
 								removeGeometryFor( sf );
 								tweed.frame.setGenUI( null ); // current selection is invalid
 								sf.skel = (PlanSkeleton) threadKey;
+								
+								sf.mr.setOutline( sf.skel.output );
+
 								setSkel( (PlanSkeleton) threadKey, sf, lastOccluders );
 
 							}

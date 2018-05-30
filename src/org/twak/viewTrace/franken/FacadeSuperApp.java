@@ -49,7 +49,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
 
-		DRectangle mini = Pix2Pix.findBounds( mf );
+		DRectangle mini = Pix2Pix.findBounds( mf, false );
 		
 		int 
 			outWidth  =   (int) Math.ceil ( ( mini.width  * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples

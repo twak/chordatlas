@@ -53,17 +53,14 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 			wood = new float[] {0.8f, 0.8f, 0.8f, 1 },
 			balcony = new float[] {0.2f, 0.2f, 0.2f, 1},
 			moudling = new float[] {0.7f, 0.7f, 0.7f, 1},
-			error = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+			error = new float[] { 0.5f, 0.5f, 0.5f, 1.0f },
+			gray = new float[] { 0.1f, 0.1f, 0.1f, 1f } ;
 
 	public final MatMeshBuilder 
 		WOOD  =  get( "wood", wood ),
 		GLASS =  get( "glass", glass ),
 		ERROR =  get( "error", error),
 		MOULDING = get( "brick", moudling ),
-		BALCONY =  get( "balcony", balcony);
-
-	
-	
-
-
+		BALCONY =  get( "balcony", balcony),
+		GRAY = get( "chimney_black", gray );
 }

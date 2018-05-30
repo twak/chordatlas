@@ -9,6 +9,7 @@ import java.util.Random;
 
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
@@ -178,16 +179,16 @@ public class CGAMini extends FeatureGenerator {
 
 		DRectangle all = mf.getAsRect();
 		
-		if  ( mf.postState != null ) {
+		if  ( !TweedSettings.settings.createDormers && mf.postState != null ) {
 			
 			all = new DRectangle ( all );
 			
-			OptionalDouble od = mf.postState.skelFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
+			OptionalDouble od = mf.postState.wallFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
 			
 			if (od.isPresent())
 				all.height = od.getAsDouble();
 			
-			double[] bounds = mf.postState.skelFaces.stream()
+			double[] bounds = mf.postState.wallFaces.stream()
 					.flatMap( e -> e.stream() )
 					.collect( new InaxPoint2dCollector() );
 			

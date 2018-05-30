@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
@@ -45,14 +46,37 @@ public class MiniRoof implements HasApp {
 		for (Loop<Point2d> face : getAllFaces() ) {
 			if (Loopz.inside( worldXY, face )) {
 				
-				FCircle circ = new FCircle (worldXY, radius, f );
+				FCircle circ = new FCircle (worldXY, Math.min (0.5, radius * 0.6 ), f );
+
 				
+				// 1. try moving the feature away from the edge
+				for (Loopable<Point2d> pt : face.loopableIterator()) {
+					
+					Line l = new Line (pt.get(), pt.getNext().get()) ;
+					
+					double dist = l.distance( circ.loc, true );
+					
+					if (dist < circ.radius) {
+						Vector2d perp = new Vector2d(l.dir());
+						perp.set (-perp.y, perp.x);
+						perp.scale (dist / perp.length());
+						
+						circ.loc.add( perp );
+					}
+				}
+
+				
+				// 2. shrink the feature
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
 					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
 				}
 				
 				circ.radius -= 0.01;
+
+				for (FCircle c : greebles.valueList()) 
+					if (c.loc.distance( circ.loc ) < circ.radius + c.radius)
+						return;
 				
 				if (circ.radius < 0.1)
 					return;

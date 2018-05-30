@@ -84,6 +84,9 @@ public class RoofGreebleApp extends App implements HasApp {
 
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 						MiniRoof mr = (MiniRoof)e.getKey();
+						
+						Pix2Pix.importTexture( e.getValue(), -1, null, null, null );
+						
 						createGreebles(mr, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
 					}
 
