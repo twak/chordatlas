@@ -13,9 +13,11 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
 import org.twak.utils.Imagez;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
@@ -35,6 +37,8 @@ public class PanesLabelApp extends App {
 	public boolean regularize = true;
 	public List<DRectangle> panes = null;
 	public double frameWidth = 0.07 /*cm */;
+
+	public Loop<Point2d> coveringRoof;
 	
 	public PanesLabelApp(HasApp ha) {
 		super(ha );
@@ -217,7 +221,7 @@ public class PanesLabelApp extends App {
 			frameY[frameY.length -1 -i] = frameY[i] = true;
 		}
 		
-		int fLen = 3;
+		int fLen = 5;
 		for (boolean[] aa : new boolean[][] {frameX, frameY}) // denoise...
 			for (int i = 0; i < aa.length - fLen; i++) 
 				if (!aa[i] && ! aa[i + fLen])

@@ -3,6 +3,7 @@ package org.twak.viewTrace.franken;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -19,6 +20,7 @@ import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
+import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Imagez;
@@ -28,9 +30,13 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Show;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
+import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 
@@ -191,8 +197,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			
 			if ( true ) { // pad edges
 				
-				
-				
 				Color c = new Color( bigCoarse.getRGB( bigCoarse.getWidth() / 2, bigCoarse.getHeight() / 2 ) );
 
 				g.setColor( c );
@@ -200,6 +204,18 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 
 				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
 					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );
+				}
+				
+				if (false)
+				for (HalfEdge e : mr.app.superFace) { // dormers
+					MiniFacade mf = ((SuperEdge)e).toEdit; 
+					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) 
+						if (f.app.coveringRoof != null) {
+							
+							for (Loopable <Point2d> pt : f.app.coveringRoof.loopableIterator() ) {
+								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
+							}
+						}
 				}
 			}
 			

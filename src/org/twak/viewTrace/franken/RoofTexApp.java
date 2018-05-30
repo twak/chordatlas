@@ -16,17 +16,24 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
+import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
+import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+
 
 public class RoofTexApp extends App {
 
@@ -222,9 +229,35 @@ public class RoofTexApp extends App {
 				g.setColor( greeble.f.colour );
 				g.fill(p);
 				
-				
-				
 			}
+		
+		
+		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
+		for (HalfEdge e : mr.app.superFace) {
+			MiniFacade mf = ((SuperEdge)e).toEdit; 
+			for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) 
+				if (f.app.coveringRoof != null) {
+
+
+					int count = 0;
+					for (Loopable<Point2d> ll : f.app.coveringRoof.loopableIterator()) {
+						
+						if (count ++ == 3)
+							continue;
+						
+						Point2d a = drawTo.transform( bounds.normalize( ll.get() ) );
+						Point2d b = drawTo.transform( bounds.normalize( ll.getNext().get() ) );
+						
+						g.drawLine( (int)a.x, (int)a.y, (int)b.x, (int)b.y );
+					}
+					
+//					Polygon dormer = Loopz.toPolygon (f.app.coveringRoof.singleton(), bounds, drawTo ).get(0);
+//					g.setColor( Color.red );
+//					g.fill( dormer );
+//					g.setColor( Color.magenta );
+//					g.draw( dormer );
+				}
+		}
 		
 		return bounds;
 	}

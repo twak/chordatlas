@@ -75,7 +75,7 @@ public class GreebleSkel {
 //	boolean isTextured = false;
 //	DRectangle roofBounds;
 	
-	private HasApp roofApp;
+	private MiniRoof miniroof;
 	
 	public static float[] 
 			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
@@ -88,10 +88,10 @@ public class GreebleSkel {
 		this.sf = sf;
 	}
 
-	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup, HasApp roof ) {
+	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup, MiniRoof roof ) {
 		
 		this.onClick = onClick;
-		this.roofApp = roof;
+		this.miniroof = roof;
 		createMesh( output, occluderLookup );
 		return node;
 	}
@@ -110,7 +110,7 @@ public class GreebleSkel {
 		
 //		roofBounds = new DRectangle.Enveloper();
 		
-		roofColor = Colourz.toF4( HasApp.get( roofApp ).color );
+		roofColor = Colourz.toF4( HasApp.get( miniroof ).color );
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
 		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
@@ -174,7 +174,8 @@ public class GreebleSkel {
 				mf.featureGen.update();
 		}
 		
-		greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
+		if (tweed != null) // just calculating dormer locations
+			greebleGrid = new GreebleGrid(tweed, new MMeshBuilderCache());
 		
 		// generate geometry for each face
 		for (List<Face> chain : chains) {
@@ -218,6 +219,7 @@ public class GreebleSkel {
 			Set<QuadF> allFeatures = new LinkedHashSet<>();
 			allFeatures.addAll( processedFeatures );
 			
+			if (tweed != null)
 			for ( Face f : chain ) 
 				face( f, mf2, processedFeatures, megafacade );
 
@@ -233,7 +235,8 @@ public class GreebleSkel {
 					QuadF w = quit.next();
 					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
 						
-						greebleGrid.createDormerWindow( w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
+						if (greebleGrid != null)
+						greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
 								(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 						
 						quit.remove();
@@ -241,8 +244,9 @@ public class GreebleSkel {
 				}
 			}
 			
-			edges( output, roofColor );
 			
+			if (greebleGrid != null) {
+				edges( output, roofColor );
 			// output per-material objects
 			greebleGrid.attachAll(node, chain, output, new ClickMe() {
 				@Override
@@ -263,6 +267,7 @@ public class GreebleSkel {
 					}
 				}
 			});
+			}
 		}
 	}
 
@@ -376,23 +381,23 @@ public class GreebleSkel {
 				
 				RoofTag rt = (RoofTag)t;
 				
-				RoofTexApp ra = (RoofTexApp) HasApp.get ( roofApp );
+				RoofTexApp ra = (RoofTexApp) HasApp.get ( miniroof );
 				
 				switch ( ra.appMode ) {
 
 				case Off:
-					faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
+					faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					break;
 				case Bitmap:
-					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, roofApp );
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, miniroof );
 					break;
 				case Net:
 					if ( ra.texture == null )
-						faceColor = greebleGrid.mbs.get( TILE, ra.color, roofApp );
+						faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					
 					else {
 						String texture = ra.getTexture (rt);
-						faceColor = greebleGrid.mbs.getTexture( "roof_" + texture, texture, roofApp );
+						faceColor = greebleGrid.mbs.getTexture( "roof_" + texture, texture, miniroof );
 					}
 					break;
 				}
@@ -680,7 +685,7 @@ public class GreebleSkel {
 		
 		LoopL<Point2d> roofUVs;
 		
-		RoofTexApp ra = (RoofTexApp) HasApp.get( roofApp );
+		RoofTexApp ra = (RoofTexApp) HasApp.get( miniroof );
 		MiniRoof mr = (MiniRoof) ra.hasA;
 		
 		switch ( ra.appMode ) {
@@ -731,15 +736,15 @@ public class GreebleSkel {
 
 		MatMeshBuilder mmb;
 		
-		App a = HasApp.get( roofApp );
+		App a = HasApp.get( miniroof );
 		
 		switch ( a.appMode ) {
 			case Off: 
 			default:
-				mmb = greebleGrid.mbs.get( TILE, roofColor, roofApp );
+				mmb = greebleGrid.mbs.get( TILE, roofColor, miniroof );
 				break;
 			case Bitmap:
-				mmb = greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG, roofApp );
+				mmb = greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG, miniroof );
 				break;
 			case Net:
 //				mmb = greebleGrid.mbs.getTexture( TILE_TEXTURED+"_" + a.texture, a.texture, roofApp );
@@ -748,7 +753,7 @@ public class GreebleSkel {
 		}
 		
 		GreebleEdge.roowWallGreeble( output, 
-				greebleGrid.mbs.get( TILE, roofColor, roofApp ),
+				greebleGrid.mbs.get( TILE, roofColor, miniroof ),
 				mmb, 
 				greebleGrid.mbs.get( BRICK, new float[] { 1, 0, 0, 1 } ), TILE_UV_SCALE );
 

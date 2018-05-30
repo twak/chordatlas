@@ -22,10 +22,14 @@ import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
 import org.twak.tweed.gen.skel.FCircle;
+import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Filez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
+import org.twak.utils.collections.Loop;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm3D;
@@ -230,6 +234,7 @@ public class GreebleGrid {
 
 	
 	protected void createDormerWindow( 
+			MiniRoof roof,
 			QuadF l,
 			MeshBuilder window, 
 			MeshBuilder glass, 
@@ -276,8 +281,6 @@ public class GreebleGrid {
 		
 		double depth = lout.closestPointOn( deepest, false ).distance( lout.closestPointOn( new Point3d( loc ), false ) ); 
 
-//		createInnie( rect, allUV.normalize( rect ), to3d, mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ), 0.2f, 0, true );
-		
 		Matrix4d to3d;
 		
 		double outset = 0.1;
@@ -305,9 +308,32 @@ public class GreebleGrid {
 		}
 		
 		FRect w = new FRect ( l.original );
+		
+		// find roof locations / uv coordinates for roof
+		{
+			w.app.coveringRoof = new Loop<Point2d>();
+
+			Point2d p = new Point2d(loc.x, loc.z), 
+					d = new Point2d (deepest.x, deepest.z);
+			
+			p.scaleAdd(outset, new Vector2d ( out.x, out.z ) , p);
+			
+			w.app.coveringRoof.append( new Point2d( p ) );
+			w.app.coveringRoof.append( new Point2d( d ) );
+			
+			d.scaleAdd(w.width, new Vector2d ( along.x, along.z ), d);
+			w.app.coveringRoof.append( new Point2d( d ) );
+			
+			p.scaleAdd(w.width, new Vector2d ( along.x, along.z ), p);
+			w.app.coveringRoof.append( new Point2d( p ) );
+			
+		}
+		
+		
 		w.x = 0;
 		w.y = 0;
 		
+		if (tweed != null)
 		if (w.app.texture == null)
 			WindowGen.createWindow( window, glass, new Window( Jme3z.to ( loc ), Jme3z.to(along), Jme3z.to(up), 
 					l.original.width, l.original.height, depth, panelWidth, panelHeight ) );
@@ -317,9 +343,34 @@ public class GreebleGrid {
 		} else {
 			createInnie( w, null, to3d, mbs.GRAY, -depth + outset - 0.5, -depth + outset - 0.5, 
 					new boolean[] {true, true /*right*/, false, true /*left*/, false, false } ); // walls around window
+
 			
-			createInnie( w, null, to3d, window, -depth + outset - 0.5, -depth + outset - 0.5, 
-					new boolean[] {false, false, true, false, false, false } ); // walls around window
+			if (w.app.coveringRoof != null) {
+				
+				double height = loc.y + w.height;
+				
+				LoopL<Point3d> rp = w.app.coveringRoof.singleton().new Map<Point3d>() {
+
+					@Override
+					public Point3d map( Loopable<Point2d> input ) {
+						return Pointz.to3( input.get(), height );
+					}
+				}.run();
+				
+				LoopL<Point2d> uvs = w.app.coveringRoof.singleton().new Map<Point2d>() {
+					@Override
+					public Point2d map( Loopable<Point2d> input ) {
+						return roof.app.textureRect.normalize( input.get() );
+					}
+				}.run();
+				
+			mbs.getTexture( "roof_" + roof.app.texture, roof.app.texture, roof ).add( rp, uvs, true );
+			
+			}
+			else {
+				createInnie( w, null, to3d, window, -depth + outset - 0.5, -depth + outset - 0.5, 
+					new boolean[] {false, false, true, false, false, false } ); // roof over window
+			}
 			
 			createWindowFromPanes (w.app.panes, w, to3d, 
 					mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ), 

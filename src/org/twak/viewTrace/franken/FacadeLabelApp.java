@@ -6,8 +6,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
@@ -27,6 +30,7 @@ import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
+import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -237,5 +241,13 @@ public class FacadeLabelApp extends App {
 	
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net};
+	}
+	
+	public void finishedBatches( List<App> list ) {
+
+		// compute dormer-roof locations
+		list.stream().map( x -> ((FacadeLabelApp)x).superFace ).collect(Collectors.toSet() ).stream().
+			forEach( x -> new GreebleSkel( null, x ).
+			showSkeleton( x.skel.output, null, new HashMap<>(), x.mr ) );
 	}
 }

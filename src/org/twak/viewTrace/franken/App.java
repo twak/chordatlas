@@ -103,6 +103,8 @@ public abstract class App /*earance*/ implements Cloneable {
 		if (first >= todo.get(stage).size()) {
 			System.out.println( "finishing "+ todo.get( stage ).get( 0 ).getClass().getSimpleName() );
 			
+			todo.get(stage).get(0).finishedBatches(todo.get(stage));
+			
 			globalUpdate.run();
 			
 			for (App a : new ArrayList<> ( todo.get( stage )) )
@@ -137,6 +139,10 @@ public abstract class App /*earance*/ implements Cloneable {
 				App.computeWithChildren( 0, stage+1, todo, globalUpdate );
 		}
 		
+	}
+
+	public void finishedBatches( List<App> list ) {
+		// hook to compute after all batches have run
 	}
 
 	public void markDirty() {
