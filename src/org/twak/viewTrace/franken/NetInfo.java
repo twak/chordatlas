@@ -26,9 +26,9 @@ public class NetInfo {
 		index.put ( d( BlockApp.class        ), new NetInfo ( "block"          , 0, 0   ) );
 		index.put ( d( BuildingApp.class     ), new NetInfo ( "building"       , 0, 0   ) );
 		
-		index.put ( d( FacadeGreebleApp.class), new NetInfo ( "facade greebles", 0, 256 ) );
 		index.put ( d( FacadeLabelApp.class  ), new NetInfo ( "facade labels"  , 8, 256 ) );
 		index.put ( d( FacadeTexApp.class    ), new NetInfo ( "facade textures", 8, 256 ) );
+		index.put ( d( FacadeGreebleApp.class), new NetInfo ( "facade greebles", 0, 256 ) );
 		
 		index.put ( d( RoofGreebleApp.class  ), new NetInfo ( "roof greebles"  , 8, 512 ) );
 		index.put ( d( RoofTexApp.class      ), new NetInfo ( "roof"           , 8, 512 ) );
