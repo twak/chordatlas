@@ -208,7 +208,7 @@ public class FacadeTexApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null );
+						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, new BufferedImage[3] );
 
 						if ( dest != null ) {
 							meta.mf.app.coarse = meta.mf.app.texture = dest;

@@ -3,15 +3,22 @@ package org.twak.viewTrace.franken;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
 import org.twak.tweed.Tweed;
+import org.twak.utils.Filez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App.TextureUVs;
 
 public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 
@@ -40,9 +47,47 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 	}
 
 	@Override
-	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, String dest ) {
+	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, BufferedImage[] maps ) {
+
+		NetInfo ni = NetInfo.get( this );
+
+		String fileName = "scratch/" + UUID.randomUUID() + ".png";
+
+		try {
+			for ( FRect f : mf.featureGen.get( Feature.WINDOW ) ) {
+
+				DRectangle d = new DRectangle( 0, 0, maps[ 0 ].getWidth(), maps[ 0 ].getHeight() ).
+						transform( Pix2Pix.findBounds( mf, false ).normalize( f ) );
+
+				d.y = ni.resolution - d.y - d.height;
+
+				File wf = new File( Tweed.DATA + "/" + f.app.texture );
+				BufferedImage[] windowMaps = 
+						new BufferedImage[] {
+								ImageIO.read( wf ), 
+								ImageIO.read( Filez.extTo( wf, "_spec.png" ) ), 
+								ImageIO.read( Filez.extTo( wf, "_norm.png" ) ) };
+
+				for ( int i = 0; i < 3; i++ ) {
+
+					Graphics2D tpg = maps[ i ].createGraphics();
+					tpg.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
+					tpg.drawImage( windowMaps[ i ], (int) d.x, (int) d.y, (int) d.width, (int) d.height, null );
+					tpg.dispose();
+				}
+			}
+
+			ImageIO.write( maps[ 0 ], "png", new File( Tweed.DATA + "/" + fileName ) );
+			ImageIO.write( maps[ 1 ], "png", new File( Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
+			ImageIO.write( maps[ 2 ], "png", new File( Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) ) );
+
+		} catch ( IOException e1 ) {
+			e1.printStackTrace();
+		}
+		
+		
 		mf.app.textureUVs = TextureUVs.SQUARE;
-		mf.app.texture = dest + ".png";
+		mf.app.texture = fileName;
 	}
 	
 	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, MiniFacade mf ) throws IOException {

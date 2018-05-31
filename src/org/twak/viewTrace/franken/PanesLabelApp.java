@@ -160,10 +160,12 @@ public class PanesLabelApp extends App {
 						else
 							meta.app.panes = null;
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null );
+						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null, new BufferedImage[3] );
 						
-						if ( dest != null )   
-							 meta.r.app.texture = ((PanesLabelApp ) meta.r.app).label = dest;
+						if ( dest != null ) {
+							meta.r.app.textureUVs = TextureUVs.ZERO_ONE;
+							meta.r.app.texture = ((PanesLabelApp ) meta.r.app).label = dest;
+						}
 					}
 					
 				} catch (Throwable th) {

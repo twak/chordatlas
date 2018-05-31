@@ -37,6 +37,7 @@ import org.twak.viewTrace.facades.GreebleSkel.QuadF;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
+import org.twak.viewTrace.franken.App.TextureUVs;
 
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -372,7 +373,7 @@ public class GreebleGrid {
 					new boolean[] {false, false, true, false, false, false } ); // roof over window
 			}
 			
-			createWindowFromPanes (w.app.panes, w, to3d, 
+			createWindowFromPanes (w.app.panes, w,w, to3d, 
 					mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ), 
 					0.1, 0 );
 		}
@@ -497,7 +498,7 @@ public class GreebleGrid {
 			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, hasBack  );
 	}
 	
-	private void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, Matrix4d to3d, 
+	private void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
 			MatMeshBuilder window, double paneDepth, double frameDepth ) {
 
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
@@ -509,7 +510,7 @@ public class GreebleGrid {
 				@Override
 				public void instance( DRectangle rect ) {
 					createInnie( rect, 
-							bounds.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT );
+							uvs.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT );
 				}
 			});
 		}
@@ -518,7 +519,7 @@ public class GreebleGrid {
 			
 			@Override
 			public void instance( DRectangle rect ) {
-				window.add( rect, bounds.normalize( rect), to3d, -frameDepth );
+				window.add( rect, uvs.normalize( rect), to3d, -frameDepth );
 			}
 		} );
 		
@@ -734,16 +735,25 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (w.app.texture == null)
+							if (w.app.texture == null) // no texture info
 								createInnie( rect, allUV.normalize( rect ), to3d, mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
-							else if (w.app.panes == null) {
+							else if (w.app.panes == null) { // just coarse facade
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
-							} else {
-								DRectangle uvs = allUV.normalize( rect );
-								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); // walls around window
-								createWindowFromPanes (w.app.panes, rect, to3d, 
+							
+							} else if (w.app.textureUVs == TextureUVs.ZERO_ONE){ // labels
+								
+								createInnie( rect, rect, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+								createWindowFromPanes (w.app.panes, rect, rect, to3d,
 										mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ),
+										0.3, 0.2 );
+							}
+							else { // textures
+								
+								DRectangle uvs = allUV.normalize( rect );
+								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );
+								createWindowFromPanes (w.app.panes, rect, allUV, to3d,
+										mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ),
 										0.3, 0.2 );
 							}
 						}
