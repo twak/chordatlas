@@ -8,16 +8,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
 import org.twak.tweed.Tweed;
+import org.twak.utils.Cache;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
+import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -67,6 +71,20 @@ public class PanesTexApp extends App implements HasApp {
 		
 		BufferedImage eBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D eg =  eBi.createGraphics();
+		
+		Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
+
+			@Override
+			public BufferedImage[] create( MiniFacade mf ) {
+				
+				return new BufferedImage[] {
+						Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.texture ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.texture, "_spec.png" ) ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.texture, "_norm.png" ) ) ) 
+				};
+			}
+			
+		};
 		
 		for ( App a : batch ) {
 
@@ -119,13 +137,47 @@ public class PanesTexApp extends App implements HasApp {
 
 						Meta meta = (Meta) e.getKey();
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.imBounds, null );
+						BufferedImage[] maps = new BufferedImage[3];
+						
+						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, 
+								meta.imBounds, null, maps );
 
 						if ( dest != null ) {
+							
+							FRect frect = ((FRect) meta.pta.parent.hasA );
+							MiniFacade mf = frect.mf;
+							
 							meta.pta.texture = dest;
 							meta.pta.parent.texture = dest;
+							meta.pta.textureUVs = TextureUVs.Rectangle;
+							
+							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
+							
+							d.y = ni.resolution - d.y - d.height;
+							
+							BufferedImage[] toPatch = facadesImages.get(mf);
+							
+							for (int i = 0; i < 3; i++ ) {
+								Graphics2D tpg = toPatch[i].createGraphics();
+								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
+								tpg.dispose();
+							}
 						}
+							
 					}
+					
+					for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
+						String fileName = "scratch/" + UUID.randomUUID() +".png";
+						
+						BufferedImage[] imgs = updated.getValue();
+						
+						ImageIO.write( imgs[0], "png", new File(Tweed.DATA + "/" +fileName ) );
+						ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
+						ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
+						
+						updated.getKey().app.texture = fileName;
+					}
+					
 
 				} catch ( Throwable th ) {
 					th.printStackTrace();

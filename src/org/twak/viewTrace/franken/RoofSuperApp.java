@@ -8,9 +8,11 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
@@ -23,6 +25,7 @@ import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
+import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
@@ -72,14 +75,25 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 	}
 
 	@Override
-	public void setTexture( MiniRoof mf,FacState<MiniRoof> state, String dest ) {
+	public void setTexture( MiniRoof mf,FacState<MiniRoof> state, BufferedImage[] maps ) {
+		
+		String fileName = "scratch/" + UUID.randomUUID() +".png";
+
+		try {
+			ImageIO.write( maps[0], "png", new File(Tweed.DATA + "/" +fileName ) );
+			ImageIO.write( maps[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
+			ImageIO.write( maps[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
+			
+			
+		} catch ( IOException e1 ) {
+			e1.printStackTrace();
+		}
 		
 		if (textures == null)
 			textures = new HashMap<>();
 		
 		mf.app.textureUVs = TextureUVs.ZERO_ONE;
-		
-		textures.put (state.tag, dest+".png");
+		textures.put (state.tag, fileName );
 	}
 	
 	private static class TwoRects {

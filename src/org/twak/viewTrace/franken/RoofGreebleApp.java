@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class RoofGreebleApp extends App implements HasApp {
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 						MiniRoof mr = (MiniRoof)e.getKey();
 						
-						Pix2Pix.importTexture( e.getValue(), -1, null, null, null );
+						Pix2Pix.importTexture( e.getValue(), -1, null, null, null, new BufferedImage[3] );
 						
 						createGreebles(mr, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
 					}

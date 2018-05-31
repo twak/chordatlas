@@ -197,7 +197,8 @@ public class Pix2Pix {
 		return null;
 	}
 
-	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, DRectangle crop, RescaleOp rgbRescale ) throws IOException {
+	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, 
+			DRectangle crop, RescaleOp rgbRescale, BufferedImage[] output ) throws IOException {
 		
 //		String name = f.get
 
@@ -225,6 +226,7 @@ public class Pix2Pix {
 				labels = scaleToFill ( labels, crop );
 			}
 			
+			
 			NormSpecGen ns = new NormSpecGen( rgb, labels, specLookup );
 			
 			if (specular >= 0) {
@@ -233,6 +235,10 @@ public class Pix2Pix {
 				g.fillRect( 0, 0, ns.spec.getWidth(), ns.spec.getHeight() );
 				g.dispose();
 			}
+			
+			output[0] = rgb;
+			output[1] = ns.spec;
+			output[2] = ns.norm;
 
 			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );

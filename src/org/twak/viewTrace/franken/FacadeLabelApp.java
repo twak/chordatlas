@@ -169,7 +169,7 @@ public class FacadeLabelApp extends App {
 						
 						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 						
-						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null );
+						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
 						if ( dest != null ) 
 							meta.mf.appLabel.texture = dest; //= meta.mf.app.texture  doesn't work because of the dormer windows
