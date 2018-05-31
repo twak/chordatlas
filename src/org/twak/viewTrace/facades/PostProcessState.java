@@ -27,7 +27,7 @@ public class PostProcessState {
 	
 	public DRectangle innerFacadeRect;
 	public DRectangle outerWallRect;
-	public List<LoopL<Point2d>> occluders = new ArrayList();
+	public LoopL<Point2d> occluders = new LoopL();
 	
 	public Set<FRect> generatedWindows = new LinkedHashSet<>();
 }

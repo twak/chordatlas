@@ -39,7 +39,9 @@ public class Pix2Pix {
 
 	String netName;
 	int resolution;
-	
+	Map<Object, String> inputs = new HashMap<>();
+
+
 	public Pix2Pix (NetInfo ni) {
 		this.netName = ni.name;//netName;
 		this.resolution = ni.resolution;
@@ -49,11 +51,16 @@ public class Pix2Pix {
 		public void finished ( Map<Object, File>  results);
 	}
 	
+	public interface EResult {
+		public void finished ( Map<Object, double[]>  results);
+	}
+	
 	public static class Job implements JobResult {
 		
 		JobResult finished;
 		public String name;
 		boolean encode= false;
+		public EResult eFinished;
 		
 		public Job () {
 			this.name = System.nanoTime() +"--"+ Math.random();
@@ -67,6 +74,12 @@ public class Pix2Pix {
 		public Job (JobResult finished, boolean encode) {
 			this (finished);
 			this.encode = encode;
+		}
+		
+		public Job (EResult finished) {
+			this.name = System.nanoTime() +"--"+ Math.random();
+			this.eFinished = finished;
+			this.encode = true;
 		}
 
 		@Override
@@ -82,8 +95,6 @@ public class Pix2Pix {
 	}
 	
 	public void submitSafe( Job job ) {
-		
-
 		
 		String network = netName;
 		
@@ -148,17 +159,33 @@ public class Pix2Pix {
 	private void finished( Job job, File outDir ) {
 		System.out.println( "processing "+job.name );
 		
-		Map<Object, File> done =new HashMap<>();
 		
 		if (job.encode) {
-			for (File f : outDir.listFiles()) 
-				done.put( null, f );
+			
+			Map<Object, double[]> done =new HashMap<>();
+			
+			for (File f : outDir.listFiles())  {
+				
+				for (Map.Entry<Object, String> e : inputs.entrySet())
+					if (f.getName().startsWith( e.getValue() )) {
+						String[] ls = f.getName().replaceAll( e.getValue()+"@", "" ).split("_");
+						
+						double[] out = new double[ls.length];
+						for (int i = 0; i< ls.length; i++)
+							out[i] = Double.parseDouble( ls[i] );
+						done.put( e.getKey(), out );
+					}
+			}
+			
+			job.eFinished.finished( done );
 		}
-		else
-		for (Map.Entry<Object, String> e : inputs.entrySet())
-			done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
+		else {
+			Map<Object, File> done =new HashMap<>();
+			for (Map.Entry<Object, String> e : inputs.entrySet())
+				done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
 		
-		job.finished.finished( done );
+			job.finished.finished( done );
+		}
 		
 		try {
 			FileUtils.deleteDirectory( outDir );
@@ -179,24 +206,23 @@ public class Pix2Pix {
 			File dir = new File( TweedSettings.settings.bikeGanRoot + "input/" + netName + "_e/val/" );
 			dir.mkdirs();
 
-			addEInput( bi, new Object(), null );
+			addEInput( bi, new Object() );
 			
-//			ImageIO.write( bi, "png", new File( dir, System.nanoTime() + ".png" ) );
-
-			submit( new Job( new JobResult() {
-
+			submit( new Job( new EResult() {
+				
 				@Override
-				public void finished( Map<Object, File> results ) {
-					for ( File zf : results.values() ) {
-						String[] ss = zf.getName().split( "_" );
-						for ( int i = 0; i < ss.length; i++ )
-							values[ i ] = Double.parseDouble( ss[ i ] );
-						update.run();
-						return;
-						
+				public void finished( Map<Object, double[]> results ) {
+					
+					o:
+					for ( Map.Entry<Object, double[]> e : results.entrySet() ) 
+						for ( int i = 0; i < e.getValue().length; i++ ) {
+							values[ i ] = e.getValue()[i];
+							break o;
 					}
+				
+					update.run();
 				}
-			}, true ) );
+			} ) );
 
 			return orig;
 			
@@ -302,17 +328,15 @@ public class Pix2Pix {
 					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 
 			g.setColor( CMPLabel.Background.rgb );
-			for ( LoopL<Point2d> ll : mf.postState.occluders )
-				for ( Loop<Point2d> l : ll )
-					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
+			for ( Loop<Point2d> l : mf.postState.occluders ) 
+				g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 		}
 	}
 
-
-	Map<Object, String> inputs = new HashMap<>();
 	static final String [] inputMapNames = new String[] {"", "_empty", "_mlabels" }; 
 	
-	public void addInput( BufferedImage input, BufferedImage empty, BufferedImage mLabels, Object key, double[] styleZ, Double scale ) {
+	public void addInput( BufferedImage input, BufferedImage empty,
+			BufferedImage mLabels, Object key, double[] styleZ, Double scale ) {
 		
 		BufferedImage[] bis = new BufferedImage[] {input, empty, mLabels};
 		String name = UUID.randomUUID() +  ( scale == null? "" : ("@" + scale ));
@@ -341,7 +365,7 @@ public class Pix2Pix {
 		}
 	}
 	
-	public void addEInput ( BufferedImage bi, Object key, double[] styleZ ) {
+	public void addEInput ( BufferedImage bi, Object key ) {
 		try {
 			
 			String name = UUID.randomUUID() +"";

@@ -88,7 +88,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 	public transient SkelFootprint skelFootprint;
 	protected List<Line> footprint;
-	transient Map<Object, Face> lastOccluders = new HashMap<>();
+	transient Map<SuperEdge, Face> lastOccluders = new HashMap<>();
 
 	public BlockApp app = new BlockApp( this );
 
@@ -147,6 +147,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	}
 
 	private void setRender( HalfMesh2 mesh ) {
+		
+		SkelFootprint.findOcclusions ( mesh );
+		
 		this.block = mesh;
 		
 		for (HalfFace f : block)
@@ -161,25 +164,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		Node pNode = new Node();
 
-
-		
-//		Map<Object, Face> occluderIDs = new HashMap<>();
-//		
-//		// find some sensible defaults to propogate
-//		for ( Face f : toRender output.faces.values() )  {
-//			
-//			WallTag wt = ((WallTag)t);
-//			if (t != null ) {
-//				
-//				if (f.parent == null /*is bottom */)
-//					for (Object o : wt.occlusions)
-//						occluderIDs.put( wt.occlusionID, f );
-//
-//		
-		
 		if ( block != null ) {
 
-			 Map<Object, Face> occluderLookup = lastOccluders = new HashMap<>();
+			lastOccluders = new HashMap<>();
 			
 			for ( int i = 0; i < block.faces.size(); i++ )
 				try {
@@ -194,9 +181,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					if (previouslyRendered.skel != null) 
 						for (Face ff :previouslyRendered.skel.output.faces.values()) {
 							WallTag wt = (WallTag) GreebleHelper.getTag( ff.profile, WallTag.class );
-							if (wt != null && ff.parent == null) {
-								occluderLookup.put(wt.occlusionID, ff);
-							}
+							if (wt != null && ff.parent == null) 
+								lastOccluders.put(wt.occlusionID, ff);
 						}
 					
 				} catch ( Throwable th ) {
@@ -210,7 +196,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					Rendered previouslyRendered = geometry.get( sf );
 					
 					if (previouslyRendered.skel != null) 
-							setSkel ( previouslyRendered.skel, sf, occluderLookup);
+							setSkel ( previouslyRendered.skel, sf );
 
 				} catch ( Throwable th ) {
 					th.printStackTrace();
@@ -390,7 +376,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		this.geometry = new Cach<> (sf -> new Rendered() );
 	}
 	
-	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_, Map<Object, Face> occluderLookup ) {
+	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
 		sft_.app.isDirty = true; // todo: dirty hack! can remove sft from this interface
 		
@@ -424,8 +410,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				};
 
 				GreebleSkel greeble = new GreebleSkel( tweed, sf );
+				greeble.occluderLookup = lastOccluders;
 
-				house = greeble.showSkeleton( sf.skel.output, onclick, occluderLookup, sf.mr );
+				house = greeble.showSkeleton( sf.skel.output, onclick, sf.mr );
 
 				gNode.attachChild( house );
 				geometry.get( sf ).set( house, sf.skel.output, sf.skel );
@@ -496,7 +483,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 								
 								sf.mr.setOutline( sf.skel.output );
 
-								setSkel( (PlanSkeleton) threadKey, sf, lastOccluders );
+								setSkel( (PlanSkeleton) threadKey, sf );
 
 							}
 
@@ -564,7 +551,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					tweed.enqueue( new Runnable() {
 						@Override
 						public void run() {
-							setSkel( skel, sf, lastOccluders );					
+							setSkel( skel, sf );					
 						}
 					} );
 				}
@@ -616,7 +603,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null );
 			}
 			ensureMF( sf, se );
-		} 
+		}
 		
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
 			roof = new RoofTag( sf.roofColor );

@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
@@ -124,8 +126,6 @@ public class FacadeLabelApp extends App {
 
 			MiniFacade mf = (MiniFacade) a.hasA;
 			
-			mf.postState.generatedWindows.clear();
-			
 			DRectangle mini = Pix2Pix.findBounds( mf, mf.app.dormer );
 
 			g.setColor( Color.black );
@@ -196,6 +196,9 @@ public class FacadeLabelApp extends App {
 				root = om.readTree( FileUtils.readFileToString( file ) );
 				JsonNode node = root.get( "window" );
 				
+				m.mf.postState.generatedWindows.clear();
+				
+				i:
 				for (int i = 0; i < node.size(); i++) {
 					
 					JsonNode rect = node.get( i );
@@ -204,8 +207,15 @@ public class FacadeLabelApp extends App {
 							rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(),
 							rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
 							
-					FRect window = m.mf.featureGen.add( Feature.WINDOW, m.mfBounds.transform ( m.mask.normalize( f ) ) );
 					
+					f = m.mfBounds.transform ( m.mask.normalize( f ) );
+					
+					if (m.mf.postState != null)
+					for (Point2d p : f.points()) 
+						if ( Loopz.inside( p, m.mf.postState.occluders) )
+							continue i;
+					
+					FRect window = m.mf.featureGen.add( Feature.WINDOW, f );
 					
 					if (m.mf.app.styleSource instanceof JointStyle) {
 						
@@ -231,6 +241,7 @@ public class FacadeLabelApp extends App {
 					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 1 ).featureGen;
 				}
 				
+
 				m.mf.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
 				
 			} catch ( IOException e ) {
@@ -282,6 +293,6 @@ public class FacadeLabelApp extends App {
 		// compute dormer-roof locations
 		list.stream().map( x -> ((FacadeLabelApp)x).superFace ).collect(Collectors.toSet() ).stream().
 			forEach( x -> new GreebleSkel( null, x ).
-			showSkeleton( x.skel.output, null, new HashMap<>(), x.mr ) );
+			showSkeleton( x.skel.output, null, x.mr ) );
 	}
 }

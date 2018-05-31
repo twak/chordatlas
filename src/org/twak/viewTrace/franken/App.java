@@ -79,7 +79,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	public static void computeWithChildren (int first, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
 		if (stage >= NetInfo.index.size())
+		{
+//			globalUpdate.run();
 			return;
+		}
 		
 		if (todo.get( stage ).isEmpty()) {
 			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
@@ -118,8 +121,7 @@ public abstract class App /*earance*/ implements Cloneable {
 			if (!batch.isEmpty()) {
 				System.out.println( "batch " + first +"/"+ all.size() + " "+  todo.get( stage ).get( 0 ).getClass().getSimpleName() );
 				batch.get( 0 ).computeBatch ( () -> 
-				App.computeWithChildren( first + Batch_Size, stage, todo, globalUpdate ), 
-					batch );
+				App.computeWithChildren( first + Batch_Size, stage, todo, globalUpdate ), batch );
 			}
 			else {
 				globalUpdate.run();

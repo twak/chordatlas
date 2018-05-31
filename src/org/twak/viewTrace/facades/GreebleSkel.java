@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
@@ -83,22 +84,24 @@ public class GreebleSkel {
 	
 	SuperFace sf;
 	
+	public Map<SuperEdge, Face> occluderLookup;
+	
 	public GreebleSkel( Tweed tweed, SuperFace sf ) {
 		this.tweed = tweed;
 		this.sf = sf;
 	}
 
-	public Node showSkeleton( Output output, OnClick onClick, java.util.Map<Object, Face> occluderLookup, MiniRoof roof ) {
+	public Node showSkeleton( Output output, OnClick onClick, MiniRoof roof ) {
 		
 		this.onClick = onClick;
 		this.miniroof = roof;
-		createMesh( output, occluderLookup );
+		createMesh( output );
 		return node;
 	}
 	
 	
 
-	public void createMesh( Output output, java.util.Map<Object, Face> occluderLookup ) {
+	public void createMesh( Output output ) {
 		
 		float[] roofColor = BLANK_ROOF;
 		
@@ -124,18 +127,18 @@ public class GreebleSkel {
 					allMFs.add( wt.miniFacade );
 		}
 		
+		if (tweed != null)
 		for (MiniFacade mf : allMFs) {
-				mf.postState = null;
 				mf.postState = new PostProcessState();
 		}
 		
 //		roofBounds.grow( 2 );
 //		roofBounds.height = roofBounds.width = Math.max( roofBounds.width, roofBounds.height );
 		
-		
 		List<List<Face>> chains = Campz.findChains( output );
 
 		// give each minifacade a chance to update its features based on the skeleton result
+		if (tweed != null)
 		for (List<Face> chain : chains) {
 			
 			Set<WallTag> opt = chain.stream().flatMap( f -> f.profile.stream() )
@@ -162,7 +165,7 @@ public class GreebleSkel {
 					for ( Object o : wt.occlusions ) {
 						Face f = occluderLookup.get( o );
 						if ( f != null ) 
-							mf.postState.occluders.add( projectTo( megafacade, mfl, lf, f ) );
+							mf.postState.occluders.addAll( projectTo( megafacade, mfl, lf, f ) );
 				}
 				
 				mf.width = chain.get( 0 ).edge.length();
@@ -216,16 +219,18 @@ public class GreebleSkel {
 					.forEach ( q -> processedFeatures.add(q) );
 			}
 
-			Set<QuadF> allFeatures = new LinkedHashSet<>();
-			allFeatures.addAll( processedFeatures );
+			if ( tweed != null ) {
+				Set<QuadF> allFeatures = new LinkedHashSet<>();
+				allFeatures.addAll( processedFeatures );
 			
-			if (tweed != null)
-			for ( Face f : chain ) 
-				face( f, mf2, processedFeatures, megafacade );
+				for ( Face f : chain )
+					face( f, mf2, processedFeatures, megafacade );
 
-			allFeatures.removeAll( processedFeatures );
-			for (QuadF q1 : allFeatures)
-				mf2.postState.generatedWindows.add(q1.original);
+				allFeatures.removeAll( processedFeatures );
+				for ( QuadF q1 : allFeatures ) {
+					mf2.postState.generatedWindows.add( q1.original );
+				}
+			}
 			
 			if ( ( wt != null && wt.miniFacade.app.dormer) ||  
 					TweedSettings.settings.createDormers ) {
@@ -657,11 +662,12 @@ public class GreebleSkel {
 				}
 			}
 			
+			
+			
 			if ( wallTag == null || toRecess == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
 			}
-			else
-			if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
+			else if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
 				
 				greebleGrid.buildGrid (
 					floorRect,

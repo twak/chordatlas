@@ -45,7 +45,7 @@ public class FacadeDesigner {
 						@Override
 						public void run() {
 							
-							sg.setSkel( skel, sf, sg.lastOccluders );
+							sg.setSkel( skel, sf );
 							sg.tweed.getRootNode().updateGeometricState();
 							
 							if (se.toEdit.app.appMode == AppMode.Net) // needs prior setSkel to compute visible windows.
@@ -55,7 +55,7 @@ public class FacadeDesigner {
 									sg.tweed.enqueue( new Runnable() {
 										@Override
 										public void run() {
-											sg.setSkel( skel, sf, sg.lastOccluders );
+											sg.setSkel( skel, sf );
 											sg.tweed.getRootNode().updateGeometricState();
 										}
 									} );

@@ -153,12 +153,16 @@ public class JointStyle implements StyleSource {
 		for ( Joint j : joints )
 			findBake( j, Collections.singletonList( root ), bakeWith, new HashMap<>() );
 
-		Random randy = new Random();
+		Random randy = new Random(0xDEADBEEF);
 
-		for ( App building : root.getDown().valueList() ) 
+		for ( App building : root.getDown().valueList() )  {
+			
+			((BuildingApp)building).updateDormers( randy.nextBoolean() );
+			
 			redraw( Collections.singletonList( building ), 
 					new HashSet<>(), building.lastJoint = drawJoint( randy ), 
 					randy, bakeWith );
+		}
 	}
 
 	public void updateJointProb() {

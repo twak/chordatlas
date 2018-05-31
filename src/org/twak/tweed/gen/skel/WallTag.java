@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.twak.siteplan.tags.PlanTag;
+import org.twak.tweed.gen.SuperEdge;
 import org.twak.utils.Line;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -26,8 +27,8 @@ public class WallTag extends PlanTag{
 	public double noWindowsBelow = 0;
 	public MiniFacade miniFacade;
 
-	public Object occlusionID; // markers for which other tags may occlude
-	public Set<Object> occlusions = new HashSet<>();
+	public SuperEdge occlusionID; // markers for which other tags may occlude
+	public Set<SuperEdge> occlusions = new HashSet<>();
 	
 	public WallTag() {
 		super("wall");
@@ -35,7 +36,7 @@ public class WallTag extends PlanTag{
 	
 	
 	
-	public WallTag(Line planLine, Object occlusionID, Set<Object> occlusions, MiniFacade miniFacade) {
+	public WallTag(Line planLine, SuperEdge occlusionID, Set<SuperEdge> occlusions, MiniFacade miniFacade) {
 		super( "wall" );
 		
 		this.occlusions = occlusions;
@@ -97,7 +98,7 @@ public class WallTag extends PlanTag{
 		}
 	}
 
-	public WallTag( Line planline, Object occlusionID, Set<Object> occlusions, MiniFacade miniFacade, boolean isGroundFloor ) {
+	public WallTag( Line planline, SuperEdge occlusionID, Set<SuperEdge> occlusions, MiniFacade miniFacade, boolean isGroundFloor ) {
 		this( planline, occlusionID, occlusions, miniFacade );
 		this.isGroundFloor = isGroundFloor;
 	}

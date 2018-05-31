@@ -67,13 +67,13 @@ public class FacadeGreebleApp extends App implements HasApp {
 	final static Feature[] toGenerate = new Feature[] {
 			
 			Feature.BALCONY,
-//			Feature.CORNICE,
+			Feature.CORNICE,
 			Feature.DOOR,
 			Feature.SHOP,
 			Feature.SILL,
-//			Feature.MOULDING,
+			Feature.DOOR,
+			Feature.MOULDING,
 	}; 
-	
 	
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {

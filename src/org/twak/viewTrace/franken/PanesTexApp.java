@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+import org.twak.viewTrace.franken.Pix2Pix.EResult;
 
 public class PanesTexApp extends App implements HasApp {
 
@@ -62,16 +64,13 @@ public class PanesTexApp extends App implements HasApp {
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) {
-
+	public void computeBatch( Runnable whenDone, List<App> batch ) { // first compute latent variables
+		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
-
-		BufferedImage lBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D lg =  lBi.createGraphics();
 		
-		BufferedImage eBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D eg =  eBi.createGraphics();
+		BufferedImage im = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D eg =  im.createGraphics();
 		
 		Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
 
@@ -85,13 +84,82 @@ public class PanesTexApp extends App implements HasApp {
 				};
 			}
 		};
-		
+
 		for ( App a : batch ) {
 
 			try {
-				
-				PanesTexApp pta = (PanesTexApp)a;
+
+				PanesTexApp pta = (PanesTexApp) a;
 				PanesLabelApp pla = pta.parent;
+
+				if ( pla.label == null )
+					continue;
+				
+				MiniFacade mf = ((FRect)parent.hasA).mf;
+				
+				BufferedImage src = facadesImages.get( mf )[0];
+				
+				DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
+				
+				FRect r = (FRect) pla.hasA;
+				
+				DRectangle inSrc = new DRectangle(ni.resolution, ni.resolution).transform( mfBounds.normalize( r ) );
+				
+				inSrc.y = ni.resolution - inSrc.y - inSrc.height;
+						
+				BufferedImage toEncode = Imagez.scaleLongest( src.getSubimage( (int) inSrc.x, (int) inSrc.y, (int) inSrc.width, (int) inSrc.height ), 170 );
+				toEncode = Imagez.padTo( toEncode, null, 256, 256, Color.black );
+				
+				Meta meta = new Meta (pta, ni.sizeZ );
+				
+				p2.addEInput( toEncode, meta );
+				
+				Job j = new Job( new EResult() {
+					
+					@Override
+					public void finished( Map<Object, double[]> results ) {
+						
+						List<Meta> next = new ArrayList<>();
+						
+						for ( Map.Entry<Object, double[]> e : results.entrySet() ) {
+							Meta meta = (Meta) e.getKey();
+							next.add(meta);
+							meta.styleZ = e.getValue();
+						}
+						
+						computeTextures( whenDone, next, facadesImages );	
+					}
+				} );
+				
+				p2.submit( j );
+				
+			} catch ( Throwable e1 ) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	public void computeTextures( Runnable whenDone, List<Meta> batch, Cache<MiniFacade, BufferedImage[]> facadesImages ) {
+
+		NetInfo ni = NetInfo.get(this); 
+		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
+
+		BufferedImage lBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D lg =  lBi.createGraphics();
+		
+		BufferedImage eBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D eg =  eBi.createGraphics();
+		
+			
+		for ( Meta meta : batch ) {
+
+			try {
+				
+				PanesTexApp pta = (PanesTexApp)meta.pta;
+				PanesLabelApp pla = pta.parent;
+				
+				if (pla.label == null)
+					continue;
 				
 				BufferedImage labelSrc = ImageIO.read( Tweed.toWorkspace( pla.label ) );
 
@@ -114,9 +182,9 @@ public class PanesTexApp extends App implements HasApp {
 				eg.setColor( Color.red );
 				eg.fillRect( (int) imBounds.x, (int) imBounds.y, (int) imBounds.width, (int)imBounds.height);
 				
-				Meta meta = new Meta( pta, imBounds ); 
+				meta.imBounds = imBounds;
 				
-				p2.addInput( lBi, eBi, null, meta, a.styleZ, pta.parent.frameScale );
+				p2.addInput( lBi, eBi, null, meta, meta.styleZ, pta.parent.frameScale );
 
 
 			} catch ( IOException e1 ) {
@@ -193,12 +261,13 @@ public class PanesTexApp extends App implements HasApp {
 	}
 
 	private static class Meta {
+		protected double[] styleZ;
 		PanesTexApp pta;
 		DRectangle imBounds;
 		
-		private Meta( PanesTexApp pta, DRectangle imBounds ) {
+		private Meta( PanesTexApp pta, int sizeZ ) {
 			this.pta = pta;
-			this.imBounds = imBounds;
+			this.styleZ = new double[sizeZ];
 		}
 	}
 

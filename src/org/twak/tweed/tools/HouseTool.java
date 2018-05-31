@@ -58,7 +58,7 @@ public class HouseTool extends Tool {
 			
 			System.out.println( "start: "+accumWidth +" end: "+ (accumWidth + width ) );
 			
-			accumWidth += width + 0.5;
+			accumWidth += width;// + 0.5;
 			
 			builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
 			builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );

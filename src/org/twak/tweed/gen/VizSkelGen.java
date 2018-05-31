@@ -54,12 +54,12 @@ public class VizSkelGen extends SkelGen {
 		if ( mode == Mode.Extrude ) {
 			sf = toHalf( Loopz.to3d( Loopz.removeInnerEdges( Loopz.toXZLoop( blockGen.polies ) ).get( 0 ), 0, 1 ) );
 			PlanSkeleton skel = calc( sf );
-			setSkel( skel, sf, null );
+			setSkel( skel, sf );
 		} else
 			for ( Loop<Point3d> loop : blockGen.polies ) {
 				sf = toHalf( loop );
 				PlanSkeleton skel = calc( sf );
-				setSkel( skel, sf, null );
+				setSkel( skel, sf );
 			}
 		
 		gNode.updateModelBound();

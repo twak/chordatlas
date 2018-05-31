@@ -183,16 +183,17 @@ public class FacadeTexApp extends App {
 					gE.draw( p );
 				}
 
+				gL.setColor( CMPLabel.Background.rgb );
 				gE.setColor( CMPLabel.Background.rgb );
 				
 				stroke = new BasicStroke( 1 );
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				
-				for ( LoopL<Point2d> ll : mf.postState.occluders )
-					for ( Loop<Point2d> l : ll ) {
-						gL.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
-						gE.fill( Pix2Pix.toPoly( mf, maskLabel, mini, l ) );
+				for ( Loop<Point2d> l : mf.postState.occluders ) {
+						Polygon poly = Pix2Pix.toPoly( mf, maskLabel, mini, l );
+						gL.fill( poly );
+						gE.fill( poly );
 					}
 				
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );

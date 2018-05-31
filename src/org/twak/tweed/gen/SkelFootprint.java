@@ -196,9 +196,6 @@ public class SkelFootprint {
 		cleanFootprints         ( SS.mesh );
 		
 		updateHeights           ( SS.mesh );
-		
-		if (TRUE) // not needed if we're not doing fully procedural windows
-			findOcclusions ( SS.mesh );
 	}
 
 	private static void mergeSmallFaces( SolverState SS ) {
@@ -1033,8 +1030,12 @@ public class SkelFootprint {
 	}
 	
 
-	private static void findOcclusions( HalfMesh2 mesh ) {
+	public static void findOcclusions( HalfMesh2 mesh ) {
 
+		for ( HalfFace hf : mesh.faces )
+			for ( HalfEdge e1 : hf.edges() ) 
+				((SuperEdge)e1).occlusions.clear();
+		
 		for ( HalfFace hf : mesh.faces )
 			for ( HalfEdge e1 : hf.edges() ) {
 
@@ -1045,11 +1046,10 @@ public class SkelFootprint {
 						if ( e1 != e2 ) {
 
 							Line e2l = e2.line();
-
-							if ( el1.distance( e2l ) < 1 && e2l.absAngle( el1 ) > Math.PI * 0.7
-							//									!el1.isOnLeft(  e2l.fromPPram( 0.5 ) ) 
-							) 
-								( (SuperEdge) e1 ).occlusions.add( e2 );
+							// !el1.isOnLeft(  e2l.fromPPram( 0.5 ) )
+							
+							if ( el1.distance( e2l ) < 1 && e2l.absAngle( el1 ) > Math.PI * 0.7 )
+								( (SuperEdge) e1 ).occlusions.add( (SuperEdge) e2 );
 						}
 				}
 			}

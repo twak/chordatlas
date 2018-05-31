@@ -96,6 +96,22 @@ public class GreebleHelper {
 		
 		return out;
 	}
+	
+	public static LoopL<LPoint3d> transformx( LoopL<LPoint3d> ll, Matrix4d mat ) {
+
+		return ll.new Map<LPoint3d>() {
+
+			@Override
+			public LPoint3d map( Loopable<LPoint3d> input ) {
+					LPoint3d p = input.get();
+					LPoint3d pn = new LPoint3d(p, p.label);
+					mat.transform( pn );
+					return pn;
+			}
+
+		}.run();
+	}
+	
 	public static Loop<LPoint2d> to2dLoop(Loop<LPoint3d> in, int axis) {
 
 		Loop<LPoint2d> out = new Loop<>();
