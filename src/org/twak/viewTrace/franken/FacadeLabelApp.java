@@ -5,29 +5,23 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.CGAMini;
-import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -211,6 +205,13 @@ public class FacadeLabelApp extends App {
 							
 					FRect window = m.mf.featureGen.add( Feature.WINDOW, m.mfBounds.transform ( m.mask.normalize( f ) ) );
 					
+					FRect nearestOld = closest (window, m.mf.app.oldWindows );  
+					
+					if (nearestOld != null) {
+						window.app = (PanesLabelApp) nearestOld.app.copy();
+						window.app.styleZ = nearestOld.app.styleZ;
+					}
+					
 				}
 				
 				if (regFrac > 0) {
@@ -226,6 +227,22 @@ public class FacadeLabelApp extends App {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private FRect closest( FRect window, ArrayList<FRect> oldWindows ) {
+		
+		double bestDist = Double.MAX_VALUE;
+		FRect bestWin = null;
+		for ( FRect r : oldWindows ) {
+			double dist = window.getCenter().distanceSquared( r.getCenter() );
+
+			if ( dist < bestDist ) {
+				bestDist = dist;
+				bestWin = r;
+			}
+		}
+		
+		return bestWin;
 	}
 
 	private static class Meta {
@@ -245,6 +262,12 @@ public class FacadeLabelApp extends App {
 	
 	public void finishedBatches( List<App> list ) {
 
+		for (App a : list) {
+			MiniFacade mf = (MiniFacade)a.hasA;
+			FacadeTexApp fta = mf.app;
+			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
+		}
+		
 		// compute dormer-roof locations
 		list.stream().map( x -> ((FacadeLabelApp)x).superFace ).collect(Collectors.toSet() ).stream().
 			forEach( x -> new GreebleSkel( null, x ).

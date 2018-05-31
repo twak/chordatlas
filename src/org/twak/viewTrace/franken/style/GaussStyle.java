@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -35,6 +36,15 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 		this.ni = ni;
 	}
 
+	
+	@Override
+	public StyleSource copy() {
+		GaussStyle out = new GaussStyle( ni );
+		out.mean = Arrays.copyOf( mean, mean.length );
+		out.std = std;
+		out.meanImage = meanImage;
+		return out;
+	}
 	@Override
 	public double[] draw( Random random, App app ) {
 

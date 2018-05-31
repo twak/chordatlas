@@ -13,5 +13,5 @@ public interface StyleSource {
 	public double[] draw(Random random, App app);
 	public JPanel getUI(Runnable update);
 	public boolean install( SelectedApps selectedApps ); // return true to handle installation yourself
-	
+	public StyleSource copy();
 }

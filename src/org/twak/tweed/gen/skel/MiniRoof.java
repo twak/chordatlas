@@ -10,6 +10,7 @@ import javax.vecmath.Vector2d;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.tweed.gen.Pointz;
+import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
@@ -20,8 +21,11 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.RoofTexApp;
 
 public class MiniRoof implements HasApp {
@@ -67,27 +71,25 @@ public class MiniRoof implements HasApp {
 				}
 
 				
-				// 2. shrink the feature
-				if (false)
+				// 2. otherwise shrink the feature
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
 					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
 				}
 				
-				circ.radius -= 0.01;
+//				circ.radius -= 0.01;
 
-//				for (FCircle c : greebles.valueList()) 
-//					if (c.loc.distance( circ.loc ) <  2*(circ.radius + c.radius) )
-//						return;
-//				
-//				if (circ.radius < 0.1)
-//					return;
-//				
-//				DRectangle bounds = circ.toRect();
-//				for (Point2d p : bounds.points()) {
-//					if (!Loopz.inside( p, face )) 
-//						return;
-//				}
+				if (circ.radius < 0.1)
+					return;
+
+				for (HalfEdge e : app.superFace ) {
+					
+					SuperEdge se = (SuperEdge)e;
+					
+					for (FRect fr : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) // avoid dormer windows
+						if ( Loopz.inside( circ.loc, fr.app.coveringRoof) )
+							return;
+				}
 				
 				greebles.put (face, circ );
 			}

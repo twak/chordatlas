@@ -41,6 +41,7 @@ public class FacadeTexApp extends App {
 	public String coarse;
 	
 	public boolean dormer = true;
+	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
 	
 	public FacadeTexApp( HasApp ha ) {
 		super( ha );

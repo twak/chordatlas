@@ -59,7 +59,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.texture = a.texture;
 		this.styleZ = a.styleZ;
 		this.name = a.name;
-		this.styleSource = a.styleSource;
+		this.styleSource = a.styleSource.copy();
 	}
 	
 	public App( HasApp ha ) {

@@ -20,6 +20,14 @@ public class MultiModal implements StyleSource {
 		public GaussStyle ss;
 		public double prob = 0.5;
 		public double accumProb;
+		
+		public Mode copy() {
+			Mode out = new Mode();
+			out.ss = (GaussStyle) ss.copy();
+			out.prob = prob;
+			out.accumProb = accumProb;
+			return out;
+		}
 	}
 	
 	public List<Mode> modes = new ArrayList<>();
@@ -31,7 +39,19 @@ public class MultiModal implements StyleSource {
 	public MultiModal(NetInfo ex) {
 		this.exemplar = ex;
 	}
-	
+
+
+	@Override
+	public StyleSource copy() {
+		MultiModal out = new MultiModal( exemplar );
+		
+		for (Mode m : modes) 
+			out.modes.add(m.copy());
+		
+		out.totalProb = totalProb;
+		
+		return out;
+	}
 	public void updateModes() {
 		totalProb = 0;
 		

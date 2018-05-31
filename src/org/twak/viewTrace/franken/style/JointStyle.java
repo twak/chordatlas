@@ -85,6 +85,11 @@ public class JointStyle implements StyleSource {
 		nets.add (new NetProperties(RoofSuperApp             .class, true , false  ) );
 	}
 	
+	@Override
+	public StyleSource copy() {
+		return this; // we only have one joint for the entire block
+	}
+	
 	public static class NetProperties {
 		
 		public Class<? extends App> klass;
