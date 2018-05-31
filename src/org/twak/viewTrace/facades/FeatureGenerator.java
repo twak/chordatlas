@@ -24,8 +24,11 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		this(mf);
 		
 		for (Map.Entry<Feature, List<FRect>> ee : features.entrySet()) {
-			for (FRect e : ee.getValue())
-				put( ee.getKey(), new FRect( e ) );
+			for (FRect e : ee.getValue()) {
+				FRect fr = new FRect( e, mf);
+				fr.f = ee.getKey();
+				put( fr.f, fr );
+			}
 		}
 	}
 
@@ -59,8 +62,10 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 	public FeatureGenerator copy(MiniFacade n) {
 		FeatureGenerator out = new FeatureGenerator( n );
 		for (Map.Entry<Feature, List<FRect>> ee : entrySet()) {
-			for (FRect e : ee.getValue())
-				out.put( ee.getKey(), new FRect( e ) );
+			for (FRect e : ee.getValue()) {
+				FRect fr = new FRect( e, true );
+				out.put( ee.getKey(), fr );
+			}
 		}
 		return out;
 	}

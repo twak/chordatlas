@@ -56,21 +56,27 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, BufferedImage cropped ) {
 		
 		NormSpecGen ns = renderLabels( mf, cropped );
-		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
+		BufferedImage[] maps = new BufferedImage[] { cropped, ns.spec, ns.norm };
 
 		NetInfo ni = NetInfo.get( this );
 
 		String fileName = "scratch/" + UUID.randomUUID() + ".png";
 
+		DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
+		
 		try {
 			for ( FRect f : mf.featureGen.get( Feature.WINDOW ) ) {
 
 				DRectangle d = new DRectangle( 0, 0, maps[ 0 ].getWidth(), maps[ 0 ].getHeight() ).
-						transform( Pix2Pix.findBounds( mf, false ).normalize( f ) );
+						transform( mfBounds.normalize( f ) );
 
-				d.y = ni.resolution - d.y - d.height;
+				d.y = maps[ 0 ].getHeight() - d.y - d.height;
 
 				File wf = new File( Tweed.DATA + "/" + f.app.texture );
+				
+				if (!wf.exists())
+					continue;
+				
 				BufferedImage[] windowMaps = 
 						new BufferedImage[] {
 								ImageIO.read( wf ), 

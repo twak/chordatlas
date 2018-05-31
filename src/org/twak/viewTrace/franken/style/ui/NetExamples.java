@@ -228,8 +228,6 @@ public class NetExamples extends JComponent {
 				
 				for ( Pair<Integer, BufferedImage> e : values ) {
 					
-					System.out.println(" >> " + ( startTime - lastChanged) );
-					
 					if (startTime < lastChanged)
 						return;
 					addImage( e.first(), e.second() );

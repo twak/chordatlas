@@ -200,7 +200,7 @@ public class GreebleSkel {
 					megafacade.set( e.end.x, e.end.y, e.start.x, e.start.y ); // we might rotate the facade to apply a set of features to a different side of the building.
 				}
 				
-				if (TweedSettings.settings.snapFacadeWidth) {
+				if (false && TweedSettings.settings.snapFacadeWidth) {
 					
 					mf2 = new MiniFacade ( wt.miniFacade );
 					mf2.postState = wt.miniFacade.postState;
@@ -553,13 +553,14 @@ public class GreebleSkel {
 		Matrix4d to2d = new Matrix4d( to3d ); // now in jme space
 		to2d.invert();
 		
-		MiniFacade toRecess = null;
+		FeatureGenerator toRecess = new FeatureGenerator( (MiniFacade) null );
 		
 		
-		if (mf != null) {
-			toRecess = new MiniFacade(mf);
-			toRecess.featureGen = new FeatureGenerator( toRecess );
-		}
+//		if (mf != null) {
+//			toRecess = new FeatureGenerator();
+//			toRecess.mf = mf;
+//			toRecess.add new FeatureGenerator( toRecess );
+//		}
 		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
 		
@@ -645,12 +646,12 @@ public class GreebleSkel {
 						wallTag != null && floorRect != null && toRecess != null ) {
 
 					// set the vertical bounds, so we can just render in 2d
-					FRect bounds = new FRect( n.original );
+					FRect bounds = new FRect( n.original, false );
 					n.setBounds( to2d, bounds );
 
 					if ( floorRect.contains( bounds ) ) 
 					{
-						toRecess.featureGen.put( n.original.f, bounds );
+						toRecess.put( n.original.f, bounds );
 						quit.remove();
 					}
 				}
@@ -666,6 +667,7 @@ public class GreebleSkel {
 					floorRect,
 					to3d,
 					toRecess,
+					mf,
 					m,
 					wallTag );
 			else {
@@ -674,7 +676,8 @@ public class GreebleSkel {
 					floorRect,
 					uvs,
 					to3d,
-					toRecess );
+					toRecess,
+					mf );
 			}
 		}
 	}

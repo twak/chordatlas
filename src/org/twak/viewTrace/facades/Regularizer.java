@@ -50,7 +50,7 @@ public class Regularizer {
 	public double alpha = 0.2;
 	public double scale = 1;
 	
-	final static Feature[] toReg = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
+	public Feature[] toReg = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
 	
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
 	
@@ -450,7 +450,7 @@ public class Regularizer {
 				FRect o;
 				
 				if ( dimensionSpread( found ) > 1.4 ) { // scattered -> union (typically shop windows)  
-					o = new FRect( found.get( 0 ) );
+					o = new FRect( found.get( 0 ), true );
 
 					for ( FRect n : found )
 						o.setFrom( o.union( n ) );
@@ -1263,7 +1263,7 @@ public class Regularizer {
 		if (!rit.hasNext() )
 			return null;
 		
-		FRect out = new FRect(rit.next());
+		FRect out = new FRect(rit.next(), true);
 		
 		while (rit.hasNext())
 			out.setFrom( out.union( rit.next() ) );

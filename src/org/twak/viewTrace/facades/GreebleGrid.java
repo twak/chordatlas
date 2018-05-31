@@ -308,7 +308,7 @@ public class GreebleGrid {
 			to3d.invert();
 		}
 		
-		FRect w = new FRect ( l.original );
+		FRect w = new FRect ( l.original, false );
 		
 		// find roof locations / uv coordinates for roof
 		{
@@ -615,7 +615,7 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void buildGrid( DRectangle all, Matrix4d to3d, MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
+	protected void buildGrid( DRectangle all, Matrix4d to3d, FeatureGenerator filteredFeatuers, MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
 
 		Grid g = new Grid( .010, all.x, all.getMaxX(), all.y, all.getMaxY() );
 
@@ -623,7 +623,7 @@ public class GreebleGrid {
 
 			wallColorMat.app = mf;
 			
-			for ( FRect w : mf.featureGen.get( Feature.WINDOW ) ) {
+			for ( FRect w : filteredFeatuers.get( Feature.WINDOW ) ) {
 
 				if ( all.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -655,9 +655,9 @@ public class GreebleGrid {
 				
 			}
 
-			for ( FRect s_ : mf.featureGen.get( Feature.SHOP ) ) {
+			for ( FRect s_ : filteredFeatuers.get( Feature.SHOP ) ) {
 				
-				FRect s = new FRect(s_);
+				FRect s = new FRect(s_, true);
 				
 				DRectangle rect = all.intersect( s );
 				
@@ -668,8 +668,8 @@ public class GreebleGrid {
 						@Override
 						public void instance( DRectangle rect ) {
 
-							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+s.hashCode(), mbs.wood,  s );
-							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+s.hashCode(), mbs.glass, s );
+							MatMeshBuilder wood  = mbs.get( mbs.WOOD .name+s.hashCode(), mbs.wood,  s.app.hasA );
+							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+s.hashCode(), mbs.glass, s.app.hasA );
 							
 							createWindow( rect, to3d, wallColorMat, wood, glass, 
 									wallTag.windowDepth, 
@@ -681,7 +681,7 @@ public class GreebleGrid {
 					} );
 				}
 			}
-			for ( DRectangle d : mf.featureGen.get( Feature.DOOR ) ) {
+			for ( DRectangle d : filteredFeatuers.get( Feature.DOOR ) ) {
 				if ( all.contains( d ) )
 					g.insert( d, new Griddable() {
 						@Override
@@ -691,7 +691,7 @@ public class GreebleGrid {
 					} );
 			}
 
-			for ( DRectangle b : mf.featureGen.get( Feature.BALCONY ) ) {
+			for ( DRectangle b : filteredFeatuers.get( Feature.BALCONY ) ) {
 				if ( all.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
@@ -706,7 +706,7 @@ public class GreebleGrid {
 					} );
 			}
 
-			for ( DRectangle b : mf.featureGen.get( Feature.MOULDING ) ) {
+			for ( DRectangle b : filteredFeatuers.get( Feature.MOULDING ) ) {
 				if ( all.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override
@@ -727,14 +727,14 @@ public class GreebleGrid {
 
 	final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
 	
-	protected void textureGrid( DRectangle allGeom, DRectangle allUV, Matrix4d to3d, MiniFacade mf ) {
+	protected void textureGrid( DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
 
 		if ( mf != null && mf.app.texture != null ) {
 			
 			Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 			MatMeshBuilder mmb = mbs.getTexture( "texture_"+mf.app.texture , mf.app.texture, mf );
 
-			for ( FRect w : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
+			for ( FRect w : filteredFeatures.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
 				if ( allGeom.contains( w ) )
 					
@@ -742,16 +742,16 @@ public class GreebleGrid {
 						@Override
 						public void instance( DRectangle rect ) {
 							if (w.app.texture == null) // no texture info
-								createInnie( rect, allUV.normalize( rect ), to3d, mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
+								createInnie( rect, allUV.normalize( rect ), to3d, mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w.app.hasA ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
 							else if (w.app.panes == null) { // just coarse facade
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
-								mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
+								mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w.app.hasA ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
 							
 							} else if (w.app.textureUVs == TextureUVs.ZERO_ONE){ // labels
 								
 								createInnie( rect, rect, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								createWindowFromPanes (w.app.panes, rect, rect, to3d,
-										mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ),
+										mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w.app.hasA ),
 										0.3, 0.2 );
 							}
 							else { // textures
@@ -759,14 +759,14 @@ public class GreebleGrid {
 								DRectangle uvs = allUV.normalize( rect );
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );
 								createWindowFromPanes (w.app.panes, rect, allUV, to3d,
-										mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w ),
+										mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w.app.hasA ),
 										0.3, 0.2 );
 							}
 						}
 					} );
 			}
 			
-			for ( FRect w : mf.featureGen.get( Feature.DOOR ) ) {
+			for ( FRect w : filteredFeatures.get( Feature.DOOR ) ) {
 				
 				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -775,12 +775,12 @@ public class GreebleGrid {
 							if (w.app.texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f, 0, MeshBuilder.ALL_BUT_FRONT );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture, w.app.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
+								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+w.app.texture, w.app.texture, w.app.hasA ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
 						}
 					} );
 			}
 			
-			for ( FRect w : mf.featureGen.getRects( Feature.MOULDING, Feature.SILL ) ) {
+			for ( FRect w : filteredFeatures.getRects( Feature.MOULDING, Feature.SILL ) ) {
 				
 				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -790,7 +790,7 @@ public class GreebleGrid {
 						}
 					} );
 			}
-			for ( FRect w : mf.featureGen.getRects( Feature.CORNICE ) ) {
+			for ( FRect w : filteredFeatures.getRects( Feature.CORNICE ) ) {
 				
 				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
@@ -801,7 +801,7 @@ public class GreebleGrid {
 					} );
 			}
 			
-			for ( FRect b : mf.featureGen.get( Feature.BALCONY ) ) {
+			for ( FRect b : filteredFeatures.get( Feature.BALCONY ) ) {
 				if ( allGeom.contains( b ) )
 					g.insert( b, new Griddable() {
 						@Override

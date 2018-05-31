@@ -46,6 +46,14 @@ public class PanesLabelApp extends App {
 	
 	public PanesLabelApp(PanesLabelApp t) {
 		super (t);
+		this.label = t.label;
+		this.child = (PanesTexApp) t.child.copy();
+		this.child.parent = this;
+		this.frameScale = t.frameScale;
+		this.regularize = t.regularize;
+		this.panes = t.panes;
+		this.frameWidth = t.frameScale;
+		this.coveringRoof = t.coveringRoof;
 	}
 	
 	@Override
@@ -100,12 +108,10 @@ public class PanesLabelApp extends App {
 			try {
 				MiniFacade mf = ( (FRect) a.hasA ).mf;
 
-				DRectangle mini = Pix2Pix.findBounds( mf, false );
-
 				FRect r = (FRect) a.hasA;
-
-//				if ( !mini.contains( r ) )
-//					continue;
+				
+				if ( !Pix2Pix.findBounds( mf, true ).contains( r ) )
+					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
 				

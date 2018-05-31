@@ -41,7 +41,11 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	int xi, yi; // grid coords
 	int[] gridCoords;
 	
-	public FRect( FRect o ) {
+//	public FRect( FRect o ) {
+//		this (o, false);
+//	}
+	
+	public FRect( FRect o, boolean duplicateApp ) {
 		super(o);
 		
 		f = o.f;
@@ -56,34 +60,39 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
 		
-		app = o.app;//.copy();
+		if (duplicateApp) {
+			app =   (PanesLabelApp ) o.app.copy();
+			app.hasA = this;
+		}
+		else
+			app = o.app;
 		
 		this.mf = o.mf;
 	}
 	
 	public FRect(MiniFacade mf) {
 		super();
-		app = (PanesLabelApp) App.createFor( this );
+		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 	
 	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		app = (PanesLabelApp) App.createFor( this );
+		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
 
 	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
-		app = (PanesLabelApp) App.createFor( this );
+		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.f = feature;
-		app = (PanesLabelApp) App.createFor( this );
+		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
@@ -176,7 +185,9 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 			after.add( toSplit );
 		} else {
 			
-			FRect g = new FRect( toSplit ), p = new FRect( toSplit );
+			FRect g = new FRect( toSplit, true ), 
+					p = new FRect( toSplit, true );
+			
 			g.set( minMax[1], l, true );
 			before.add (g);
 			p.set( minMax[0], l, true );

@@ -83,14 +83,19 @@ public class Pix2Pix {
 	
 	public void submitSafe( Job job ) {
 		
+
+		
 		String network = netName;
 		
 		if (job.encode)
 			network = network+"_e";
 			
-		
 		File go     = new File( TweedSettings.settings.bikeGanRoot + "/input/"  + network + "/val/go" );
 		File outDir = new File( TweedSettings.settings.bikeGanRoot + "/output/" + network +"/" + job.name );
+		
+		if (inputs.isEmpty()) {
+			finished( job, outDir );
+		}
 		
 		try {
 			FileWriter  fos = new FileWriter( go );
@@ -130,25 +135,7 @@ public class Pix2Pix {
 
 			if ( outDir.exists() ) {
 				
-				System.out.println( "processing "+job.name );
-				
-				Map<Object, File> done =new HashMap<>();
-				
-				if (job.encode) {
-					for (File f : outDir.listFiles()) 
-						done.put( null, f );
-				}
-				else
-				for (Map.Entry<Object, String> e : inputs.entrySet())
-					done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
-				
-				job.finished.finished( done );
-				
-				try {
-					FileUtils.deleteDirectory( outDir );
-				} catch ( IOException e ) {
-					e.printStackTrace();
-				}
+				finished( job, outDir );
 				return;
 			}
 			
@@ -156,6 +143,28 @@ public class Pix2Pix {
 		
 		System.out.println( "timeout trying to get result "+ job.name );
 		
+	}
+
+	private void finished( Job job, File outDir ) {
+		System.out.println( "processing "+job.name );
+		
+		Map<Object, File> done =new HashMap<>();
+		
+		if (job.encode) {
+			for (File f : outDir.listFiles()) 
+				done.put( null, f );
+		}
+		else
+		for (Map.Entry<Object, String> e : inputs.entrySet())
+			done.put( e.getKey(), new File (outDir, e.getValue()+".png") );
+		
+		job.finished.finished( done );
+		
+		try {
+			FileUtils.deleteDirectory( outDir );
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
 	}
 	
 	public BufferedImage encode(File f, double[] values, Runnable update ) {

@@ -9,15 +9,11 @@ import java.util.Random;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.AutoCheckbox;
-import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
+import org.twak.viewTrace.franken.style.JointStyle.Joint;
 import org.twak.viewTrace.franken.style.StyleSource;
 
 public abstract class App /*earance*/ implements Cloneable {
@@ -50,6 +46,7 @@ public abstract class App /*earance*/ implements Cloneable {
 //	public int sizeZ = -1;
 //	public int resolution;
 	public DRectangle textureRect;
+	public Joint lastJoint;
 	
 	public App( App a ) {
 		this.hasA = a.hasA;
@@ -72,17 +69,6 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.styleSource = new GaussStyle(NetInfo.get(this));
 	}
 
-	public static App createFor(HasApp ha) {
-		
-		if (ha.getClass() == MiniRoof.class) {
-			return new RoofTexApp(ha);
-		} else if (ha.getClass() == FRect.class) {
-			return new PanesLabelApp(ha);
-		}		
-		
-		throw new Error("unkown to factory " + ha.getClass().getSimpleName());
-	}
-	
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		return new JPanel();
 	}
@@ -135,8 +121,10 @@ public abstract class App /*earance*/ implements Cloneable {
 				App.computeWithChildren( first + Batch_Size, stage, todo, globalUpdate ), 
 					batch );
 			}
-			else
+			else {
+				globalUpdate.run();
 				App.computeWithChildren( 0, stage+1, todo, globalUpdate );
+			}
 		}
 		
 	}

@@ -232,14 +232,17 @@ public class RoofTexApp extends App {
 			}
 		
 		
-		g.setColor( Color.magenta );
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		for (HalfEdge e : mr.app.superFace) {
 			MiniFacade mf = ((SuperEdge)e).toEdit; 
 			for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) 
 				if (f.app.coveringRoof != null) {
 
+					g.setColor( Color.cyan );
+					Polygon dormer = Loopz.toPolygon (f.app.coveringRoof.singleton(), bounds, drawTo ).get(0);
+					g.fill( dormer );
 
+					g.setColor( Color.magenta );
 					int count = 0;
 					for (Loopable<Point2d> ll : f.app.coveringRoof.loopableIterator()) {
 						
@@ -252,9 +255,6 @@ public class RoofTexApp extends App {
 						g.drawLine( (int)a.x, (int)a.y, (int)b.x, (int)b.y );
 					}
 					
-//					Polygon dormer = Loopz.toPolygon (f.app.coveringRoof.singleton(), bounds, drawTo ).get(0);
-//					g.setColor( Color.red );
-//					g.fill( dormer );
 //					g.setColor( Color.magenta );
 //					g.draw( dormer );
 				}

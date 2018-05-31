@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
+import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
@@ -69,8 +71,13 @@ public class FacadeTexApp extends App {
 		
 		if (mf.postState != null)
 			
-		for (FRect r : mf.featureGen.get( Feature.WINDOW ))
+		for (FRect r : mf.featureGen.get( Feature.WINDOW )) {
+			
+//			r.mf = mf;
+//			r.app.hasA = r;
+			
 			out.put( "window", r.app );
+		}
 		
 //		MiniRoof mr = (MiniRoof) ( (MiniFacade)hasA ).appLabel.hasA;
 //		for (mr.greebles.get( mf.postState. ))
@@ -116,8 +123,11 @@ public class FacadeTexApp extends App {
 
 		for ( MiniFacade mf : mfb ) {
 			
-			if (mf.featureGen instanceof CGAMini)
+			if (mf.featureGen instanceof CGAMini) {
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
+				// new windows created, clear ui state.
+				TweedFrame.instance.tweed.setTool( TextureTool.class );
+			}
 
 			DRectangle mini = Pix2Pix.findBounds( mf, false );
 

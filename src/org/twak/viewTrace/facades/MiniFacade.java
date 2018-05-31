@@ -331,7 +331,7 @@ public class MiniFacade implements HasApp {
 		List<FRect> out = new ArrayList();
 		if ( rects != null )
 			for ( FRect o : rects ) {
-				FRect n = new FRect( o );
+				FRect n = new FRect( o, false );
 				n.width *= widthRatio;
 				n.x = (n.x - left) * widthRatio + left + xOffset;
 				out.add( n );

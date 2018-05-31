@@ -155,8 +155,10 @@ public class JointStyle implements StyleSource {
 
 		Random randy = new Random();
 
-		for ( App building : root.getDown().valueList() )
-			redraw( Collections.singletonList( building ), new HashSet<>(), drawJoint( randy ), randy, bakeWith );
+		for ( App building : root.getDown().valueList() ) 
+			redraw( Collections.singletonList( building ), 
+					new HashSet<>(), building.lastJoint = drawJoint( randy ), 
+					randy, bakeWith );
 	}
 
 	public void updateJointProb() {
@@ -236,7 +238,7 @@ public class JointStyle implements StyleSource {
 			for (Class c : bakeTogether.keySet()) {
 				double[] val = j.appInfo.get( c ).dist.draw( random, null );
 				for (App b : bakeTogether.get( c ) ) {
-					a.styleZ = val;
+					b.styleZ = val;
 				}
 			}
 			
@@ -263,6 +265,18 @@ public class JointStyle implements StyleSource {
 
 	@Override
 	public double[] draw( Random random, App app ) {
+		
+		if (app.styleZ == null) { // hack: windiow has just been created
+
+			App building = app;
+			while (! ( building instanceof BuildingApp) )
+				building = building.getUp();
+			
+			Joint j = building.lastJoint;
+			
+			app.styleZ = j.appInfo.get( app.getClass() ).dist.draw( random, app );
+		}
+			
 		return app.styleZ; // do nothing
 	}
 

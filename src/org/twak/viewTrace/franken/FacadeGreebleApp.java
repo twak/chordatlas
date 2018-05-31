@@ -1,39 +1,28 @@
 package org.twak.viewTrace.franken;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
-import org.twak.utils.Filez;
-import org.twak.utils.Imagez;
-import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -44,6 +33,9 @@ public class FacadeGreebleApp extends App implements HasApp {
 	
 	private FacadeTexApp parent;
 
+	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
+
+	
 	public FacadeGreebleApp( FacadeTexApp parent ) {
 		super( (HasApp) null );
 		this.hasA = this;
@@ -210,12 +202,36 @@ public class FacadeGreebleApp extends App implements HasApp {
 						frects.add( fr );
 					}
 					
+					
 					Color avgCol = mean (m.rgb, frects );
 					for (DRectangle r : frects) {
 						FRect fr = m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
 						m.mf.featureGen.add( f, fr );
 						fr.app.color = avgCol;
 					}
+					
+//					Color avgCol = mean (m.rgb, frects );
+//					for (DRectangle r : frects) {
+//						
+//						Iterator<FRect> fit = m.mf.featureGen.get( Feature.WINDOW ).iterator();
+//						
+//						while (fit.hasNext() ) {
+//							FRect w = fit.next();
+//							if (w.intersects( r )) 
+//								if ( Math.abs( w.area() - r.area()) < w.area() / 2 ) 
+//									fit.remove();
+//						}
+//						
+//						FRect fr = m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
+//						fr.app.color = avgCol;
+//					}
+//					
+//					Regularizer r = new Regularizer();
+//					r.toReg = new Feature[] {};
+//					r.alpha = regAlpha;
+//					r.scale = regScale;
+//					
+//					m.mf.featureGen = r.go(Collections.singletonList( m.mf ), 1, null ).get( 1 ).featureGen;					
 				}
 
 			} catch ( IOException e ) {

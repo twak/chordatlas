@@ -31,6 +31,7 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+import org.twak.viewTrace.franken.style.JointStyle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -205,11 +206,20 @@ public class FacadeLabelApp extends App {
 							
 					FRect window = m.mf.featureGen.add( Feature.WINDOW, m.mfBounds.transform ( m.mask.normalize( f ) ) );
 					
-					FRect nearestOld = closest (window, m.mf.app.oldWindows );  
 					
-					if (nearestOld != null) {
-						window.app = (PanesLabelApp) nearestOld.app.copy();
-						window.app.styleZ = nearestOld.app.styleZ;
+					if (m.mf.app.styleSource instanceof JointStyle) {
+						
+						JointStyle js = (JointStyle) m.mf.app.styleSource;
+						window.app.child.styleSource = window.app.styleSource = js; // dirty hack
+						window.app.child.styleZ = window.app.styleZ = null;
+						
+					} else {
+						
+						FRect nearestOld = closest( window, m.mf.app.oldWindows );
+						if ( nearestOld != null ) {
+							window.app = (PanesLabelApp) nearestOld.app.copy();
+							window.app.styleZ = nearestOld.app.styleZ;
+						}
 					}
 					
 				}

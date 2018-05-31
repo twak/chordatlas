@@ -27,7 +27,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class PanesTexApp extends App implements HasApp {
 
-	private PanesLabelApp parent;
+	public PanesLabelApp parent;
 
 	public PanesTexApp(PanesLabelApp parent) {
 		super( (HasApp) null );
@@ -37,6 +37,7 @@ public class PanesTexApp extends App implements HasApp {
 	
 	public PanesTexApp(PanesTexApp t) {
 		super ( (App ) t);
+		this.parent = t.parent;
 	}
 	
 	@Override
@@ -83,7 +84,6 @@ public class PanesTexApp extends App implements HasApp {
 						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.texture, "_norm.png" ) ) ) 
 				};
 			}
-			
 		};
 		
 		for ( App a : batch ) {
@@ -149,7 +149,8 @@ public class PanesTexApp extends App implements HasApp {
 							
 							meta.pta.texture = dest;
 							meta.pta.parent.texture = dest;
-							meta.pta.textureUVs = TextureUVs.Rectangle;
+							meta.pta.textureUVs = TextureUVs.SQUARE;
+							meta.pta.parent.textureUVs = TextureUVs.SQUARE;
 							
 							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
 							
@@ -167,6 +168,7 @@ public class PanesTexApp extends App implements HasApp {
 							
 					}
 					
+//					if (false)
 					for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
 						String fileName = "scratch/" + UUID.randomUUID() +".png";
 						
@@ -177,6 +179,7 @@ public class PanesTexApp extends App implements HasApp {
 						ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
 						
 						updated.getKey().app.texture = fileName;
+//						updated.getKey().app.textureUVs = TextureUVs.Rectangle;
 					}
 					
 

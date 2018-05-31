@@ -90,11 +90,8 @@ public class Tweed extends SimpleApplication {
 			FOV_UP ="FovUp", FOV_DOWN = "FovDown";
 
 	public TweedFrame frame;
-	
 	public FeatureCache features;
-	
 	private Picture background;
-	
 	public Vector3d cursorPosition;
 
 
@@ -158,7 +155,7 @@ public class Tweed extends SimpleApplication {
 		
 		getFlyByCamera().setDragToRotate(true);
 
-		setTool(tools[1]);
+		setTool(HouseTool.class);
 
 		debug = new Node( "dbg" );
 		rootNode.attachChild( debug );
@@ -365,6 +362,15 @@ public class Tweed extends SimpleApplication {
 		System.out.println("ambient now " + TweedSettings.settings.ambient);
 		ambient.setColor(ColorRGBA.White.mult( (float) TweedSettings.settings.ambient));
   		sun.setColor( new ColorRGBA(1f, 0.95f, 0.99f, 1f).mult( 2- (float)TweedSettings.settings.ambient) );
+	}
+	
+	public void setTool( Class newTool ) {
+
+		for ( Tool t : tools )
+			if ( t.getClass() == newTool ) {
+				setTool( t );
+				return;
+			}
 	}
 	
 	public void setTool( Tool newTool ) {

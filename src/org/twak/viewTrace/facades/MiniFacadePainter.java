@@ -29,6 +29,7 @@ import org.twak.utils.ui.Rainbow;
 import org.twak.utils.ui.SimplePopup2;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.PanesLabelApp;
 
 
 public class MiniFacadePainter implements ICanPaintU, ICanEdit {
@@ -304,7 +305,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 				
 				if (dragging != null) {
 					
-					FRect rec = new FRect( dragging );
+					FRect rec = new FRect( dragging, true );
 //					rec.x += 0.5;
 					rec.x += rec.width + 0.3;
 					mf.featureGen.put( rec.f, rec );
