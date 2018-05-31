@@ -39,6 +39,7 @@ import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
@@ -75,7 +76,11 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 	}
 
 	@Override
-	public void setTexture( MiniRoof mf,FacState<MiniRoof> state, BufferedImage[] maps ) {
+	public void setTexture( MiniRoof mf,FacState<MiniRoof> state, BufferedImage cropped ) {
+		
+		NormSpecGen ns = new NormSpecGen( cropped, null, null);
+		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
+
 		
 		String fileName = "scratch/" + UUID.randomUUID() +".png";
 

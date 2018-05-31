@@ -38,7 +38,7 @@ public class MiniFacade implements HasApp {
 		SHOP (new Color (255,0,170)), SILL (new Color (255,170,0)),  MOULDING ( new Color (0,255,170) ),
 		GRID (Color.black);
 		
-		Color color;
+		public Color color;
 		
 		private Feature (Color c) {
 			this.color = c;

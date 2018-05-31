@@ -361,11 +361,17 @@ public class GreebleGrid {
 				LoopL<Point2d> uvs = w.app.coveringRoof.singleton().new Map<Point2d>() {
 					@Override
 					public Point2d map( Loopable<Point2d> input ) {
-						return roof.app.textureRect.normalize( input.get() );
+						
+						if (roof.app.textureRect == null)
+							return input.get();
+						else
+							return roof.app.textureRect.normalize( input.get() );
 					}
 				}.run();
 				
-			mbs.getTexture( "roof_" + roof.app.texture, roof.app.texture, roof ).add( rp, uvs, true );
+				MeshBuilder roofTexture = roof.app.texture == null ? window : mbs.getTexture( "roof_" + roof.app.texture, roof.app.texture, roof );
+				
+				roofTexture.add( rp, uvs, true );
 			
 			}
 			else {

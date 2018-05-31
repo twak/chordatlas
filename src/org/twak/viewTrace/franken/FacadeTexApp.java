@@ -88,7 +88,7 @@ public class FacadeTexApp extends App {
 		return new FacadeTexApp( this );
 	}
 
-	final static Map<Color, Color> specLookup = new HashMap<>();
+	public final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
 		specLookup.put( CMPLabel.Window.rgb, Color.white );
 		specLookup.put( CMPLabel.Shop.rgb  , Color.darkGray );

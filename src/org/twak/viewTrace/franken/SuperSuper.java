@@ -63,7 +63,7 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 	// add to the todo list; remember to pad coarse by overlap in all directions
 	public abstract void drawCoarse( MultiMap<A, FacState> todo, A mf ) throws IOException;
 	
-	public abstract void setTexture( A mf, FacState<A> state, BufferedImage[] maps );
+	public abstract void setTexture( A mf, FacState<A> state, BufferedImage maps );
 	
 	public abstract double[] getZFor( A a );
 	
@@ -238,11 +238,7 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 										state.bigFine.getWidth() - overlap, state.bigFine.getHeight() - overlap, null );
 							}
 							
-							fixme: where should specular come from?
-							
-							NormSpecGen ns = new NormSpecGen( cropped, null, null );
-
-							setTexture( mf, state, new BufferedImage[] { cropped, ns.norm, ns.spec} );
+							setTexture( mf, state, cropped );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
 
 						}
 					}

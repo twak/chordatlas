@@ -233,6 +233,7 @@ public class FacadeLabelApp extends App {
 		
 		double bestDist = Double.MAX_VALUE;
 		FRect bestWin = null;
+		if (oldWindows != null)
 		for ( FRect r : oldWindows ) {
 			double dist = window.getCenter().distanceSquared( r.getCenter() );
 

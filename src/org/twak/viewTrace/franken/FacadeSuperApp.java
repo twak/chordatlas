@@ -1,24 +1,30 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
 import org.twak.utils.Filez;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.facades.NormSpecGen;
 
 public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 
@@ -47,7 +53,10 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 	}
 
 	@Override
-	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, BufferedImage[] maps ) {
+	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, BufferedImage cropped ) {
+		
+		NormSpecGen ns = renderLabels( mf, cropped );
+		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
 
 		NetInfo ni = NetInfo.get( this );
 
@@ -88,6 +97,40 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		
 		mf.app.textureUVs = TextureUVs.SQUARE;
 		mf.app.texture = fileName;
+	}
+
+	private NormSpecGen renderLabels( MiniFacade mf, BufferedImage cropped ) {
+		BufferedImage labels = new BufferedImage( cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
+		
+		DRectangle bounds = Pix2Pix.findBounds( mf, false );
+		DRectangle cropRect = new DRectangle(cropped.getWidth(), cropped.getHeight()); 
+		
+		Graphics2D g = labels.createGraphics();
+		
+		g.setColor( CMPLabel.Facade.rgb );
+		
+		Stroke stroke = new BasicStroke( 3 );
+		
+		g.setStroke( stroke );
+		
+		for ( Loop<? extends Point2d> l : mf.postState.wallFaces ) {
+			
+			Polygon p = Pix2Pix.toPoly( mf, cropRect, bounds, l ) ; 
+			
+			g.fill( p );
+			g.draw( p );
+		}
+		
+		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );
+		
+		for (Feature f : mf.featureGen.keySet())
+			if (f != Feature.WINDOW)
+				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f) );
+		
+		g.dispose();
+		
+		NormSpecGen ns = new NormSpecGen( cropped, labels, FacadeTexApp.specLookup );
+		return ns;
 	}
 	
 	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, MiniFacade mf ) throws IOException {

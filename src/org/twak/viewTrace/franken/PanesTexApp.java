@@ -57,7 +57,7 @@ public class PanesTexApp extends App implements HasApp {
 	final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
 		specLookup.put( Color.blue, Color.white );
-		specLookup.put( Color.red, Color.black );
+		specLookup.put( Color.red, Color.darkGray );
 	}
 
 	@Override
@@ -157,6 +157,7 @@ public class PanesTexApp extends App implements HasApp {
 							
 							BufferedImage[] toPatch = facadesImages.get(mf);
 							
+//							if (false)
 							for (int i = 0; i < 3; i++ ) {
 								Graphics2D tpg = toPatch[i].createGraphics();
 								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
