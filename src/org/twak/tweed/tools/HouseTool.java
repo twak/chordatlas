@@ -37,7 +37,7 @@ public class HouseTool extends Tool {
 		super( tweed );
 	}
 	
-	public int num = 5;
+	public int num = 1;
 	
 	@Override
 	public void clickedOn( Spatial target, Vector3f loc, Vector2f cursorPosition ) {

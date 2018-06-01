@@ -299,9 +299,8 @@ public class FacadeGreebleApp extends App implements HasApp {
 				r.alpha = regAlpha;
 				r.scale = regScale;
 
-				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
+//				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
 
-				
 				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW ) ) {
 
 					for ( Feature ff : win.attachedHeight.cache.keySet() ) {

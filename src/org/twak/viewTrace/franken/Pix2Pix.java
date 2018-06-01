@@ -158,8 +158,7 @@ public class Pix2Pix {
 	}
 
 	private void finished( Job job, File outDir ) {
-		System.out.println( "processing "+job.name );
-		
+//		System.out.println( "processing "+job.name );
 		
 		if (job.encode) {
 			
@@ -309,8 +308,20 @@ public class Pix2Pix {
 		
 		if ( toEdit.postState == null ) 
 			return toEdit.getAsRect();
-		else if ( includeRoof )
-			return  GreebleHelper.findRect( toEdit.postState.wallFaces, toEdit.postState.roofFaces );
+		
+		else if ( includeRoof ) {
+			DRectangle out =  GreebleHelper.findRect( toEdit.postState.wallFaces, toEdit.postState.roofFaces );
+			if (out != null )
+				return out;
+		}
+		else {
+			DRectangle out =  GreebleHelper.findRect( toEdit.postState.wallFaces );
+			if (out != null )
+				return out;
+		}
+
+		if ( toEdit.postState == null ) 
+			return toEdit.getAsRect();
 		else
 			return toEdit.postState.outerWallRect;
 	}

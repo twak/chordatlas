@@ -39,7 +39,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	String name;
 	
 	// marks as needing geometry recreation
-	public boolean isDirty = false; 
+	public boolean isDirty = true; 
 	
 	// GAN optoins
 //	public String netName;
@@ -76,7 +76,12 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static void computeWithChildren (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static synchronized void computeWithChildren (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+		
+		computeWithChildren_( batchStart, stage, todo, globalUpdate );
+	}
+	
+	private static void computeWithChildren_ (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
 		if (stage >= NetInfo.index.size())
 		{
@@ -85,7 +90,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		}
 		
 		if (todo.get( stage ).isEmpty()) {
-			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
+			App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
 			return;
 		}
 		
@@ -96,11 +101,11 @@ public abstract class App /*earance*/ implements Cloneable {
 			
 			globalUpdate.run();
 			
-			for (App a : new ArrayList<> ( todo.get( stage )) )
+			for (App a : new ArrayList<> ( todo.get( stage )) ) // app might have created new children
 				for (App next : a.getDown().valueList())
-					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
+					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
 			
-			App.computeWithChildren( 0, stage+1, todo, globalUpdate );
+			App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
 			
 		} else {
 		
@@ -109,6 +114,10 @@ public abstract class App /*earance*/ implements Cloneable {
 			
 			for ( int i = batchStart; i < Math.min( all.size(), batchStart + Batch_Size ); i++ ) {
 				App app = all.get( i );
+				
+				for (App next : app.getDown().valueList()) // add all children, even if not eval'd
+					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
+				
 				if (app.appMode == AppMode.Net) {
 					
 					if (app.styleSource != null)
@@ -120,12 +129,12 @@ public abstract class App /*earance*/ implements Cloneable {
 
 			if (!batch.isEmpty()) {
 				System.out.println( "batch " + batchStart +"/"+ all.size() + " "+  todo.get( stage ).get( 0 ).getClass().getSimpleName() );
-				batch.get( 0 ).computeBatch ( () -> 
-				App.computeWithChildren( batchStart + Batch_Size, stage, todo, globalUpdate ), batch );
+				batch.get( 0 ).computeBatch ( () -> App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate ), batch );
+//				App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate );
 			}
 			else {
 				globalUpdate.run();
-				App.computeWithChildren( 0, stage+1, todo, globalUpdate );
+				App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
 			}
 		}
 		

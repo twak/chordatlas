@@ -41,6 +41,7 @@ public class FacadeTexApp extends App {
 	
 	public SuperFace parent; // for non-label pipeline
 	public String coarse;
+	public String coarseWithWindows;
 	
 	public boolean dormer = true;
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list

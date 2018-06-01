@@ -638,8 +638,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				if ( range != null )
 					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null );
 			}
-			ensureMF( sf, se );
 		}
+		ensureMF( sf, se );
 		
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
 			roof = new RoofTag( sf.roofColor );
@@ -769,10 +769,19 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 							sf.heights = null;
 							sf.maxProfHeights = null;
 							sf.colors = new ArrayList<>();
+							
+							for (Bar b : sf.skel.plan.points.eIterator() ) {
+								SETag set = (SETag) GreebleHelper.getTag( b.tags, SETag.class );
+								if (set != null)
+									set.se.prof = toProf ( sf.skel.plan.profiles.get(b) ); 
+							}
+							
 							sf.skel = null;
 							
 							for (HalfEdge e : f2) {
 								SuperEdge se = (SuperEdge)e;
+								
+//								se.prof = se. 
 								
 								if (se.profLine != null)
 									se.profLine.mega = null;
@@ -781,6 +790,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 								if (e.over != null && ((SuperEdge)e.over).profLine != null) 
 									((SuperEdge)e.over).profLine.mega = null;
 							}
+							
 						}
 						
 						blockGen  = null;

@@ -70,19 +70,20 @@ public class JointStyle implements StyleSource {
 	}
 
 	public List<NetProperties> nets = new ArrayList<>();
+	Map<Class, NetProperties> klass2Net = new HashMap<>();
 	public NetProperties defaultNet;
 	{
-		nets.add (new NetProperties(BlockApp                 .class, false, false ) );
-		nets.add (new NetProperties(BuildingApp              .class, false, false ) );
-		nets.add (new NetProperties(FacadeLabelApp           .class, true , false ) );
-		nets.add (new NetProperties(FacadeGreebleApp         .class, true , false  ) );
-		nets.add (new NetProperties(FacadeSuperApp           .class, true , false ) );
-		nets.add (defaultNet = new NetProperties(FacadeTexApp.class, true , true ) );
-		nets.add (new NetProperties(PanesLabelApp            .class, true , false ) );
-		nets.add (new NetProperties(PanesTexApp              .class, true , false ) );
-		nets.add (new NetProperties(RoofTexApp               .class, true , true  ) );
-		nets.add (new NetProperties(RoofGreebleApp           .class, false, false  ) );
-		nets.add (new NetProperties(RoofSuperApp             .class, true , false  ) );
+		nets.add (new NetProperties(BlockApp                 .class, false, false, true  ) );
+		nets.add (new NetProperties(BuildingApp              .class, false, false, true  ) );
+		nets.add (new NetProperties(FacadeLabelApp           .class, true , false, true  ) );
+		nets.add (new NetProperties(FacadeGreebleApp         .class, true , false, true  ) );
+		nets.add (new NetProperties(FacadeSuperApp           .class, true , false, false ) );
+		nets.add (defaultNet = new NetProperties(FacadeTexApp.class, true , true , true  ) );
+		nets.add (new NetProperties(PanesLabelApp            .class, true , false, true  ) );
+		nets.add (new NetProperties(PanesTexApp              .class, true , false, true  ) );
+		nets.add (new NetProperties(RoofTexApp               .class, true , true , true  ) );
+		nets.add (new NetProperties(RoofGreebleApp           .class, false, false, true  ) );
+		nets.add (new NetProperties(RoofSuperApp             .class, true , false, false ) );
 	}
 	
 	@Override
@@ -90,16 +91,21 @@ public class JointStyle implements StyleSource {
 		return this; // we only have one joint for the entire block
 	}
 	
-	public static class NetProperties {
+	public class NetProperties {
 		
 		public Class<? extends App> klass;
 		public boolean show; // in the ui
 		public boolean on; // do we run the GAN?
+		public boolean medium; // are we on if set to medium
 		
-		public NetProperties( Class<? extends App> k, boolean s, boolean onByDefault ) {
+		
+		public NetProperties( Class<? extends App> k, boolean s, boolean onByDefault, boolean medium ) {
 			this.klass = k;
 			this.show = s;
 			this.on = onByDefault;
+			this.medium = medium;
+			
+			klass2Net.put (k, this);
 		}
 
 		public App findExemplar (App root) {
@@ -126,6 +132,20 @@ public class JointStyle implements StyleSource {
 			
 			return findExemplar( next );
 		}
+
+		public void setHigh() {
+			this.on = true;
+		}
+		
+		public void setMedium() {
+			this.on = medium;
+		}
+		
+		public void setLow() {
+			Class c= (Class)klass;
+			this.on = c == FacadeLabelApp.class
+					|| c == FacadeTexApp.class || c == RoofTexApp.class;
+		}
 	}
 	
 	public JointStyle( NetInfo ignore ) {
@@ -150,8 +170,9 @@ public class JointStyle implements StyleSource {
 
 		MultiMap<App, App> bakeWith = new MultiMap<>();
 
-		for ( Joint j : joints )
-			findBake( j, Collections.singletonList( root ), bakeWith, new HashMap<>() );
+		
+		for ( Joint j : joints ) 
+			findBake( 0, new MultiMap<>(0, root), j, bakeWith );
 
 		Random randy = new Random(0xDEADBEEF);
 
@@ -159,7 +180,7 @@ public class JointStyle implements StyleSource {
 			
 			((BuildingApp)building).updateDormers( randy.nextBoolean() );
 			
-			redraw( Collections.singletonList( building ), 
+			redraw( 0, new MultiMap<>(0, root), 
 					new HashSet<>(), building.lastJoint = drawJoint( randy ), 
 					randy, bakeWith );
 		}
@@ -194,39 +215,48 @@ public class JointStyle implements StyleSource {
 		return j;
 	}
 	
-	public void findBake( Joint j, List<App> current, MultiMap<App, App> bakeWith, Map<Class, App> parents ) {
+	public void findBake( int stage,  MultiMap<Integer, App> todo, Joint j, MultiMap<App, App> bakeWith ) {
 
-		List<App> next = new ArrayList<>();
+		if (stage >= NetInfo.evaluationOrder.size())
+			return;
 
-		for ( App a : current ) {
-			
-			parents.put( a.getClass(), a );
+		for ( App a : todo.get( stage ) ) {
 			
 			PerJoint ai = j.appInfo.get( a.getClass() );
 			Class bw = ai.bakeWith;
+			
 			if ( bw != null ) {
 
-				if ( parents.get( bw ) == null )
-					throw new Error();
-
-				bakeWith.put( parents.get( bw ), a );
+				App p = a;
+				
+				while (p != null && p.getClass() != ai.bakeWith) 
+					p = p.getUp();
+				
+				if (p.getClass() == ai.bakeWith)
+					bakeWith.put( p, a );
+				else
+					System.err.println("failed to find bake");
 			}
 			
 			a.styleSource = this;
-			a.appMode = ai.ns.on || !ai.ns.show ? AppMode.Net : AppMode.Off; // ui for block, building, not others
-
-			next.addAll( a.getDown().valueList() );
+			setMode( a  );
+			
+			for (App next : a.getDown().valueList())
+				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
 		}
 
-		if (!next.isEmpty())
-			findBake( j, next, bakeWith, parents );
+		findBake( stage+1, todo, j, bakeWith );
 	}
 
-	private void redraw( List<App> as, Set<App> drawn, Joint j, Random random, MultiMap<App, App> bakeWith ) {
+	private void redraw( int stage,  MultiMap<Integer, App> todo, Set<App> drawn, Joint j, Random random, MultiMap<App, App> bakeWith ) {
 
-		List<App> next = new ArrayList<>();
-
-		for ( App a : as ) {
+		if (stage >= NetInfo.evaluationOrder.size())
+			return;
+		
+		for ( App a : todo.get( stage ) ) {
+			
+			for (App next : a.getDown().valueList())
+				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
 			
 			if (drawn.contains ( a ) )
 				continue; // pre-baked
@@ -243,14 +273,14 @@ public class JointStyle implements StyleSource {
 				double[] val = j.appInfo.get( c ).dist.draw( random, null );
 				for (App b : bakeTogether.get( c ) ) {
 					b.styleZ = val;
+					drawn.add(b);
 				}
 			}
 			
-			next.addAll( a.getDown().valueList() );
+			
 		}
 
-		if (!next.isEmpty() )
-			redraw( next, drawn, j, random, bakeWith );
+		redraw( stage + 1, todo,  drawn, j, random, bakeWith );
 	}
 
 	private Joint drawJoint( Random random ) {
@@ -288,6 +318,20 @@ public class JointStyle implements StyleSource {
 	public JPanel getUI( Runnable update ) {
 		JPanel out = new JPanel(new ListDownLayout() );
 		
+
+		JButton low = new JButton( "set low detail" );
+		low.addActionListener( e -> nets.stream().forEach( n -> n.setLow() ) );
+		out.add(low);
+		
+		JButton medium = new JButton( "set normal detail" );
+		medium.addActionListener( e -> nets.stream().forEach( n -> n.setMedium() ) );
+		out.add(medium);
+		
+		JButton high = new JButton( "set high detail" );
+		high.addActionListener( e -> nets.stream().forEach( n -> n.setHigh() ) );
+		out.add(high);
+		
+		
 		JButton but = new JButton( "edit joint" );
 		but.addActionListener( e -> new JointUI(this, update ).openFrame() );
 		out.add( but );
@@ -303,6 +347,12 @@ public class JointStyle implements StyleSource {
 		out.add( redaw );
 
 		return out;
+	}
+
+	public void setMode( App appMode ) {
+		NetProperties ns = klass2Net.get(appMode.getClass()); 
+		appMode.appMode = (ns.on || !ns.show) ? AppMode.Net : AppMode.Off; // ui for block, building, not others
+		appMode.styleSource = this;
 	}
 
 }

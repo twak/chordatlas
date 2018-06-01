@@ -204,10 +204,10 @@ public class Regularizer {
 		}
 
 		
-		if (debugFrac < 1) {
-			out.add(0, new MiniFacade());
-			return out;
-		}
+//		if (debugFrac < 1) { fixme
+//			out.add(0, new MiniFacade());
+//			return out;
+//		}
 		
 		for ( MiniFacade mf : out ) {
 			findOuters( mf );
@@ -494,8 +494,8 @@ public class Regularizer {
 		spreadAttachedOverGrid( Feature.CORNICE, corniceX );
 		spreadAttachedOverGrid( Feature.BALCONY, balX );
 		
-		if (toReg.length > 0)
-			fixOverlaps (out);
+//		if (toReg.length > 0)
+		fixOverlaps (out);
 		mergeRemoveSmall( out );
 		
 		DRectangle mr = out.getAsRect();

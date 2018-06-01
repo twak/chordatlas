@@ -244,10 +244,18 @@ public class PanesTexApp extends App implements HasApp {
 			@Override
 			public void finished( Map<Object, File> results ) {
 
+				
 				Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
 
 					@Override
 					public BufferedImage[] create( MiniFacade mf ) {
+						
+						String src;
+						
+						if (mf.app.coarseWithWindows != null)
+							src = mf.app.coarseWithWindows;
+						else
+							src = mf.app.coarse;
 						
 						return new BufferedImage[] {
 								Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.coarse ) ), 
@@ -287,6 +295,8 @@ public class PanesTexApp extends App implements HasApp {
 							for (int i = 0; i < 3; i++ ) {
 								Graphics2D tpg = toPatch[i].createGraphics();
 								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
+								tpg.setColor (Color.magenta);
+								tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
 								tpg.dispose();
 							}
 						}
@@ -303,7 +313,9 @@ public class PanesTexApp extends App implements HasApp {
 						ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
 						ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
 						
-						updated.getKey().app.texture = fileName;
+						MiniFacade mf = updated.getKey();
+						
+						mf.app.coarseWithWindows = mf.app.texture = fileName;
 //						updated.getKey().app.textureUVs = TextureUVs.Rectangle;
 					}
 					
@@ -316,6 +328,25 @@ public class PanesTexApp extends App implements HasApp {
 			}
 		} ) );
 	}
+	
+	@Override
+	public void finishedBatches( List<App> list ) {
+		
+		for (App a : list) {
+			PanesTexApp pta = (PanesTexApp) a;
+			PanesLabelApp pla = pta.parent;
+
+			if ( pla.label == null )
+				continue;
+
+			MiniFacade mf = ( (FRect) parent.hasA ).mf;
+			mf.app.coarseWithWindows = null;
+		}
+			
+		
+		super.finishedBatches( list );
+	}
+	
 
 	private static class Meta {
 		protected double[] styleZ;

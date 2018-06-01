@@ -128,8 +128,7 @@ public class FacadeLabelApp extends App {
 		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
-		
-		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
+//		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
 
 		for (App a : batch) {
 
@@ -137,10 +136,14 @@ public class FacadeLabelApp extends App {
 			
 			DRectangle mini = Pix2Pix.findBounds( mf, mf.app.dormer );
 
+			if (mini.area() < 0.1)
+				continue;
+			
 			g.setColor( Color.black );
 			g.fillRect( 0, 0, ni.resolution, ni.resolution );
 
 			DRectangle mask = new DRectangle( mini );
+			
 
 			double scale = ni.resolution / Math.max( mini.height, mini.width );
 			
@@ -238,8 +241,10 @@ public class FacadeLabelApp extends App {
 					if (m.mf.app.styleSource instanceof JointStyle) {
 						
 						JointStyle js = (JointStyle) m.mf.app.styleSource;
-						window.app.child.styleSource = window.app.styleSource = js; // dirty hack
+						window.app.child.styleSource = window.app.styleSource = js; // fixme: dirty hack
 						window.app.child.styleZ = window.app.styleZ = null;
+						js.setMode(window.app.child);
+						js.setMode(window.app);
 						
 					} else {
 						
@@ -256,7 +261,7 @@ public class FacadeLabelApp extends App {
 					Regularizer reg = new Regularizer();
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
-					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 1 ).featureGen;
+//					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
 				}
 				
 
