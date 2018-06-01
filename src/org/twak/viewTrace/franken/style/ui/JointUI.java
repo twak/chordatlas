@@ -95,7 +95,7 @@ public class JointUI extends JPanel {
 			@Override
 			public void run() {
 				jd.redraw();
-				globalUpdate.run();
+//				globalUpdate.run();
 			}
 		};
 		
@@ -124,7 +124,13 @@ public class JointUI extends JPanel {
 		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
 		
 		JButton close = new JButton( "ok" );
-		close.addActionListener( l -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
+		
+		close.addActionListener( l -> {
+			jd.redraw();
+			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			globalUpdate.run();
+		} );
+		
 		add( close, BorderLayout.SOUTH );
 
 		if (selectedJoint == null)
@@ -288,8 +294,6 @@ public class JointUI extends JPanel {
 				if (modal != null)
 					modal.stop();
 				
-				jd.redraw();
-				globalUpdate.run();
 			};
 		} );
 		

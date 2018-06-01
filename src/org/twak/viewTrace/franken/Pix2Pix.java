@@ -105,6 +105,7 @@ public class Pix2Pix {
 		File outDir = new File( TweedSettings.settings.bikeGanRoot + "/output/" + network +"/" + job.name );
 		
 		if (inputs.isEmpty()) {
+			outDir.mkdirs();
 			finished( job, outDir );
 		}
 		
@@ -417,7 +418,7 @@ public class Pix2Pix {
 		
 		for ( FRect r : rects ) {
 
-			if ( mini.contains( r ) && toEdit.postState.generatedWindows.contains( r ) ) {
+			if ( toEdit.postState.generatedWindows.contains( r ) ) {
 				
 				DRectangle w = bounds.transform( mini.normalize( r ) );
 

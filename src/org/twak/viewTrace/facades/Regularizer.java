@@ -50,7 +50,8 @@ public class Regularizer {
 	public double alpha = 0.2;
 	public double scale = 1;
 	
-	public Feature[] toReg = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
+	public Feature[] toReg  = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
+	public Feature[] toReg2 = toReg;
 	
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
 	
@@ -149,7 +150,6 @@ public class Regularizer {
 //			for (MiniFacade mf : out)
 //					cluster1 ( mf.getRects(toReg), 1,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
 			
-			
 			List<FRect> allRects = new ArrayList<>();
 			
 			for (MiniFacade mf : out)
@@ -164,16 +164,20 @@ public class Regularizer {
 			cluster1 ( allRects, 0.2 * scale,  alpha, Bounds.XMIN, Bounds.XMAX, Bounds.YMIN, Bounds.YMAX);
 			
 			if (i % 5 == 0)
-				for (MiniFacade mf : out) 
-					findNeighbours(  mf.featureGen.getRects(Feature.WINDOW ) );
+				for (MiniFacade mf : out) {
+					findNeighbours(  mf.featureGen.getRects(Feature.WINDOW, Feature.SHOP ) );
+					findNeighbours(  mf.featureGen.getRects(Feature.MOULDING) );
+				}
 			
 			for (Dir dir : Dir.values())
 				clusterDeltas(allRects, 0.2* scale, alpha, dir );
 			
 			for ( MiniFacade mf : out ) { 
 				
+				if (toReg.length > 0)
 				for (FRect d :  mf.featureGen.get(Feature.DOOR))
 					constrainDoor (mf, d, alpha);
+				
 				for (FRect m :  mf.featureGen.get(Feature.MOULDING))
 					constrainMoulding( mf, m, alpha);
 			}
@@ -213,13 +217,15 @@ public class Regularizer {
 		
 		ids = 0;
 		
-		for ( Feature f : toReg )  // find ids...starting with the biggest
+		for ( Feature f : toReg2 )  // find ids...starting with the biggest
 		{
 			List<Pair<MiniFacade, FRect>> allRects = new ArrayList<>();
 		
 			for (MiniFacade mf : out)
-				for (FRect r : mf.featureGen.get(f))
+				for (FRect r : mf.featureGen.get(f)) {
+					r.id = -1;
 					allRects.add(new Pair<>(mf, r));
+				}
 			
 			Collections.sort(allRects, new Comparator<Pair<MiniFacade, FRect>>() {
 
@@ -262,8 +268,6 @@ public class Regularizer {
 		out.add(0, combine(out));
 		
 		System.out.println("done");
-		
-
 		
 		return out;
 	}
@@ -455,19 +459,24 @@ public class Regularizer {
 					for ( FRect n : found )
 						o.setFrom( o.union( n ) );
 					
-				} else // about same size: average position: windows on a grid
+				} else { // about same size: average position: windows on a grid
 					o = new FRect( average( found.toArray( new FRect[found.size()] ) ), out );
+				}
 				
 				{
 					FRect t = found.get(0);
 					o.f = t.f;
 					o.id = i;
-					o.outer = null;
+					o.app = t.app;
+					o.attached = t.attached;
+					
+//					o.outer = t.outer;
 					
 					o.attachedHeight.get( Feature.SILL ).d    = averageAttached (o, Feature.SILL, found);
 					o.attachedHeight.get( Feature.CORNICE ).d = averageAttached (o, Feature.CORNICE, found);
 					o.attachedHeight.get( Feature.BALCONY ).d = averageAttached (o, Feature.BALCONY, found);
 
+					
 					if ( t.f == Feature.WINDOW || t.f == Feature.SHOP ) {
 						for ( FRect r : found ) {
 							corniceX.get( r.outer, r.yi ).add( o );
@@ -485,27 +494,27 @@ public class Regularizer {
 		spreadAttachedOverGrid( Feature.CORNICE, corniceX );
 		spreadAttachedOverGrid( Feature.BALCONY, balX );
 		
-		fixOverlaps (out);
+		if (toReg.length > 0)
+			fixOverlaps (out);
 		mergeRemoveSmall( out );
 		
 		DRectangle mr = out.getAsRect();
 		mr.width -= 0.2; // ensure everything is comfortably within the bounds
 		mr.x += 0.1; 
 		
-		
-		for ( Feature f : Feature.values() ) { // clip to all
+		for ( Feature f : Feature.values() ) { // clip to minifacade
 			Iterator<FRect> rit = out.featureGen.get( f ).iterator();
 			while ( rit.hasNext() ) {
 				FRect r = rit.next();
 				DRectangle section = r.intersect( mr );
-//				if ( section == null || section.area() < 0.5 )
-//					rit.remove();
-//				else
-					r.setFrom( section );
+				if ( section == null ) //|| section.area() < 0.5 )
+					rit.remove();
+				else
+				r.setFrom( section );
 			}
 		}
 		
-		{ // door height
+		{
 			Double hf = Double.valueOf( 0 );
 			while ( out.groundFloorHeight < 6 && ( ( hf = horizontalEmpty( out, out.groundFloorHeight ) ) != null ) )
 				out.groundFloorHeight = hf + 0.3;
@@ -552,14 +561,13 @@ public class Regularizer {
 						miss ++;
 				}
 				
-				
 				double avg = avgHeight / hits;
 				
-				if (hits > miss) 
+				if (hits >= miss) 
 					corniceX.get( o, i ).stream().forEach( w -> w.attachedHeight.cache.get( cornice ).d = avg );
-				else
-					corniceX.get( o, i ).stream().filter(w -> w.attachedHeight.cache.get( cornice ).d > 0).
-						forEach( w -> w.attachedHeight.cache.get( cornice ).d = 0 );
+//				else
+//					corniceX.get( o, i ).stream().filter(w -> w.attachedHeight.cache.get( cornice ).d > 0).
+//						forEach( w -> w.attachedHeight.cache.get( cornice ).d = 0 );
 			}
 		}
 	}
@@ -833,23 +841,30 @@ public class Regularizer {
 	private void assignFeaturesToWindows(List<FRect> windows, MultiMap<Feature, FRect> rects) {
 		
 		int count = 0;
+		int total = 0;
 		for ( Feature f : new Feature[] { Feature.CORNICE, Feature.SILL, Feature.BALCONY } ) {
 			for ( FRect r : rects.get( f ) ) {
+				
+				total ++;
+				
+				boolean used = false;
 				
 				for (FRect w : windows) {
 					
 					DRectangle bounds = new DRectangle(w);
-					bounds.height = bounds.height * 0.5;
+					bounds.height = bounds.height * 0.8;
+					bounds.x -= bounds.width * 0.2;
+					bounds.width = bounds.width * 1.4;
 					
 					switch ( f ) {
 					case SILL:
-						bounds.y = bounds.x - bounds.height;
+						bounds.y = bounds.y - bounds.height;
 						break;
 					case BALCONY:
-						bounds.y = bounds.x;
+						bounds.y -= bounds.height * 0.8;
 						break;
 					case CORNICE:
-						bounds.y = bounds.getMaxY();
+						bounds.y = bounds.getMaxY() - bounds.height * 0.2;
 						break;
 					default:
 						break;
@@ -858,22 +873,25 @@ public class Regularizer {
 					if (r.intersects( w )) {
 						w.attached.put( f, r );
 						count++;
+						used = true;
 					}
 				}
 				
-				FRect win = nearest( windows, r, 2 );
-				if ( win != null )
-					win.attached.put( f, r );
+				if ( !used ) {
+					FRect win = nearest( windows, r, 2 );
+					if ( win != null )
+						win.attached.put( f, r );
+				}
 			}
 		}
 		
-//		System.out.println("atatched " + count +" cornicesesese");
+		System.out.println("atatched " + count +" / " + total +" cornicesesese");
 	}
 
 	private FRect nearest( List<FRect> windows, FRect sill, double maxDist ) {
 		
 		FRect bestWin = null;
-		double bestDist = 1;
+		double bestDist = 3;
 		
 		for (FRect w : windows) {
 			
@@ -1050,8 +1068,8 @@ public class Regularizer {
 					}
 				}
 				
-				if (outer.building.findPositions().values().size() >= 2)
-				{
+				if (outer.building.findPositions().values().size() >= 2) {
+					
 					outer.done();
 					mf.outers.add(outer);
 					
@@ -1304,13 +1322,13 @@ public class Regularizer {
 		final double tol = 4;
 		
 		if (d.x < mf.left + tol)
-			set (d, Bounds.XMIN, mf.left, alpha);
+			set (d, Bounds.XMIN, mf.left + 0.1, alpha * 5);
 		
 		if (d.x > mf.left + mf.width - tol)
-			set (d, Bounds.XMAX, mf.left + mf.width, alpha);
+			set (d, Bounds.XMAX, mf.left + mf.width - 0.1, alpha * 5);
 		
-		if (d.height < 0.5)
-			set ( d, Bounds.HEIGHT, 0.5, alpha );
+//		if (d.height < 0.5)
+//			set ( d, Bounds.HEIGHT, 0.5, alpha );
 	}
 	
 	private void set (FRect r, Bounds direction, double value, double alpha) {

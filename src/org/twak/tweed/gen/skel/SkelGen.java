@@ -60,8 +60,10 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.utils.ui.Rainbow;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -237,6 +239,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		sf.skel = skel;
 		
+		if (sf.mr == null)
+			sf.mr = new MiniRoof( sf ); // deserialization
+
+		sf.skel.output.addNonSkeletonSharedEdges(new RoofTag( Colourz.toF4( sf.mr.app.color )) );
 		sf.mr.setOutline( sf.skel.output );
 		
 		return skel;
@@ -470,6 +476,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					public void show( Output output, Skeleton threadKey ) {
 
 						
+						
 						super.show( output, threadKey );
 
 						tweed.enqueue( new Runnable() {
@@ -481,6 +488,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 								tweed.frame.setGenUI( null ); // current selection is invalid
 								sf.skel = (PlanSkeleton) threadKey;
 								
+								sf.skel.output.addNonSkeletonSharedEdges(new RoofTag( Colourz.toF4( sf.mr.app.color )) );
 								sf.mr.setOutline( sf.skel.output );
 
 								setSkel( (PlanSkeleton) threadKey, sf );
@@ -488,7 +496,35 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 							}
 
 						} );
+					}
+					
+					
+					public void addedBar(Bar bar) {
+						
+						SETag oldTag = (SETag) bar.tags.iterator().next();
+						
+						bar.tags.clear();
+						SuperEdge se = new SuperEdge( bar.start, bar.end, null );
+						
+						SETag tag = new SETag( se );
+						tag.color = Rainbow.random();
+						tag.name = Math.random()+"";
+						bar.tags.add (tag);
+						
+						List<Point2d> defpts = new ArrayList<>();
+						defpts.add( new Point2d( 0, 0 ) );
+						defpts.add( new Point2d( 0, -10 ) );
+						defpts.add( new Point2d( 5, -15 ) );
+
+						Profile profile = new Profile( defpts );
+						tagWalls( sf, profile, se, bar.start, bar.end );
+						plan.addLoop( profile.points.get( 0 ), plan.root, profile );
+						
+						plan.profiles.put( bar, profile );
 					};
+					
+					
+					
 				};
 				siteplan.setVisible( true );
 				siteplan.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
@@ -726,6 +762,29 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				new SimpleFileChooser(tweed.frame.frame, true, "select location", null, "xml" ) {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
+						
+						for (HalfFace f2 : SkelGen.this.block) {
+							
+							SuperFace sf = (SuperFace)f2;
+							sf.heights = null;
+							sf.maxProfHeights = null;
+							sf.colors = new ArrayList<>();
+							sf.skel = null;
+							
+							for (HalfEdge e : f2) {
+								SuperEdge se = (SuperEdge)e;
+								
+								if (se.profLine != null)
+									se.profLine.mega = null;
+								
+								
+								if (e.over != null && ((SuperEdge)e.over).profLine != null) 
+									((SuperEdge)e.over).profLine.mega = null;
+							}
+						}
+						
+						blockGen  = null;
+						
 						new XStream().toXML( SkelGen.this, new FileOutputStream( f ) );
 					}
 				};

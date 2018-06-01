@@ -591,16 +591,20 @@ public class GreebleGrid {
 		mat.addCube(loc, up, along, out, bg, width, (float) depth );
 		
 		// top railings
-		mat.addCube(loc.add(up.mult( height )), up, along, out, bg, bg * 2, depth );
-		mat.addCube(loc.add(up.mult( height ).add(along.mult(width-2*bg))), up, along, out, bg, bg*2, depth );
-		mat.addCube( loc.add( up.mult( height ).add( out.mult( depth - bg ) ) ), up, along, out, bg, width, bg*2 );
+		
+		mbs.GRAY.addCube(loc.add(up.mult( height )), up, along, out, bg, bg * 2, depth );
+		mbs.GRAY.addCube(loc.add(up.mult( height ).add(along.mult(width-2*bg))), up, along, out, bg, bg*2, depth );
+		mbs.GRAY.addCube( loc.add( up.mult( height ).add( out.mult( depth - bg ) ) ), up, along, out, bg, width, bg*2 );
 		
 		int count = (int)(depth/spacing);
 		
 		// side bars
+		Vector3f l2 = loc.add(up.mult(0.01f));
 		for (int c = 0; c< count; c++) {
-			mat.addCube(loc.add(out.mult(c * spacing)).add(along.mult(bgsm)) , up, along, out, height, sm, sm );
-			mat.addCube(loc.add(out.mult(c * spacing)).add(along.mult(width - sm - bgsm)) , up, along, out, height, sm, sm );
+			
+			
+			mat.addCube(l2.add(out.mult(c * spacing)).add(along.mult(bgsm)) , up, along, out, height , sm, sm );
+			mat.addCube(l2.add(out.mult(c * spacing)).add(along.mult(width - sm - bgsm)) , up, along, out, height, sm, sm );
 		}
 		
 		count = (int) ( width / spacing);
@@ -609,7 +613,7 @@ public class GreebleGrid {
 		// front bars
 		for (int c = 0; c< count+1; c++) {
 			
-			mat.addCube(loc.add(out.mult(depth - sm-bgsm)).add(along.mult(bgsm + spacing * c)) , up, along, out, height, sm, sm);
+			mat.addCube(l2.add(out.mult(depth - sm-bgsm)).add(along.mult(bgsm + spacing * c)) , up, along, out, height, sm, sm);
 			
 		}
 	}
@@ -786,7 +790,7 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
 						}
 					} );
 			}

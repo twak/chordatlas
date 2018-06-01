@@ -84,24 +84,33 @@ public class FacadeLabelApp extends App {
 		
 		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
 			public void updated(double value) {
+				
+				for (App a : apps)
+					((FacadeLabelApp)a).regFrac = value;
 				globalUpdate.run();
 			};
 		}.notWhileDragging() );
 		
 		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
 			public void updated(double value) {
+				for (App a : apps)
+					((FacadeLabelApp)a).regAlpha = value;
 				globalUpdate.run();
 			};
 		}.notWhileDragging() );
 		
 		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
 			public void updated(double value) {
+				for (App a : apps)
+					((FacadeLabelApp)a).regScale = value;
 				globalUpdate.run();
 			};
 		}.notWhileDragging() );
 		
 		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
 			public void updated(boolean selected) {
+				for (App a : apps)
+					((MiniFacade)a.hasA).app.dormer = selected;
 				globalUpdate.run();
 			}
 		} );
@@ -209,6 +218,15 @@ public class FacadeLabelApp extends App {
 							
 					
 					f = m.mfBounds.transform ( m.mask.normalize( f ) );
+					
+					{ // move away from edges
+						double gap = 0.1;
+						if (f.x < m.mfBounds.x + gap )
+							f.x += gap;
+						else
+						if (f.x + f.width > m.mfBounds.getMaxX() - gap)
+							f.x -= gap;
+					}
 					
 					if (m.mf.postState != null)
 					for (Point2d p : f.points()) 

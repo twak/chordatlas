@@ -35,7 +35,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	public PanesLabelApp app;
 	public MiniFacade mf;
 	
-	Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
+	public Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
 	
 	AOuter outer;
 	int xi, yi; // grid coords

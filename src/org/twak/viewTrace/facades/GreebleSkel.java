@@ -116,9 +116,6 @@ public class GreebleSkel {
 		roofColor = Colourz.toF4( HasApp.get( miniroof ).color );
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
-		output.addNonSkeletonSharedEdges(new RoofTag( roofColor ));
-		
-		
 		for ( Face f : output.faces.values() )  {
 			WallTag wt = ((WallTag) GreebleHelper.getTag( f.profile, WallTag.class ));
 			
@@ -240,8 +237,10 @@ public class GreebleSkel {
 					QuadF w = quit.next();
 					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
 						
+						mf2.postState.generatedWindows.add(w.original);
+						
 						if (greebleGrid != null)
-						greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
+							greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
 								(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 						
 						quit.remove();
@@ -631,10 +630,10 @@ public class GreebleSkel {
 			materials.add( faceMaterial );
 		} else {
 			
-			floors.add( facadeRect );
-			materials.add( faceMaterial );
-			if (sides != null)
-				faceMaterial.add( sides, GreebleHelper.wallUVs(sides, uvs), to3d );
+				floors.add( facadeRect );
+				materials.add( faceMaterial );
+				if ( sides != null )
+					faceMaterial.add( sides, GreebleHelper.wallUVs( sides, uvs ), to3d );
 		}
 
 		for ( int j = 0; j < floors.size(); j++ ) {
@@ -664,7 +663,7 @@ public class GreebleSkel {
 			
 			
 			
-			if ( wallTag == null || toRecess == null ) {
+			if ( floorRect == null || wallTag == null || toRecess == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
 			}
 			else if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )

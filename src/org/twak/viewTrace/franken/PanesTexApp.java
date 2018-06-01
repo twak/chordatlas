@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import org.twak.tweed.Tweed;
 import org.twak.utils.Cache;
@@ -19,6 +21,7 @@ import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -30,6 +33,7 @@ import org.twak.viewTrace.franken.Pix2Pix.EResult;
 public class PanesTexApp extends App implements HasApp {
 
 	public PanesLabelApp parent;
+	public boolean useCoarseStyle = true;
 
 	public PanesTexApp(PanesLabelApp parent) {
 		super( (HasApp) null );
@@ -40,6 +44,25 @@ public class PanesTexApp extends App implements HasApp {
 	public PanesTexApp(PanesTexApp t) {
 		super ( (App ) t);
 		this.parent = t.parent;
+	}
+	
+	@Override
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+		
+		JPanel p = new JPanel();
+		
+		p.add (new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
+			@Override
+			public void updated( boolean selected ) {
+				
+				for (App a : apps)
+					((PanesTexApp)a).useCoarseStyle = selected;
+				
+				globalUpdate.run();
+			}
+		});
+		
+		return p;
 	}
 	
 	@Override
@@ -72,19 +95,9 @@ public class PanesTexApp extends App implements HasApp {
 		BufferedImage im = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D eg =  im.createGraphics();
 		
-		Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
 
-			@Override
-			public BufferedImage[] create( MiniFacade mf ) {
-				
-				return new BufferedImage[] {
-						Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.texture ) ), 
-						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.texture, "_spec.png" ) ) ), 
-						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.texture, "_norm.png" ) ) ) 
-				};
-			}
-		};
-
+		List<Meta> otherMEta = new ArrayList<>();
+		
 		for ( App a : batch ) {
 
 			try {
@@ -94,53 +107,84 @@ public class PanesTexApp extends App implements HasApp {
 
 				if ( pla.label == null )
 					continue;
-				
-				MiniFacade mf = ((FRect)parent.hasA).mf;
-				
-				BufferedImage src = facadesImages.get( mf )[0];
-				
+
+				MiniFacade mf = ( (FRect) parent.hasA ).mf;
+
+
 				DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
-				
+
 				FRect r = (FRect) pla.hasA;
+
+				Meta meta = new Meta( pta, ni.sizeZ, mf, r );
 				
-				DRectangle inSrc = new DRectangle(ni.resolution, ni.resolution).transform( mfBounds.normalize( r ) );
-				
-				inSrc.y = ni.resolution - inSrc.y - inSrc.height;
-						
-				BufferedImage toEncode = Imagez.scaleLongest( src.getSubimage( (int) inSrc.x, (int) inSrc.y, (int) inSrc.width, (int) inSrc.height ), 170 );
-				toEncode = Imagez.padTo( toEncode, null, 256, 256, Color.black );
-				
-				Meta meta = new Meta (pta, ni.sizeZ );
-				
-				p2.addEInput( toEncode, meta );
-				
-				Job j = new Job( new EResult() {
+				if ( mf.app.texture == null || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
 					
-					@Override
-					public void finished( Map<Object, double[]> results ) {
-						
-						List<Meta> next = new ArrayList<>();
-						
-						for ( Map.Entry<Object, double[]> e : results.entrySet() ) {
-							Meta meta = (Meta) e.getKey();
-							next.add(meta);
-							meta.styleZ = e.getValue();
-						}
-						
-						computeTextures( whenDone, next, facadesImages );	
-					}
-				} );
+					meta.styleZ = a.styleZ;
+					otherMEta.add( meta );
+					
+				} else {
+
+					BufferedImage src = Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.coarse ) );
+					
+					DRectangle inSrc = new DRectangle( ni.resolution, ni.resolution ).transform( mfBounds.normalize( r ) );
+
+					inSrc.y = ni.resolution - inSrc.y - inSrc.height;
+
+					BufferedImage toEncode = Imagez.scaleLongest( src.getSubimage( (int) inSrc.x, (int) inSrc.y, (int) inSrc.width, (int) inSrc.height ), 170 );
+					toEncode = Imagez.padTo( toEncode, null, 256, 256, Color.black );
+					p2.addEInput( toEncode, meta );
+				}
 				
-				p2.submit( j );
 				
 			} catch ( Throwable e1 ) {
 				e1.printStackTrace();
 			}
 		}
+
+		p2.submit( new Job( new EResult() {
+
+			@Override
+			public void finished( Map<Object, double[]> results ) {
+
+				List<Meta> next = new ArrayList<>();
+
+				for ( Map.Entry<Object, double[]> e : results.entrySet() ) {
+					Meta meta = (Meta) e.getKey();
+					next.add( meta );
+					meta.styleZ = e.getValue();
+				}
+				
+				for (Meta m : otherMEta) {
+					
+					double bestArea = Double.MAX_VALUE;
+					Meta bestM2 = null;
+					
+					for (Meta m2 : next) {
+						
+						double area = Math.abs ( m2.worldLocation.area() - m.worldLocation.area() );
+						
+						if (area < bestArea) {
+							bestM2 = m2;
+							bestArea = area;
+						}
+					}
+						
+					if (bestM2 != null )
+						m.styleZ = bestM2.styleZ;
+					
+				}
+				
+				next.addAll( otherMEta );
+
+				computeTextures( whenDone, next );
+			}
+		} ) );
+				
 	}
 	
-	public void computeTextures( Runnable whenDone, List<Meta> batch, Cache<MiniFacade, BufferedImage[]> facadesImages ) {
+	public void computeTextures( Runnable whenDone, List<Meta> batch ) {
 
+		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
 
@@ -200,6 +244,19 @@ public class PanesTexApp extends App implements HasApp {
 			@Override
 			public void finished( Map<Object, File> results ) {
 
+				Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
+
+					@Override
+					public BufferedImage[] create( MiniFacade mf ) {
+						
+						return new BufferedImage[] {
+								Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.coarse ) ), 
+								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.coarse, "_spec.png" ) ) ), 
+								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.coarse, "_norm.png" ) ) ) 
+						};
+					}
+				};
+				
 				try {
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
@@ -264,10 +321,14 @@ public class PanesTexApp extends App implements HasApp {
 		protected double[] styleZ;
 		PanesTexApp pta;
 		DRectangle imBounds;
+		MiniFacade mf;
+		private FRect worldLocation;
 		
-		private Meta( PanesTexApp pta, int sizeZ ) {
+		private Meta( PanesTexApp pta, int sizeZ, MiniFacade mf, FRect r ) {
 			this.pta = pta;
 			this.styleZ = new double[sizeZ];
+			this.mf = mf;
+			this.worldLocation = r;
 		}
 	}
 

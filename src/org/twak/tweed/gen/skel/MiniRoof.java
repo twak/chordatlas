@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
@@ -22,6 +23,7 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.HasApp;
@@ -110,7 +112,19 @@ public class MiniRoof implements HasApp {
 		
 		for (Face f : output.faces.values() ) {
 			
-			if ( GreebleHelper.getTag( f.profile, RoofTag.class ) == null )
+			
+			if (f.edge.linearForm == null /*! fixme !*/ ) {
+				
+				Vector2d a2 = f.edge.projectDown().dir();
+				Vector3d b = new Vector3d ( f.edge.uphill ), a = new Vector3d(a2.x, a2.y, 0);
+				
+				b.cross( a, b );
+				
+				f.edge.linearForm = new LinearForm3D( b, f.edge.start );
+			}
+			
+//			if ( f.edge.getPlaneNormal().angle(Mathz.Z_UP) > Math.PI /2 -0.001 ) // GreebleHelper.getTag( f.profile, RoofTag.class ) == null )
+			if ( GreebleHelper.getTag( f.profile, WallTag.class ) != null )
 				continue;
 			
 			LoopL<Point2d> category = f.edge.uphill.angle( Mathz.Z_UP ) > Math.PI * 0.4 ? flats : pitches;

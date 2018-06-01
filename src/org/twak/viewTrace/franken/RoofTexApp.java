@@ -185,11 +185,17 @@ public class RoofTexApp extends App {
 			g.draw( p );
 		}
 		
+		g.setColor( Color.cyan );
+		for (Polygon p : pitches)
+			g.fill( p );
+		
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		g.setColor( Color.magenta );
 		
+		g.setColor( Color.magenta );
 		for (Polygon p : pitches)
 			g.draw( p );
+		
 		
 		g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		g.setColor( Color.gray );

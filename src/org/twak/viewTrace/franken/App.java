@@ -76,7 +76,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static void computeWithChildren (int first, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static void computeWithChildren (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
 		if (stage >= NetInfo.index.size())
 		{
@@ -89,7 +89,7 @@ public abstract class App /*earance*/ implements Cloneable {
 			return;
 		}
 		
-		if (first >= todo.get(stage).size()) {
+		if (batchStart >= todo.get(stage).size()) {
 			System.out.println( "finishing "+ todo.get( stage ).get( 0 ).getClass().getSimpleName() );
 			
 			todo.get(stage).get(0).finishedBatches(todo.get(stage));
@@ -107,7 +107,7 @@ public abstract class App /*earance*/ implements Cloneable {
 			List<App> all = todo.get( stage );
 			List<App> batch = new ArrayList<>();
 			
-			for ( int i = first; i < Math.min( all.size(), first + Batch_Size ); i++ ) {
+			for ( int i = batchStart; i < Math.min( all.size(), batchStart + Batch_Size ); i++ ) {
 				App app = all.get( i );
 				if (app.appMode == AppMode.Net) {
 					
@@ -119,9 +119,9 @@ public abstract class App /*earance*/ implements Cloneable {
 			}
 
 			if (!batch.isEmpty()) {
-				System.out.println( "batch " + first +"/"+ all.size() + " "+  todo.get( stage ).get( 0 ).getClass().getSimpleName() );
+				System.out.println( "batch " + batchStart +"/"+ all.size() + " "+  todo.get( stage ).get( 0 ).getClass().getSimpleName() );
 				batch.get( 0 ).computeBatch ( () -> 
-				App.computeWithChildren( first + Batch_Size, stage, todo, globalUpdate ), batch );
+				App.computeWithChildren( batchStart + Batch_Size, stage, todo, globalUpdate ), batch );
 			}
 			else {
 				globalUpdate.run();

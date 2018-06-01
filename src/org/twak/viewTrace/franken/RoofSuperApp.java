@@ -34,6 +34,7 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.Show;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -164,6 +165,9 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			
 			Loop<Point2d> pixPts = toPix.tranform( verticalPts );
 			
+			Color mean = Color.darkGray;
+			mean = meanColor( src, mean, pixPts );
+			
 			Face origin = mr.origins.get( verticalPts );
 			
 			if (origin == null)
@@ -215,10 +219,8 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			
 			
 			if ( true ) { // pad edges
-				
-				Color c = new Color( bigCoarse.getRGB( bigCoarse.getWidth() / 2, bigCoarse.getHeight() / 2 ) );
 
-				g.setColor( c );
+				g.setColor( mean );
 				g.setStroke( new BasicStroke( overlap / 2 ) );
 
 				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
@@ -250,6 +252,31 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 	
 			todo.put( mr, state );
 		}
+	}
+
+	private Color meanColor( BufferedImage src, Color def, Loop<Point2d> pixPts ) {
+
+		int[] meanCol = new int[3];
+		int[] tmp = new int[3];
+		int count2 = 0;
+		for ( int i = 0; i < 30; i++ ) {
+
+			int x = (int) ( Math.random() * src.getWidth() ), y = (int) ( Math.random() * src.getHeight() );
+			int rgb = src.getRGB( x, y );
+
+			if ( Loopz.inside( new Point2d( x, y ), pixPts ) ) {
+				count2++;
+				int[] rgbs = Colourz.toComp( rgb );
+				for ( int j = 0; j < 3; j++ )
+					meanCol[ j ] += rgbs[ j ];
+			}
+		}
+		if ( count2 > 0 ) {
+			for ( int j = 0; j < 3; j++ )
+				meanCol[ j ] /= count2;
+			return Colourz.to3( meanCol );
+		}
+		return def;
 	}
 
 }

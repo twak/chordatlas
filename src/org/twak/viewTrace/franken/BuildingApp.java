@@ -17,7 +17,7 @@ import org.twak.utils.ui.ListDownLayout;
 public class BuildingApp extends App {
 
 	public SkelGen parent;
-	boolean createDormers = Math.random() < 0.5;
+	public boolean createDormers = Math.random() < 0.5;
 	
 	public BuildingApp( SuperFace superFace ) {
 		super( superFace );

@@ -1,6 +1,7 @@
 package org.twak.viewTrace.franken;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -152,11 +153,12 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		BufferedImage bigCoarse = new BufferedImage(
 				outWidth  + overlap * 2,
 				outHeight + overlap * 2, BufferedImage.TYPE_3BYTE_BGR );
-
+		
 		Graphics2D g = bigCoarse.createGraphics();
 		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 
+		
 		int 
 			w = bigCoarse.getWidth()  - 2 * overlap, 
 			h = bigCoarse.getHeight() - 2 * overlap;
@@ -166,6 +168,33 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 				g.drawImage( src, 
 						overlap + wi * w, overlap + hi * h, 
 						w, h, null );
+		
+		{
+			DRectangle dest = new DRectangle(overlap, overlap, w, h);
+			
+			g.setColor( new Color (255, 255, 255, 50) );
+			for (FRect s : mf.featureGen.get( Feature.CORNICE )) {
+				DRectangle draw = dest.transform( mini.normalize( s ) );
+				draw.y = bigCoarse.getHeight()  - draw.y - draw.height;
+				g.fillRect( (int) draw.x, (int)draw.y, (int)draw.width, (int) draw.height );
+			}
+			
+			g.setColor( new Color (78, 51, 51, 50) );
+			for (FRect s : mf.featureGen.get( Feature.SILL )) {
+				DRectangle draw = dest.transform( mini.normalize( s ) );
+				draw.y = bigCoarse.getHeight()  - draw.y - draw.height;
+				g.fillRect( (int) draw.x, (int)draw.y, (int)draw.width, (int) draw.height );
+			}
+			
+			g.setColor( new Color (78, 51, 51, 50) );
+			for (FRect s : mf.featureGen.get( Feature.MOULDING )) {
+				DRectangle draw = dest.transform( mini.normalize( s ) );
+				draw.y = bigCoarse.getHeight()  - draw.y - draw.height;
+				g.fillRect( (int) draw.x, (int)draw.y, (int)draw.width, (int) draw.height );
+			}
+			
+			
+		}
 
 		g.dispose();
 		

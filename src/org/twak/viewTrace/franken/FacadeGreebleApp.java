@@ -10,13 +10,20 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
+import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
@@ -28,6 +35,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 
 public class FacadeGreebleApp extends App implements HasApp {
 	
@@ -62,6 +70,38 @@ public class FacadeGreebleApp extends App implements HasApp {
 	@Override
 	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
+	}
+	
+	@Override
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+		JPanel out = new JPanel(new ListDownLayout());
+		
+		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+			public void updated(double value) {
+				
+				for (App a : apps)
+					((FacadeGreebleApp)a).regFrac = value;
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+			public void updated(double value) {
+				for (App a : apps)
+					((FacadeGreebleApp)a).regAlpha = value;
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+			public void updated(double value) {
+				for (App a : apps)
+					((FacadeGreebleApp)a).regScale = value;
+				globalUpdate.run();
+			};
+		}.notWhileDragging() );
+		
+		return out;
 	}
 
 	final static Feature[] toGenerate = new Feature[] {
@@ -157,9 +197,13 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 						Meta meta = (Meta)e.getKey();
 						
-//						Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null );
+						Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
-						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						File boxFile = new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" );
+						
+						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
+						
+						importLabels(meta, boxFile );
 					}
 
 				} catch ( Throwable e ) {
@@ -180,16 +224,31 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 //				m.mf.featureGen = new FeatureGenerator( m.mf );
 
-				root = om.readTree( FileUtils.readFileToString( file ) );
+				root = om.readTree(FileUtils.readFileToString( file ) );
 
+				for (Feature f : toGenerate) { // map all back to windows
+					
+					List<FRect> rects = m.mf.featureGen.getRects( f );
+					
+					if (f == Feature.SHOP || f == Feature.DOOR)
+					{
+						for (FRect r : rects) {
+							m.mf.featureGen.map.remove( f, r );
+							m.mf.featureGen.add( Feature.WINDOW, r );
+						}
+					}
+					else for (FRect r : rects) 
+						m.mf.featureGen.map.remove( f, r );
+				}
+				
 				for ( Feature f : toGenerate ) {
 
-					JsonNode node = root.get( f.name().toLowerCase() );
+					JsonNode node = root.get( f.name().toLowerCase().replace ("moulding", "molding") );
 
 					if ( node == null )
 						continue;
 
-					List<DRectangle> frects = new ArrayList<>();
+					List<DRectangle> frects = new ArrayList<>(), balconies = new ArrayList<>();
 					
 					for ( int i = 0; i < node.size(); i++ ) {
 
@@ -199,39 +258,110 @@ public class FacadeGreebleApp extends App implements HasApp {
 								NetInfo.get( this ).resolution - rect.get( 3 ).asDouble(), rect.get( 1 ).asDouble() - rect.get( 0 ).asDouble(), 
 								rect.get( 3 ).asDouble() - rect.get( 2 ).asDouble() );
 						
+						fr = m.mfBounds.transform( m.mask.normalize( fr ) );
 						frects.add( fr );
 					}
-					
-					
-					Color avgCol = mean (m.rgb, frects );
-					for (DRectangle r : frects) {
-						FRect fr = m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
-						m.mf.featureGen.add( f, fr );
-						fr.app.color = avgCol;
+
+					if ( f != Feature.SHOP && f != Feature.DOOR )
+
+						for ( DRectangle r : frects ) {
+							m.mf.featureGen.add( f, r );
+						}
+					else
+
+					if ( f == Feature.SHOP || f == Feature.DOOR )
+						for ( DRectangle r : frects ) {
+
+							Iterator<FRect> fit = m.mf.featureGen.get( Feature.WINDOW ).iterator();
+
+							while ( fit.hasNext() ) {
+								
+								FRect w = fit.next();
+								if ( w.intersects( r ) )
+									if ( Math.abs( w.area() - r.area() ) < w.area() / 2 ) {
+										// don't change the size
+										r = new FRect( w, false );
+										
+										m.mf.featureGen.add( f, r );
+										
+										fit.remove();
+										break;
+									}
+							}
+						}
+				}
+
+				Regularizer r = new Regularizer();
+
+				r.toReg = new Feature[] {};
+				r.toReg2 = new Feature[] { Feature.WINDOW, Feature.SHOP, Feature.DOOR, Feature.MOULDING };
+
+				r.alpha = regAlpha;
+				r.scale = regScale;
+
+				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
+
+				
+				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW ) ) {
+
+					for ( Feature ff : win.attachedHeight.cache.keySet() ) {
+
+						DRectangle feat = new DRectangle( win.x, win.y, win.width, win.attachedHeight.get( ff ).d );
+
+						if (feat.height == 0)
+							continue;
+						
+						Color c = null;
+						
+						switch ( ff ) {
+						case BALCONY:
+
+							if (feat.height < 0.2)
+								continue;
+							
+							feat.height = Mathz.clamp( feat.height, 0.5, 1.5 );
+							double d = Mathz.clamp( win.width / 6, 0.1, 0.5 );
+
+							feat.width += d * 2;
+							feat.x -= d;
+							
+							DRectangle bounds = new DRectangle(m.rgb.getWidth(), m.rgb.getHeight()).transform( m.mfBounds.normalize( feat ) );
+							
+							c = mean( m.rgb, Collections.singletonList( bounds ) );
+
+							break;
+
+						case SILL:
+
+							feat.height = Mathz.clamp( feat.height, 0.1, 0.5 );
+							
+							feat.y -= feat.height;
+
+							feat.width += 0.1;
+							feat.x -= 0.05;
+
+							break;
+
+						case CORNICE:
+
+							feat.height = Mathz.clamp( feat.height, 0.1, 0.5 );
+							
+							feat.y += win.height;
+
+							feat.width += 0.1;
+							feat.x -= 0.05;
+
+							break;
+						default:
+						}
+
+						if ( feat.height > 0 ) {
+							FRect f = m.mf.featureGen.add( ff, feat );
+							if (c != null)
+								f.app.color = c;
+						}
 					}
-					
-//					Color avgCol = mean (m.rgb, frects );
-//					for (DRectangle r : frects) {
-//						
-//						Iterator<FRect> fit = m.mf.featureGen.get( Feature.WINDOW ).iterator();
-//						
-//						while (fit.hasNext() ) {
-//							FRect w = fit.next();
-//							if (w.intersects( r )) 
-//								if ( Math.abs( w.area() - r.area()) < w.area() / 2 ) 
-//									fit.remove();
-//						}
-//						
-//						FRect fr = m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
-//						fr.app.color = avgCol;
-//					}
-//					
-//					Regularizer r = new Regularizer();
-//					r.toReg = new Feature[] {};
-//					r.alpha = regAlpha;
-//					r.scale = regScale;
-//					
-//					m.mf.featureGen = r.go(Collections.singletonList( m.mf ), 1, null ).get( 1 ).featureGen;					
+
 				}
 
 			} catch ( IOException e ) {

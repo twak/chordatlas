@@ -108,7 +108,7 @@ public class HouseTool extends Tool {
 		SkelGen sg = new SkelGen( mesh, tweed, null );
 		tweed.frame.addGen( sg, true );
 		
-		 tweed.setTool( new TextureTool( tweed ) );
+//		 tweed.setTool( new TextureTool( tweed ) );
 		
 	}
 	
