@@ -258,9 +258,9 @@ public class PanesTexApp extends App implements HasApp {
 							src = mf.app.coarse;
 						
 						return new BufferedImage[] {
-								Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.coarse ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.coarse, "_spec.png" ) ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( mf.app.coarse, "_norm.png" ) ) ) 
+								Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
+								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
+								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_norm.png" ) ) ) 
 						};
 					}
 				};
@@ -295,8 +295,8 @@ public class PanesTexApp extends App implements HasApp {
 							for (int i = 0; i < 3; i++ ) {
 								Graphics2D tpg = toPatch[i].createGraphics();
 								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
-								tpg.setColor (Color.magenta);
-								tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
+//								tpg.setColor (Color.magenta);
+//								tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
 								tpg.dispose();
 							}
 						}
