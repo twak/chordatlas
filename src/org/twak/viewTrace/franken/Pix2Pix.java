@@ -320,7 +320,7 @@ public class Pix2Pix {
 				return out;
 		}
 
-		if ( toEdit.postState == null ) 
+		if ( toEdit.postState == null || toEdit.postState.outerWallRect == null ) 
 			return toEdit.getAsRect();
 		else
 			return toEdit.postState.outerWallRect;
@@ -429,7 +429,7 @@ public class Pix2Pix {
 		
 		for ( FRect r : rects ) {
 
-			if ( toEdit.postState.generatedWindows.contains( r ) ) {
+			if ( toEdit.postState == null || toEdit.postState.generatedWindows.contains( r ) ) {
 				
 				DRectangle w = bounds.transform( mini.normalize( r ) );
 

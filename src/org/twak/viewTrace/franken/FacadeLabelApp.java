@@ -261,7 +261,7 @@ public class FacadeLabelApp extends App {
 					Regularizer reg = new Regularizer();
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
-//					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
+					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
 				}
 				
 

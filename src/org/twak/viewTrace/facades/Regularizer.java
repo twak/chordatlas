@@ -113,7 +113,12 @@ public class Regularizer {
 			return out;
 		}
 		
-		alignMFs (out);
+		if (toReg.length > 0)
+			alignMFs (out);
+		else {
+			lp = in.get( 0 ).left;
+			rp = in.get( 0 ).width;
+		}
 		
 		if (debugFrac == 0) {
 			out.add(0, new MiniFacade() );
@@ -499,7 +504,7 @@ public class Regularizer {
 		mergeRemoveSmall( out );
 		
 		DRectangle mr = out.getAsRect();
-		mr.width -= 0.2; // ensure everything is comfortably within the bounds
+		mr.width -= 0.01; // ensure everything is comfortably within the bounds
 		mr.x += 0.1; 
 		
 		for ( Feature f : Feature.values() ) { // clip to minifacade

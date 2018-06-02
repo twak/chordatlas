@@ -141,6 +141,9 @@ public class FacadeGreebleApp extends App implements HasApp {
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
 				MiniFacade mf = (MiniFacade) fga.parent.hasA;
 
+				if (mf.postState == null)
+					continue;
+				
 				mf.featureGen.removeAll( toGenerate );
 
 				gR.setColor( CMPLabel.Background.rgb );
@@ -299,9 +302,16 @@ public class FacadeGreebleApp extends App implements HasApp {
 				r.alpha = regAlpha;
 				r.scale = regScale;
 
-//				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
+				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
+				
+				need to tell all frects.mf = m.mf
+						check that window positions are the same
+				 with non-square faces, we draw iwndow to the long place?
+				 empty facades...
+				moldings over windows
+				 some dormers didnt get textured
 
-				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW ) ) {
+				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW, Feature.DOOR ) ) {
 
 					for ( Feature ff : win.attachedHeight.cache.keySet() ) {
 
@@ -398,6 +408,9 @@ public class FacadeGreebleApp extends App implements HasApp {
 			for (int x = (int) f.x; x < f.x + f.width; x++)
 				for (int y = rgb.getHeight() - (int)  (f.y + f.height); y < rgb.getHeight() - (f.y ); y++) 
 				{
+					if (x < 0 || x >= rgb.getWidth() || y < 0 || y >= rgb.getHeight() )
+						continue;
+					
 					int val = rgb.getRGB( x, y );
 					values[0] += ( val & 0xff0000 ) >> 16;
 					values[1] += ( val & 0x00ff00 ) >> 8;
