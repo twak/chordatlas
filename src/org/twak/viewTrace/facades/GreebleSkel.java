@@ -253,7 +253,7 @@ public class GreebleSkel {
 			
 			
 			if (greebleGrid != null) {
-				edges( output, roofColor );
+//				edges( output, roofColor );
 			// output per-material objects
 			greebleGrid.attachAll(node, chain, output, new ClickMe() {
 				@Override

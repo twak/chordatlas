@@ -24,6 +24,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.ProgressMonitor;
 import javax.swing.border.EmptyBorder;
 
 import org.twak.utils.Mathz;
@@ -124,11 +125,11 @@ public class JointUI extends JPanel {
 		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
 		
 		JButton close = new JButton( "ok" );
-		
+
 		close.addActionListener( l -> {
 			jd.redraw();
 			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-			globalUpdate.run();
+//			globalUpdate.run();
 		} );
 		
 		add( close, BorderLayout.SOUTH );
@@ -314,11 +315,11 @@ public class JointUI extends JPanel {
 					public void heresTheFile( File f ) throws Throwable {
 						BlockApp editing = jd.root;
 						try {
-						jd = (JointStyle) new XStream().fromXML( f );
-						jd.root = editing;
-						jd.redraw();
-						selectedJoint = null;
-						buildNetSelectUI();
+							jd = (JointStyle) new XStream().fromXML( f );
+							jd.root = editing;
+							jd.redraw();
+							selectedJoint = jd.joints.get( 0 );
+							buildNetSelectUI();
 						}
 						catch (Throwable th) {
 							JOptionPane.showMessageDialog( frame, "an error occured while loading " + f.getName() );

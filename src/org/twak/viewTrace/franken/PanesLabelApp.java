@@ -85,7 +85,7 @@ public class PanesLabelApp extends App {
 				for (App a : apps)
 					((PanesLabelApp)a).regularize = selected;
 				
-				apps.computeAll(globalUpdate);
+				globalUpdate.run();
 			}
 		};
 	}
@@ -131,10 +131,10 @@ public class PanesLabelApp extends App {
 				
 				PanesLabelApp pla =  (PanesLabelApp)a;
 
-				pla.frameScale = pla.frameWidth * scale / ni.resolution;
+				pla.frameScale = 0.5 * pla.frameWidth * scale / ni.resolution;
 				
 				if (r.width > 3) // small frame sizes start to look strange 
-					pla.frameScale *= 4;
+					pla.frameScale *= 8;
 				
 				p2.addInput( bi, bi, null, meta, a.styleZ, pla.frameScale );
 

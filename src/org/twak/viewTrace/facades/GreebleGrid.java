@@ -793,10 +793,6 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							
-							if (w.f == Feature.MOULDING)
-								System.out.println(" creating moulding ++ " + rect);
-							
 							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
 						}
 					} );

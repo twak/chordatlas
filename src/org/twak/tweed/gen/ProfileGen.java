@@ -583,6 +583,9 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 					Node profileNode = new Node();
 //					dispCol = new ColorRGBA( randy.nextFloat(), randy.nextFloat(), randy.nextFloat(), 1 );
 					
+					if (Double.isNaN( profileLine.start.x ) )
+						continue;
+					
 					MegaFacade pMF = mf.moveTo(profileLine);
 					
 						if ( pi >= 1 ) {

@@ -74,7 +74,7 @@ public class MultiModal implements StyleSource {
 	}
 
 	@Override
-	public JPanel getUI( Runnable update ) {
+	public JPanel getUI( Runnable update, SelectedApps sa ) {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );

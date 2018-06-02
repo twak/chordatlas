@@ -149,17 +149,24 @@ public class NetExamples extends JComponent {
 					
 					startTime = System.currentTimeMillis();
 					
-					
-					
 					for (int i = 0; i < batchSize; i++) {
 						
 						int index = randy.nextInt(inputs.size());
 						
 						double[] z = styleSource.draw( randy, null );
 						
+						
+						Double scale = 0.1;
+						
+						if (exemplar.name.contains ("pane") )
+							scale = 0.05 * Math.random() + 0.01;
+						else if (exemplar.name == "roof")
+							scale = null;
+						
+						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
 								new UniqueInt ( index ),
-								styleSource.draw( randy, null ), exemplar.name == "roof" ? null : 0.1 ) ;//scales.get(index) );
+								styleSource.draw( randy, null ),scale ) ;//scales.get(index) );
 						
 					}
 					

@@ -13,7 +13,9 @@ import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.ProgressMonitor;
 
+import org.twak.tweed.TweedFrame;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
@@ -168,6 +170,8 @@ public class JointStyle implements StyleSource {
 		
 		Random randy = new Random(0xDEADBEEF);
 
+		root.styleSource = this; 
+		
 		for ( App building : root.getDown().valueList() )  {
 			
 			MultiMap<App, App> bakeWith = new MultiMap<>();
@@ -312,7 +316,7 @@ public class JointStyle implements StyleSource {
 	}
 
 	@Override
-	public JPanel getUI( Runnable update ) {
+	public JPanel getUI( Runnable update, SelectedApps sa ) {
 		JPanel out = new JPanel(new ListDownLayout() );
 		
 
@@ -337,8 +341,13 @@ public class JointStyle implements StyleSource {
 		redaw.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				redraw();
+				
 				update.run();
+				
+//				new Thread() {
+//					public void run() {
+//					};
+//				}.start();
 			}
 		} );
 		out.add( redaw );

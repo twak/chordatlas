@@ -224,7 +224,7 @@ public class MultiModalEditor extends JPanel {
 			} );
 			
 			add (closerP, BorderLayout.NORTH);
-			add (w.ss.getUI( localUpdate ), BorderLayout.CENTER);
+			add (w.ss.getUI( localUpdate, null ), BorderLayout.CENTER);
 		}
 		
 	}

@@ -57,7 +57,7 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	}
 
 	@Override
-	public JPanel getUI( Runnable update ) {
+	public JPanel getUI( Runnable update, SelectedApps sa ) {
 
 		JPanel out = new JPanel( new ListDownLayout() );
 

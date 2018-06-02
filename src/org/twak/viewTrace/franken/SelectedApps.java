@@ -17,12 +17,14 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
+import org.twak.utils.ui.Cancellable;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.HasApp;
@@ -86,7 +88,7 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	public void computeAll( Runnable globalUpdate ) {
+	public void computeAll( Runnable globalUpdate, ProgressMonitor m ) {
 		
 		MultiMap<Integer, App> todo = new MultiMap<>();
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
@@ -100,6 +102,8 @@ public class SelectedApps extends ArrayList<App>{
 		Runnable update = new Runnable() {
 			@Override
 			public void run() {
+				
+				System.out.println("selected apps createUI shim");
 				
 				if (exemplar instanceof BlockApp)
 					for (App building : exemplar.getDown().valueList())
@@ -164,6 +168,7 @@ public class SelectedApps extends ArrayList<App>{
 				}.start();
 			}
 		}, "texture", exemplar.getValidAppModes() );
+		
 		buildLayout(exemplar.appMode, options, () -> refresh( update ) );
 		
 //		if ( NetInfo.get( exemplar ).resolution > 0)
@@ -176,7 +181,7 @@ public class SelectedApps extends ArrayList<App>{
 	}
 
 	protected void refresh( Runnable update ) {
-		new Thread ( () -> SelectedApps.this.computeAll(update) ).start();
+		new Thread ( () ->  SelectedApps.this.computeAll(update, null) ).start();
 	}
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
@@ -292,7 +297,7 @@ public class SelectedApps extends ArrayList<App>{
 
 				options.removeAll();
 				options.setLayout( new BorderLayout() );
-				options.add( ss.getUI(update), BorderLayout.CENTER );
+				options.add( ss.getUI(update, SelectedApps.this), BorderLayout.CENTER );
 				options.repaint();
 				options.revalidate();
 				

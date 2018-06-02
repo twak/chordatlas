@@ -10,10 +10,11 @@ import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.ProgressMonitor;
 
+import org.twak.tweed.TweedFrame;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.Cancellable;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
@@ -81,24 +82,38 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren (int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
+		ProgressMonitor pm = new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "", 0, 100 );
 		
-		computeWithChildren_( Math.max (1,stage), todo, globalUpdate, new Cancellable() );
+		try {
+			computeWithChildren_( Math.max (1,stage), todo, globalUpdate, pm );
+		} finally {
+			if (pm != null)
+				pm.close();
+		}
 	}
 	
-	private static void computeWithChildren_ (int stage, MultiMap<Integer, App> done, Runnable globalUpdate, Cancellable pm ) {
-
-		if ( pm.cancelled )
-			return;
+	private static void computeWithChildren_ (int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
 
 		if ( stage >= NetInfo.index.size() ) {
 			return;
 		}
 
+		
 		Set<App> todo = new LinkedHashSet<>();
 
 		Class k = NetInfo.evaluationOrder.get( stage );
 
 		System.out.println ("computing " + k.getSimpleName() );
+		
+		if ( pm != null ) {
+			pm.setMaximum( NetInfo.index.size() );
+			pm.setProgress( stage );
+			pm.setNote( "processing " + k.getSimpleName() );
+
+			if ( pm.isCanceled() )
+				return;
+
+		}
 		
 		todo.addAll( done.get( stage ) ); 
 		
@@ -128,10 +143,19 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		App.computeWithChildren_( stage + 1, done, globalUpdate, pm );
 	}
-	private static void computeBatch( List<App> todo, int batchStart, Runnable globalUpdate, Cancellable pm ) {
+	private static void computeBatch( List<App> todo, int batchStart, Runnable globalUpdate, ProgressMonitor pm ) {
 
 		if (batchStart >= todo.size())
 			return;
+		
+		if ( pm != null ) {
+
+			pm.setNote(  todo.get( 0 ).name + " " + batchStart + "/"+todo.size() );
+			pm.setMaximum( todo.size() );
+			pm.setProgress( batchStart );
+			if ( pm.isCanceled() )
+				return;
+		}
 		
 		List<App> batch = todo.subList( batchStart, Math.min( todo.size(), batchStart + Batch_Size ) );
 		

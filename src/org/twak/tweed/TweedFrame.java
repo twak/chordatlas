@@ -480,9 +480,17 @@ public class TweedFrame {
 					new SimpleFileChooser( frame, false, "Select skeleton to load", new File( Tweed.JME ), "xml" ) {
 						public void heresTheFile( File skelGen ) throws Throwable {
 							try {
-								SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
-								sg.onLoad( tweed );
-								addGen( sg, true  );
+								
+								for ( File f : skelGen.getParentFile().listFiles() ) {
+									try {
+										SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
+										sg.onLoad( tweed );
+										addGen( sg, true );
+										break;
+									} catch ( Throwable th ) {
+										th.printStackTrace();
+									}
+								}
 							}
 							catch (Throwable th ) {
 								th.printStackTrace();

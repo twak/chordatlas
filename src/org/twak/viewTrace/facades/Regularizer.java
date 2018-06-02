@@ -391,10 +391,10 @@ public class Regularizer {
 		out.width = rp - lp;
 		out.imageFeatures = in.get( 0 ).imageFeatures;
 		
-		if (toReg.length == 0)
-			out.height = in.stream().mapToDouble( mf -> mf.height ).average().getAsDouble();
-		else
-			out.height = 500;
+//		if (toReg.length == 0)
+		out.height = Double.MAX_VALUE;
+//		else
+//			out.height = in.stream().mapToDouble( mf -> mf.height ).average().getAsDouble();
 		
 		double[] color = new double[] {0,0,0,1}; 
 //		out.groundColor = new double[] {0,0,0,1};
@@ -416,9 +416,6 @@ public class Regularizer {
 		}
 		
 		out.app.color = Colourz.to4( color );
-		
-		
-		
 		
 		Cache2<Outer, Integer, List<FRect>> corniceX = new ArrayCache2();
 		Cache2<Outer, Integer, List<FRect>> sillX = new ArrayCache2();
@@ -499,6 +496,7 @@ public class Regularizer {
 				out.featureGen.put( o.f, o );
 			}
 		}
+		
 		
 		spreadAttachedOverGrid( Feature.SILL, sillX );
 		spreadAttachedOverGrid( Feature.CORNICE, corniceX );

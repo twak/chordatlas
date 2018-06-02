@@ -11,7 +11,7 @@ import org.twak.viewTrace.franken.SelectedApps;
 public interface StyleSource {
 	
 	public double[] draw(Random random, App app);
-	public JPanel getUI(Runnable update);
+	public JPanel getUI(Runnable update, SelectedApps sa);
 	public boolean install( SelectedApps selectedApps ); // return true to handle installation yourself
 	public StyleSource copy();
 }
