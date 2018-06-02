@@ -119,9 +119,11 @@ public class GreebleSkel {
 		for ( Face f : output.faces.values() )  {
 			WallTag wt = ((WallTag) GreebleHelper.getTag( f.profile, WallTag.class ));
 			
-			if (wt != null ) 
+			if (wt != null ) {
 				if (wt.miniFacade != null)
 					allMFs.add( wt.miniFacade );
+			}
+			
 		}
 		
 		if (tweed != null)
@@ -187,7 +189,6 @@ public class GreebleSkel {
 			
 			MiniFacade mf2 = null;
 			
-			
 			Set<QuadF> processedFeatures = new HashSet<>();
 			
 			Line megafacade = new Line();
@@ -225,7 +226,9 @@ public class GreebleSkel {
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) {
-					mf2.postState.generatedWindows.add( q1.original );
+					if (q1.original.f == Feature.WINDOW || q1.original.f == Feature.SHOP) {
+						mf2.postState.generatedWindows.add( q1.original );
+					}
 				}
 			}
 			

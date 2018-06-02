@@ -153,7 +153,7 @@ public class RoofGreebleApp extends App implements HasApp {
     
     @Override
     public void finishedBatches( List<App> list ) {
-    	for (App a : list)
-    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
+//    	for (App a : list)
+//    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
     }
 }

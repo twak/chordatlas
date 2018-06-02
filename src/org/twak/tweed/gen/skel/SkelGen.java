@@ -317,7 +317,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				tagWalls( ( SuperFace) se.face, profile, se, lpb.get(), lpb.getNext().get() );
 				plan.addLoop( profile.points.get( 0 ), plan.root, profile );
 
-				b.tags.add( new SETag( se ) );
+				b.tags.add( new SETag( se, sf ) );
 
 				loop.prepend( b );
 				plan.profiles.put( b, profile );
@@ -488,6 +488,20 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 								tweed.frame.setGenUI( null ); // current selection is invalid
 								sf.skel = (PlanSkeleton) threadKey;
 								
+
+								for ( Face f : sf.skel.output.faces.values() ) {
+									WallTag wt = ( (WallTag) GreebleHelper.getTag( f.profile, WallTag.class ) );
+
+									if ( wt != null && wt.miniFacade == null ) { // created by siteplan
+										wt.miniFacade = new MiniFacade();
+
+										SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
+
+										if ( set != null )
+											wt.miniFacade.app.parent = (SuperFace) set.se.face;
+									}
+								}
+								
 								sf.skel.output.addNonSkeletonSharedEdges(new RoofTag( Colourz.toF4( sf.mr.app.color )) );
 								sf.mr.setOutline( sf.skel.output );
 
@@ -506,7 +520,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 						bar.tags.clear();
 						SuperEdge se = new SuperEdge( bar.start, bar.end, null );
 						
-						SETag tag = new SETag( se );
+						SETag tag = new SETag( se, sf );
 						tag.color = Rainbow.random();
 						tag.name = Math.random()+"";
 						bar.tags.add (tag);

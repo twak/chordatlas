@@ -3,14 +3,17 @@ package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.Cancellable;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
@@ -76,70 +79,133 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static synchronized void computeWithChildren (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static synchronized void computeWithChildren (int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		computeWithChildren_( batchStart, stage, todo, globalUpdate );
+		
+		computeWithChildren_( Math.max (1,stage), todo, globalUpdate, new Cancellable() );
 	}
 	
-	private static void computeWithChildren_ (int batchStart, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
-		
-		if (stage >= NetInfo.index.size())
-		{
-//			globalUpdate.run();
-			return;
-		}
-		
-		if (todo.get( stage ).isEmpty()) {
-			App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
-			return;
-		}
-		
-		if (batchStart >= todo.get(stage).size()) {
-			System.out.println( "finishing "+ todo.get( stage ).get( 0 ).getClass().getSimpleName() );
-			
-			todo.get(stage).get(0).finishedBatches(todo.get(stage));
-			
-			globalUpdate.run();
-			
-			for (App a : new ArrayList<> ( todo.get( stage )) ) // app might have created new children
-				for (App next : a.getDown().valueList())
-					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
-			
-			App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
-			
-		} else {
-		
-			List<App> all = todo.get( stage );
-			List<App> batch = new ArrayList<>();
-			
-			for ( int i = batchStart; i < Math.min( all.size(), batchStart + Batch_Size ); i++ ) {
-				App app = all.get( i );
-				
-				for (App next : app.getDown().valueList()) // add all children, even if not eval'd
-					todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
-				
-				if (app.appMode == AppMode.Net) {
-					
-					if (app.styleSource != null)
-						app.styleZ = app.styleSource.draw( randy, app );
-					
-					batch.add( app );
-				}
-			}
+	private static void computeWithChildren_ (int stage, MultiMap<Integer, App> done, Runnable globalUpdate, Cancellable pm ) {
 
-			if (!batch.isEmpty()) {
-				System.out.println( "batch " + batchStart +"/"+ all.size() + " "+  todo.get( stage ).get( 0 ).getClass().getSimpleName() );
-				batch.get( 0 ).computeBatch ( () -> App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate ), batch );
-//				App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate );
-			}
-			else {
-				todo.get(stage).get(0).finishedBatches(todo.get(stage));
-				globalUpdate.run();
-				App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
-			}
+		if ( pm.cancelled )
+			return;
+
+		if ( stage >= NetInfo.index.size() ) {
+			return;
 		}
+
+		Set<App> todo = new LinkedHashSet<>();
+
+		Class k = NetInfo.evaluationOrder.get( stage );
+
+		System.out.println ("computing " + k.getSimpleName() );
 		
+		todo.addAll( done.get( stage ) ); 
+		
+		// collect all current children from preivous stages
+		for ( int i = 0; i < stage; i++ )
+			for ( App a : done.get( i ) ) 
+				for ( App n : a.getDown().valueList() )
+					if ( n.appMode == AppMode.Net && n.getClass() == k ) {
+						todo.add( n );
+					}
+		
+		for (App a : todo)
+			if ( a.styleSource != null )
+				a.styleZ = a.styleSource.draw( randy, a );
+
+		List<App> list = new ArrayList(todo);
+		computeBatch ( list , 0, globalUpdate, pm);
+		
+		System.out.println ("finished "+todo.size()+" " + k.getSimpleName() +"s" );
+
+		if (!todo.isEmpty()) {
+			done.putAll( stage, todo );
+			list.get(0).finishedBatches( new ArrayList<>( todo ) );
+		}
+			
+		globalUpdate.run();
+		
+		App.computeWithChildren_( stage + 1, done, globalUpdate, pm );
 	}
+	private static void computeBatch( List<App> todo, int batchStart, Runnable globalUpdate, Cancellable pm ) {
+
+		if (batchStart >= todo.size())
+			return;
+		
+		List<App> batch = todo.subList( batchStart, Math.min( todo.size(), batchStart + Batch_Size ) );
+		
+		System.out.println( "batch " + batchStart + "/" + todo.size() + " " );
+		batch.get( 0 ).computeBatch( () -> App.computeBatch( todo, batchStart + Batch_Size, globalUpdate, pm ), batch );
+		
+		globalUpdate.run();
+	}
+
+//	private static void computeWithChildren_ (int batchStart, int stage, MultiMap<Integer, App> done, 
+//			
+//			Runnable globalUpdate, Cancellable pm ) {
+//		
+//		if (pm.cancelled)
+//			return;
+//		
+//		if (stage >= NetInfo.index.size())
+//		{
+////			globalUpdate.run();
+//			return;
+//		}
+//		
+//		
+//		if (done.get( stage ).isEmpty()) {
+//			App.computeWithChildren_( 0, stage+1, done, globalUpdate, pm );
+//			return;
+//		}
+//		
+//		if (batchStart >= done.get(stage).size()) {
+//			System.out.println( "finishing "+ done.get( stage ).get( 0 ).getClass().getSimpleName() );
+//			
+//			done.get(stage).get(0).finishedBatches(done.get(stage));
+//			
+//			globalUpdate.run();
+//			
+//			for (App a : new ArrayList<> ( done.get( stage )) ) // app might have created new children
+//				for (App next : a.getDown().valueList())
+//					done.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
+//			
+//			App.computeWithChildren_( 0, stage+1, done, globalUpdate, pm );
+//			
+//		} else {
+//			
+//			List<App> all = done.get( stage );
+//			List<App> batch = new ArrayList<>();
+//			
+//			for ( int i = batchStart; i < Math.min( all.size(), batchStart + Batch_Size ); i++ ) {
+//				App app = all.get( i );
+//				
+//				for (App next : app.getDown().valueList()) // add all children, even if not eval'd
+//					done.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next, true );
+//				
+//				if (app.appMode == AppMode.Net) {
+//					
+//					if (app.styleSource != null)
+//						app.styleZ = app.styleSource.draw( randy, app );
+//					
+//					batch.add( app );
+//				}
+//			}
+//			
+//			if (!batch.isEmpty()) {
+//				System.out.println( "batch " + batchStart +"/"+ all.size() + " "+  done.get( stage ).get( 0 ).getClass().getSimpleName() );
+//				batch.get( 0 ).computeBatch ( () -> App.computeWithChildren_( batchStart + Batch_Size, stage, done, globalUpdate, pm ), batch );
+////				App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate );
+//			}
+//			else {
+//				done.get(stage).get(0).finishedBatches(done.get(stage));
+//				globalUpdate.run();
+//				App.computeWithChildren_( 0, stage+1, done, globalUpdate, pm );
+//			}
+//		}
+//		
+//	}
 
 	public void finishedBatches( List<App> list ) {
 		// hook to compute after all batches have run

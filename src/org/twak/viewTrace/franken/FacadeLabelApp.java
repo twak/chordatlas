@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +17,7 @@ import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -231,10 +231,15 @@ public class FacadeLabelApp extends App {
 							f.x -= gap;
 					}
 					
-					if (m.mf.postState != null)
-					for (Point2d p : f.points()) 
-						if ( Loopz.inside( p, m.mf.postState.occluders) )
-							continue i;
+//					if (m.mf.postState != null) {
+//						for (Point2d p : f.points()) { 
+//							if ( Loopz.inside( p, m.mf.postState.occluders) )
+//								continue i;
+//							if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.wallFaces) ) || 
+//									 Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.roofFaces) ) ) )
+//								continue i;
+//						}
+//					}
 					
 					FRect window = m.mf.featureGen.add( Feature.WINDOW, f );
 					
@@ -262,6 +267,7 @@ public class FacadeLabelApp extends App {
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
 					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
+					m.mf.featureGen.setMF(m.mf);
 				}
 				
 
@@ -311,6 +317,7 @@ public class FacadeLabelApp extends App {
 			MiniFacade mf = (MiniFacade)a.hasA;
 			FacadeTexApp fta = mf.app;
 			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
+			fta.chimneyTexture = null;
 		}
 		
 		// compute dormer-roof locations

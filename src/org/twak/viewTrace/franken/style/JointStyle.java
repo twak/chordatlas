@@ -166,23 +166,19 @@ public class JointStyle implements StyleSource {
 	
 	public void redraw() {
 		
-//		install(Collections.singletonList( this.root ));
-
-		MultiMap<App, App> bakeWith = new MultiMap<>();
-
-		
-		for ( Joint j : joints ) 
-			findBake( 0, new MultiMap<>(0, root), j, bakeWith );
-
 		Random randy = new Random(0xDEADBEEF);
 
 		for ( App building : root.getDown().valueList() )  {
 			
-			((BuildingApp)building).updateDormers( randy.nextBoolean() );
+			MultiMap<App, App> bakeWith = new MultiMap<>();
 			
-			redraw( 0, new MultiMap<>(0, root), 
-					new HashSet<>(), building.lastJoint = drawJoint( randy ), 
-					randy, bakeWith );
+			building.lastJoint = drawJoint( randy );
+			
+			findBake( 1, new MultiMap<>(1, building), building.lastJoint, bakeWith );
+			
+			((BuildingApp)building).updateDormers( randy.nextDouble() > 0.25 );
+			
+			redraw( 1, new MultiMap<>( 1, building), new HashSet<>(), building.lastJoint, randy, bakeWith );
 		}
 	}
 
@@ -225,7 +221,7 @@ public class JointStyle implements StyleSource {
 			PerJoint ai = j.appInfo.get( a.getClass() );
 			Class bw = ai.bakeWith;
 			
-			if ( bw != null ) {
+			if ( bw != a.getClass() ) {
 
 				App p = a;
 				
@@ -250,6 +246,7 @@ public class JointStyle implements StyleSource {
 
 	private void redraw( int stage,  MultiMap<Integer, App> todo, Set<App> drawn, Joint j, Random random, MultiMap<App, App> bakeWith ) {
 
+		
 		if (stage >= NetInfo.evaluationOrder.size())
 			return;
 		

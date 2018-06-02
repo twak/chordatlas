@@ -107,7 +107,7 @@ public class RoofTexApp extends App {
 
 						MiniRoof mr = ((MiniRoof)e.getKey());
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, null,  null, new RescaleOp(0.5f, 1.5f, null ), new BufferedImage[3] );
+						String dest = Pix2Pix.importTexture( e.getValue(), 50, null,  null, new RescaleOp(0.5f, 1.5f, null ), new BufferedImage[3] );
 
 						if ( dest != null ) {
 							zuper.textures = null;

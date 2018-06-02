@@ -81,7 +81,10 @@ public class MiniFacade implements HasApp {
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
+		
 		this.app = m.app;// m.app.copy();
+		this.appLabel = m.appLabel;
+		
 		this.featureGen = m.featureGen.copy(this);
 		this.postState = m.postState;
 		

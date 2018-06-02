@@ -183,7 +183,7 @@ public class Regularizer {
 				for (FRect d :  mf.featureGen.get(Feature.DOOR))
 					constrainDoor (mf, d, alpha);
 				
-				for (FRect m :  mf.featureGen.get(Feature.MOULDING))
+				for (FRect m :  new ArrayList<>(  mf.featureGen.get(Feature.MOULDING)) )
 					constrainMoulding( mf, m, alpha);
 			}
 			
@@ -391,6 +391,11 @@ public class Regularizer {
 		out.width = rp - lp;
 		out.imageFeatures = in.get( 0 ).imageFeatures;
 		
+		if (toReg.length == 0)
+			out.height = in.stream().mapToDouble( mf -> mf.height ).average().getAsDouble();
+		else
+			out.height = 500;
+		
 		double[] color = new double[] {0,0,0,1}; 
 //		out.groundColor = new double[] {0,0,0,1};
 		
@@ -419,7 +424,7 @@ public class Regularizer {
 		Cache2<Outer, Integer, List<FRect>> sillX = new ArrayCache2();
 		Cache2<Outer, Integer, List<FRect>> balX = new ArrayCache2();
 
-		out.height = in.stream().mapToDouble( mf -> mf.height ).average().getAsDouble();
+		
 		out.groundFloorHeight = in.stream().mapToDouble( mf -> mf.groundFloorHeight ).average().getAsDouble();
 		
 		for (int i = 0; i < ids; i++) {
@@ -1324,6 +1329,62 @@ public class Regularizer {
 	
 	private void constrainMoulding( MiniFacade mf, FRect d, double alpha ) {
 		
+
+		for ( int j = 0; j < d.adjacent.length; j++ ) {
+			
+			FRect n = d.adjacent[j];
+			if (n == null)
+				continue;
+			
+			DRectangle u = d.union( n ), i = d.intersect( n );
+			
+			double ia = i == null ? 0 : i.area();
+			
+			if ( (n.area() + d.area() - ia) / u.area() > 0.7 ) {
+				d.setFrom(u);
+				d.adjacent[j] = null;
+				mf.featureGen.remove( n.f, n );
+			}
+		}
+
+		for ( FRect avoid : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
+			if ( d.intersects( avoid ) ) {
+
+				for ( Bounds[] b : new Bounds[][] { 
+					{ Bounds.YMIN, Bounds.YMAX },
+					{ Bounds.XMIN, Bounds.XMAX }, 
+					} ) {
+
+					Bounds min = b[ 0 ], max = b[ 1 ];
+
+					if ( d.get( max ) > avoid.get( min ) && d.get( max ) < avoid.get( max ) ) {
+
+						if ( d.get( min ) < avoid.get( min ) )
+							d.set( max, avoid.get( min ) );
+						else {
+							mf.featureGen.remove( d.f, d );
+							return;
+						}
+					} else if ( d.get( min ) > avoid.get( min ) && d.get( min ) < avoid.get( max ) ) {
+
+						if ( d.get( max ) > avoid.get( max ) ) {
+							d.set( min, avoid.get( max ) );
+						} else {
+							mf.featureGen.remove( d.f, d );
+							return;
+						}
+					}
+
+				}
+			}
+		}
+		
+//			if ( n != null && similar( n, d ) ) {
+//				n.attached.putAll (d.attached);
+//				mf.featureGen.remove( d.f, d );
+//				break;
+//			}
+//		
 		final double tol = 4;
 		
 		if (d.x < mf.left + tol)

@@ -14,21 +14,23 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
 import org.twak.utils.Cache;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
+import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.franken.Pix2Pix.EResult;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
-import org.twak.viewTrace.franken.Pix2Pix.EResult;
 
 public class PanesTexApp extends App implements HasApp {
 
@@ -91,9 +93,6 @@ public class PanesTexApp extends App implements HasApp {
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
-		
-		BufferedImage im = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
-		Graphics2D eg =  im.createGraphics();
 		
 
 		List<Meta> otherMEta = new ArrayList<>();
@@ -269,6 +268,7 @@ public class PanesTexApp extends App implements HasApp {
 				};
 				
 				try {
+					e:
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
 						Meta meta = (Meta) e.getKey();
@@ -293,6 +293,15 @@ public class PanesTexApp extends App implements HasApp {
 							d.y = ni.resolution - d.y - d.height;
 							
 							BufferedImage[] toPatch = facadesImages.get(mf);
+							
+//							if (mf.postState != null) 
+//							for (Point2d p : frect.points()) { 
+//								if ( Loopz.inside( p, mf.postState.occluders) )
+//									continue e;
+//								if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.wallFaces) ) || 
+//										 Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.roofFaces) ) ) )
+//									continue e;
+//							}
 							
 							if (toPatch == null)
 								continue;

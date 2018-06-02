@@ -69,4 +69,12 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		}
 		return out;
 	}
+
+	public void setMF( MiniFacade mf ) {
+		this.mf = mf;
+		for (FRect f : valueList()) {
+			f.mf = mf;
+		}
+		
+	}
 }

@@ -92,7 +92,7 @@ public class SelectedApps extends ArrayList<App>{
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
 		todo.putAll( i , this );
 		
-		App.computeWithChildren( 0, i, todo, globalUpdate );
+		App.computeWithChildren( i, todo, globalUpdate );
 	}
 	
 	public JPanel createUI( Runnable update_ ) {

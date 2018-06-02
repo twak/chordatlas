@@ -314,8 +314,11 @@ public class GreebleGrid {
 		{
 			w.app.coveringRoof = new Loop<Point2d>();
 
-			Point2d p = new Point2d(loc.x, loc.z), 
-					d = new Point2d (deepest.x, deepest.z);
+			Point2d p = new Point2d(loc.x, loc.z), d = new Point2d();
+			
+			d.scaleAdd( -depth, new Vector2d ( out.x, out.z), p );
+			
+//					d = new Point2d (deepest.x, deepest.z);
 			
 			p.scaleAdd(outset, new Vector2d ( out.x, out.z ) , p);
 			
@@ -339,7 +342,7 @@ public class GreebleGrid {
 			WindowGen.createWindow( window, glass, new Window( Jme3z.to ( loc ), Jme3z.to(along), Jme3z.to(up), 
 					l.original.width, l.original.height, depth, panelWidth, panelHeight ) );
 		else if (w.app.panes == null) {
-			createInnie( w, ZERO_ONE_UVS, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+			createInnie( w, null, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 			mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w ).add( w, ZERO_ONE_UVS, to3d, -0.2 );
 		} else {
 			createInnie( w, null, to3d, mbs.GRAY, -depth + outset - 0.5, -depth + outset - 0.5, 
@@ -790,6 +793,10 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
+							
+							if (w.f == Feature.MOULDING)
+								System.out.println(" creating moulding ++ " + rect);
+							
 							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
 						}
 					} );

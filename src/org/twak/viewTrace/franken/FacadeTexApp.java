@@ -45,6 +45,7 @@ public class FacadeTexApp extends App {
 	
 	public boolean dormer = true;
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
+	public String chimneyTexture;
 	
 	public FacadeTexApp( HasApp ha ) {
 		super( ha );
@@ -72,7 +73,7 @@ public class FacadeTexApp extends App {
 		
 		if (mf.postState != null)
 			
-		for (FRect r : mf.featureGen.get( Feature.WINDOW )) {
+		for (FRect r : mf.postState.generatedWindows ) { // featureGen.get( Feature.WINDOW )) {
 			
 //			r.mf = mf;
 //			r.app.hasA = r;
@@ -169,7 +170,7 @@ public class FacadeTexApp extends App {
 				gL.setColor( CMPLabel.Facade.rgb );
 				gE.setColor( CMPLabel.Facade.rgb );
 				
-				Stroke stroke = new BasicStroke( 3 );
+				Stroke stroke = new BasicStroke( 0.2f * (float) scale );
 				
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
@@ -184,17 +185,20 @@ public class FacadeTexApp extends App {
 					gE.draw( p );
 				}
 
-				gL.setColor( CMPLabel.Background.rgb );
-				gE.setColor( CMPLabel.Background.rgb );
-				
-				stroke = new BasicStroke( 1 );
+				stroke = new BasicStroke( 2 );
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				
 				for ( Loop<Point2d> l : mf.postState.occluders ) {
 						Polygon poly = Pix2Pix.toPoly( mf, maskLabel, mini, l );
+						gL.setColor( CMPLabel.Background.rgb );
+						gE.setColor( CMPLabel.Background.rgb );
 						gL.fill( poly );
 						gE.fill( poly );
+						gL.setColor( CMPLabel.Facade.rgb );
+						gE.setColor( CMPLabel.Facade.rgb );
+						gL.draw( poly );
+						gE.draw( poly );
 					}
 				
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
@@ -203,7 +207,22 @@ public class FacadeTexApp extends App {
 			Meta meta = new Meta( mf, maskLabel );
 
 			p2.addInput( labels, empty, null, meta, mf.app.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
+			
+			if (chimneyTexture == null) {
+				Meta m2 = new Meta (mf, null);
+
+				gL.setColor( CMPLabel.Background.rgb );
+				gL.fillRect( 0, 0, resolution, resolution );
+				
+				int inset = 40;
+				gL.setColor( CMPLabel.Facade.rgb );
+				gL.fillRect( inset, inset, resolution - 2*inset, resolution - 2*inset );
+				
+				p2.addInput( labels, empty, null, m2, mf.app.styleZ,  0.3 );
+				chimneyTexture = "in progress";
+			}
 		}
+		
 		
 		gL.dispose();
 		gE.dispose();
@@ -220,14 +239,22 @@ public class FacadeTexApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
+						boolean isChimney = meta.mask == null;
+						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, new BufferedImage[3] );
 
+						
 						if ( dest != null ) {
-							meta.mf.app.coarse = meta.mf.app.texture = dest;
 							
-							for (FRect r: meta.mf.featureGen.getRects( Feature.WINDOW )) {
-								r.app.panes = null;
-								r.app.texture = null;
+							if (isChimney) {
+								(meta.mf.app).chimneyTexture = dest;
+							} else {
+								meta.mf.app.coarse = meta.mf.app.texture = dest;
+
+								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
+									r.app.panes = null;
+									r.app.texture = null;
+								}
 							}
 							
 						}

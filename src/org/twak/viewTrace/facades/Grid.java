@@ -183,9 +183,13 @@ public class Grid implements ICanPaint {
 
 	public Map<Griddable, DRectangle> findPositions() {
 		
+		Map<Griddable, DRectangle> out = new HashMap<>();
+		
+		if (x == null || y == null)
+			return out;
+		
 		Map<Griddable, Double[]> rx = findRange(x), ry = findRange( y );
 		
-		Map<Griddable, DRectangle> out = new HashMap<>();
 		
 		rx.keySet().stream().forEach( g ->  out.put (g, new DRectangle( 
 				rx.get( g )[0],  
