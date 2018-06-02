@@ -155,6 +155,8 @@ public class NetExamples extends JComponent {
 						
 						int index = randy.nextInt(inputs.size());
 						
+						double[] z = styleSource.draw( randy, null );
+						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
 								new UniqueInt ( index ),
 								styleSource.draw( randy, null ), exemplar.name == "roof" ? null : 0.1 ) ;//scales.get(index) );

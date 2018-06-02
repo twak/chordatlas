@@ -216,10 +216,8 @@ public class Pix2Pix {
 					
 					o:
 					for ( Map.Entry<Object, double[]> e : results.entrySet() ) 
-						for ( int i = 0; i < e.getValue().length; i++ ) {
+						for ( int i = 0; i < e.getValue().length; i++ ) 
 							values[ i ] = e.getValue()[i];
-							break o;
-					}
 				
 					update.run();
 				}

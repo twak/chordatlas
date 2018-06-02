@@ -317,6 +317,7 @@ public class JointUI extends JPanel {
 						jd = (JointStyle) new XStream().fromXML( f );
 						jd.root = editing;
 						jd.redraw();
+						selectedJoint = null;
 						buildNetSelectUI();
 						}
 						catch (Throwable th) {
