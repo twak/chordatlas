@@ -33,7 +33,7 @@ import org.twak.viewTrace.franken.Pix2Pix.EResult;
 public class PanesTexApp extends App implements HasApp {
 
 	public PanesLabelApp parent;
-	public boolean useCoarseStyle = true;
+	public boolean useCoarseStyle = false;
 
 	public PanesTexApp(PanesLabelApp parent) {
 		super( (HasApp) null );
@@ -257,6 +257,9 @@ public class PanesTexApp extends App implements HasApp {
 						else
 							src = mf.app.coarse;
 						
+						if (src == null)
+							return null;
+						
 						return new BufferedImage[] {
 								Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
 								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
@@ -291,6 +294,9 @@ public class PanesTexApp extends App implements HasApp {
 							
 							BufferedImage[] toPatch = facadesImages.get(mf);
 							
+							if (toPatch == null)
+								continue;
+							
 //							if (false)
 							for (int i = 0; i < 3; i++ ) {
 								Graphics2D tpg = toPatch[i].createGraphics();
@@ -305,6 +311,10 @@ public class PanesTexApp extends App implements HasApp {
 					
 //					if (false)
 					for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
+						
+						if (updated.getValue() == null)
+							continue;
+						
 						String fileName = "scratch/" + UUID.randomUUID() +".png";
 						
 						BufferedImage[] imgs = updated.getValue();

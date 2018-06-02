@@ -70,6 +70,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.ColorOverlayFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
@@ -175,7 +176,7 @@ public class Tweed extends SimpleApplication {
 		setFov(0);
 		setCameraSpeed( 0 );
 		
-		if ( false ) {//TweedSettings.settings.SSAO ) {
+		if ( TweedSettings.settings.SSAO ) {
 			
 			FilterPostProcessor fpp = new FilterPostProcessor( assetManager );
 			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
@@ -550,60 +551,68 @@ public class Tweed extends SimpleApplication {
 	};
 
 	public void clearBackground() {
-		if (background == null) {
-			background = new Picture( "background" );
+
+		if ( !TweedSettings.settings.SSAO ) {
+
+			if ( background == null ) {
+				background = new Picture( "background" );
+			}
+			Material mat1 = new Material( getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
+			mat1.setColor( "Color", ColorRGBA.Black );
+			background.setMaterial( null );
+			background.setMaterial( mat1 );
 		}
-		Material mat1 = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-		mat1.setColor("Color", ColorRGBA.Black);
-		background.setMaterial(null);
-		background.setMaterial(mat1);
 	}
-	
+
 	final static String BG_LOC = "scratch/bg.jpg";
 
 	public void setBackground( BufferedImage bi ) {
+		if ( !TweedSettings.settings.SSAO ) {
 
-		try {
+			try {
 
-			long hack = System.currentTimeMillis();
+				long hack = System.currentTimeMillis();
 
-			ImageIO.write( bi, "jpg", new File( JME + BG_LOC + hack + ".jpg" ) );
-			background.setMaterial( null );
-			getAssetManager().deleteFromCache( new AssetKey<>( BG_LOC ) );
+				ImageIO.write( bi, "jpg", new File( JME + BG_LOC + hack + ".jpg" ) );
+				background.setMaterial( null );
+				getAssetManager().deleteFromCache( new AssetKey<>( BG_LOC ) );
 
-			Material mat = new Material( getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
-			mat.setTexture( "ColorMap", getAssetManager().loadTexture( BG_LOC + hack + ".jpg" ) );
-			//					mat.setColor("Color", ColorRGBA.Red); 
-			background.setMaterial( mat );
+				Material mat = new Material( getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
+				mat.setTexture( "ColorMap", getAssetManager().loadTexture( BG_LOC + hack + ".jpg" ) );
+				//					mat.setColor("Color", ColorRGBA.Red); 
+				background.setMaterial( mat );
 
-			//					background.setImage(assetManager, BG_LOC, false);
-			background.updateGeometricState();
+				//					background.setImage(assetManager, BG_LOC, false);
+				background.updateGeometricState();
 
-			gainFocus();
+				gainFocus();
 
-		} catch ( IOException e ) {
-			e.printStackTrace();
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
-	protected void buildBackground() {
-		
-		String bgKey = "background";
-		
-//		clearBackground();
-		
-		background.setWidth( cam.getWidth() );
-		background.setHeight( cam.getHeight() );
-		background.setPosition( 0, 0 );
-		background.updateGeometricState();
 
-		ViewPort pv = renderManager.createPreView( bgKey, cam );
-		pv.setClearFlags( true, true, true );
-		pv.attachScene( background );
-		
-		viewPort.setClearFlags( false, true, true );
-		
-		background.updateGeometricState();
+	protected void buildBackground() {
+
+		if ( !TweedSettings.settings.SSAO ) {
+			String bgKey = "background";
+
+			//		clearBackground();
+
+			background.setWidth( cam.getWidth() );
+			background.setHeight( cam.getHeight() );
+			background.setPosition( 0, 0 );
+			background.updateGeometricState();
+
+			ViewPort pv = renderManager.createPreView( bgKey, cam );
+			pv.setClearFlags( true, true, true );
+			pv.attachScene( background );
+
+			viewPort.setClearFlags( false, true, true );
+
+			background.updateGeometricState();
+		}
 
 	}
 

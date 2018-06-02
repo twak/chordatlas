@@ -131,7 +131,7 @@ public class PanesLabelApp extends App {
 				
 				PanesLabelApp pla =  (PanesLabelApp)a;
 
-				pla.frameScale = 0.6 * pla.frameWidth * scale / ni.resolution;
+				pla.frameScale = pla.frameWidth * scale / ni.resolution;
 				
 				if (r.width > 3) // small frame sizes start to look strange 
 					pla.frameScale *= 4;

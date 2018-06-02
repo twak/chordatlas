@@ -216,7 +216,7 @@ public class GreebleGrid {
 		loc.add(ptt[0]);
 		
 		WindowGen.createWindow( window, glass, new Window( Jme3z.to ( loc ), Jme3z.to(along), Jme3z.to(up), 
-				winPanel.width, winPanel.height, 0.3, panelWidth, panelHeight ) ); 
+				winPanel.width, winPanel.height, 0.0, panelWidth, panelHeight ) ); 
 		
 		Vector3f u = Jme3z.to(up), o = Jme3z.to( out );
 		
@@ -371,7 +371,7 @@ public class GreebleGrid {
 				
 				MeshBuilder roofTexture = roof.app.texture == null ? window : mbs.getTexture( "roof_" + roof.app.texture, roof.app.texture, roof );
 				
-				roofTexture.add( rp, uvs, true );
+				roofTexture.add( rp, roof.app.texture == null ?  null : uvs, true );
 			
 			}
 			else {

@@ -16,7 +16,7 @@ public class WallTag extends PlanTag{
 	public Line planLine;
 //	public float[] color = null;//new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	public boolean isGroundFloor, makeDoor = Math.random() < 0.5;
-	public double windowDepth = 0.5;//Math.random() * 0.3 + 0.4;
+	public double windowDepth = 0.4;//Math.random() * 0.3 + 0.4;
 	public double doorDepth = 0.4;
 	public float[] groundFloorColor;
 	public double sillHeight = -1, sillDepth = -1;

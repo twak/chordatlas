@@ -304,12 +304,12 @@ public class FacadeGreebleApp extends App implements HasApp {
 
 				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
 				
-				need to tell all frects.mf = m.mf
-						check that window positions are the same
-				 with non-square faces, we draw iwndow to the long place?
-				 empty facades...
-				moldings over windows
-				 some dormers didnt get textured
+//				need to tell all frects.mf = m.mf
+//						check that window positions are the same
+//				 with non-square faces, we draw iwndow to the long place?
+//				 empty facades...
+//				moldings over windows
+//				 some dormers didnt get textured
 
 				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW, Feature.DOOR ) ) {
 

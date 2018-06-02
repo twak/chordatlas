@@ -1,5 +1,7 @@
 package org.twak.tweed.gen.skel;
 
+import java.util.stream.Collectors;
+
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
@@ -8,6 +10,8 @@ import org.twak.utils.WeakListener.Changed;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
+import org.twak.viewTrace.facades.GreebleSkel;
+import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.App.AppMode;
 
 public class FacadeDesigner {
@@ -48,8 +52,12 @@ public class FacadeDesigner {
 							sg.setSkel( skel, sf );
 							sg.tweed.getRootNode().updateGeometricState();
 							
+							sg.block.faces.stream().map( x -> (SuperFace) x ).collect(Collectors.toSet() ).stream().
+								forEach( x -> new GreebleSkel( null, x ).
+										showSkeleton( x.skel.output, null, x.mr ) );
+							
 							if (se.toEdit.app.appMode == AppMode.Net) // needs prior setSkel to compute visible windows.
-							SkelGen.updateTexture( se.toEdit, new Runnable() {
+							SkelGen.updateTexture( sf, new Runnable() {
 								@Override
 								public void run() {
 									sg.tweed.enqueue( new Runnable() {

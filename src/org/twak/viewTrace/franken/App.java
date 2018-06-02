@@ -133,6 +133,7 @@ public abstract class App /*earance*/ implements Cloneable {
 //				App.computeWithChildren_( batchStart + Batch_Size, stage, todo, globalUpdate );
 			}
 			else {
+				todo.get(stage).get(0).finishedBatches(todo.get(stage));
 				globalUpdate.run();
 				App.computeWithChildren_( 0, stage+1, todo, globalUpdate );
 			}

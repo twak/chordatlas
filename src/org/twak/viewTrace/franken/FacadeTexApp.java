@@ -224,6 +224,12 @@ public class FacadeTexApp extends App {
 
 						if ( dest != null ) {
 							meta.mf.app.coarse = meta.mf.app.texture = dest;
+							
+							for (FRect r: meta.mf.featureGen.getRects( Feature.WINDOW )) {
+								r.app.panes = null;
+								r.app.texture = null;
+							}
+							
 						}
 					}
 

@@ -4,15 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
-import org.twak.tweed.gen.FeatureCache.MFPoint;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofGreeble;
 import org.twak.utils.collections.MultiMap;
@@ -153,4 +150,10 @@ public class RoofGreebleApp extends App implements HasApp {
 			}
 		}		
 	}
+    
+    @Override
+    public void finishedBatches( List<App> list ) {
+    	for (App a : list)
+    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
+    }
 }

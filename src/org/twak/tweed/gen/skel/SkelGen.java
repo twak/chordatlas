@@ -574,7 +574,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	}
 
 	public static void updateTexture (HasApp sf, Runnable update) {
-		new Thread( () -> new SelectedApps( HasApp.get( sf) ).computeAll( update ) ).start();
+		new Thread( () -> new SelectedApps( HasApp.get( sf ) ).computeAll( update ) ).start();
 	}
 	
 	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {

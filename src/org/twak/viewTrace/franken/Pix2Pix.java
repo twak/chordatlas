@@ -107,6 +107,7 @@ public class Pix2Pix {
 		if (inputs.isEmpty()) {
 			outDir.mkdirs();
 			finished( job, outDir );
+			return;
 		}
 		
 		try {
