@@ -342,6 +342,7 @@ public class JointStyle implements StyleSource {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				
+				redraw();
 				update.run();
 				
 //				new Thread() {

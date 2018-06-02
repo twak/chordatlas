@@ -82,7 +82,8 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren (int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		ProgressMonitor pm = new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "", 0, 100 );
+		ProgressMonitor pm = new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
+		
 		
 		try {
 			computeWithChildren_( Math.max (1,stage), todo, globalUpdate, pm );
