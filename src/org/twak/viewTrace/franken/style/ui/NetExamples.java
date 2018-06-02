@@ -47,6 +47,8 @@ public class NetExamples extends JComponent {
 	StyleSource styleSource;
 	
 	final static int BATCH_SIZE = 16;
+	
+	int batchSize = BATCH_SIZE;
 //	final static double scale = 0.5;
 	
 	final static int DRAW_SIZE = 128;
@@ -139,13 +141,17 @@ public class NetExamples extends JComponent {
 		new Thread () {
 			@Override
 			public void run() {
+				
+				batchSize = 4;
 				while (inputs.size() > 0 && go && isVisible()) {
 					
 					Pix2Pix p2 = new Pix2Pix( exemplar );
 					
 					startTime = System.currentTimeMillis();
 					
-					for (int i = 0; i < BATCH_SIZE; i++) {
+					
+					
+					for (int i = 0; i < batchSize; i++) {
 						
 						int index = randy.nextInt(inputs.size());
 						
@@ -154,6 +160,8 @@ public class NetExamples extends JComponent {
 								styleSource.draw( randy, null ), exemplar.name == "roof" ? null : 0.1 ) ;//scales.get(index) );
 						
 					}
+					
+					batchSize = BATCH_SIZE;
 					
 					p2.submitSafe( new Job() {
 						public void finished(java.util.Map<Object,File> results) {

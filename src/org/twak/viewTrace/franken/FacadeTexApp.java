@@ -45,7 +45,6 @@ public class FacadeTexApp extends App {
 	
 	public boolean dormer = true;
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
-	public String chimneyTexture;
 	
 	public FacadeTexApp( HasApp ha ) {
 		super( ha );
@@ -99,7 +98,7 @@ public class FacadeTexApp extends App {
 
 	public final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
-		specLookup.put( CMPLabel.Window.rgb, Color.white );
+		specLookup.put( CMPLabel.Window.rgb, new Color (180, 180, 180) );
 		specLookup.put( CMPLabel.Shop.rgb  , Color.darkGray );
 		specLookup.put( CMPLabel.Door.rgb  , Color.gray );
 	}
@@ -208,18 +207,18 @@ public class FacadeTexApp extends App {
 
 			p2.addInput( labels, empty, null, meta, mf.app.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
 			
-			if (chimneyTexture == null) {
+			if ( mf.app.getChimneyTexture() == null) {
 				Meta m2 = new Meta (mf, null);
 
 				gL.setColor( CMPLabel.Background.rgb );
 				gL.fillRect( 0, 0, resolution, resolution );
 				
-				int inset = 40;
+				int inset = 20;
 				gL.setColor( CMPLabel.Facade.rgb );
 				gL.fillRect( inset, inset, resolution - 2*inset, resolution - 2*inset );
 				
 				p2.addInput( labels, empty, null, m2, mf.app.styleZ,  0.3 );
-				chimneyTexture = "in progress";
+				mf.app.setChimneyTexture( "in progress" );
 			}
 		}
 		
@@ -247,7 +246,7 @@ public class FacadeTexApp extends App {
 						if ( dest != null ) {
 							
 							if (isChimney) {
-								(meta.mf.app).chimneyTexture = dest;
+								meta.mf.app.setChimneyTexture( dest );
 							} else {
 								meta.mf.app.coarse = meta.mf.app.texture = dest;
 
@@ -266,6 +265,14 @@ public class FacadeTexApp extends App {
 				whenDone.run();
 			}
 		} ) );
+	}
+	
+	public String getChimneyTexture() {
+		return ((MiniFacade)hasA).appLabel.superFace.app.chimneyTexture;
+	}
+
+	public void setChimneyTexture( String tex ) {
+		((MiniFacade)hasA).appLabel.superFace.app.chimneyTexture = tex;
 	}
 
 	private static class Meta {

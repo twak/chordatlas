@@ -18,6 +18,7 @@ public class BuildingApp extends App {
 
 	public SkelGen parent;
 	public boolean createDormers = Math.random() < 0.5;
+	public String chimneyTexture;
 	
 	public BuildingApp( SuperFace superFace ) {
 		super( superFace );

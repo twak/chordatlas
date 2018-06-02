@@ -180,7 +180,7 @@ public class GreebleGrid {
 	}
 	
 	
-	public static void createWindow( DRectangle winPanel, Matrix4d to3d, 
+	public void createWindow( DRectangle winPanel, Matrix4d to3d, 
 			MeshBuilder wall, 
 			MeshBuilder window, 
 			MeshBuilder glass, 
@@ -389,7 +389,7 @@ public class GreebleGrid {
 	}
 	
 
-	public static void moulding( Matrix4d to3d, DRectangle rect, MeshBuilder mb ) {
+	public void moulding( Matrix4d to3d, DRectangle rect, MeshBuilder mb ) {
 		
 		double hh = rect.height/2;
 		
@@ -448,7 +448,7 @@ public class GreebleGrid {
 		
 	}
 
-	protected  Vector3f[] findWorldBox( DRectangle door, Matrix4d to3d, double depth ) {
+	protected static Vector3f[] findWorldBox( DRectangle door, Matrix4d to3d, double depth ) {
 		
 		Point2d[] pts = door.points();
 		
@@ -486,7 +486,7 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void createInnie( DRectangle rect, DRectangle uvs, Matrix4d to3d, MeshBuilder mat, 
+	protected static void createInnie( DRectangle rect, DRectangle uvs, Matrix4d to3d, MeshBuilder mat, 
 			double depth, double atDepth, boolean[] hasBack ) {
 		
 		Vector3f[] jpts = findWorldBox( rect, to3d, depth );
@@ -507,7 +507,7 @@ public class GreebleGrid {
 			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, hasBack  );
 	}
 	
-	private void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
+	public static void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
 			MatMeshBuilder window, double paneDepth, double frameDepth ) {
 
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
@@ -867,12 +867,24 @@ public class GreebleGrid {
 //		return r;
 //	}
 
-	public void createChimney( Point3d onRoof, FCircle feature, Vector2d along, LinearForm3D pitch ) {
+	public void createChimney( Point3d onRoof, MiniRoof mr, FCircle feature, Vector2d along, LinearForm3D pitch, String tex ) {
 		
-		MatMeshBuilder mat =
-				feature.radius > 0.2 ?
-				mbs.get( "chimney_brown", new float[] { 78f/255, 51f / 255, 31f / 255, 1f }  ) :
-				mbs.GRAY ;
+		MatMeshBuilder mat;
+		
+		boolean uvs;
+		
+		if (feature.radius < 0.2) { 
+			mat = mbs.GRAY;
+			uvs = false;
+		}
+		else if (tex != null) {
+			mat = mbs.getTexture( tex, tex, mr);
+			uvs = true;
+		}
+		else {
+			mat = mbs.get( "chimney_brown", new float[] { 78f/255, 51f / 255, 31f / 255, 1f }, null  );
+			uvs = false;
+		}
 		
 		along = new Vector2d(along);
 		along.normalize();
@@ -905,32 +917,42 @@ public class GreebleGrid {
 
 		double height = Math.max (0.5, (max - min) * 2 );
 		
-		mat.addCube( new Point3d(a[1].x, min + height, a[1].y), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
-				-height, feature.radius * 2, feature.radius * 2 );
+		
+		Vector3f locJ = new Vector3f( (float) a[1].x, (float) ( min ) , (float) a[1].y),
+				upJ    = new Vector3f(0,1,0),
+				alongJ = new Vector3f ( (float) along.x, 0, (float) along.y);
+		
+		mat.addInsideRect (
+				locJ, upJ, alongJ, upJ.cross( alongJ ), 
+				(float)height, (float) feature.radius * 2, (float) feature.radius * 2 ,
+				uvs ? new float[][] {{0.4f,0.4f},{0.6f,0.6f}} : null, MeshBuilder.ALL );
+		
+//		mat.addCube( new Point3d(a[1].x, min + height, a[1].y), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
+//				-height, feature.radius * 2, feature.radius * 2 );
 
 		double step = 0.1;// Math.min ( feature.radius / 2, 0.1 );
 		
 		if (feature.radius > 2*step) {
 		
-		
-		Point3d offset = new Point3d(a[1].x , min + height + step, a[1].y );
+		Point3d offset = new Point3d(a[1].x , min, a[1].y );
 		
 		double sl =feature.radius * 2 - step * 2;
 		
 		Vector3d upp = new Vector3d( -along.y, 0, along.x ),
 				 alg = new Vector3d( along.x, 0, along.y );
 		
-			offset.scaleAdd (-step, upp, offset);
-			offset.scaleAdd (step, alg, offset);
+		offset.scaleAdd (-step, upp, offset);
+		offset.scaleAdd (step, alg, offset);
+		offset.scaleAdd (height + 0.01, Mathz.Y_UP, offset );
 		
-			mat.addCube( offset, Mathz.Y_UP, alg, -step, sl, step );
-			mat.addCube( offset, Mathz.Y_UP, alg, -step, step, sl );
+		
+			mbs.GRAY.addCube( offset, Mathz.Y_UP, alg, -0.02, sl, sl );
 			
-			offset.scaleAdd (-sl, upp, offset);
-			offset.scaleAdd (sl, alg, offset);
+//			offset.scaleAdd (-sl, upp, offset);
+//			offset.scaleAdd (sl, alg, offset);
 			
-			mat.addCube( offset, Mathz.Y_UP, alg, -step, -sl, -step );
-			mat.addCube( offset, Mathz.Y_UP, alg, -step, -step, -sl );
+//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -sl, -step );
+//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -step, -sl );
 		}
 	}
 	

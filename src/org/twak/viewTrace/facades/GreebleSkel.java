@@ -732,11 +732,16 @@ public class GreebleSkel {
 			switch ( feature.f ) {
 
 			case Chimney:
-				greebleGrid.createChimney ( onRoof, feature, f.edge.projectDown().dir() , f.edge.linearForm );
+				greebleGrid.createChimney ( onRoof, mr, feature, f.edge.projectDown().dir() , f.edge.linearForm, mr.app.superFace.app.chimneyTexture );
 				break;
 				
 			case Velux:
-				GreebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
+				if (mr.app.texture == null)
+					greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
+				else
+					greebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, mr.app.textureRect , to3d,
+							greebleGrid.mbs.getTexture( "velux_"+mr.app.texture+"__"+r.hashCode(), mr.app.texture, mr ),
+							0.3, 0.2 );
 				break;
 			}
 		}

@@ -317,7 +317,7 @@ public class FacadeLabelApp extends App {
 			MiniFacade mf = (MiniFacade)a.hasA;
 			FacadeTexApp fta = mf.app;
 			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
-			fta.chimneyTexture = null;
+			fta.setChimneyTexture( null );
 		}
 		
 		// compute dormer-roof locations
