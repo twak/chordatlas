@@ -1046,9 +1046,14 @@ public class SkelFootprint {
 						if ( e1 != e2 ) {
 
 							Line e2l = e2.line();
-							// !el1.isOnLeft(  e2l.fromPPram( 0.5 ) )
 							
-							if ( el1.distance( e2l ) < 1 && e2l.absAngle( el1 ) > Math.PI * 0.7 )
+							
+							double dist = el1.distance( e2l ); 
+									
+							if (  e2l.absAngle( el1 ) > Math.PI * 0.7 &&  ( 
+									( dist < 0.1 && !el1.isOnLeft(  e2l.fromPPram( 0.5 ) )) || 
+									dist < 0.001 ) )
+								
 								( (SuperEdge) e1 ).occlusions.add( (SuperEdge) e2 );
 						}
 				}

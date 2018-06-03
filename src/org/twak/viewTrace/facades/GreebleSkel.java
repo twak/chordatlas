@@ -739,9 +739,10 @@ public class GreebleSkel {
 				if (mr.app.texture == null)
 					greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
 				else
-					greebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, mr.app.textureRect , to3d,
-							greebleGrid.mbs.getTexture( "velux_"+mr.app.texture+"__"+r.hashCode(), mr.app.texture, mr ),
-							0.3, 0.2 );
+					continue;
+//					GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, mr.app.textureRect , to3d,
+//							greebleGrid.mbs.getTexture( "velux_"+mr.app.texture+"__"+r.hashCode(), mr.app.texture, mr ),
+//							-0.1, 0.05 );
 				break;
 			}
 		}

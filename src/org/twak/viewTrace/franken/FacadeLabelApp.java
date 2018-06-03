@@ -209,6 +209,9 @@ public class FacadeLabelApp extends App {
 				root = om.readTree( FileUtils.readFileToString( file ) );
 				JsonNode node = root.get( "window" );
 				
+				if (m.mf.postState == null)
+					m.mf.postState = new PostProcessState();
+				
 				m.mf.postState.generatedWindows.clear();
 				
 				i:

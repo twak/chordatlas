@@ -512,6 +512,12 @@ public class GreebleGrid {
 
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 
+		if (panes.size() == 0) {
+			double delta = 0.02; 
+			panes.add( new DRectangle ( delta / bounds.width, delta / bounds.height, 
+					(bounds.width - delta *2)/ bounds.width, (bounds.height - delta * 2)/ bounds.height ) );
+		}
+		
 		Grid grid = new Grid( 0.01, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY() );
 		
 		for (DRectangle pane : panes) {
@@ -528,7 +534,7 @@ public class GreebleGrid {
 			
 			@Override
 			public void instance( DRectangle rect ) {
-				window.add( rect, uvs.normalize( rect), to3d, -frameDepth );
+				window.add( rect, uvs.normalize( bounds.transform ( rect ) ), to3d, -frameDepth );
 			}
 		} );
 		

@@ -27,6 +27,8 @@ import javax.swing.JToggleButton;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.EmptyBorder;
 
+import org.twak.tweed.TweedFrame;
+import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
@@ -42,6 +44,7 @@ import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
 import org.twak.viewTrace.franken.style.JointStyle.NetProperties;
 
+import com.jme3.texture.Texture;
 import com.thoughtworks.xstream.XStream;
 
 
@@ -56,23 +59,17 @@ public class JointUI extends JPanel {
 	JPanel modalPanel;
 	MultiModalEditor modal;
 	
-	public JointUI (JointStyle jd, Runnable globalUpdate) {
-		
-		this.jd = jd;
+	public JointUI (BlockApp root, Runnable globalUpdate) {
+
+		if (! (root.styleSource instanceof JointStyle))
+			root.styleSource = this.jd = new JointStyle(null);
+		else 
+			this.jd =  (JointStyle) root.styleSource;
 		
 		if (jd.joints.isEmpty())
 			jd.rollJoint();
 		
 		this.globalUpdate = globalUpdate;
-//		Runnable() {
-//			
-//			@Override
-//			public void run() {
-//				jd.redraw();
-//				globalUpdate.run();		
-//			}
-//		};
-		
 		this.selectedJoint = jd.joints.get(0);
 		buildNetSelectUI();
 	}
@@ -318,6 +315,10 @@ public class JointUI extends JPanel {
 							jd = (JointStyle) new XStream().fromXML( f );
 							jd.root = editing;
 							jd.redraw();
+							
+							// current joint ui is invalid
+							TweedFrame.instance.tweed.setTool( new TextureTool( TweedFrame.instance.tweed ) );
+							
 							selectedJoint = jd.joints.get( 0 );
 							buildNetSelectUI();
 						}

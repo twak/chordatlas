@@ -168,7 +168,7 @@ public class JointStyle implements StyleSource {
 	
 	public void redraw() {
 		
-		Random randy = new Random(0xDEADBEEF);
+		Random randy = new Random(System.nanoTime());
 
 		root.styleSource = this; 
 		
@@ -238,7 +238,6 @@ public class JointStyle implements StyleSource {
 					System.err.println("failed to find bake");
 			}
 			
-			a.styleSource = this;
 			setMode( a  );
 			
 			for (App next : a.getDown().valueList())
@@ -334,7 +333,7 @@ public class JointStyle implements StyleSource {
 		
 		
 		JButton but = new JButton( "edit joint" );
-		but.addActionListener( e -> new JointUI(this, update ).openFrame() );
+		but.addActionListener( e -> new JointUI( (BlockApp) sa.findRoots().iterator().next(), update ).openFrame() );
 		out.add( but );
 
 		JButton redaw = new JButton( "redraw" );

@@ -103,8 +103,6 @@ public class SelectedApps extends ArrayList<App>{
 			@Override
 			public void run() {
 				
-				System.out.println("selected apps createUI shim");
-				
 				if (exemplar instanceof BlockApp)
 					for (App building : exemplar.getDown().valueList())
 						building.isDirty = true;

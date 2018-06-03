@@ -37,7 +37,7 @@ public class HouseTool extends Tool {
 		super( tweed );
 	}
 	
-	public int num = 1;
+	public int numX = 1, numY = 1;
 	
 	@Override
 	public void clickedOn( Spatial target, Vector3f loc, Vector2f cursorPosition ) {
@@ -49,57 +49,61 @@ public class HouseTool extends Tool {
 		
 		double accumWidth = 0;
 		
-		for ( int i = 0; i < num; i++ ) {
-			
-			double width = Math.random() * 4 + 6;
-			double height =  Math.random() * 6 + 6;
-			
-			double[] minMax = new double[] { 0, 5 + Math.random() *4, accumWidth, accumWidth + width };
-			
-			System.out.println( "start: "+accumWidth +" end: "+ (accumWidth + width ) );
-			
-			accumWidth += width + 0.5;
-			
-			builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
-			builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
-			builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 2 ] + loc.z ) );
-			builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 2 ] + loc.z ) );
-			
-			HalfFace f = builder.newFace();
+		for ( int x = 0; x < numX; x++ ) {
+			for ( int y = 0; y < numY; y++ ) {
 
-			Prof p1 = new Prof(), p2 = new Prof();
+				double width = Math.random() * 4 + 6;
+				double depth = Math.random() * 4 + 6;
 
-			p1.add( new Point2d( 0, 0 ) );
-			p1.add( new Point2d( 0, height ) );
-			p1.add( new Point2d( -5, height + 5 ) );
+				double height = Math.random() * 6 + 6;
 
-			p2.add( new Point2d( 0, 0 ) );
-			p2.add( new Point2d( 0, height ) );
+				double[] minMax = new double[] { x * 12 - depth / 2, x * 12 + depth / 2, y * 12 - width / 2, y * 12 + width / 2 };
 
-			Prof[] ps = new Prof[] { p1, p2 };
+				System.out.println( "start: " + accumWidth + " end: " + ( accumWidth + width ) );
 
-			int count = 0;
+				//			accumWidth += width + 0.5;
 
-			for ( HalfEdge e : f ) {
-				SuperEdge se = (SuperEdge) e;
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
+				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
+				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 2 ] + loc.z ) );
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 2 ] + loc.z ) );
 
-				se.prof = ps[0];// count % ps.length ];
+				HalfFace f = builder.newFace();
 
-				MiniFacade mini = newMini( null, se.length() );
-				mini.height = height;
+				Prof p1 = new Prof(), p2 = new Prof();
 
-				if ( count >= 0 ) {
-					se.addMini( mini );
+				p1.add( new Point2d( 0, 0 ) );
+				p1.add( new Point2d( 0, height ) );
+				p1.add( new Point2d( -5, height + 5 ) );
 
-					se.toEdit = mini;
+				p2.add( new Point2d( 0, 0 ) );
+				p2.add( new Point2d( 0, height ) );
+
+				Prof[] ps = new Prof[] { p1, p2 };
+
+				int count = 0;
+
+				for ( HalfEdge e : f ) {
+					SuperEdge se = (SuperEdge) e;
+
+					se.prof = ps[ 0 ];// count % ps.length ];
+
+					MiniFacade mini = newMini( null, se.length() );
+					mini.height = height;
+
+					if ( count >= 0 ) {
+						se.addMini( mini );
+
+						se.toEdit = mini;
+					}
+					count++;
 				}
-				count++;
-			}
 
-			SuperFace sf = (SuperFace) f;
-			sf.maxProfHeights = new ArrayList();
-			sf.maxProfHeights.add( Double.valueOf( 100 ) );
-			sf.height = 100;
+				SuperFace sf = (SuperFace) f;
+				sf.maxProfHeights = new ArrayList();
+				sf.maxProfHeights.add( Double.valueOf( 100 ) );
+				sf.height = 100;
+			}
 		}
 
 		HalfMesh2 mesh = builder.done();
@@ -140,7 +144,8 @@ public class HouseTool extends Tool {
 
 		panel.setLayout( new ListDownLayout() );
 		
-		panel.add( new AutoSpinner( this, "num", "number of houses", 1, 10 ));
+		panel.add( new AutoSpinner( this, "numX", "number of houses deep", 1, 10 ));
+		panel.add( new AutoSpinner( this, "numY", "number pf houses wide", 1, 10 ));
 	}
 
 }

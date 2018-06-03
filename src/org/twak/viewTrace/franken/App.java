@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.TweedFrame;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.HasApp;
@@ -82,8 +83,11 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren (int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		ProgressMonitor pm = null;//new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
+		ProgressMonitor pm =
+				TweedSettings.settings.sitePlanInteractiveTextures ? null : 
+				new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
 		
+		long startTime = System.currentTimeMillis();
 		
 		try {
 			computeWithChildren_( Math.max (1,stage), todo, globalUpdate, pm );
@@ -91,6 +95,10 @@ public abstract class App /*earance*/ implements Cloneable {
 			if (pm != null)
 				pm.close();
 		}
+		
+		
+		System.out.println("time taken " + (System.currentTimeMillis() - startTime));
+		
 	}
 	
 	private static void computeWithChildren_ (int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {

@@ -376,6 +376,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		// TODO Auto-generated method stub
 		super.onLoad( tweed );
 		this.geometry = new Cach<>( sf -> new Rendered() );
+		
+		SkelFootprint.findOcclusions( block );
+		
 	}
 
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {

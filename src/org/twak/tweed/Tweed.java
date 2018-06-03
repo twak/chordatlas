@@ -598,7 +598,7 @@ public class Tweed extends SimpleApplication {
 		if ( !TweedSettings.settings.SSAO ) {
 			String bgKey = "background";
 
-			//		clearBackground();
+			clearBackground();
 
 			background.setWidth( cam.getWidth() );
 			background.setHeight( cam.getHeight() );
@@ -609,7 +609,7 @@ public class Tweed extends SimpleApplication {
 			pv.setClearFlags( true, true, true );
 			pv.attachScene( background );
 
-			viewPort.setClearFlags( false, true, true );
+			viewPort.setClearFlags( true, true, true );
 
 			background.updateGeometricState();
 		}
@@ -775,7 +775,6 @@ public class Tweed extends SimpleApplication {
 		cartesian2Country.transform( trans, 0, trans, 0, 1 );
 		
 		if ( TweedSettings.settings.gmlCoordSystem.equals( "EPSG:3042" ) ) { /* madrid?! */
-			System.out.println( "******* dirty hack in place for flipped CS" );
 			double tmp = trans[ 0 ];
 			trans[ 0 ] = trans[ 1 ];
 			trans[ 1 ] = tmp;
