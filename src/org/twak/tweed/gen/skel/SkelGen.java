@@ -94,16 +94,12 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 	public BlockApp app = new BlockApp( this );
 
-	transient Cache<SuperFace, Rendered> geometry = new Cach<> (sf -> new Rendered() );
-	
+	transient Cache<SuperFace, Rendered> geometry = new Cach<>( sf -> new Rendered() );
+
 	static {
-		PlanSkeleton.TAGS = new String[][]
-			    {
-	        {"org.twak.tweed.gen.skel.WallTag", "wall"},
-	        {"org.twak.tweed.gen.skel.RoofTag", "roof"},
-	    };
+		PlanSkeleton.TAGS = new String[][] { { "org.twak.tweed.gen.skel.WallTag", "wall" }, { "org.twak.tweed.gen.skel.RoofTag", "roof" }, };
 	}
-	
+
 	public SkelGen() {
 		super( "headless", null );
 		skelFootprint = new SkelFootprint();
@@ -135,7 +131,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		super( "skel", tweed );
 
-		setRender ( mesh );
+		setRender( mesh );
 		this.blockGen = blockGen;
 
 		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
@@ -145,17 +141,17 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	}
 
 	private void optimize( ProgressMonitor m ) {
-		setRender ( skelFootprint.buildAndSolve( footprint, this, m ) );
+		setRender( skelFootprint.buildAndSolve( footprint, this, m ) );
 	}
 
 	private void setRender( HalfMesh2 mesh ) {
-		
-		SkelFootprint.findOcclusions ( mesh );
-		
+
+		SkelFootprint.findOcclusions( mesh );
+
 		this.block = mesh;
-		
-		for (HalfFace f : block)
-			((SuperFace)f).app.parent = this;		
+
+		for ( HalfFace f : block )
+			( (SuperFace) f ).app.parent = this;
 	}
 
 	@Override
@@ -169,42 +165,42 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		if ( block != null ) {
 
 			lastOccluders = new HashMap<>();
-			
+
 			for ( int i = 0; i < block.faces.size(); i++ )
 				try {
 					HalfFace f = block.faces.get( i );
 					SuperFace sf = (SuperFace) f;
-					
+
 					Rendered previouslyRendered = geometry.get( sf );
-					
-					if (previouslyRendered.skel == null)  
+
+					if ( previouslyRendered.skel == null )
 						previouslyRendered.skel = calc( sf );
 
-					if (previouslyRendered.skel != null) 
-						for (Face ff :previouslyRendered.skel.output.faces.values()) {
+					if ( previouslyRendered.skel != null )
+						for ( Face ff : previouslyRendered.skel.output.faces.values() ) {
 							WallTag wt = (WallTag) GreebleHelper.getTag( ff.profile, WallTag.class );
-							if (wt != null && ff.parent == null) 
-								lastOccluders.put(wt.occlusionID, ff);
+							if ( wt != null && ff.parent == null )
+								lastOccluders.put( wt.occlusionID, ff );
 						}
-					
+
 				} catch ( Throwable th ) {
 					th.printStackTrace();
 				}
-		
+
 			for ( int i = 0; i < block.faces.size(); i++ )
-				
+
 				try {
 					SuperFace sf = (SuperFace) block.faces.get( i );
 					Rendered previouslyRendered = geometry.get( sf );
-					
-					if (previouslyRendered.skel != null) 
-							setSkel ( previouslyRendered.skel, sf );
+
+					if ( previouslyRendered.skel != null )
+						setSkel( previouslyRendered.skel, sf );
 
 				} catch ( Throwable th ) {
 					th.printStackTrace();
 				}
 		}
-		
+
 		if ( !pNode.getChildren().isEmpty() )
 			tweed.frame.addGen( new JmeGen( "sProfs", tweed, pNode ), false );
 
@@ -238,13 +234,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		}
 
 		sf.skel = skel;
-		
-		if (sf.mr == null)
+
+		if ( sf.mr == null )
 			sf.mr = new MiniRoof( sf ); // deserialization
 
-		sf.skel.output.addNonSkeletonSharedEdges(new RoofTag( Colourz.toF4( sf.mr.app.color )) );
+		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.app.color ) ) );
 		sf.mr.setOutline( sf.skel.output );
-		
+
 		return skel;
 	}
 
@@ -275,7 +271,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		LoopL<HalfEdge> edges = sf.findHoles();
 		LoopL<Point2d> lpd = new LoopL();
-		
+
 		for ( Loop<HalfEdge> loopHE : edges ) {
 
 			Map<Point2d, SuperEdge> ses = new HashMap();
@@ -314,7 +310,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					profile = toProfile( se.prof );
 				}
 
-				tagWalls( ( SuperFace) se.face, profile, se, lpb.get(), lpb.getNext().get() );
+				tagWalls( (SuperFace) se.face, profile, se, lpb.get(), lpb.getNext().get() );
 				plan.addLoop( profile.points.get( 0 ), plan.root, profile );
 
 				b.tags.add( new SETag( se, sf ) );
@@ -323,15 +319,15 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				plan.profiles.put( b, profile );
 			}
 		}
-		
+
 		plan.points = loopl;
 
 		if ( cap != null ) {
-			
+
 			// skel.capAt( cap, a -> skel.capArea = a ); simple...but doesn't show in the siteplan ui
-			
-			Ship s = new FlatRoofShip( cap, plan) ;
-			
+
+			Ship s = new FlatRoofShip( cap, plan );
+
 			for ( Profile prof : plan.profiles.values() ) {
 				for ( Loop<Bar> lb : prof.points ) {
 					boolean addedMarker = false;
@@ -351,55 +347,54 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					}
 				}
 			}
-			
-	        plan.ships.add( s );
+
+			plan.ships.add( s );
 		}
 
 		PlanSkeleton skel = new PlanSkeleton( plan );
 		skel.skeleton();
-		
+
 		return skel;
 	}
 
 	private static class Rendered {
-		
+
 		PlanSkeleton skel;
 		Node node;
 		Output output;
-		
+
 		public void set( Node node, Output output, PlanSkeleton skel ) {
 			this.node = node;
 			this.output = output;
 			this.skel = skel;
-			
+
 		}
 	}
-	
+
 	@Override
 	public void onLoad( Tweed tweed ) {
 		// TODO Auto-generated method stub
 		super.onLoad( tweed );
-		this.geometry = new Cach<> (sf -> new Rendered() );
+		this.geometry = new Cach<>( sf -> new Rendered() );
 	}
-	
+
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
 		sft_.app.isDirty = true; // todo: dirty hack! can remove sft from this interface
-		
-		for (HalfFace hf : block) {
-			
-			SuperFace sf = (SuperFace)hf;
-		
-			if ( sf.app.isDirty ) {
-				
 
-				for (HalfEdge he : sf) { 
+		for ( HalfFace hf : block ) {
+
+			SuperFace sf = (SuperFace) hf;
+
+			if ( sf.app.isDirty ) {
+
+				for ( HalfEdge he : sf ) {
 					SuperEdge se = (SuperEdge) he;
 					ensureMF( sf, se );
 				}
 
 				sf.app.isDirty = false;
-				
+
 				removeGeometryFor( sf );
 
 				Node house;
@@ -433,8 +428,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	private void removeGeometryFor( SuperFace sf ) {
 		Rendered rd = geometry.get( sf );
 		if ( rd != null ) {
-			
-			if (rd.node != null ) {
+
+			if ( rd.node != null ) {
 				rd.node.removeFromParent();
 				rd.node = null;
 			}
@@ -449,7 +444,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		JButton fac = new JButton( "edit facade" );
 		fac.addActionListener( e -> editFacade( skel, sf, se ) );
 		ui.add( fac );
-		
+
 		JButton proc = new JButton( "procedural facade" );
 		proc.addActionListener( e -> cgaFacade( skel, sf, se ) );
 		ui.add( proc );
@@ -463,82 +458,103 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				closeSitePlan();
 				Plot.closeLast();
 
+				if (!TweedSettings.settings.sitePlanInteractiveTextures)
 				for ( HalfEdge he : sf ) {
 					SuperEdge ee = (SuperEdge) he;
 					if ( ee.toEdit != null )
 						ee.toEdit.app.appMode = AppMode.Off;
 				}
-				
+
 				siteplan = new Siteplan( skel.plan, false ) {
 
-//					SuperFace workon = sf;
+					//					SuperFace workon = sf;
 
 					public void show( Output output, Skeleton threadKey ) {
 
-						
-						
 						super.show( output, threadKey );
 
-						tweed.enqueue( new Runnable() {
+								tweed.enqueue( new Runnable() {
 
-							@Override
-							public void run() {
-								
-								removeGeometryFor( sf );
-								tweed.frame.setGenUI( null ); // current selection is invalid
-								sf.skel = (PlanSkeleton) threadKey;
-								
+									@Override
+									public void run() {
 
-								for ( Face f : sf.skel.output.faces.values() ) {
-									WallTag wt = ( (WallTag) GreebleHelper.getTag( f.profile, WallTag.class ) );
+										removeGeometryFor( sf );
+										tweed.frame.setGenUI( null ); // current selection is invalid
+										sf.skel = (PlanSkeleton) threadKey;
 
-									if ( wt != null && wt.miniFacade == null ) { // created by siteplan
-										wt.miniFacade = new MiniFacade();
+										for ( Face f : sf.skel.output.faces.values() ) {
+											WallTag wt = ( (WallTag) GreebleHelper.getTag( f.profile, WallTag.class ) );
 
-										SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
+											if ( wt != null ) { 
 
-										if ( set != null )
-											wt.miniFacade.app.parent = (SuperFace) set.se.face;
+												SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
+
+												if ( set != null ) // created by siteplan --> set correct face
+													wt.miniFacade.app.parent = (SuperFace) set.se.face;
+											}
+										}
+
+										sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.app.color ) ) );
+										sf.mr.setOutline( sf.skel.output );
+
+										setSkel( (PlanSkeleton) threadKey, sf );
+										
+										if (TweedSettings.settings.sitePlanInteractiveTextures)
+										updateTexture( sf, new Runnable() {
+											public void run() {
+												
+												tweed.enqueue( new Runnable() {
+													
+													@Override
+													public void run() {
+														setSkel( (PlanSkeleton) threadKey, sf );
+													}
+												} );
+												
+											};
+										}); 
 									}
-								}
-								
-								sf.skel.output.addNonSkeletonSharedEdges(new RoofTag( Colourz.toF4( sf.mr.app.color )) );
-								sf.mr.setOutline( sf.skel.output );
+							} );
+						}
 
-								setSkel( (PlanSkeleton) threadKey, sf );
+					public void addedBar( Bar bar ) {
 
-							}
-
-						} );
-					}
-					
-					
-					public void addedBar(Bar bar) {
-						
 						SETag oldTag = (SETag) bar.tags.iterator().next();
-						
+
 						bar.tags.clear();
 						SuperEdge se = new SuperEdge( bar.start, bar.end, null );
-						
+
 						SETag tag = new SETag( se, sf );
 						tag.color = Rainbow.random();
-						tag.name = Math.random()+"";
-						bar.tags.add (tag);
-						
+						tag.name = Math.random() + "";
+						bar.tags.add( tag );
+
 						List<Point2d> defpts = new ArrayList<>();
 						defpts.add( new Point2d( 0, 0 ) );
-						defpts.add( new Point2d( 0, -10 ) );
-						defpts.add( new Point2d( 5, -15 ) );
+						defpts.add( new Point2d( 0, -7 ) );
+						defpts.add( new Point2d( 5, -12 ) );
 
 						Profile profile = new Profile( defpts );
 						tagWalls( sf, profile, se, bar.start, bar.end );
-						plan.addLoop( profile.points.get( 0 ), plan.root, profile );
 						
+						if (oldTag != null)
+							se.toEdit.app.parent = oldTag.sf;
+						if (TweedSettings.settings.sitePlanInteractiveTextures) {
+							se.toEdit.app.appMode = AppMode.Net;
+							se.toEdit.height = 5;
+							se.toEdit.featureGen = new CGAMini( se.toEdit );
+							
+							if (oldTag != null)
+								oldTag.sf.insert( se ); //!
+							
+						}
+						
+						
+						plan.addLoop( profile.points.get( 0 ), plan.root, profile );
+
 						plan.profiles.put( bar, profile );
 					};
-					
-					
-					
+
 				};
 				siteplan.setVisible( true );
 				siteplan.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
@@ -546,35 +562,34 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		} );
 		ui.add( camp );
-		
+
 		JButton tex = new JButton( "texture" );
 		tex.addActionListener( x -> {
 			tweed.setTool( new TextureTool( tweed ) );
 			SkelGen.this.textureSelected( skel, house, sf, se, se.toEdit );
-		}
-				);
+		} );
 		ui.add( tex );
-		
-//		JButton plan = new JButton( "plan" );
-//		plan.addActionListener( e -> new Plot( toRender, footprint ) );
-//		ui.add( plan );
-//
-//		JButton b = new JButton( "view clean profiles" );
-//		b.addActionListener( e -> SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed ) );
-//		ui.add( b );
-//
-//		JButton c = new JButton( "compare profiles" );
-//		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs ) );
-//		ui.add( c );
 
-//		JButton mini = new JButton( "street-view" );
-//		mini.addActionListener( e -> new MiniViewer( se ) );
-//		if ( sf != null )
-//			ui.add( mini );
-//
-//		JButton prof = new JButton( "profiles" );
-//		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
-//		ui.add( prof );
+		//		JButton plan = new JButton( "plan" );
+		//		plan.addActionListener( e -> new Plot( toRender, footprint ) );
+		//		ui.add( plan );
+		//
+		//		JButton b = new JButton( "view clean profiles" );
+		//		b.addActionListener( e -> SkelFootprint.debugFindCleanProfiles( footprint, this, new ProgressMonitor( null, "", "", 0, 100 ), tweed ) );
+		//		ui.add( b );
+		//
+		//		JButton c = new JButton( "compare profiles" );
+		//		c.addActionListener( e -> skelFootprint.debugCompareProfs( skelFootprint.globalProfs ) );
+		//		ui.add( c );
+
+		//		JButton mini = new JButton( "street-view" );
+		//		mini.addActionListener( e -> new MiniViewer( se ) );
+		//		if ( sf != null )
+		//			ui.add( mini );
+		//
+		//		JButton prof = new JButton( "profiles" );
+		//		prof.addActionListener( e -> new ProfileAssignmentViewer( sf, skelFootprint == null ? null : skelFootprint.globalProfs ) );
+		//		ui.add( prof );
 
 		JButton remove = new JButton( "remove building" );
 		remove.addActionListener( e -> {
@@ -583,17 +598,16 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		} );
 		ui.add( remove );
 
-
 		tweed.frame.setGenUI( ui );
 	}
 
-	public static void updateTexture (HasApp sf, Runnable update) {
+	public static void updateTexture( HasApp sf, Runnable update ) {
 		new Thread( () -> new SelectedApps( HasApp.get( sf ) ).computeAll( update, null ) ).start();
 	}
-	
+
 	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
-		if (ha == null)
-			tweed.frame.setGenUI( new JLabel (  "no texture found" ) );
+		if ( ha == null )
+			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else
 			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps( HasApp.get( ha ) ).createUI( new Runnable() {
 				@Override
@@ -601,13 +615,13 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					tweed.enqueue( new Runnable() {
 						@Override
 						public void run() {
-							setSkel( skel, sf );					
+							setSkel( skel, sf );
 						}
 					} );
 				}
-			}) );
+			} ) );
 	}
-	
+
 	private WallTag findWallMini( LoopL<Bar> points ) {
 
 		Optional<Tag> wall = points.streamE().flatMap( b -> b.tags.stream() ).filter( t -> t instanceof WallTag ).findAny();
@@ -644,9 +658,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	}
 
 	public static Profile tagWalls( SuperFace sf, Profile profile, SuperEdge se, Point2d s, Point2d e ) {
-		
+
 		if ( se.toEdit == null ) { // first time through, use regularizer 
-			if ( se.toRegularize != null && ! se.toRegularize.isEmpty() ) {
+			if ( se.toRegularize != null && !se.toRegularize.isEmpty() ) {
 				double[] range = findRange( se, s, e, null );
 
 				if ( range != null )
@@ -654,9 +668,8 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			}
 		}
 		ensureMF( sf, se );
-		
-		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), 
-			roof = new RoofTag( sf.roofColor );
+
+		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), roof = new RoofTag( sf.roofColor );
 
 		boolean first = true;
 		for ( Loop<Bar> lb : profile.points ) {
@@ -764,62 +777,68 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		JButton compare = new JButton( "compare to mesh" );
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
 		ui.add( compare );
-		
+
 		JButton pf = new JButton( "procedural all facades" );
 		pf.addActionListener( l -> cgaAll() );
 		ui.add( pf );
-		
-		JButton save = new JButton ("save...");
+
+		JButton save = new JButton( "save..." );
 		save.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				new SimpleFileChooser(tweed.frame.frame, true, "select location", null, "xml" ) {
+				new SimpleFileChooser( tweed.frame.frame, true, "select location", null, "xml" ) {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
-						
-						for (HalfFace f2 : SkelGen.this.block) {
-							
-							SuperFace sf = (SuperFace)f2;
+
+						Map<HalfFace, PlanSkeleton> store = new HashMap<>();
+						for ( HalfFace f2 : SkelGen.this.block )
+							store.put( f2, ( (SuperFace) f2 ).skel );
+
+						for ( HalfFace f2 : SkelGen.this.block ) {
+
+							SuperFace sf = (SuperFace) f2;
 							sf.heights = null;
 							sf.maxProfHeights = null;
 							sf.colors = new ArrayList<>();
-							
-							for (Bar b : sf.skel.plan.points.eIterator() ) {
+
+							for ( Bar b : sf.skel.plan.points.eIterator() ) {
 								SETag set = (SETag) GreebleHelper.getTag( b.tags, SETag.class );
-								if (set != null)
-									set.se.prof = toProf ( sf.skel.plan.profiles.get(b) ); 
+								if ( set != null )
+									set.se.prof = toProf( sf.skel.plan.profiles.get( b ) );
 							}
-							
+
 							sf.skel = null;
-							
-							for (HalfEdge e : f2) {
-								SuperEdge se = (SuperEdge)e;
-								
-//								se.prof = se. 
-								
-								if (se.profLine != null)
+
+							for ( HalfEdge e : f2 ) {
+								SuperEdge se = (SuperEdge) e;
+
+								//								se.prof = se. 
+
+								if ( se.profLine != null )
 									se.profLine.mega = null;
-								
-								
-								if (e.over != null && ((SuperEdge)e.over).profLine != null) 
-									((SuperEdge)e.over).profLine.mega = null;
+
+								if ( e.over != null && ( (SuperEdge) e.over ).profLine != null )
+									( (SuperEdge) e.over ).profLine.mega = null;
 							}
-							
+
 						}
-						
-						blockGen  = null;
-						
+
+						blockGen = null;
+
 						new XStream().toXML( SkelGen.this, new FileOutputStream( f ) );
+
+						for ( HalfFace f2 : SkelGen.this.block )
+							( (SuperFace) f2 ).skel = store.get( f2 );
 					}
 				};
 			}
 		} );
-		ui.add(save);
-		
-//		JButton tf = new JButton( "texture all facades" );
-//		tf.addActionListener( l -> textureAll() );
-//		ui.add( tf );
-		
+		ui.add( save );
+
+		//		JButton tf = new JButton( "texture all facades" );
+		//		tf.addActionListener( l -> textureAll() );
+		//		ui.add( tf );
+
 		return ui;
 	}
 
@@ -828,118 +847,112 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		Jme3z.dump( dump, gNode, 0 );
 	}
 
-	public void editFacade ( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
-		
+	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
+
 		closeSitePlan();
 		new FacadeDesigner( skel, sf, se, this );
 	}
-	
+
 	public static void ensureMF( SuperFace sf, SuperEdge se ) {
 
-		if (sf.mr == null)
-			sf.mr = new MiniRoof(sf);
+		if ( sf.mr == null )
+			sf.mr = new MiniRoof( sf );
 
 		if ( se.toEdit == null ) {
 			se.toEdit = new MiniFacade();
 			se.toEdit.left = 0;
 			se.toEdit.width = se.length();
 		}
-		
+
 		se.toEdit.app.parent = sf;
 		se.toEdit.appLabel.superFace = sf;
-		
-		if (se.toRegularize != null && !se.toRegularize.isEmpty())
-			se.toEdit.height = se.toRegularize.get( 0 ).height;
-		else if (se.prof != null) {
 
-			if (se.prof.size() > 2)
+		if ( se.toRegularize != null && !se.toRegularize.isEmpty() )
+			se.toEdit.height = se.toRegularize.get( 0 ).height;
+		else if ( se.prof != null ) {
+
+			if ( se.prof.size() > 2 )
 				se.toEdit.height = se.prof.get( 1 ).y;
-			
-			if (se.toEdit.height < 1.5)
+
+			if ( se.toEdit.height < 1.5 )
 				se.toEdit.height = sf.height;
-		}
-		else
+		} else
 			se.toEdit.height = sf.height;
 	}
 
 	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
-		
-		ensureMF(sf, se);
-		
+
+		ensureMF( sf, se );
+
 		se.toEdit.appLabel = new FacadeLabelApp( se.toEdit );
 		se.toEdit.app = new FacadeTexApp( se.toEdit );
-		
+
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		se.toEdit.featureGen.update();
-		
-		patchWallTag( skel, se, se.toEdit);
-		
+
+		patchWallTag( skel, se, se.toEdit );
+
 		calculateOnJmeThread();
 	}
-	
 
 	private void cgaAll() {
 
-		for (HalfFace hf : block )
-			for (HalfEdge he : hf) {
+		for ( HalfFace hf : block )
+			for ( HalfEdge he : hf ) {
 				SuperEdge se = (SuperEdge) he;
-				
-				ensureMF((SuperFace)hf, se);
+
+				ensureMF( (SuperFace) hf, se );
 				se.toEdit.featureGen = new CGAMini( se.toEdit );
 				se.toEdit.featureGen.update();
 			}
-		
+
 		calculateOnJmeThread();
 	}
-	
-//	private void textureAll() {
-//		
-//		List<MiniFacade> mfs = new ArrayList<>();
-//		
-//		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
-//		
-//		for (int i = 0; i < style.length; i++)
-//			style[i] = Math.random() - 0.5;
-//		
-//		for (HalfFace hf : block )
-//			for (HalfEdge he : hf) {
-//				SuperEdge se = (SuperEdge) he;
-//				
-//				ensureMF((SuperFace)hf, se);
-//				mfs.add( se.toEdit );
-//				se.toEdit.featureGen.facadeStyle = style;
-//				se.toEdit.featureGen.update();
-//			}
-//		new Thread( new Runnable() {
-//			@Override
-//			public void run() {
-//				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
-//					public void run() {
-//						tweed.enqueue( new Runnable() {
-//							@Override
-//							public void run() {
-//								for (MiniFacade mf : mfs)
-//									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
-//								calculateOnJmeThread();
-//							}
-//						} );
-//					}
-//				} );
-//			}
-//		} ).start();
-//		
-//	}
+
+	//	private void textureAll() {
+	//		
+	//		List<MiniFacade> mfs = new ArrayList<>();
+	//		
+	//		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
+	//		
+	//		for (int i = 0; i < style.length; i++)
+	//			style[i] = Math.random() - 0.5;
+	//		
+	//		for (HalfFace hf : block )
+	//			for (HalfEdge he : hf) {
+	//				SuperEdge se = (SuperEdge) he;
+	//				
+	//				ensureMF((SuperFace)hf, se);
+	//				mfs.add( se.toEdit );
+	//				se.toEdit.featureGen.facadeStyle = style;
+	//				se.toEdit.featureGen.update();
+	//			}
+	//		new Thread( new Runnable() {
+	//			@Override
+	//			public void run() {
+	//				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
+	//					public void run() {
+	//						tweed.enqueue( new Runnable() {
+	//							@Override
+	//							public void run() {
+	//								for (MiniFacade mf : mfs)
+	//									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
+	//								calculateOnJmeThread();
+	//							}
+	//						} );
+	//					}
+	//				} );
+	//			}
+	//		} ).start();
+	//		
+	//	}
 
 	public static void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
-		
-		for (Bar b : skel.plan.profiles.keySet()) {
-			if (b.end.equals( se.start ) && b.start.equals( se.end )) {
+
+		for ( Bar b : skel.plan.profiles.keySet() ) {
+			if ( b.end.equals( se.start ) && b.start.equals( se.end ) ) {
 				skel.plan.profiles.get( b ) // simple one-liner thank you streams
-				.points.streamE()
-				.flatMap( bar -> bar.tags.stream() )
-				.filter( tag -> tag instanceof WallTag )
-				.map( tag -> (WallTag) tag )
-				.forEach( t -> t.miniFacade = mf );
+						.points.streamE().flatMap( bar -> bar.tags.stream() ).filter( tag -> tag instanceof WallTag ).map( tag -> (WallTag) tag ).forEach( t -> t.miniFacade = mf );
 			}
 		}
 	}

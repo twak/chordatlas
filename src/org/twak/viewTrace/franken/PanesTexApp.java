@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.Cache;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
@@ -28,6 +29,7 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.EResult;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
@@ -41,11 +43,17 @@ public class PanesTexApp extends App implements HasApp {
 		super( (HasApp) null );
 		super.hasA = this;
 		this.parent = parent;
+		
+		if (TweedSettings.settings.sitePlanInteractiveTextures)
+			appMode = AppMode.Net;
 	}
 	
 	public PanesTexApp(PanesTexApp t) {
 		super ( (App ) t);
 		this.parent = t.parent;
+		
+		if (TweedSettings.settings.sitePlanInteractiveTextures)
+			appMode = AppMode.Net;
 	}
 	
 	@Override
@@ -349,7 +357,7 @@ public class PanesTexApp extends App implements HasApp {
 	}
 	
 	@Override
-	public void finishedBatches( List<App> list ) {
+	public void finishedBatches( List<App> list, List<App> all ) {
 		
 		for (App a : list) {
 			PanesTexApp pta = (PanesTexApp) a;
@@ -363,7 +371,7 @@ public class PanesTexApp extends App implements HasApp {
 		}
 			
 		
-		super.finishedBatches( list );
+		super.finishedBatches( list, all );
 	}
 	
 

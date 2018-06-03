@@ -16,6 +16,7 @@ import org.twak.utils.geom.DRectangle.RectDir;
 import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.Pix2Pix;
 
 /**
  * Old code for greebling via CGA-esque grammar
@@ -180,7 +181,7 @@ public class CGAMini extends FeatureGenerator {
 	
 	public void update () {
 
-		DRectangle all = mf.getAsRect();
+		DRectangle all = Pix2Pix.findBounds( mf, false );
 		
 		if  ( !TweedSettings.settings.createDormers && mf.postState != null ) {
 			

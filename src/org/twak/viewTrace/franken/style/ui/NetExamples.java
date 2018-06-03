@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
+import org.twak.tweed.TweedFrame;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -95,8 +97,11 @@ public class NetExamples extends JComponent {
 				randomOrder.add( new Pair (i, j) );
 		Collections.shuffle( randomOrder );
 		
-		if (!exampleFolder.exists())
+		if (!exampleFolder.exists()) 
 			exampleFolder.mkdirs();
+		
+		if (exampleFolder.listFiles().length == 0)
+			JOptionPane.showMessageDialog( TweedFrame.instance.frame, "missing inputs", "no inputs in "+exampleFolder.getName(), JOptionPane.ERROR_MESSAGE);
 		
 		for (File f : exampleFolder.listFiles() ) {
 			
@@ -219,6 +224,7 @@ public class NetExamples extends JComponent {
 		{
 			List<Pair<Integer, BufferedImage>> warmup = new ArrayList<>();
 
+			
 			for ( int i = 0; i < 32; i++ ) {
 
 				BufferedImage tmp = new BufferedImage( exemplar.resolution, exemplar.resolution, BufferedImage.TYPE_3BYTE_BGR );
@@ -228,7 +234,7 @@ public class NetExamples extends JComponent {
 				g.fillRect( 0, 0, exemplar.resolution, exemplar.resolution );
 				g.dispose();
 
-				warmup.add( new Pair( i % inputs.size(), tmp ) );
+				warmup.add( new Pair( i % Math.max( 1, inputs.size()), tmp ) );
 			}
 
 //			lastChanged = System.currentTimeMillis() - 5000;

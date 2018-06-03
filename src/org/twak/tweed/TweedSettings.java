@@ -93,6 +93,7 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
+	public boolean sitePlanInteractiveTextures = true;
 
 	
 	

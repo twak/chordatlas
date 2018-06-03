@@ -30,6 +30,7 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.PostProcessState;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
@@ -311,8 +312,26 @@ public class FacadeLabelApp extends App {
 		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 	
-	public void finishedBatches( List<App> list ) {
+	public void finishedBatches( List<App> list, List<App> all ) {
 
+		for (App a : all) 
+			if (! list.contains( a )) {
+				MiniFacade mf = ((MiniFacade)((FacadeLabelApp)a).hasA );
+				PostProcessState ps = mf.postState;
+				if (ps != null)
+					ps.generatedWindows.clear();
+			}
+		
+		for (App a : all) {
+			if (! list.contains( a )) {
+				MiniFacade mf = ((MiniFacade)((FacadeLabelApp)a).hasA );
+				 PostProcessState ps = mf.postState;
+				 if (ps != null)
+					 for (FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
+						 ps.generatedWindows.add( f );
+			}
+		}
+		
 		for (App a : list) {
 			MiniFacade mf = (MiniFacade)a.hasA;
 			FacadeTexApp fta = mf.app;

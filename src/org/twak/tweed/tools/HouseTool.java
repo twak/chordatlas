@@ -52,13 +52,13 @@ public class HouseTool extends Tool {
 		for ( int i = 0; i < num; i++ ) {
 			
 			double width = Math.random() * 4 + 6;
-			double height = Math.random() * 6 + 6;
+			double height =  Math.random() * 6 + 6;
 			
 			double[] minMax = new double[] { 0, 5 + Math.random() *4, accumWidth, accumWidth + width };
 			
 			System.out.println( "start: "+accumWidth +" end: "+ (accumWidth + width ) );
 			
-			accumWidth += width;// + 0.5;
+			accumWidth += width + 0.5;
 			
 			builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
 			builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
@@ -83,17 +83,15 @@ public class HouseTool extends Tool {
 			for ( HalfEdge e : f ) {
 				SuperEdge se = (SuperEdge) e;
 
-				se.prof = ps[ count % ps.length ];
+				se.prof = ps[0];// count % ps.length ];
 
 				MiniFacade mini = newMini( null, se.length() );
+				mini.height = height;
 
-				if ( count == 0 ) {
+				if ( count >= 0 ) {
 					se.addMini( mini );
 
 					se.toEdit = mini;
-
-					if ( count == 0 )
-						se.addMini( mini );
 				}
 				count++;
 			}
@@ -117,10 +115,10 @@ public class HouseTool extends Tool {
 		MiniFacade mini = new MiniFacade();
 		mini = new MiniFacade();
 		mini.width = length;
-		mini.height = 20;
+		mini.height = 10;
 		
-		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3, mini ) );
-		mini.featureGen = new CGAMini( mini );
+//		mini.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, Math.random() * mini.width - 3, 5, 3, 3, mini ) );
+//		mini.featureGen = new CGAMini( mini );
 
 		mini.imageFeatures = imf;
 		mini.app.appMode = AppMode.Off;//"tex.jpg";

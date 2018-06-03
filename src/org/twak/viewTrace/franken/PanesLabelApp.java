@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
@@ -24,6 +25,7 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -42,6 +44,9 @@ public class PanesLabelApp extends App {
 	
 	public PanesLabelApp(HasApp ha) {
 		super(ha );
+		
+		if (TweedSettings.settings.sitePlanInteractiveTextures)
+			appMode = AppMode.Net;
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -54,6 +59,9 @@ public class PanesLabelApp extends App {
 		this.panes = t.panes;
 		this.frameWidth = t.frameScale;
 		this.coveringRoof = t.coveringRoof;
+		
+		if (TweedSettings.settings.sitePlanInteractiveTextures)
+			appMode = AppMode.Net;
 	}
 	
 	@Override

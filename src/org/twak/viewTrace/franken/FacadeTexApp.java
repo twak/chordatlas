@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedFrame;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.tools.TextureTool;
@@ -124,9 +125,10 @@ public class FacadeTexApp extends App {
 
 		for ( MiniFacade mf : mfb ) {
 			
-			if (mf.featureGen instanceof CGAMini) {
+			if (!TweedSettings.settings.sitePlanInteractiveTextures &&
+					mf.featureGen instanceof CGAMini) {
+				
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
-				// new windows created, clear ui state.
 				TweedFrame.instance.tweed.setTool( TextureTool.class );
 			}
 

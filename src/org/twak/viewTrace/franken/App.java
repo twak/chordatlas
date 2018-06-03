@@ -82,7 +82,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren (int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		ProgressMonitor pm = new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
+		ProgressMonitor pm = null;//new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
 		
 		
 		try {
@@ -100,7 +100,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		}
 
 		
-		Set<App> todo = new LinkedHashSet<>();
+		Set<App> todo = new LinkedHashSet<>(), all = new LinkedHashSet<>();
 
 		Class k = NetInfo.evaluationOrder.get( stage );
 
@@ -113,7 +113,6 @@ public abstract class App /*earance*/ implements Cloneable {
 
 			if ( pm.isCanceled() )
 				return;
-
 		}
 		
 		todo.addAll( done.get( stage ) ); 
@@ -122,8 +121,11 @@ public abstract class App /*earance*/ implements Cloneable {
 		for ( int i = 0; i < stage; i++ )
 			for ( App a : done.get( i ) ) 
 				for ( App n : a.getDown().valueList() )
-					if ( n.appMode == AppMode.Net && n.getClass() == k ) {
-						todo.add( n );
+					if ( n.getClass() == k ) { 
+						if ( n.appMode == AppMode.Net ) 
+							todo.add( n );
+						
+						all.add(n);
 					}
 		
 		for (App a : todo)
@@ -135,10 +137,10 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		System.out.println ("finished "+todo.size()+" " + k.getSimpleName() +"s" );
 
-		if (!todo.isEmpty()) {
-			done.putAll( stage, todo );
-			list.get(0).finishedBatches( new ArrayList<>( todo ) );
-		}
+		done.putAll( stage, all, true );
+		
+		if (!all.isEmpty()) 
+			all.iterator().next().finishedBatches( new ArrayList<>( todo ), new ArrayList<>(all) );
 			
 		globalUpdate.run();
 		
@@ -232,7 +234,7 @@ public abstract class App /*earance*/ implements Cloneable {
 //		
 //	}
 
-	public void finishedBatches( List<App> list ) {
+	public void finishedBatches( List<App> list, List<App> all ) {
 		// hook to compute after all batches have run
 	}
 
