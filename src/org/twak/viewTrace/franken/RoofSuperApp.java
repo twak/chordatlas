@@ -221,7 +221,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			if ( true ) { // pad edges
 
 				g.setColor( mean );
-				g.setStroke( new BasicStroke( overlap / 2 ) );
+				g.setStroke( new BasicStroke( overlap / 8 ) );
 
 				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
 					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );

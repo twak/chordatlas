@@ -483,10 +483,10 @@ public class TweedFrame {
 								
 								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
+										SkelGen sg = (SkelGen) new XStream().fromXML( f );
 										sg.onLoad( tweed );
 										addGen( sg, true );
-										break;
+//										break;
 									} catch ( Throwable th ) {
 										th.printStackTrace();
 									}

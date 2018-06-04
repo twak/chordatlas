@@ -49,15 +49,17 @@ public class HouseTool extends Tool {
 		
 		double accumWidth = 0;
 		
+		double spacing = 14;
+		
 		for ( int x = 0; x < numX; x++ ) {
 			for ( int y = 0; y < numY; y++ ) {
 
 				double width = Math.random() * 4 + 6;
 				double depth = Math.random() * 4 + 6;
 
-				double height = Math.random() * 6 + 6;
+				double height = Math.random() * 4 + 4;
 
-				double[] minMax = new double[] { x * 12 - depth / 2, x * 12 + depth / 2, y * 12 - width / 2, y * 12 + width / 2 };
+				double[] minMax = new double[] { x * spacing - depth / 2, x * spacing + depth / 2, y * spacing - width / 2, y * spacing + width / 2 };
 
 				System.out.println( "start: " + accumWidth + " end: " + ( accumWidth + width ) );
 
@@ -74,10 +76,11 @@ public class HouseTool extends Tool {
 
 				p1.add( new Point2d( 0, 0 ) );
 				p1.add( new Point2d( 0, height ) );
-				p1.add( new Point2d( -5, height + 5 ) );
+				p1.add( new Point2d( -( 4.5 * Math.random() + 4), height + 5 ) );
 
 				p2.add( new Point2d( 0, 0 ) );
 				p2.add( new Point2d( 0, height ) );
+				p2.add( new Point2d( -( 1.5 * Math.random() + 2), height + 5 ) );
 
 				Prof[] ps = new Prof[] { p1, p2 };
 
@@ -86,7 +89,7 @@ public class HouseTool extends Tool {
 				for ( HalfEdge e : f ) {
 					SuperEdge se = (SuperEdge) e;
 
-					se.prof = ps[ 0 ];// count % ps.length ];
+					se.prof = ps[ count % ps.length ];
 
 					MiniFacade mini = newMini( null, se.length() );
 					mini.height = height;
@@ -108,6 +111,7 @@ public class HouseTool extends Tool {
 
 		HalfMesh2 mesh = builder.done();
 		SkelGen sg = new SkelGen( mesh, tweed, null );
+		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
 		
 //		 tweed.setTool( new TextureTool( tweed ) );
@@ -144,8 +148,8 @@ public class HouseTool extends Tool {
 
 		panel.setLayout( new ListDownLayout() );
 		
-		panel.add( new AutoSpinner( this, "numX", "number of houses deep", 1, 10 ));
-		panel.add( new AutoSpinner( this, "numY", "number pf houses wide", 1, 10 ));
+		panel.add( new AutoSpinner( this, "numX", "number of houses deep", 1, 50 ));
+		panel.add( new AutoSpinner( this, "numY", "number pf houses wide", 1, 50 ));
 	}
 
 }

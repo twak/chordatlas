@@ -531,10 +531,9 @@ public class GreebleGrid {
 		}
 		
 		grid.instance( new Griddable() {
-			
 			@Override
 			public void instance( DRectangle rect ) {
-				window.add( rect, uvs.normalize( bounds.transform ( rect ) ), to3d, -frameDepth );
+				window.add( rect, uvs.normalize( rect ), to3d, -frameDepth );
 			}
 		} );
 		
@@ -762,10 +761,10 @@ public class GreebleGrid {
 							
 							} else if (w.app.textureUVs == TextureUVs.ZERO_ONE){ // labels
 								
-								createInnie( rect, rect, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								createWindowFromPanes (w.app.panes, rect, rect, to3d,
 										mbs.getTexture( "texture_"+w.app.texture+"_window_"+w.hashCode(), w.app.texture, w.app.hasA ),
-										0.3, 0.2 );
+										0.2, 0.17 );
 							}
 							else { // textures
 								
@@ -773,7 +772,7 @@ public class GreebleGrid {
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );
 								createWindowFromPanes (w.app.panes, rect, allUV, to3d,
 										mbs.getTexture( "texture_"+mf.app.texture+"_window_"+w.hashCode() , mf.app.texture, w.app.hasA ),
-										0.3, 0.2 );
+										0.2, 0.17 );
 							}
 						}
 					} );
