@@ -33,6 +33,7 @@ import org.twak.readTrace.MiniTransform;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.EventMoveHandle;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.tweed.tools.AlignTool;
 import org.twak.utils.Filez;
@@ -176,7 +177,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	
 	
 	private final static int MAX = 1000;
-	private static final boolean IMPORT_TEXTURES = false;
+//	private static final boolean IMPORT_TEXTURES = true;
 
 	@Override
 	public JComponent getUI() {
@@ -334,7 +335,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 								if ( inside( pt, halfPlanes ) ) 
 								{
 
-									if ( IMPORT_TEXTURES && ! (
+									if ( TweedSettings.settings.importMiniMeshTextures && ! (
 											(obj.currentMaterial != null && obj.currentMaterial.equals( mat ) ) ||
 											(obj.currentMaterial == null && mat == null ) ) ) {
 										

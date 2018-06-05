@@ -486,15 +486,24 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 										sf.skel = (PlanSkeleton) threadKey;
 
 										for ( Face f : sf.skel.output.faces.values() ) {
+
 											WallTag wt = ( (WallTag) GreebleHelper.getTag( f.profile, WallTag.class ) );
 
 											if ( wt != null ) { 
+//												if (f.parent == null && wt.occlusionID != null) {
+////													wt.oc= wt.occlusionID;
+//													wt.occlusionID.start.set ( wt.occlusionID.end );  
+//													wt.occlusionID.end.set ( wt.occlusionID.start );  
+//												}
 
 												SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
 
 												if ( set != null ) // created by siteplan --> set correct face
 													wt.miniFacade.app.parent = (SuperFace) set.se.face;
 											}
+											
+											
+											
 										}
 
 										sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.app.color ) ) );
@@ -569,7 +578,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		JButton tex = new JButton( "texture" );
 		tex.addActionListener( x -> {
 			tweed.setTool( new TextureTool( tweed ) );
-			SkelGen.this.textureSelected( skel, house, sf, se, se.toEdit );
+			SkelGen.this.textureSelected( skel, house, sf, se, se == null ? null : se.toEdit );
 		} );
 		ui.add( tex );
 

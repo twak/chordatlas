@@ -87,8 +87,8 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 
 		try {
 			ImageIO.write( maps[0], "png", new File(Tweed.DATA + "/" +fileName ) );
-			ImageIO.write( maps[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
-			ImageIO.write( maps[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
+			ImageIO.write( maps[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) ) );
+			ImageIO.write( maps[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) )  );
 			
 			
 		} catch ( IOException e1 ) {

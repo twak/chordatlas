@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 
@@ -16,6 +17,7 @@ import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
@@ -75,7 +77,16 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
-		return new JPanel();
+		
+		JPanel out = new JPanel(new ListDownLayout());
+		
+		if (this.texture != null)
+			out.add (new JLabel (this.texture));
+		if (this instanceof FacadeTexApp) 
+			out.add (new JLabel (  ((FacadeTexApp)this).coarse));
+		
+		
+		return out;
 	}
 
 	static Random randy = new Random();

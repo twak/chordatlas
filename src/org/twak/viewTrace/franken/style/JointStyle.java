@@ -169,6 +169,7 @@ public class JointStyle implements StyleSource {
 	public void redraw() {
 		
 		Random randy = new Random(0xDEADBEEF);//System.nanoTime());
+//		Random randy = new Random(System.nanoTime());
 
 		root.styleSource = this; 
 		

@@ -481,16 +481,16 @@ public class TweedFrame {
 						public void heresTheFile( File skelGen ) throws Throwable {
 							try {
 								
-								for ( File f : skelGen.getParentFile().listFiles() ) {
+//								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										SkelGen sg = (SkelGen) new XStream().fromXML( f );
+										SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
 										sg.onLoad( tweed );
 										addGen( sg, true );
 //										break;
 									} catch ( Throwable th ) {
 										th.printStackTrace();
 									}
-								}
+//							}
 							}
 							catch (Throwable th ) {
 								th.printStackTrace();

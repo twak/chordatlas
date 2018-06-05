@@ -94,6 +94,7 @@ public class TweedSettings {
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
 	public boolean sitePlanInteractiveTextures = true;
+	public boolean importMiniMeshTextures = false;
 
 	
 	

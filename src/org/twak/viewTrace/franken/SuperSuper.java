@@ -118,6 +118,8 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 			for (FacState<A> state : todo.get(a)) {
 			try {
 
+				System.out.println("super batch " + state.nextTiles.size());
+				
 				while ( count < MAX_CONCURRENT && !state.nextTiles.isEmpty() ) {
 					
 					TileState ts = state.nextTiles.remove( 0 );

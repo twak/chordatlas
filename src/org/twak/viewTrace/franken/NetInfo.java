@@ -34,7 +34,7 @@ public class NetInfo {
 		index.put ( d( FacadeGreebleApp.class), new NetInfo ( "facade greebles", 0, 256, Color.blue ) );
 		
 		index.put ( d( RoofGreebleApp.class  ), new NetInfo ( "roof greebles"  , 8, 512, Color.blue ) );
-		index.put ( d( RoofTexApp.class      ), new NetInfo ( "roof"           , 8, 512, Color.blue ) );
+		index.put ( d( RoofTexApp.class      ), new NetInfo ( "roof textures"  , 8, 512, Color.blue ) );
 		
 		index.put ( d( PanesLabelApp.class   ), new NetInfo ( "pane labels"    , 8, 256, Color.red ) );
 		index.put ( d( PanesTexApp.class     ), new NetInfo ( "pane textures"  , 8, 256, Color.red ) );

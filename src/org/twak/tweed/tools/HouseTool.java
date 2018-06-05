@@ -66,6 +66,12 @@ public class HouseTool extends Tool {
 				//			accumWidth += width + 0.5;
 
 				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
+				
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x + 0.1, minMax[ 3 ] + loc.z + 0.1 ) );
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x + 0.2, minMax[ 3 ] + loc.z ) );
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x + 0.3, minMax[ 3 ] + loc.z + 0.3 ) );
+				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x + 0.4, minMax[ 3 ] + loc.z + 0.3) );
+				
 				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
 				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 2 ] + loc.z ) );
 				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 2 ] + loc.z ) );
