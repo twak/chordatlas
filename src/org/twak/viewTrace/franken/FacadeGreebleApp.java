@@ -24,6 +24,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.HasApp;
@@ -302,7 +303,11 @@ public class FacadeGreebleApp extends App implements HasApp {
 				r.alpha = regAlpha;
 				r.scale = regScale;
 
+//				new Plot (m.mf);
 				
+				
+				{
+					
 				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
 				m.mf.featureGen.setMF(m.mf);
 				
@@ -369,6 +374,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 						}
 					}
 
+				}
 				}
 
 			} catch ( IOException e ) {

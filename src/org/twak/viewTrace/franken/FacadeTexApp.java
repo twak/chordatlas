@@ -251,6 +251,7 @@ public class FacadeTexApp extends App {
 								meta.mf.app.setChimneyTexture( dest );
 							} else {
 								meta.mf.app.coarse = meta.mf.app.texture = dest;
+								meta.mf.app.coarseWithWindows = null;
 
 								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
 									r.app.panes = null;

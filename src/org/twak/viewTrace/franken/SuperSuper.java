@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -136,6 +137,9 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 						g.dispose();
 						
 						ts.coarse = toProcess;
+						
+						
+						System.out.println (" z is " + Arrays.toString( getZFor( a )) );
 						
 						p2.addInput( toProcess, null, null, ts, getZFor( a ), null );
 					}

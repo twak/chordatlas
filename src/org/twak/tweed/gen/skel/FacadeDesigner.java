@@ -77,7 +77,7 @@ public class FacadeDesigner {
 		
 		Plot p = new Plot( se.toEdit );
 		
-		c.changed();
-		p.addEditListener( c );
+//		c.changed();
+//		p.addEditListener( c );
 	}
 }

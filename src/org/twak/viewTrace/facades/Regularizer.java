@@ -113,6 +113,7 @@ public class Regularizer {
 			return out;
 		}
 		
+		
 		if (toReg.length > 0)
 			alignMFs (out);
 		else {
@@ -145,6 +146,9 @@ public class Regularizer {
 			for (MiniFacade mf : out)
 				mf.featureGen.get( f ).stream().forEach( r -> r.f = f );
 		
+
+//		if (new Object() != new Object())
+//			return out;
 		
 		for (int i = 0; i < 50 * debugFrac; i++) {
 			
@@ -221,7 +225,7 @@ public class Regularizer {
 		
 		
 		ids = 0;
-		
+
 		for ( Feature f : toReg2 )  // find ids...starting with the biggest
 		{
 			List<Pair<MiniFacade, FRect>> allRects = new ArrayList<>();
@@ -1185,7 +1189,7 @@ public class Regularizer {
 				
 				FRect r = rit.next();
 				
-				if ( r.width <= 0.3 * scale || r.height <= 0.3 * scale ) {
+				if ( r.width <= 0.5 * scale || r.height <= 0.5 * scale ) {
 					rit.remove();
 					continue rit;
 				}
@@ -1206,7 +1210,14 @@ public class Regularizer {
 					
 					for (FRect r2 : mf.featureGen.get(f)) {
 						if (r != r2 && similarMerge(r, r2)) {
-							r2.setFrom ( average(r, r2) );
+							
+							
+							if ( (r.area() + r2.area() ) * 1.5 > r.union( r2 ).area() )
+								r2.setFrom (r.union(r2));
+							else
+								r2.setFrom ( average(r, r2) );
+							
+							
 							r2.attached.putAll( r.attached );
 							
 							rit.remove();
