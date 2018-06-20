@@ -304,7 +304,7 @@ public class FacadeGreebleApp extends App {
 				
 				{
 					
-				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
+				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null, ac ).get( 0 ).featureGen;
 				m.mf.featureGen.setMF(m.mf);
 				
 				for (FRect f : m.mf.featureGen.get( Feature.MOULDING ) )

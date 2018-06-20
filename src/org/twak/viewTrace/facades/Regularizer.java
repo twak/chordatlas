@@ -58,6 +58,7 @@ public class Regularizer {
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
 	
 	double targetWidth = -1;
+	AppStore ac;
 	
 	public Regularizer () {}
 	public Regularizer (double alpha) {
@@ -68,29 +69,27 @@ public class Regularizer {
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
-	AppStore ac;
-	
 	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade, AppStore ac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		this.ac = ac;
-		
-		return go (in, 1, wantsFacade).get(0);
+		return go (in, 1, wantsFacade, ac).get(0);
 		
 	}
 	
-	public List<MiniFacade> go (List<MiniFacade> in, double targetS, double targetE, double debugFrac ) {
+	public List<MiniFacade> go (List<MiniFacade> in, double targetS, double targetE, double debugFrac, AppStore ac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return go(in, debugFrac, null);
+		return go(in, debugFrac, null, ac);
 		
 	}
 	
-	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures ) {
+	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures, AppStore ac ) {
+		
+		this.ac = ac;
 		
 		for (MiniFacade mf : in) 
 			if (mf.imageFeatures != null)

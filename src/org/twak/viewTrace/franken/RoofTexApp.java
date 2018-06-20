@@ -158,7 +158,7 @@ public class RoofTexApp extends App {
 			DRectangle bounds = draw (gL, drawTo, toEdit, ac);
 			drawEmpty (gE, drawTo, toEdit, bounds);
 			
-			p2.addInput( label, empty, null, toEdit, ac.get(FacadeTexApp.class, toEdit).styleZ, null );
+			p2.addInput( label, empty, null, toEdit, ac.get(RoofTexApp.class, toEdit).styleZ, null );
 		}
 	}
 	
