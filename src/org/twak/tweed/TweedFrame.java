@@ -6,6 +6,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -105,6 +108,13 @@ public class TweedFrame {
 		canvas = ctx.getCanvas();
 		canvas.setPreferredSize( d3Dim );
 
+		canvas.addComponentListener( new ComponentAdapter() {
+			@Override
+			public void componentResized( ComponentEvent arg0 ) {
+				tweed.setCameraPerspective();
+			}
+		} );
+		
 		frame.setLayout( new BorderLayout() );
 		frame.add( buildUI(), BorderLayout.EAST );
 		frame.add( canvas, BorderLayout.CENTER );

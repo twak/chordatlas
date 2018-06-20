@@ -1,7 +1,7 @@
 package org.twak.viewTrace.franken;
 
 
-import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.twak.viewTrace.franken.style.StyleSource;
 public abstract class App /*earance*/ implements Cloneable {
 	
 	public enum TextureUVs {
-		SQUARE, ZERO_ONE, Rectangle;
+		Square, Zero_One, Rectangle;
 	}
 	
 	public enum AppMode {
@@ -36,7 +36,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public AppMode appMode = AppMode.Off;
 	
 //	public String texture;
-	public TextureUVs textureUVs = TextureUVs.SQUARE;
+	public TextureUVs textureUVs = TextureUVs.Square;
 //	public Color color = Color.gray;
 	public double[] styleZ;
 	public StyleSource styleSource;
@@ -45,11 +45,6 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	// marks as needing geometry recreation
 	public boolean isDirty = true; 
-	
-	// GAN optoins
-//	public String netName;
-//	public int sizeZ = -1;
-//	public int resolution;
 	
 	public DRectangle textureRect;
 	public Joint lastJoint;
@@ -71,7 +66,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		this.styleSource = new GaussStyle(NetInfo.get(this));
 	}
 
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
@@ -206,6 +201,12 @@ public abstract class App /*earance*/ implements Cloneable {
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
-	
-	
+
+	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
+		 return new JLabel("no options");
+	}
+
+	public Component createBitmapUI( Runnable update, SelectedApps selectedApps ) {
+		return new JLabel("no options");
+	}
 }

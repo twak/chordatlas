@@ -88,7 +88,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if (textures == null)
 			textures = new HashMap<>();
 		
-		textureUVs = TextureUVs.ZERO_ONE;
+		textureUVs = TextureUVs.Zero_One;
 		textures.put (state.tag, fileName );
 	}
 	

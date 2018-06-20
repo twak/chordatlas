@@ -773,7 +773,7 @@ public class GreebleGrid {
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
 							
-							} else if (pa.textureUVs == TextureUVs.ZERO_ONE){ // labels
+							} else if (pa.textureUVs == TextureUVs.Zero_One){ // labels
 								
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								createWindowFromPanes (pa.panes, rect, rect, to3d,

@@ -191,28 +191,14 @@ public class SelectedApps extends ArrayList<App>{
 		
 		switch (appMode) {
 		case Off:
-//			JButton col = new JButton("color");
-//			
-//			col.addActionListener( e -> new ColourPicker(null, exemplar.color) {
-//				@Override
-//				public void picked( Color color ) {
-//					for (App a : SelectedApps.this) {
-//						a.color = color;
-//					}
-//					
-//					update.run();
-//				}
-//			} );
-//			out.add( col );
-			out.add( new JLabel("fixme: no options") );
+			out.add( exemplar.createColorUI ( update, this ) );
 			break;
 		case Bitmap:
 		default:
-			out.add( new JLabel("no options") );
+			out.add( exemplar.createBitmapUI ( update, this ) );
 			break;
 		case Net:
 			out.add( createDistEditor(update) );
-			
 			break;
 		}
 	}
@@ -306,7 +292,7 @@ public class SelectedApps extends ArrayList<App>{
 		
 		combo.fire();
 		
-		north.add( exemplar.createUI( update, SelectedApps.this ) );
+		north.add( exemplar.createNetUI( update, SelectedApps.this ) );
 		north.add( combo );
 		
 		out.add( north, BorderLayout.NORTH );

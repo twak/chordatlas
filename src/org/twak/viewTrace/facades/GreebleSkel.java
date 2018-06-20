@@ -597,7 +597,7 @@ public class GreebleSkel {
 		
 		DRectangle uvs;
 		
-		if (mf != null && ac.get( FacadeTexApp.class, mf ).textureUVs == TextureUVs.SQUARE) {
+		if (mf != null && ac.get( FacadeTexApp.class, mf ).textureUVs == TextureUVs.Square) {
 			uvs = new DRectangle(mf.postState.outerWallRect);
 
 			{ // for faces not at the bottom, move to the bottom's uv space
@@ -712,10 +712,10 @@ public class GreebleSkel {
 				roofUVs = null;
 				break;
 			case Net:
-				if ( ra.texture != null && ra.textureUVs == TextureUVs.SQUARE )
+				if ( ra.texture != null && ra.textureUVs == TextureUVs.Square )
 					roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 				
-				else if ( rsa.appMode == AppMode.Net && rsa.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
+				else if ( rsa.appMode == AppMode.Net && rsa.textures != null && ra.textureUVs == TextureUVs.Zero_One ) {
 					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( end ), Pointz.to2XZ( start ) );
 				}
 				else

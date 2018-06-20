@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedFrame;
@@ -24,6 +27,8 @@ import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
@@ -285,6 +290,30 @@ public class FacadeTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {AppMode.Off, AppMode.Bitmap, AppMode.Net};
+	}
+	
+	@Override
+	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
+		
+		JPanel out = new JPanel(new ListDownLayout());
+		JButton col = new JButton("color");
+		
+		col.addActionListener( e -> new ColourPicker(null, color) {
+			@Override
+			public void picked( Color color ) {
+				
+				for (App a : selectedApps)  {
+					((FacadeTexApp)a).color = color;
+					((FacadeTexApp)a).texture = null;
+				}
+				
+				update.run();
+			}
+		} );
+		
+		out.add( col );
+		
+		return out;
 	}
 }

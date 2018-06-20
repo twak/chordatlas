@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -24,6 +25,8 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.Pix2Pix.EResult;
@@ -58,7 +61,7 @@ public class PanesTexApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel p = new JPanel();
 		
@@ -298,8 +301,8 @@ public class PanesTexApp extends App {
 							
 							meta.pta.texture = dest;
 							pla.texture = dest;
-							meta.pta.textureUVs = TextureUVs.SQUARE;
-							pla.textureUVs = TextureUVs.SQUARE;
+							meta.pta.textureUVs = TextureUVs.Square;
+							pla.textureUVs = TextureUVs.Square;
 							
 							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
 							
@@ -397,5 +400,28 @@ public class PanesTexApp extends App {
 
 	public Enum[] getValidAppModes() {
 		return new Enum[] { AppMode.Off, AppMode.Net };
+	}
+	
+	@Override
+	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
+
+		JPanel out = new JPanel( new ListDownLayout() );
+		JButton col = new JButton( "color" );
+
+		col.addActionListener( e -> new ColourPicker( null, color ) {
+			@Override
+			public void picked( Color color ) {
+
+				for ( App a : selectedApps ) {
+					( (PanesTexApp) a ).color = color;
+					( (PanesTexApp) a ).texture = null;
+				}
+
+				update.run();
+			}
+		} );
+
+		out.add( col );
+		return out;
 	}
 }

@@ -88,7 +88,7 @@ public class PanesLabelApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		return new AutoCheckbox( this, "regularize", "regularize" ) {
 			@Override
@@ -184,7 +184,7 @@ public class PanesLabelApp extends App {
 							
 							PanesLabelApp pla = ac.get( PanesLabelApp.class, meta.r );
 							
-							pla.textureUVs = TextureUVs.ZERO_ONE;
+							pla.textureUVs = TextureUVs.Zero_One;
 							pla.texture = pla.label = dest;
 						}
 					}

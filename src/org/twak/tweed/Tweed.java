@@ -328,7 +328,10 @@ public class Tweed extends SimpleApplication {
 		frame.addGen ( new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
 	}
 
-	private void setCameraPerspective() {
+	public void setCameraPerspective() {
+		
+		if (cam == null)
+			return;
 		
 		if ( TweedSettings.settings.ortho ) {
 
@@ -338,7 +341,7 @@ public class Tweed extends SimpleApplication {
 			cam.setFrustum( -1000, 1000, -aspect * frustumSize, aspect * frustumSize, frustumSize, -frustumSize );
 			
 		} else {
-			cam.setFrustumPerspective(  TweedSettings.settings.fov*10 +100, 16 / 9f, 0.1f, 1e3f );
+			cam.setFrustumPerspective(  TweedSettings.settings.fov*10 +100, cam.getWidth() / (float) cam.getHeight(), 0.1f, 1e3f );
 			cam.setFrustumFar( 1e5f );
 		}
 	}

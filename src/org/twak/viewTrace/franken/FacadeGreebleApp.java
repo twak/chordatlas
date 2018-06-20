@@ -70,7 +70,7 @@ public class FacadeGreebleApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {

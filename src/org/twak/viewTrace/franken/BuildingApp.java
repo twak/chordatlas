@@ -51,7 +51,7 @@ public class BuildingApp extends App {
 		down.put( "roof",  ac.get( RoofGreebleApp.class, superFace.mr ) ); 
 		
 		for (HalfEdge e : superFace) 
-			down.put ( "facade", ac.get(FacadeLabelApp.class, e ) );
+			down.put ( "facade", ac.get(FacadeLabelApp.class, ((SuperEdge)e).toEdit ) );
 		
 		return down;
 	}
@@ -62,7 +62,7 @@ public class BuildingApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		out.add (new AutoCheckbox( this, "createDormers", "dormers" ) {

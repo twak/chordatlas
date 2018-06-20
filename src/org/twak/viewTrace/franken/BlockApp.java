@@ -52,7 +52,7 @@ public class BlockApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
-		return super.createUI( globalUpdate, apps );
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+		return super.createNetUI( globalUpdate, apps );
 	}
 }

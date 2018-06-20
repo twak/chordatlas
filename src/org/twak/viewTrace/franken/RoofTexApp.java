@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -28,6 +31,8 @@ import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -40,16 +45,14 @@ public class RoofTexApp extends App {
 	public SuperFace superFace;
 	
 	public String coarse;
-
-	MiniRoof mr;
-
 	public String texture;
-
-	public Color color;
+	public MiniRoof mr;
+	public Color color  = Color.gray;
 	
 	public RoofTexApp(MiniRoof mr) {
 		
 		super( );
+		this.mr = mr;
 	}
 
 	public RoofTexApp( RoofTexApp ruf ) {
@@ -58,6 +61,8 @@ public class RoofTexApp extends App {
 		this.superFace = ruf.superFace;
 		this.coarse = ruf.coarse;
 		this.texture = ruf.texture;
+		this.mr = ruf.mr;
+		this.color = ruf.color;
 	}
 
 	@Override
@@ -307,5 +312,27 @@ public class RoofTexApp extends App {
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net, AppMode.Bitmap};
 	}
+	
+	@Override
+	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
 
+		JPanel out = new JPanel( new ListDownLayout() );
+		JButton col = new JButton( "color" );
+
+		col.addActionListener( e -> new ColourPicker( null, color ) {
+			@Override
+			public void picked( Color color ) {
+
+				for ( App a : selectedApps ) {
+					( (RoofTexApp) a ).color = color;
+					( (RoofTexApp) a ).texture = null;
+				}
+
+				update.run();
+			}
+		} );
+
+		out.add( col );
+		return out;
+	}
 }

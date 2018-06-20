@@ -98,7 +98,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		
 		FacadeTexApp fta = ac.get(FacadeTexApp.class, mf);
 		
-		fta.textureUVs = TextureUVs.SQUARE;
+		fta.textureUVs = TextureUVs.Square;
 		fta.texture = fileName;
 	}
 

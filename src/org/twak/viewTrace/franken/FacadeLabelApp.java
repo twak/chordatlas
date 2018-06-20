@@ -61,7 +61,7 @@ public class FacadeLabelApp extends App {
 
 	@Override
 	public App getUp(AppStore ac) {
-		return ac.get(FacadeGreebleApp.class, mf.sf );
+		return ac.get(BuildingApp.class, mf.sf );
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class FacadeLabelApp extends App {
 	}
 
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
