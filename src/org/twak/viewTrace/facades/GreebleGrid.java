@@ -41,6 +41,7 @@ import org.twak.viewTrace.facades.Tube.CrossGen;
 import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 
 import com.jme3.material.Material;
@@ -836,7 +837,7 @@ public class GreebleGrid {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							PanesLabelApp ba = ac.get(PanesLabelApp.class, b);
+							PanesTexApp ba = ac.get(PanesTexApp.class, b);
 							createBalcony( rect, to3d, mbs.get( "balcony_"+ba.color, ba.color, mf ) , 0.3 );
 						}
 

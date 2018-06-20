@@ -44,6 +44,8 @@ public class RoofTexApp extends App {
 	MiniRoof mr;
 
 	public String texture;
+
+	public Color color;
 	
 	public RoofTexApp(MiniRoof mr) {
 		
