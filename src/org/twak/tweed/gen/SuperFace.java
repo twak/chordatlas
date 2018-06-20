@@ -8,12 +8,9 @@ import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.BuildingApp;
 
-public class SuperFace extends HalfFace implements HasApp {
+public class SuperFace extends HalfFace {
 
 	public List<float[]> colors = null;
 	public float[] roofColor;
@@ -25,7 +22,7 @@ public class SuperFace extends HalfFace implements HasApp {
 	
 	public transient MiniRoof mr = new MiniRoof(this);
 	
-	public BuildingApp app = new BuildingApp(this);
+//	public BuildingApp app = new BuildingApp(this);
 	public PlanSkeleton skel; 
 	
 	public SuperFace() {

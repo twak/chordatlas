@@ -12,21 +12,24 @@ import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.App.AppMode;
 
 public class FacadeDesigner {
 	
 	
-	public FacadeDesigner( PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
+	public FacadeDesigner( AppStore ac, PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
 
 //		JToggleButton texture = new JToggleButton( "textured" );
 //		texture.setSelected( se.toEdit != null && se.toEdit.app.texture != null );
 		
 		if ( se.toEdit == null ) {
-			SkelGen.ensureMF( sf, se );
+			sg.ensureMF( sf, se );
 		}
 		
-		if ( se.toEdit.app.appMode == AppMode.Off )
+		FacadeTexApp ma = ac.get (FacadeTexApp.class, se.toEdit);
+		
+		if ( ma.appMode == AppMode.Off )
 			se.toEdit.groundFloorHeight = 2;
 		else {
 			SkelGen.patchWallTag (skel, se, se.toEdit);
@@ -44,20 +47,20 @@ public class FacadeDesigner {
 			public void changed() {
 
 				PaintThing.debug.clear();
-					
-					sg.tweed.enqueue( new Runnable() {
-						@Override
-						public void run() {
+
+				sg.tweed.enqueue( new Runnable() {
+					@Override
+					public void run() {
 							
 							sg.setSkel( skel, sf );
 							sg.tweed.getRootNode().updateGeometricState();
 							
 							sg.block.faces.stream().map( x -> (SuperFace) x ).collect(Collectors.toSet() ).stream().
-								forEach( x -> new GreebleSkel( null, x ).
+								forEach( x -> new GreebleSkel( null, ac, x ).
 										showSkeleton( x.skel.output, null, x.mr ) );
 							
-							if (se.toEdit.app.appMode == AppMode.Net) // needs prior setSkel to compute visible windows.
-							SkelGen.updateTexture( sf, new Runnable() {
+						if ( ma.appMode == AppMode.Net ) // needs prior setSkel to compute visible windows.
+							sg.updateTexture( sf, new Runnable() {
 								@Override
 								public void run() {
 									sg.tweed.enqueue( new Runnable() {
@@ -67,11 +70,11 @@ public class FacadeDesigner {
 											sg.tweed.getRootNode().updateGeometricState();
 										}
 									} );
-									
+
 								}
 							} );
-						}
-					} );
+					}
+				} );
 			}
 		};
 		

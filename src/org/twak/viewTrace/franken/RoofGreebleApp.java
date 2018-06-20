@@ -10,32 +10,32 @@ import java.util.Map;
 import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofGreeble;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class RoofGreebleApp extends App implements HasApp {
+public class RoofGreebleApp extends App {
 
-	private RoofTexApp child;
-
-	public RoofGreebleApp( RoofTexApp child ) {
-		super( (HasApp) null );
-		this.hasA = this;
-		this.child = child;
+//	private RoofTexApp child;
+	private MiniRoof mr;
+	
+	public RoofGreebleApp( MiniRoof mr ) {
+		super( );
+		this.mr = mr;
 	}
 
 	public RoofGreebleApp( RoofGreebleApp o ) {
 
 		super( (App) o );
 		
-		this.child = o.child;
+		this.mr = o.mr;
 	}
 
 	@Override
@@ -44,21 +44,21 @@ public class RoofGreebleApp extends App implements HasApp {
 	}
 
 	@Override
-	public App getUp() {
-		return  (  child.superFace ).app;
+	public App getUp(AppStore ac) {
+		return ac.get( BuildingApp.class, mr.superFace );
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		MultiMap out = new MultiMap<>();
 		
-		out.put ("roof textures", child);
+		out.put ("roof textures", ac.get(RoofTexApp.class, mr));
 		
 		return out;
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) {
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
@@ -67,12 +67,12 @@ public class RoofGreebleApp extends App implements HasApp {
 		List<MiniRoof> toProcess = new ArrayList<>();
 		
 		for (App a : batch) {
-			MiniRoof mr = (MiniRoof) ( (RoofGreebleApp) a ).child.hasA;
+			MiniRoof mr = ((RoofGreebleApp) a ).mr;
 			mr.clearGreebles();
 			toProcess.add(mr);
 		}
 		
-		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution );
+		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution, ac );
 		
 		p2.submit( new Job( new JobResult() {
 			
@@ -85,7 +85,7 @@ public class RoofGreebleApp extends App implements HasApp {
 						
 						Pix2Pix.importTexture( e.getValue(), -1, null, null, null, new BufferedImage[3] );
 						
-						createGreebles(mr, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
+						createGreebles(mr, ac, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
 					}
 
 				} catch ( Throwable e ) {
@@ -100,7 +100,7 @@ public class RoofGreebleApp extends App implements HasApp {
 	
     private final static ObjectMapper om = new ObjectMapper();
 
-    private void createGreebles( MiniRoof mr, File file ) {
+    private void createGreebles( MiniRoof mr, AppStore ac, File file ) {
 
 		if ( file.exists() ) {
 
@@ -134,11 +134,13 @@ public class RoofGreebleApp extends App implements HasApp {
 								y = ni.resolution - circle.get(1).asDouble(), 
 								r = circle.get( 2 ).asDouble();
 						
-						Point2d worldXY = mr.app.textureRect.transform( imRect.normalize( new Point2d(x, y) ) );
+						RoofTexApp rta = ac.get( RoofTexApp.class, mr );
 						
-						r = r * mr.app.textureRect.height / ni.resolution;
+						Point2d worldXY = rta.textureRect.transform( imRect.normalize( new Point2d(x, y) ) );
 						
-						mr.addFeature (f, r, worldXY );
+						r = r * rta.textureRect.height / ni.resolution;
+						
+						mr.addFeature (ac, f, r, worldXY );
 						
 //						m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
 
@@ -152,7 +154,7 @@ public class RoofGreebleApp extends App implements HasApp {
 	}
     
     @Override
-    public void finishedBatches( List<App> list, List<App> all ) {
+    public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
 //    	for (App a : list)
 //    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
     }

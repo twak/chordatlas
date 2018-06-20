@@ -5,6 +5,7 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
@@ -12,12 +13,16 @@ import org.twak.viewTrace.franken.style.JointStyle;
 
 public class BlockApp extends App {
 
+	SkelGen skelGen;
+	
 	public BlockApp( BlockApp buildingApp ) {
 		super (buildingApp);
+		this.skelGen = buildingApp.skelGen;
 	}
 
 	public BlockApp( SkelGen skelGen ) {
-		super (skelGen );
+		super ( );
+		this.skelGen = skelGen;
 	}
 
 	@Override
@@ -26,34 +31,28 @@ public class BlockApp extends App {
 	}
 
 	@Override
-	public App getUp() {
+	public App getUp(AppStore ac) {
 		return null;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		
 		MultiMap<String, App> down = new MultiMap<>();
-		SkelGen sg = (SkelGen) hasA;
 
-		for (HalfFace sf : sg.block) {
-			down.put( "building", ((SuperFace) sf).app );
-		}
+		for (HalfFace sf : skelGen.block) 
+			down.put( "building", ac.get(BuildingApp.class, sf ) );
 		
 		return down;
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
 		whenDone.run();
 	}
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
-		
-//		if (styleSource instanceof JointDistribution )
-//			return styleSource.getUI( globalUpdate );
-//		else
-			return super.createUI( globalUpdate, apps );
+		return super.createUI( globalUpdate, apps );
 	}
 }

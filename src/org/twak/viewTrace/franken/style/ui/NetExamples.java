@@ -24,6 +24,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.twak.tweed.TweedFrame;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -65,6 +66,7 @@ public class NetExamples extends JComponent {
 	
 	long startTime = 0, endTime = 1000, lastChanged = 0;
 	
+	AppStore ac;
 	
 	static class UniqueInt {
 		
@@ -79,10 +81,11 @@ public class NetExamples extends JComponent {
 		}
 	}
 	
-	public NetExamples ( StyleSource ss, int x, int y, NetInfo exemplar, File exampleFolder ) {
+	public NetExamples ( StyleSource ss, int x, int y, NetInfo exemplar, File exampleFolder, AppStore ac ) {
 		
 		this.styleSource = ss;
 		this.exemplar = exemplar;
+		this.ac = ac;
 		
 		images = new BufferedImage [x][y];
 		inputIdx = new int[x][y];
@@ -158,7 +161,7 @@ public class NetExamples extends JComponent {
 						
 						int index = randy.nextInt(inputs.size());
 						
-						double[] z = styleSource.draw( randy, null );
+						double[] z = styleSource.draw( randy, null, ac );
 						
 						
 						Double scale = 0.1;
@@ -171,7 +174,7 @@ public class NetExamples extends JComponent {
 						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
 								new UniqueInt ( index ),
-								styleSource.draw( randy, null ),scale ) ;//scales.get(index) );
+								styleSource.draw( randy, null, ac ),scale ) ;//scales.get(index) );
 						
 					}
 					

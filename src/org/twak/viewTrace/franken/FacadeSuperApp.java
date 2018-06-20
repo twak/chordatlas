@@ -16,32 +16,29 @@ import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Filez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.NormSpecGen;
 
-public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
+public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 
-	FacadeTexApp parent;
+	MiniFacade mf;
 	
-	public FacadeSuperApp( FacadeTexApp parent ) {
-		super( parent );
-		this.hasA = this;
-		this.parent = parent;
+	public FacadeSuperApp( MiniFacade mf ) {
+		super();
+		this.mf = mf;
 	}
 
 	public FacadeSuperApp( FacadeSuperApp o ) {
-
 		super( (SuperSuper) o );
-
-		this.parent = o.parent;
+		this.mf = o.mf;
 	}
 
 	@Override
@@ -49,12 +46,8 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		return new FacadeSuperApp( this );
 	}
 
-	public double[] getZFor( MiniFacade e ) {
-		return e.app.zuper.styleZ;
-	}
-
 	@Override
-	public void setTexture( MiniFacade mf, FacState<MiniFacade> state, BufferedImage cropped ) {
+	public void setTexture( FacState<MiniFacade> state, BufferedImage cropped, AppStore ac ) {
 		
 		NormSpecGen ns = renderLabels( mf, cropped );
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.spec, ns.norm };
@@ -73,7 +66,9 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 
 				d.y = maps[ 0 ].getHeight() - d.y - d.height;
 
-				File wf = new File( Tweed.DATA + "/" + f.app.texture );
+				PanesLabelApp pla = ac.get( PanesLabelApp.class, f );
+				
+				File wf = new File( Tweed.DATA + "/" + pla.texture );
 				
 				if (!wf.exists())
 					continue;
@@ -101,9 +96,10 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 			e1.printStackTrace();
 		}
 		
+		FacadeTexApp fta = ac.get(FacadeTexApp.class, mf);
 		
-		mf.app.textureUVs = TextureUVs.SQUARE;
-		mf.app.texture = fileName;
+		fta.textureUVs = TextureUVs.SQUARE;
+		fta.texture = fileName;
 	}
 
 	private NormSpecGen renderLabels( MiniFacade mf, BufferedImage cropped ) {
@@ -140,9 +136,11 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 		return ns;
 	}
 	
-	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, MiniFacade mf ) throws IOException {
+	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, AppStore ac ) throws IOException {
 		
-		BufferedImage src = ImageIO.read( Tweed.toWorkspace( ((FacadeTexApp) parent).coarse ) );
+		FacadeTexApp fta = ac.get(FacadeTexApp.class, mf);
+		
+		BufferedImage src = ImageIO.read( Tweed.toWorkspace( fta.coarse ) );
 
 		DRectangle mini = Pix2Pix.findBounds( mf, false );
 		
@@ -205,5 +203,10 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> implements HasApp {
 				state.nextTiles.add( new TileState( state, x, y ) );
 
 		todo.put( mf, state );
+	}
+
+	@Override
+	public App getUp( AppStore ac ) {
+		return ac.get(FacadeTexApp.class, mf);
 	}
 }

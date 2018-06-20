@@ -9,6 +9,7 @@ import javax.vecmath.Point2d;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Cache;
 import org.twak.utils.collections.Loop;
@@ -24,8 +25,8 @@ import org.twak.utils.geom.DRectangle.RectDir;
  */
 public class GreebleCGA extends GreebleSkel {
 
-	public GreebleCGA( Tweed tweed, SuperFace sf ) {
-		super( tweed, sf );
+	public GreebleCGA( Tweed tweed, AppStore ac, SuperFace sf ) {
+		super( tweed, ac, sf );
 	}
 
 	private static List<Double> split3 (RectDir r, double first, double last) {

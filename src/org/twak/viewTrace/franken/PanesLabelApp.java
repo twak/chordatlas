@@ -4,34 +4,29 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class PanesLabelApp extends App {
 
-	PanesTexApp child = new PanesTexApp( this );
+//	PanesTexApp child = new PanesTexApp( this );
 	
 	public String label;
 	public double frameScale = 0.1;
@@ -42,8 +37,14 @@ public class PanesLabelApp extends App {
 
 	public Loop<Point2d> coveringRoof;
 	
-	public PanesLabelApp(HasApp ha) {
-		super(ha );
+	FRect fr;
+	public String texture;
+	
+	public PanesLabelApp(FRect fr) {
+		
+		super();
+		
+		this.fr = fr;
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
@@ -52,28 +53,31 @@ public class PanesLabelApp extends App {
 	public PanesLabelApp(PanesLabelApp t) {
 		super (t);
 		this.label = t.label;
-		this.child = (PanesTexApp) t.child.copy();
-		this.child.parent = this;
+		
+		this.fr = t.fr;
+		
 		this.frameScale = t.frameScale;
 		this.regularize = t.regularize;
 		this.panes = t.panes;
 		this.frameWidth = t.frameScale;
 		this.coveringRoof = t.coveringRoof;
 		
+		this.texture = t.texture;
+		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
 	}
 	
 	@Override
-	public App getUp() {
-		return ((FRect)hasA).mf.app;
+	public App getUp(AppStore ac) {
+		return ac.get( FacadeTexApp.class, fr.mf );
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		MultiMap<String, App>  out = new MultiMap<>();
 		
-		out.put( "texture", child );
+		out.put( "texture", ac.get(PanesTexApp.class, fr ) );
 		
 		return out;
 	}
@@ -101,7 +105,7 @@ public class PanesLabelApp extends App {
 	public final static int pad = 20;
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
 
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -112,13 +116,14 @@ public class PanesLabelApp extends App {
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 		
 		
-		for ( App a : batch ) {
+		for ( App a_ : batch ) {
 			try {
-				MiniFacade mf = ( (FRect) a.hasA ).mf;
-
-				FRect r = (FRect) a.hasA;
 				
-				if ( !Pix2Pix.findBounds( mf, true ).contains( r ) )
+				PanesLabelApp a = (PanesLabelApp)a_;
+				
+				FRect r = a.fr;
+				
+				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r ) )
 					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
@@ -176,8 +181,11 @@ public class PanesLabelApp extends App {
 						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null, new BufferedImage[3] );
 						
 						if ( dest != null ) {
-							meta.r.app.textureUVs = TextureUVs.ZERO_ONE;
-							meta.r.app.texture = ((PanesLabelApp ) meta.r.app).label = dest;
+							
+							PanesLabelApp pla = ac.get( PanesLabelApp.class, meta.r );
+							
+							pla.textureUVs = TextureUVs.ZERO_ONE;
+							pla.texture = pla.label = dest;
 						}
 					}
 					

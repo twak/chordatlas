@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,21 +14,17 @@ import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.utils.collections.LoopL;
-import org.twak.utils.collections.Loopz;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.PostProcessState;
@@ -42,34 +39,37 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FacadeLabelApp extends App {
 
 	public static final double FLOOR_HEIGHT = 2.5;
-	
-	public SuperFace superFace;
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
-	public FacadeLabelApp( HasApp ha ) {
-		super( ha );
+	public MiniFacade mf;
+	public String texture;
+	
+	public FacadeLabelApp( MiniFacade mf ) {
+		super( );
+		this.mf = mf;
 	}
 
-	public FacadeLabelApp( FacadeLabelApp facadeCoarse ) {
-		super( facadeCoarse );
-		this.superFace = facadeCoarse.superFace;
-		this.regFrac   = facadeCoarse.regFrac;
-		this.regAlpha  = facadeCoarse.regAlpha;
-		this.regScale  = facadeCoarse.regScale;
+	public FacadeLabelApp( FacadeLabelApp o ) {
+		super( o );
+		this.mf = o.mf;
+		this.regFrac   = o.regFrac;
+		this.regAlpha  = o.regAlpha;
+		this.regScale  = o.regScale;
+		
+		this.texture = o.texture;
 	}
 
 	@Override
-	public App getUp() {
-		return superFace.app;
+	public App getUp(AppStore ac) {
+		return ac.get(FacadeGreebleApp.class, mf.sf );
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		MiniFacade mf = (MiniFacade)hasA;
-		out.put( "facade texture", mf.app );
+		out.put( "facade texture", ac.get(FacadeTexApp.class, mf ) );
 		
 		return out;
 	}
@@ -108,19 +108,21 @@ public class FacadeLabelApp extends App {
 			};
 		}.notWhileDragging() );
 		
-		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
-			public void updated(boolean selected) {
-				for (App a : apps)
-					((MiniFacade)a.hasA).app.dormer = selected;
-				globalUpdate.run();
-			}
-		} );
+//		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
+//			public void updated(boolean selected) {
+//				for (App a : apps)
+//					apps.ac.get(BuildingApp.class, sf)
+//					
+//					((MiniFacade)a.hasA).app.dormer = selected;
+//				globalUpdate.run();
+//			}
+//		} );
 		
 		return out;
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
 
 		NetInfo ni = NetInfo.get(this);
 		
@@ -133,9 +135,10 @@ public class FacadeLabelApp extends App {
 
 		for (App a : batch) {
 
-			MiniFacade mf = (MiniFacade) a.hasA;
+			MiniFacade amf = ((FacadeLabelApp)a).mf;
+			BuildingApp ba = appCache.get (BuildingApp.class, amf.sf );
 			
-			DRectangle mini = Pix2Pix.findBounds( mf, mf.app.dormer );
+			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers );
 
 			if (mini.area() < 0.1)
 				continue;
@@ -154,11 +157,11 @@ public class FacadeLabelApp extends App {
 				mask.y = 0; 
 			}
 
-			Pix2Pix.drawFacadeBoundary( g, mf, mini, mask, mf.app.dormer );
+			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers );
 
-			Meta meta = new Meta( mf, mask, mini );
+			Meta meta = new Meta( amf, mask, mini );
 
-			p2.addInput( bi, bi, null, meta, mf.app.styleZ, FLOOR_HEIGHT * scale / 255.  );
+			p2.addInput( bi, bi, null, meta, appCache.get(FacadeLabelApp.class, amf).styleZ, FLOOR_HEIGHT * scale / 255.  );
 		}
 
 		g.dispose();
@@ -175,12 +178,12 @@ public class FacadeLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						importLabels(meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						importLabels( appCache, meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
 						if ( dest != null ) 
-							meta.mf.appLabel.texture = dest; //= meta.mf.app.texture  doesn't work because of the dormer windows
+							appCache.get (FacadeLabelApp.class, meta.mf ).texture = dest; // todo: set on FacadeTexApp after cropping for dormers
 					}
 					
 				} catch ( Throwable e ) {
@@ -197,7 +200,7 @@ public class FacadeLabelApp extends App {
     //{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
     //"wall": [[62, 196, 0, 255]], 
     // "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
-	private void importLabels( Meta m,  File file ) {
+	private void importLabels( AppStore ac, Meta m,  File file ) {
 		
 		if (file.exists()) {
 			
@@ -247,20 +250,25 @@ public class FacadeLabelApp extends App {
 					
 					FRect window = m.mf.featureGen.add( Feature.WINDOW, f );
 					
-					if (m.mf.app.styleSource instanceof JointStyle) {
+					PanesLabelApp wla = ac.get( PanesLabelApp.class, window );
+					PanesTexApp pta = ac.get( PanesTexApp.class, window );
+					FacadeTexApp mfa = ac.get ( FacadeTexApp.class, m.mf);
+					
+					if (mfa.styleSource instanceof JointStyle) {
 						
-						JointStyle js = (JointStyle) m.mf.app.styleSource;
-						window.app.child.styleSource = window.app.styleSource = js; // fixme: dirty hack
-						window.app.child.styleZ = window.app.styleZ = null;
-						js.setMode(window.app.child);
-						js.setMode(window.app);
+						JointStyle js = (JointStyle) mfa.styleSource;
+						pta.styleSource = wla.styleSource = js; // fixme: dirty hack
+						pta.styleZ = wla.styleZ = null;
+						js.setMode(wla);
+						js.setMode(pta);
 						
 					} else {
 						
-						FRect nearestOld = closest( window, m.mf.app.oldWindows );
+						FRect nearestOld = closest( window, mfa.oldWindows );
 						if ( nearestOld != null ) {
-							window.app = (PanesLabelApp) nearestOld.app.copy();
-							window.app.styleZ = nearestOld.app.styleZ;
+							PanesLabelApp opla = ac.get (PanesLabelApp.class, nearestOld );
+							ac.set(PanesLabelApp.class, window, opla );
+							wla.styleZ = Arrays.copyOf ( opla.styleZ, opla.styleZ.length );
 						}
 					}
 					
@@ -315,19 +323,18 @@ public class FacadeLabelApp extends App {
 		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 	
-	public void finishedBatches( List<App> list, List<App> all ) {
+	public void finishedBatches( AppStore ac, List<App> list, List<App> all ) {
 
 		for (App a : all) 
 			if (! list.contains( a )) {
-				MiniFacade mf = ((MiniFacade)((FacadeLabelApp)a).hasA );
-				PostProcessState ps = mf.postState;
+				PostProcessState ps = ( (FacadeLabelApp)a).mf.postState;
 				if (ps != null)
 					ps.generatedWindows.clear();
 			}
 		
 		for (App a : all) {
 			if (! list.contains( a )) {
-				MiniFacade mf = ((MiniFacade)((FacadeLabelApp)a).hasA );
+				MiniFacade mf = ( (FacadeLabelApp)a).mf;
 				 PostProcessState ps = mf.postState;
 				 if (ps != null)
 					 for (FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
@@ -336,15 +343,15 @@ public class FacadeLabelApp extends App {
 		}
 		
 		for (App a : list) {
-			MiniFacade mf = (MiniFacade)a.hasA;
-			FacadeTexApp fta = mf.app;
+			MiniFacade mf = ( (FacadeLabelApp)a).mf;
+			FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
 			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
-			fta.setChimneyTexture( null );
+			fta.setChimneyTexture( ac, null );
 		}
 		
 		// compute dormer-roof locations
-		list.stream().map( x -> ((FacadeLabelApp)x).superFace ).collect(Collectors.toSet() ).stream().
-			forEach( x -> new GreebleSkel( null, x ).
+		list.stream().map( x -> ((FacadeLabelApp)x).mf.sf ).collect(Collectors.toSet() ).stream().
+			forEach( x -> new GreebleSkel( null, ac, x ).
 			showSkeleton( x.skel.output, null, x.mr ) );
 	}
 }

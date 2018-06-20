@@ -37,7 +37,7 @@ public class CGAMini extends FeatureGenerator {
 		
 		for (Map.Entry<Feature, List<FRect>> ee : entrySet()) {
 			for (FRect e : ee.getValue()) {
-				FRect neu = new FRect( e, false );
+				FRect neu = new FRect( e );
 				neu.mf = n;
 				out.put( ee.getKey(), neu );
 			}

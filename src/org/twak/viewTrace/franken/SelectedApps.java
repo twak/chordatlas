@@ -2,10 +2,8 @@ package org.twak.viewTrace.franken;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -20,14 +18,12 @@ import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 
 import org.twak.tweed.TweedFrame;
-import org.twak.tweed.gen.skel.SkelGen;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
-import org.twak.utils.ui.Cancellable;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
@@ -40,16 +36,22 @@ public class SelectedApps extends ArrayList<App>{
 	
 	public App exemplar;
 	
-	public SelectedApps(App app) {
+	public AppStore ac;
+	
+	public SelectedApps(App app, AppStore ac) {
 		add(app);
 		exemplar = app;
+		this.ac = ac;
 	}
 	
-	public SelectedApps() {}
+	public SelectedApps(AppStore ac) {
+		this.ac = ac;
+	}
 	
-	public SelectedApps( List<App> list ) {
+	public SelectedApps( List<App> list, AppStore ac ) {
 		super (new ArrayList (new LinkedHashSet<>(list) ) );
 		exemplar = list.get( 0 );
+		this.ac = ac;
 	}
 
 	@Override
@@ -64,11 +66,11 @@ public class SelectedApps extends ArrayList<App>{
 		Set<App> ups = new LinkedHashSet<>();
 		
 		for (App a : this) {
-			App up = a.getUp();
+			App up = a.getUp(ac);
 			if (up != null)
 				ups.add(up);
 		}
-		SelectedApps sa = new SelectedApps();
+		SelectedApps sa = new SelectedApps(ac);
 		for (App a : ups)
 			sa.add( a );
 		
@@ -79,11 +81,11 @@ public class SelectedApps extends ArrayList<App>{
 		MultiMap<String, App> as = new MultiMap<>();
 		
 		for (App a : this) 
-			as.putAll( a.getDown() );
+			as.putAll( a.getDown(ac) );
 		
 		Map<String, SelectedApps> out = new LinkedHashMap<>();
 		for (String name : as.keySet())
-			out.put( name, new SelectedApps(as.get( name ) ) );
+			out.put( name, new SelectedApps(as.get( name ), ac ) );
 			
 		return out;
 	}
@@ -94,7 +96,7 @@ public class SelectedApps extends ArrayList<App>{
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
 		todo.putAll( i , this );
 		
-		App.computeWithChildren( i, todo, globalUpdate );
+		App.computeWithChildren( ac, i, todo, globalUpdate );
 	}
 	
 	public JPanel createUI( Runnable update_ ) {
@@ -104,11 +106,11 @@ public class SelectedApps extends ArrayList<App>{
 			public void run() {
 				
 				if (exemplar instanceof BlockApp)
-					for (App building : exemplar.getDown().valueList())
+					for (App building : exemplar.getDown(ac).valueList())
 						building.isDirty = true;
 				else
 					for (App a : SelectedApps.this)
-						a.markDirty();
+						a.markDirty(ac);
 				
 				update_.run();
 			}
@@ -191,17 +193,13 @@ public class SelectedApps extends ArrayList<App>{
 		case Off:
 			JButton col = new JButton("color");
 			
-			for (App a : SelectedApps.this) {
-				a.texture = null;
-			}
-			
 			col.addActionListener( e -> new ColourPicker(null, exemplar.color) {
 				@Override
 				public void picked( Color color ) {
 					for (App a : SelectedApps.this) {
 						a.color = color;
-						a.texture = null;
 					}
+					
 					update.run();
 				}
 			} );
@@ -255,8 +253,8 @@ public class SelectedApps extends ArrayList<App>{
 			Set<App> ups = new HashSet<>();
 			
 			for (App a : current)
-				if (a.getUp() != null)
-					ups.add(a.getUp());
+				if (a.getUp(ac) != null)
+					ups.add(a.getUp(ac));
 			
 			if (ups.isEmpty())
 				return current;

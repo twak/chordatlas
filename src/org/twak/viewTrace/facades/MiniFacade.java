@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +14,11 @@ import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
-import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
-import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.FacadeLabelApp;
-import org.twak.viewTrace.franken.FacadeTexApp;
 
-public class MiniFacade implements HasApp {
+public class MiniFacade {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
@@ -45,9 +41,6 @@ public class MiniFacade implements HasApp {
 		}
 	}
 	
-	public FacadeLabelApp appLabel = new FacadeLabelApp( this );
-	public FacadeTexApp app = new FacadeTexApp( this );
-	
 	public FeatureGenerator featureGen = new FeatureGenerator(this);
 	
 	public List<Outer> outers = new ArrayList<>();
@@ -60,7 +53,9 @@ public class MiniFacade implements HasApp {
 	double imageXM, scale;
 
 	public PostProcessState postState = null;
+	public Color wallColor;
 
+	public SuperFace sf;
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -82,8 +77,8 @@ public class MiniFacade implements HasApp {
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
 		
-		this.app = m.app;// m.app.copy();
-		this.appLabel = m.appLabel;
+//		this.app = m.app;// m.app.copy();
+//		this.appLabel = m.appLabel;
 		
 		this.featureGen = m.featureGen.copy(this);
 		this.postState = m.postState;
@@ -137,7 +132,7 @@ public class MiniFacade implements HasApp {
 		
 		List<String> rgb = (List) yaml.get( "rgb" );
 		
-		app.color = new Color( 
+		wallColor = new Color( 
 				Float.parseFloat ( rgb.get( 0 ) ),
 				Float.parseFloat ( rgb.get( 1 ) ),
 				Float.parseFloat ( rgb.get( 2 ) ) );
@@ -334,7 +329,7 @@ public class MiniFacade implements HasApp {
 		List<FRect> out = new ArrayList();
 		if ( rects != null )
 			for ( FRect o : rects ) {
-				FRect n = new FRect( o, false );
+				FRect n = new FRect( o );
 				n.width *= widthRatio;
 				n.x = (n.x - left) * widthRatio + left + xOffset;
 				out.add( n );

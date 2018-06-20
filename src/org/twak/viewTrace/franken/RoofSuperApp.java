@@ -3,11 +3,9 @@ package org.twak.viewTrace.franken;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,10 +21,10 @@ import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Filez;
-import org.twak.utils.Imagez;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
@@ -35,28 +33,24 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Colourz;
-import org.twak.utils.ui.Show;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.NormSpecGen;
 
-public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
+public class RoofSuperApp extends SuperSuper <MiniRoof> {
 
-	RoofTexApp parent;
-	
 	public Map<Tag, String> textures = null;
 
+	MiniRoof mr;
 	
-	public RoofSuperApp( RoofTexApp parent ) {
+	public RoofSuperApp( MiniRoof mr ) {
 		
-		super( parent );
+		super();
 		
 		this.scale = 180;
-		this.hasA = this;
-		this.parent = parent;
+		this.mr = mr;
 	}
 
 	public RoofSuperApp( RoofSuperApp o ) {
@@ -64,7 +58,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 		super( (SuperSuper) o );
 
 		this.scale = 180;
-		this.parent = o.parent;
+		this.mr = o.mr;
 	}
 
 	@Override
@@ -72,12 +66,8 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 		return new RoofSuperApp( this );
 	}
 
-	public double[] getZFor( MiniRoof e ) {
-		return e.app.zuper.styleZ;
-	}
-
 	@Override
-	public void setTexture( MiniRoof mf,FacState<MiniRoof> state, BufferedImage cropped ) {
+	public void setTexture( FacState<MiniRoof> state, BufferedImage cropped, AppStore ac ) {
 		
 		NormSpecGen ns = new NormSpecGen( cropped, null, null);
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
@@ -98,7 +88,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 		if (textures == null)
 			textures = new HashMap<>();
 		
-		mf.app.textureUVs = TextureUVs.ZERO_ONE;
+		textureUVs = TextureUVs.ZERO_ONE;
 		textures.put (state.tag, fileName );
 	}
 	
@@ -142,16 +132,18 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
  	}
 	
 	@Override
-	public void drawCoarse( MultiMap<MiniRoof, FacState> todo, MiniRoof mr ) throws IOException {
+	public void drawCoarse( MultiMap<MiniRoof, FacState> todo, AppStore ac ) throws IOException {
 		
-		BufferedImage src = ImageIO.read( Tweed.toWorkspace( parent.coarse ) );
+		RoofTexApp rta = ac.get(RoofTexApp.class, mr);
+		
+		BufferedImage src = ImageIO.read( Tweed.toWorkspace( rta.coarse ) );
 		
 //		DRectangle imageBounds = textureRect;
 		
 //		src = Imagez.blur( 25, src );
 		
 		
-		NetInfo ni = NetInfo.get( parent );
+		NetInfo ni = NetInfo.get( this );
 		
 		int count = 0;
 		
@@ -161,7 +153,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 //			if (count ++  != 1)
 //				continue;
 			
-			TwoRects toPix = new TwoRects( mr.app.textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
+			TwoRects toPix = new TwoRects( textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
 			
 			Loop<Point2d> pixPts = toPix.tranform( verticalPts );
 			
@@ -228,21 +220,21 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 				}
 				
 				if (false)
-				for (HalfEdge e : mr.app.superFace) { // dormers
+				for (HalfEdge e : mr.superFace) { // dormers
 					MiniFacade mf = ((SuperEdge)e).toEdit; 
-					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) 
-						if (f.app.coveringRoof != null) {
-							
-							for (Loopable <Point2d> pt : f.app.coveringRoof.loopableIterator() ) {
+					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
+						
+						PanesLabelApp pla = ac.get(PanesLabelApp.class, f );
+						if ( pla.coveringRoof != null) {
+							for (Loopable <Point2d> pt : pla.coveringRoof.loopableIterator() ) {
 								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
 							}
 						}
+					}
 				}
 			}
 			
-			
 			g.dispose();
-			
 			
 			FacState state = new FacState( bigCoarse, mr, new DRectangle(0,0,bounds[1] - bounds[0], bounds[3] - bounds[2] ), rt );
 			
@@ -277,6 +269,11 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> implements HasApp {
 			return Colourz.to3( meanCol );
 		}
 		return def;
+	}
+
+	@Override
+	public App getUp( AppStore ac ) {
+		return ac.get(RoofTexApp.class, mr);
 	}
 
 }

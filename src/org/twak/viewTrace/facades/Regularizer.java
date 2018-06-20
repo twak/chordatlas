@@ -21,6 +21,7 @@ import javax.vecmath.Vector2d;
 
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Cache2;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.DumbCluster1D.Cluster;
@@ -37,6 +38,7 @@ import org.twak.utils.DumbCluster1DImpl;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class Regularizer {
 
@@ -66,10 +68,14 @@ public class Regularizer {
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
-	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade ) {
+	AppStore ac;
+	
+	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade, AppStore ac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
+		
+		this.ac = ac;
 		
 		return go (in, 1, wantsFacade).get(0);
 		
@@ -315,7 +321,7 @@ public class Regularizer {
 			}
 		
 		out.groundFloorHeight = ypad + sy + gy/2;
-		out.app.color = Color.red;//new double[] { 1,0,0, 1.0f };
+		out.wallColor = Color.red;//new double[] { 1,0,0, 1.0f };
 //		out.color = new double[] { 200 / 255f, 180 / 255f, 170 / 255f, 1.0f };
 //		out.groundColor = new double[] { 180 / 255f, 150 / 255f, 140 / 255f, 1.0f };
 		
@@ -419,7 +425,7 @@ public class Regularizer {
 //				out.groundColor[i] /= gcc;
 		}
 		
-		out.app.color = Colourz.to4( color );
+		out.wallColor = Colourz.to4( color );
 		
 		Cache2<Outer, Integer, List<FRect>> corniceX = new ArrayCache2();
 		Cache2<Outer, Integer, List<FRect>> sillX = new ArrayCache2();
@@ -465,7 +471,7 @@ public class Regularizer {
 				FRect o;
 				
 				if ( dimensionSpread( found ) > 1.4 ) { // scattered -> union (typically shop windows)  
-					o = new FRect( found.get( 0 ), true );
+					o = new FRect( found.get( 0 ) );
 
 					for ( FRect n : found )
 						o.setFrom( o.union( n ) );
@@ -478,7 +484,10 @@ public class Regularizer {
 					FRect t = found.get(0);
 					o.f = t.f;
 					o.id = i;
-					o.app = t.app;
+					
+					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
+//					ac.setFrom ( o.app = t.app;
+					
 					o.attached = t.attached;
 					
 //					o.outer = t.outer;
@@ -1300,7 +1309,7 @@ public class Regularizer {
 		if (!rit.hasNext() )
 			return null;
 		
-		FRect out = new FRect(rit.next(), true);
+		FRect out = new FRect(rit.next());
 		
 		while (rit.hasNext())
 			out.setFrom( out.union( rit.next() ) );

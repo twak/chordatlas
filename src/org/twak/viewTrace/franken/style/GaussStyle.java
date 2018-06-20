@@ -16,6 +16,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
@@ -46,7 +47,7 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 		return out;
 	}
 	@Override
-	public double[] draw( Random random, App app ) {
+	public double[] draw( Random random, App app, AppStore ac ) {
 
 		double[] out = new double[mean.length];
 

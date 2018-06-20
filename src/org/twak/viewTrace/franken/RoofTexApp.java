@@ -18,6 +18,7 @@ import javax.vecmath.Vector3d;
 import org.twak.camp.Output.Face;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
@@ -28,7 +29,6 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -37,35 +37,38 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class RoofTexApp extends App {
 
-	public RoofSuperApp zuper = new RoofSuperApp(this);
-
-	public RoofGreebleApp greebles = new RoofGreebleApp( this );
-	
 	public SuperFace superFace;
 	
 	public String coarse;
 
-	public RoofTexApp(HasApp ha) {
+	MiniRoof mr;
+
+	public String texture;
+	
+	public RoofTexApp(MiniRoof mr) {
 		
-		super( ha );
+		super( );
 	}
 
 	public RoofTexApp( RoofTexApp ruf ) {
-		
 		super( ruf );
-		this.zuper = ruf.zuper;
+		
+		this.superFace = ruf.superFace;
+		this.coarse = ruf.coarse;
+		this.texture = ruf.texture;
 	}
 
 	@Override
-	public App getUp() {
-		return greebles;
+	public App getUp(AppStore ac) {
+		
+		return ac.get(RoofGreebleApp.class, mr);
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		
 		MultiMap<String, App> out = new MultiMap<>();
-		out.put( "super", zuper );
+		out.put( "super", ac.get(RoofSuperApp.class, mr) );
 		return out;	
 	}
 
@@ -74,12 +77,14 @@ public class RoofTexApp extends App {
 		return new RoofTexApp( this );
 	}
 	
-	public String getTexture( RoofTag rt ) {
+	public String getTexture( AppStore ac, RoofTag rt ) {
 		
 		String out = null;
 		
-		if ( zuper.appMode == AppMode.Net && zuper.textures != null) 
-			out = zuper.textures.get( rt );
+		RoofSuperApp rsa = ac.get(RoofSuperApp.class, mr);
+		
+		if ( rsa.appMode == AppMode.Net && rsa.textures != null) 
+			out = rsa.textures.get( rt );
 		
 		if (out == null) 
 			out = texture;
@@ -88,14 +93,15 @@ public class RoofTexApp extends App {
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
 		
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		int resolution = ni.resolution;
 		
-		addCoarseRoofInputs( batch.stream().map( x -> (MiniRoof)x.hasA ).collect( Collectors.toList() ), p2, resolution );
+		addCoarseRoofInputs( batch.stream().map( x -> ((RoofTexApp)x).mr ).
+				collect( Collectors.toList() ), p2, resolution, ac );
 
 		p2.submit( new Job( new JobResult() {
 			
@@ -107,12 +113,17 @@ public class RoofTexApp extends App {
 
 						MiniRoof mr = ((MiniRoof)e.getKey());
 						
-						String dest = Pix2Pix.importTexture( e.getValue(), 50, null,  null, new RescaleOp(0.5f, 1.5f, null ), new BufferedImage[3] );
+						String dest = Pix2Pix.importTexture( e.getValue(), 50, null,  null, 
+								new RescaleOp(0.5f, 1.5f, null ), new BufferedImage[3] );
 
 						if ( dest != null ) {
-							zuper.textures = null;
-							mr.app.coarse = mr.app.texture = dest;
-							mr.app.textureUVs = TextureUVs.Rectangle;
+							
+							RoofSuperApp rsa  = ac.get(RoofSuperApp.class, mr);
+							RoofTexApp rta = ac.get(RoofTexApp.class, mr);
+							
+							rsa.textures = null;
+							rta.coarse = rta.texture = dest;
+							rta.textureUVs = TextureUVs.Rectangle;
 						}
 					}
 
@@ -125,7 +136,7 @@ public class RoofTexApp extends App {
 		} ) );
 	}
 
-	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution ) {
+	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution, AppStore ac ) {
 		
 		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D gL = (Graphics2D) label.getGraphics();
@@ -137,14 +148,14 @@ public class RoofTexApp extends App {
 		
 		for ( MiniRoof toEdit : mrb ) {
 
-			DRectangle bounds = draw (gL, drawTo, toEdit);
+			DRectangle bounds = draw (gL, drawTo, toEdit, ac);
 			drawEmpty (gE, drawTo, toEdit, bounds);
 			
-			p2.addInput( label, empty, null, toEdit, toEdit.app.styleZ, null );
+			p2.addInput( label, empty, null, toEdit, ac.get(FacadeTexApp.class, toEdit).styleZ, null );
 		}
 	}
 	
-	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr ) {
+	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr, AppStore ac ) {
 		
 		
 		DRectangle bounds = new DRectangle(mr.bounds);
@@ -159,7 +170,8 @@ public class RoofTexApp extends App {
 
 		bounds.grow( 2 );
 		
-		mr.app.textureRect = new DRectangle ( bounds );
+		RoofTexApp rta = ac.get(RoofTexApp.class, mr);
+		rta.textureRect = new DRectangle ( bounds );
 		
 		bounds.y += bounds.height;
 		bounds.height = -bounds.height;
@@ -239,18 +251,21 @@ public class RoofTexApp extends App {
 		
 		
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
-		for (HalfEdge e : mr.app.superFace) {
+		for (HalfEdge e : mr.superFace) {
 			MiniFacade mf = ((SuperEdge)e).toEdit; 
-			for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) 
-				if (f.app.coveringRoof != null) {
+			for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
+				
+				PanesLabelApp pla = ac.get(PanesLabelApp.class, f );
+				
+				if (pla.coveringRoof != null) {
 
 					g.setColor( Color.cyan );
-					Polygon dormer = Loopz.toPolygon (f.app.coveringRoof.singleton(), bounds, drawTo ).get(0);
+					Polygon dormer = Loopz.toPolygon (pla.coveringRoof.singleton(), bounds, drawTo ).get(0);
 					g.fill( dormer );
 
 					g.setColor( Color.magenta );
 					int count = 0;
-					for (Loopable<Point2d> ll : f.app.coveringRoof.loopableIterator()) {
+					for (Loopable<Point2d> ll : pla.coveringRoof.loopableIterator()) {
 						
 						if (count ++ == 3)
 							continue;
@@ -264,6 +279,7 @@ public class RoofTexApp extends App {
 //					g.setColor( Color.magenta );
 //					g.draw( dormer );
 				}
+			}
 		}
 		
 		return bounds;

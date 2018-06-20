@@ -304,7 +304,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 				
 				if (dragging != null) {
 					
-					FRect rec = new FRect( dragging, true );
+					FRect rec = new FRect( dragging );
 //					rec.x += 0.5;
 					rec.x += rec.width + 0.3;
 					mf.featureGen.put( rec.f, rec );

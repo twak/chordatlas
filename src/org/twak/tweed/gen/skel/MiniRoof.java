@@ -26,11 +26,10 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.RoofTexApp;
+import org.twak.viewTrace.franken.PanesLabelApp;
 
-public class MiniRoof implements HasApp {
+public class MiniRoof {
 
 	public DHash<Loop<Point2d>, Face> origins = new DHash<>();
 	
@@ -39,15 +38,15 @@ public class MiniRoof implements HasApp {
 	
 	public DRectangle bounds;
 	
-	public RoofTexApp app = new RoofTexApp( this );
-	
 	public MultiMap<Loop<Point2d>, FCircle> greebles;
 	
+	public SuperFace superFace;
+	
 	public MiniRoof( SuperFace superFace ) {
-		app.superFace = superFace;
+		this.superFace = superFace;
 	}
 	
-	public void addFeature( RoofGreeble f, double radius, Point2d worldXY ) {
+	public void addFeature( AppStore appCache, RoofGreeble f, double radius, Point2d worldXY ) {
 		
 		for (Loop<Point2d> face : getAllFaces() ) {
 			if (Loopz.inside( worldXY, face )) {
@@ -84,12 +83,12 @@ public class MiniRoof implements HasApp {
 				if (circ.radius < 0.1)
 					return;
 
-				for (HalfEdge e : app.superFace ) {
+				for (HalfEdge e : superFace ) {
 					
 					SuperEdge se = (SuperEdge)e;
 					
 					for (FRect fr : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) // avoid dormer windows
-						if ( Loopz.inside( circ.loc, fr.app.coveringRoof) )
+						if ( Loopz.inside( circ.loc,  appCache.get(PanesLabelApp.class, fr).coveringRoof ) )
 							return;
 				}
 				

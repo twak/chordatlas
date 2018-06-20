@@ -24,7 +24,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import javax.swing.ProgressMonitor;
 import javax.swing.border.EmptyBorder;
 
 import org.twak.tweed.TweedFrame;
@@ -40,11 +39,11 @@ import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.NetInfo;
+import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
 import org.twak.viewTrace.franken.style.JointStyle.NetProperties;
 
-import com.jme3.texture.Texture;
 import com.thoughtworks.xstream.XStream;
 
 
@@ -59,8 +58,14 @@ public class JointUI extends JPanel {
 	JPanel modalPanel;
 	MultiModalEditor modal;
 	
-	public JointUI (BlockApp root, Runnable globalUpdate) {
+	SelectedApps sa;
+	
+	public JointUI ( SelectedApps sa, Runnable globalUpdate) {
 
+		this.sa = sa;
+		
+		BlockApp root = (BlockApp) sa.findRoots().iterator().next();
+		
 		if (! (root.styleSource instanceof JointStyle))
 			root.styleSource = this.jd = new JointStyle(null);
 		else 
@@ -92,13 +97,13 @@ public class JointUI extends JPanel {
 		Runnable modalUpdate = new Runnable() {
 			@Override
 			public void run() {
-				jd.redraw();
+				jd.redraw(sa.ac);
 //				globalUpdate.run();
 			}
 		};
 		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate, sa.ac ), 
 				BorderLayout.CENTER );
 		
 		modalPanel.revalidate();
@@ -124,7 +129,7 @@ public class JointUI extends JPanel {
 		JButton close = new JButton( "ok" );
 
 		close.addActionListener( l -> {
-			jd.redraw();
+			jd.redraw(sa.ac);
 			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 //			globalUpdate.run();
 		} );
@@ -171,7 +176,7 @@ public class JointUI extends JPanel {
 		AutoListCombo<Class> lc = new AutoListCombo<Class> ( selectedJoint.appInfo.get( ns.klass ), "bakeWith", "fixZ", options ) {
 			
 			public void fire(Class e) {
-				jd.redraw();
+				jd.redraw(sa.ac);
 			}
 
 			@Override
@@ -314,7 +319,7 @@ public class JointUI extends JPanel {
 						try {
 							jd = (JointStyle) new XStream().fromXML( f );
 							jd.root = editing;
-							jd.redraw();
+							jd.redraw(sa.ac);
 							
 							// current joint ui is invalid
 							TweedFrame.instance.tweed.setTool( new TextureTool( TweedFrame.instance.tweed ) );

@@ -18,16 +18,14 @@ import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
-import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
@@ -38,24 +36,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 
-public class FacadeGreebleApp extends App implements HasApp {
+public class FacadeGreebleApp extends App {
 	
-	private FacadeTexApp parent;
-
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 
+	MiniFacade mf;
 	
-	public FacadeGreebleApp( FacadeTexApp parent ) {
-		super( (HasApp) null );
-		this.hasA = this;
-		this.parent = parent;
+	public FacadeGreebleApp( MiniFacade mf ) {
+		super( );
+		this.mf = mf;
 	}
 
 	public FacadeGreebleApp( FacadeGreebleApp o ) {
 
 		super( (App) o );
 		
-		this.parent = o.parent;
+		this.mf = o.mf;
 	}
 
 	@Override
@@ -64,12 +60,12 @@ public class FacadeGreebleApp extends App implements HasApp {
 	}
 
 	@Override
-	public App getUp() {
-		return parent;
+	public App getUp(AppStore ac) {
+		return ac.get(FacadeGreebleApp.class, mf);
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		return new MultiMap<>();
 	}
 	
@@ -117,7 +113,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 	}; 
 	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
 
 		NetInfo ni = NetInfo.get(this) ;
 		int resolution = ni.resolution;
@@ -140,7 +136,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 				Graphics2D gR = rgb   .createGraphics();
 
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
-				MiniFacade mf = (MiniFacade) fga.parent.hasA;
+				MiniFacade mf = (MiniFacade) fga.mf;
 
 				if (mf.postState == null)
 					continue;
@@ -168,7 +164,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 					maskLabel.y = 0;
 				}
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( fga.parent.coarse ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( appCache.get( FacadeTexApp.class, mf ).coarse ) );
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
 				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
@@ -207,7 +203,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 						
 						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
 						
-						importLabels(meta, boxFile );
+						importLabels(meta, boxFile, appCache );
 					}
 
 				} catch ( Throwable e ) {
@@ -219,7 +215,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 	}
     private final static ObjectMapper om = new ObjectMapper();
 
-	private void importLabels( Meta m, File file ) {
+	private void importLabels( Meta m, File file, AppStore ac ) {
 
 		if ( file.exists() ) {
 
@@ -284,7 +280,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 								if ( w.intersects( r ) )
 									if ( Math.abs( w.area() - r.area() ) < w.area() / 2 ) {
 										// don't change the size
-										r = new FRect( w, false );
+										r = new FRect( w );
 										
 										m.mf.featureGen.add( f, r );
 										
@@ -370,7 +366,7 @@ public class FacadeGreebleApp extends App implements HasApp {
 						if ( feat.height > 0 ) {
 							FRect f = m.mf.featureGen.add( ff, feat );
 							if (c != null)
-								f.app.color = c;
+								ac.get (PanesTexApp.class, f ).color = c;
 						}
 					}
 

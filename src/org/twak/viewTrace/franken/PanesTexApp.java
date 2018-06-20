@@ -14,35 +14,32 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Cache;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
-import org.twak.utils.collections.LoopL;
-import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.EResult;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public class PanesTexApp extends App implements HasApp {
+public class PanesTexApp extends App {
 
-	public PanesLabelApp parent;
 	public boolean useCoarseStyle = false;
-
-	public PanesTexApp(PanesLabelApp parent) {
-		super( (HasApp) null );
-		super.hasA = this;
-		this.parent = parent;
+	FRect fr;
+	public String texture;
+	
+	public PanesTexApp(FRect fr) {
+		super( );
+		
+		this.fr = fr;
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
@@ -50,7 +47,10 @@ public class PanesTexApp extends App implements HasApp {
 	
 	public PanesTexApp(PanesTexApp t) {
 		super ( (App ) t);
-		this.parent = t.parent;
+
+		this.useCoarseStyle = t.useCoarseStyle;
+		this.fr = t.fr;
+		this.texture = t.texture;
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
@@ -76,12 +76,12 @@ public class PanesTexApp extends App implements HasApp {
 	}
 	
 	@Override
-	public App getUp() {
-		return parent;
+	public App getUp(AppStore ac) {
+		return ac.get(PanesLabelApp.class, fr);
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		return new MultiMap<>();
 	}
 
@@ -97,41 +97,42 @@ public class PanesTexApp extends App implements HasApp {
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) { // first compute latent variables
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) { // first compute latent variables
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
 		
 
-		List<Meta> otherMEta = new ArrayList<>();
+		List<Meta> otherMeta = new ArrayList<>();
 		
 		for ( App a : batch ) {
 
 			try {
 
 				PanesTexApp pta = (PanesTexApp) a;
-				PanesLabelApp pla = pta.parent;
-
+				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
+				FacadeTexApp fta = ac.get(FacadeTexApp.class, pla.fr.mf );
+				
 				if ( pla.label == null )
 					continue;
 
-				MiniFacade mf = ( (FRect) parent.hasA ).mf;
+				MiniFacade mf = pla.fr.mf;
 
 
 				DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
 
-				FRect r = (FRect) pla.hasA;
+				FRect r = (FRect) pta.fr;
 
 				Meta meta = new Meta( pta, ni.sizeZ, mf, r );
 				
-				if ( mf.app.texture == null || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
+				if ( fta.texture == null || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
 					
 					meta.styleZ = a.styleZ;
-					otherMEta.add( meta );
+					otherMeta.add( meta );
 					
 				} else {
 
-					BufferedImage src = Imagez.read( new File ( Tweed.DATA+"/"+ mf.app.coarse ) );
+					BufferedImage src = Imagez.read( new File ( Tweed.DATA+"/"+ fta.coarse ) );
 					
 					DRectangle inSrc = new DRectangle( ni.resolution, ni.resolution ).transform( mfBounds.normalize( r ) );
 
@@ -161,7 +162,7 @@ public class PanesTexApp extends App implements HasApp {
 					meta.styleZ = e.getValue();
 				}
 				
-				for (Meta m : otherMEta) {
+				for (Meta m : otherMeta) {
 					
 					double bestArea = Double.MAX_VALUE;
 					Meta bestM2 = null;
@@ -181,15 +182,15 @@ public class PanesTexApp extends App implements HasApp {
 					
 				}
 				
-				next.addAll( otherMEta );
+				next.addAll( otherMeta );
 
-				computeTextures( whenDone, next );
+				computeTextures( whenDone, next, ac );
 			}
 		} ) );
 				
 	}
 	
-	public void computeTextures( Runnable whenDone, List<Meta> batch ) {
+	public void computeTextures( Runnable whenDone, List<Meta> batch, AppStore ac ) {
 
 		
 		NetInfo ni = NetInfo.get(this); 
@@ -207,20 +208,19 @@ public class PanesTexApp extends App implements HasApp {
 			try {
 				
 				PanesTexApp pta = (PanesTexApp)meta.pta;
-				PanesLabelApp pla = pta.parent;
+				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
 				
 				if (pla.label == null)
 					continue;
 				
 				BufferedImage labelSrc = ImageIO.read( Tweed.toWorkspace( pla.label ) );
 
-				FRect r = (FRect) pla.hasA;
 				
-				double scale = ( ni.resolution - 2 * PanesLabelApp.pad ) / Math.max( r.width, r.height );
+				double scale = ( ni.resolution - 2 * PanesLabelApp.pad ) / Math.max( pta.fr.width, pta.fr.height );
 				
-				DRectangle imBounds = new DRectangle(r);
+				DRectangle imBounds = new DRectangle(pta.fr);
 				
-				imBounds = r.scale( scale );
+				imBounds = pta.fr.scale( scale );
 				imBounds.x = (ni.resolution - imBounds.width) / 2;
 				imBounds.y = (ni.resolution - imBounds.height) / 2;
 
@@ -235,7 +235,7 @@ public class PanesTexApp extends App implements HasApp {
 				
 				meta.imBounds = imBounds;
 				
-				p2.addInput( lBi, eBi, null, meta, meta.styleZ, pta.parent.frameScale );
+				p2.addInput( lBi, eBi, null, meta, meta.styleZ, pla.frameScale );
 
 
 			} catch ( IOException e1 ) {
@@ -259,10 +259,12 @@ public class PanesTexApp extends App implements HasApp {
 						
 						String src;
 						
-						if (mf.app.coarseWithWindows != null)
-							src = mf.app.coarseWithWindows;
+						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+						
+						if (fta.coarseWithWindows != null)
+							src = fta.coarseWithWindows;
 						else
-							src = mf.app.coarse;
+							src = fta.coarse;
 						
 						if (src == null)
 							return null;
@@ -288,13 +290,15 @@ public class PanesTexApp extends App implements HasApp {
 
 						if ( dest != null ) {
 							
-							FRect frect = ((FRect) meta.pta.parent.hasA );
+							FRect frect = meta.pta.fr;
 							MiniFacade mf = frect.mf;
+							PanesLabelApp pla = ac.get(PanesLabelApp.class, frect);
+							
 							
 							meta.pta.texture = dest;
-							meta.pta.parent.texture = dest;
+							pla.texture = dest;
 							meta.pta.textureUVs = TextureUVs.SQUARE;
-							meta.pta.parent.textureUVs = TextureUVs.SQUARE;
+							pla.textureUVs = TextureUVs.SQUARE;
 							
 							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
 							
@@ -342,7 +346,8 @@ public class PanesTexApp extends App implements HasApp {
 						
 						MiniFacade mf = updated.getKey();
 						
-						mf.app.coarseWithWindows = mf.app.texture = fileName;
+						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+						fta.coarseWithWindows = fta.texture = fileName;
 //						updated.getKey().app.textureUVs = TextureUVs.Rectangle;
 					}
 					
@@ -357,21 +362,20 @@ public class PanesTexApp extends App implements HasApp {
 	}
 	
 	@Override
-	public void finishedBatches( List<App> list, List<App> all ) {
+	public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
 		
 		for (App a : list) {
 			PanesTexApp pta = (PanesTexApp) a;
-			PanesLabelApp pla = pta.parent;
+			PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
 
 			if ( pla.label == null )
 				continue;
 
-			MiniFacade mf = ( (FRect) parent.hasA ).mf;
-			mf.app.coarseWithWindows = null;
+			ac.get(FacadeTexApp.class, pla.fr.mf ).coarseWithWindows = null;
 		}
 			
 		
-		super.finishedBatches( list, all );
+		super.finishedBatches( list, all, ac );
 	}
 	
 

@@ -69,20 +69,20 @@ import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App.AppMode;
-import org.twak.viewTrace.franken.BlockApp;
+import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
 
-public class SkelGen extends Gen implements IDumpObjs, HasApp {
+public class SkelGen extends Gen implements IDumpObjs {
 
 	public BlockGen blockGen;
 
@@ -92,10 +92,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	protected List<Line> footprint;
 	transient Map<SuperEdge, Face> lastOccluders = new HashMap<>();
 
-	public BlockApp app = new BlockApp( this );
-
 	transient Cache<SuperFace, Rendered> geometry = new Cach<>( sf -> new Rendered() );
 
+	public AppStore appFact = new AppStore();
+	
 	static {
 		PlanSkeleton.TAGS = new String[][] { { "org.twak.tweed.gen.skel.WallTag", "wall" }, { "org.twak.tweed.gen.skel.RoofTag", "roof" }, };
 	}
@@ -151,7 +151,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		this.block = mesh;
 
 		for ( HalfFace f : block )
-			( (SuperFace) f ).app.parent = this;
+			appFact.get (BuildingApp.class, f ).parent = this;
 	}
 
 	@Override
@@ -210,7 +210,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		super.calculate();
 	}
 
-	protected static PlanSkeleton calc( SuperFace sf ) {
+	protected PlanSkeleton calc( SuperFace sf ) {
 
 		double pHeight = findHeightFromProfiles( sf );
 
@@ -238,7 +238,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		if ( sf.mr == null )
 			sf.mr = new MiniRoof( sf ); // deserialization
 
-		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.app.color ) ) );
+		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4(  appFact.get( RoofTexApp.class, sf.mr ).color ) ) );
 		sf.mr.setOutline( sf.skel.output );
 
 		return skel;
@@ -254,7 +254,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		return sf.maxProfHeights.get( (int) ( sf.maxProfHeights.size() * 0.9 ) ) + TweedSettings.settings.profileVSampleDist;
 	}
 
-	private static PlanSkeleton buildCamp( SuperFace sf, Double cap ) {
+	private PlanSkeleton buildCamp( SuperFace sf, Double cap ) {
 
 		Plan plan = new Plan();
 
@@ -383,20 +383,21 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
-		sft_.app.isDirty = true; // todo: dirty hack! can remove sft from this interface
+		appFact.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
 
 		for ( HalfFace hf : block ) {
 
 			SuperFace sf = (SuperFace) hf;
-
-			if ( sf.app.isDirty ) {
+			BuildingApp sfa = appFact.get ( BuildingApp.class, sf );
+			
+			if ( sfa.isDirty ) {
 
 				for ( HalfEdge he : sf ) {
 					SuperEdge se = (SuperEdge) he;
 					ensureMF( sf, se );
 				}
 
-				sf.app.isDirty = false;
+				sfa.isDirty = false;
 
 				removeGeometryFor( sf );
 
@@ -404,7 +405,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 				OnClick onclick = new OnClick() {
 					@Override
-					public void selected( Output output, Node house2, SuperEdge se, HasApp ha ) {
+					public void selected( Output output, Node house2, SuperEdge se, Object ha ) {
 
 						if ( tweed.tool instanceof TextureTool )
 							SkelGen.this.textureSelected( sf.skel, house2, sf, se, ha );
@@ -413,7 +414,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					}
 				};
 
-				GreebleSkel greeble = new GreebleSkel( tweed, sf );
+				GreebleSkel greeble = new GreebleSkel( tweed, appFact, sf );
 				greeble.occluderLookup = lastOccluders;
 
 				house = greeble.showSkeleton( sf.skel.output, onclick, sf.mr );
@@ -465,7 +466,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 				for ( HalfEdge he : sf ) {
 					SuperEdge ee = (SuperEdge) he;
 					if ( ee.toEdit != null )
-						ee.toEdit.app.appMode = AppMode.Off;
+						appFact.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Off;
 				}
 
 				siteplan = new Siteplan( skel.plan, false ) {
@@ -499,14 +500,14 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 												SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
 
 												if ( set != null ) // created by siteplan --> set correct face
-													wt.miniFacade.app.parent = (SuperFace) set.se.face;
+													appFact.get (FacadeTexApp.class,  wt.miniFacade ).parent = (SuperFace) set.se.face;
 											}
 											
 											
 											
 										}
 
-										sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.app.color ) ) );
+										sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( appFact.get ( RoofTexApp.class, sf.mr ).color ) ) );
 										sf.mr.setOutline( sf.skel.output );
 
 										setSkel( (PlanSkeleton) threadKey, sf );
@@ -549,16 +550,19 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 						Profile profile = new Profile( defpts );
 						tagWalls( sf, profile, se, bar.start, bar.end );
 						
+						FacadeTexApp mfa = appFact.get(FacadeTexApp.class, se.toEdit);
+						
 						if (oldTag != null)
-							se.toEdit.app.parent = oldTag.sf;
+							mfa.parent = oldTag.sf;
+						
 						if (TweedSettings.settings.sitePlanInteractiveTextures) {
-							se.toEdit.app.appMode = AppMode.Net;
+							
+							mfa.appMode = AppMode.Net;
 							se.toEdit.height = 5;
 							se.toEdit.featureGen = new CGAMini( se.toEdit );
 							
 							if (oldTag != null)
 								oldTag.sf.insert( se ); //!
-							
 						}
 						
 						
@@ -613,15 +617,15 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		tweed.frame.setGenUI( ui );
 	}
 
-	public static void updateTexture( HasApp sf, Runnable update ) {
-		new Thread( () -> new SelectedApps( HasApp.get( sf ) ).computeAll( update, null ) ).start();
+	public void updateTexture( SuperFace sf, Runnable update ) {
+		new Thread( () -> new SelectedApps( appFact.get( BuildingApp.class, sf ), appFact ).computeAll( update, null ) ).start();
 	}
 
-	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, HasApp ha ) {
+	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, Object ha ) {
 		if ( ha == null )
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
-		else
-			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps( HasApp.get( ha ) ).createUI( new Runnable() {
+		else {
+			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps(  appFact.uiAppFor(ha) , appFact ).createUI( new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -632,6 +636,7 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 					} );
 				}
 			} ) );
+		}
 	}
 
 	private WallTag findWallMini( LoopL<Bar> points ) {
@@ -669,14 +674,14 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 		}
 	}
 
-	public static Profile tagWalls( SuperFace sf, Profile profile, SuperEdge se, Point2d s, Point2d e ) {
+	public Profile tagWalls( SuperFace sf, Profile profile, SuperEdge se, Point2d s, Point2d e ) {
 
 		if ( se.toEdit == null ) { // first time through, use regularizer 
 			if ( se.toRegularize != null && !se.toRegularize.isEmpty() ) {
 				double[] range = findRange( se, s, e, null );
 
 				if ( range != null )
-					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null );
+					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null, appFact );
 			}
 		}
 		ensureMF( sf, se );
@@ -862,10 +867,10 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 
 		closeSitePlan();
-		new FacadeDesigner( skel, sf, se, this );
+		new FacadeDesigner( appFact, skel, sf, se, this );
 	}
 
-	public static void ensureMF( SuperFace sf, SuperEdge se ) {
+	public void ensureMF( SuperFace sf, SuperEdge se ) {
 
 		if ( sf.mr == null )
 			sf.mr = new MiniRoof( sf );
@@ -875,9 +880,9 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 			se.toEdit.left = 0;
 			se.toEdit.width = se.length();
 		}
-
-		se.toEdit.app.parent = sf;
-		se.toEdit.appLabel.superFace = sf;
+		
+		appFact.get (FacadeTexApp.class, se.toEdit).parent = sf;
+		appFact.get (FacadeLabelApp.class, se.toEdit).mf.sf = sf;
 
 		if ( se.toRegularize != null && !se.toRegularize.isEmpty() )
 			se.toEdit.height = se.toRegularize.get( 0 ).height;
@@ -896,8 +901,12 @@ public class SkelGen extends Gen implements IDumpObjs, HasApp {
 
 		ensureMF( sf, se );
 
-		se.toEdit.appLabel = new FacadeLabelApp( se.toEdit );
-		se.toEdit.app = new FacadeTexApp( se.toEdit );
+		
+		appFact.clear(FacadeTexApp.class, se.toEdit);
+		appFact.clear(FacadeLabelApp.class, se.toEdit);
+		
+//		se.toEdit.appLabel = new FacadeLabelApp( se.toEdit );
+//		se.toEdit.app = new FacadeTexApp( se.toEdit );
 
 		se.toEdit.featureGen = new CGAMini( se.toEdit );
 		se.toEdit.featureGen.update();

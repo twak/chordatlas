@@ -11,10 +11,10 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		super ( (a,b) -> new MatMeshBuilder( (String) a, (float[]) b ) );
 	}
 	
-	public MatMeshBuilder get (String name, Color col, HasApp onclick ) {
+	public MatMeshBuilder get (String name, Color col, Object onclick ) {
 		return get (name, Colourz.toF4( col ), onclick);
 	}
-	public MatMeshBuilder get (String name, float[] col, HasApp onclick ) {
+	public MatMeshBuilder get (String name, float[] col, Object onclick ) {
 		
 		if (col == null)
 			System.err.println( "warning null colour" );
@@ -29,7 +29,7 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		
 		return out;
 	}
-	public MatMeshBuilder getTexture (String name, String texture, HasApp onclick ) {
+	public MatMeshBuilder getTexture (String name, String texture, Object onclick ) {
 		
 		MatMeshBuilder out = textures.get( name, texture );
 		

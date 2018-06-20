@@ -13,9 +13,8 @@ import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.ProgressMonitor;
 
-import org.twak.tweed.TweedFrame;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
@@ -110,20 +109,20 @@ public class JointStyle implements StyleSource {
 			klass2Net.put (k, this);
 		}
 
-		public App findExemplar (App root) {
+		public App findExemplar (App root, AppStore ac) {
 			
 			if (root.getClass() == klass)
 				return root;
 			
-			return findExemplar( Collections.singletonList( root ) );
+			return findExemplar( Collections.singletonList( root ), ac );
 		}
 		
-		public App findExemplar (List<App> root) {
+		public App findExemplar (List<App> root, AppStore ac) {
 			
 			List<App> next = new ArrayList<>();
 			
 			for (App a : root)
-				for (App b : a.getDown().valueList())
+				for (App b : a.getDown(ac).valueList())
 					if (b.getClass() == klass)
 						return b;
 					else
@@ -132,7 +131,7 @@ public class JointStyle implements StyleSource {
 			if (next.isEmpty())
 				return null;
 			
-			return findExemplar( next );
+			return findExemplar( next, ac );
 		}
 
 		public void setHigh() {
@@ -160,30 +159,30 @@ public class JointStyle implements StyleSource {
 
 		if ( this.root != ba ) {
 			this.root = ba;
-			redraw();
+			redraw( root.ac );
 		}
 		
 		return true;
 	}
 	
-	public void redraw() {
+	public void redraw(AppStore ac) {
 		
 //		Random randy = new Random(0xDEADBEEF);//System.nanoTime());
 		Random randy = new Random(System.nanoTime());
 
 		root.styleSource = this; 
 		
-		for ( App building : root.getDown().valueList() )  {
+		for ( App building : root.getDown(ac).valueList() )  {
 			
 			MultiMap<App, App> bakeWith = new MultiMap<>();
 			
 			building.lastJoint = drawJoint( randy );
 			
-			findBake( 1, new MultiMap<>(1, building), building.lastJoint, bakeWith );
+			findBake( 1, new MultiMap<>(1, building), building.lastJoint, bakeWith, ac );
 			
-			((BuildingApp)building).updateDormers( randy.nextDouble() > 0.25 );
+			((BuildingApp)building).updateDormers( randy.nextDouble() > 0.25, ac );
 			
-			redraw( 1, new MultiMap<>( 1, building), new HashSet<>(), building.lastJoint, randy, bakeWith );
+			redraw( 1, new MultiMap<>( 1, building), new HashSet<>(), building.lastJoint, randy, bakeWith, ac );
 		}
 	}
 
@@ -216,7 +215,8 @@ public class JointStyle implements StyleSource {
 		return j;
 	}
 	
-	public void findBake( int stage,  MultiMap<Integer, App> todo, Joint j, MultiMap<App, App> bakeWith ) {
+	public void findBake( int stage,  MultiMap<Integer, App> todo, 
+			Joint j, MultiMap<App, App> bakeWith, AppStore ac ) {
 
 		if (stage >= NetInfo.evaluationOrder.size())
 			return;
@@ -231,7 +231,7 @@ public class JointStyle implements StyleSource {
 				App p = a;
 				
 				while (p != null && p.getClass() != ai.bakeWith) 
-					p = p.getUp();
+					p = p.getUp(ac);
 				
 				if (p.getClass() == ai.bakeWith)
 					bakeWith.put( p, a );
@@ -241,14 +241,15 @@ public class JointStyle implements StyleSource {
 			
 			setMode( a  );
 			
-			for (App next : a.getDown().valueList())
+			for (App next : a.getDown(ac).valueList())
 				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
 		}
 
-		findBake( stage+1, todo, j, bakeWith );
+		findBake( stage+1, todo, j, bakeWith, ac );
 	}
 
-	private void redraw( int stage,  MultiMap<Integer, App> todo, Set<App> drawn, Joint j, Random random, MultiMap<App, App> bakeWith ) {
+	private void redraw( int stage,  MultiMap<Integer, App> todo, Set<App> drawn, Joint j,
+			Random random, MultiMap<App, App> bakeWith, AppStore ac ) {
 
 		
 		if (stage >= NetInfo.evaluationOrder.size())
@@ -256,7 +257,7 @@ public class JointStyle implements StyleSource {
 		
 		for ( App a : todo.get( stage ) ) {
 			
-			for (App next : a.getDown().valueList())
+			for (App next : a.getDown(ac).valueList())
 				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
 			
 			if (drawn.contains ( a ) )
@@ -264,14 +265,14 @@ public class JointStyle implements StyleSource {
 			
 			drawn.add( a );
 			
-			a.styleZ = j.appInfo.get( a.getClass() ).dist.draw( random, a );
+			a.styleZ = j.appInfo.get( a.getClass() ).dist.draw( random, a, ac );
 			
 			MultiMap<Class, App> bakeTogether = new MultiMap<>();
 			for (App b : bakeWith.get( a ))
 				bakeTogether.put( b.getClass(), b );
 			
 			for (Class c : bakeTogether.keySet()) {
-				double[] val = j.appInfo.get( c ).dist.draw( random, null );
+				double[] val = j.appInfo.get( c ).dist.draw( random, null, ac );
 				for (App b : bakeTogether.get( c ) ) {
 					b.styleZ = val;
 					drawn.add(b);
@@ -281,7 +282,7 @@ public class JointStyle implements StyleSource {
 			
 		}
 
-		redraw( stage + 1, todo,  drawn, j, random, bakeWith );
+		redraw( stage + 1, todo,  drawn, j, random, bakeWith, ac );
 	}
 
 	private Joint drawJoint( Random random ) {
@@ -299,17 +300,17 @@ public class JointStyle implements StyleSource {
 	}
 
 	@Override
-	public double[] draw( Random random, App app ) {
+	public double[] draw( Random random, App app, AppStore ac ) {
 		
 		if (app.styleZ == null) { // hack: windiow has just been created
 
 			App building = app;
 			while (! ( building instanceof BuildingApp) )
-				building = building.getUp();
+				building = building.getUp(ac);
 			
 			Joint j = building.lastJoint;
 			
-			app.styleZ = j.appInfo.get( app.getClass() ).dist.draw( random, app );
+			app.styleZ = j.appInfo.get( app.getClass() ).dist.draw( random, app, ac );
 		}
 			
 		return app.styleZ; // do nothing
@@ -334,7 +335,7 @@ public class JointStyle implements StyleSource {
 		
 		
 		JButton but = new JButton( "edit joint" );
-		but.addActionListener( e -> new JointUI( (BlockApp) sa.findRoots().iterator().next(), update ).openFrame() );
+		but.addActionListener( e -> new JointUI( sa, update ).openFrame() );
 		out.add( but );
 
 		JButton redaw = new JButton( "redraw" );
@@ -342,7 +343,7 @@ public class JointStyle implements StyleSource {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				
-				redraw();
+				redraw(sa.ac);
 				update.run();
 				
 //				new Thread() {

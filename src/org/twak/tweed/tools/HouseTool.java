@@ -26,6 +26,7 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.FacadeTexApp;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -114,8 +115,13 @@ public class HouseTool extends Tool {
 		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
 		
-//		 tweed.setTool( new TextureTool( tweed ) );
-		
+		for (HalfFace hf : mesh)
+		for (HalfEdge he : hf) {
+			FacadeTexApp mfa = sg.appFact.get( FacadeTexApp.class, ((SuperEdge)he).toEdit );
+
+			mfa.appMode = AppMode.Off;//"tex.jpg";
+			mfa.color = Colourz.to4 ( GreebleSkel.BLANK_WALL );	
+		}
 	}
 	
 	private MiniFacade newMini(ImageFeatures imf, double length) {
@@ -129,8 +135,7 @@ public class HouseTool extends Tool {
 //		mini.featureGen = new CGAMini( mini );
 
 		mini.imageFeatures = imf;
-		mini.app.appMode = AppMode.Off;//"tex.jpg";
-		mini.app.color = Colourz.to4 ( GreebleSkel.BLANK_WALL );
+		
 //		mini.normal = "normal.jpg";
 //		mini.spec = "spec.jpg";
 		

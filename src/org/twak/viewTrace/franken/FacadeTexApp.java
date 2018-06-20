@@ -19,17 +19,15 @@ import javax.vecmath.Point2d;
 import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.tweed.gen.skel.MiniRoof;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
-import org.twak.viewTrace.facades.HasApp;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -37,57 +35,46 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
 public class FacadeTexApp extends App {
 
-	public FacadeSuperApp zuper = new FacadeSuperApp(this);
-	public FacadeGreebleApp greeble = new FacadeGreebleApp( this );
-	
 	public SuperFace parent; // for non-label pipeline
 	public String coarse;
 	public String coarseWithWindows;
 	
-	public boolean dormer = true;
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
 	
-	public FacadeTexApp( HasApp ha ) {
-		super( ha );
+	MiniFacade ha;
+	public String texture;
+	
+	public FacadeTexApp( MiniFacade mf ) {
+		super( );
+		this.ha = mf;
+		this.color = mf.wallColor;
 	}
 
-	public FacadeTexApp( FacadeTexApp facadeCoarse ) {
-		super( facadeCoarse );
-		this.zuper = facadeCoarse.zuper;
+	public FacadeTexApp( FacadeTexApp fta ) {
+
+		super( fta );
+		this.parent = fta.parent;
+		this.coarse = fta.coarse;
+		this.coarseWithWindows = fta.coarseWithWindows;
+		this.texture = fta.texture;
 	}
 
 	@Override
-	public App getUp() {
-		
-		MiniFacade mf = (MiniFacade) hasA;
-		
-		return mf.appLabel;
+	public App getUp(AppStore ac) {
+		return ac.get( FacadeLabelApp.class, ha );
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
-		
-		MiniFacade mf = (MiniFacade)hasA;
+	public MultiMap<String, App> getDown(AppStore ac) {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		if (mf.postState != null)
-			
-		for (FRect r : mf.postState.generatedWindows ) { // featureGen.get( Feature.WINDOW )) {
-			
-//			r.mf = mf;
-//			r.app.hasA = r;
-			
-			out.put( "window", r.app );
-		}
+		if (ha.postState != null)
+			for (FRect r : ha.postState.generatedWindows ) 
+				out.put( "window", ac.get (PanesLabelApp.class, r ) );
 		
-//		MiniRoof mr = (MiniRoof) ( (MiniFacade)hasA ).appLabel.hasA;
-//		for (mr.greebles.get( mf.postState. ))
-//			out.put("window")
-		
-		out.put( "super", zuper );
-		
-		out.put( "greeble", greeble );
+		out.put( "super", ac.get(FacadeSuperApp.class, ha) );
+		out.put( "greeble", ac.get(FacadeGreebleApp.class, ha) );
 		
 		return out;
 	}
@@ -105,7 +92,7 @@ public class FacadeTexApp extends App {
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
 
 		NetInfo ni =NetInfo.get(this) ;
 		int resolution = ni.resolution;
@@ -121,7 +108,7 @@ public class FacadeTexApp extends App {
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
 		
-		List<MiniFacade> mfb = batch.stream().map( x -> (MiniFacade)x.hasA ).collect( Collectors.toList() );
+		List<MiniFacade> mfb = batch.stream().map( x -> ((FacadeTexApp)x).ha ).collect( Collectors.toList() );
 
 		for ( MiniFacade mf : mfb ) {
 			
@@ -207,9 +194,11 @@ public class FacadeTexApp extends App {
 
 			Meta meta = new Meta( mf, maskLabel );
 
-			p2.addInput( labels, empty, null, meta, mf.app.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
+			FacadeTexApp mfa = appCache.get(FacadeTexApp.class, mf );
 			
-			if ( mf.app.getChimneyTexture() == null) {
+			p2.addInput( labels, empty, null, meta, mfa.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
+			
+			if ( mfa.getChimneyTexture(appCache) == null) {
 				Meta m2 = new Meta (mf, null);
 
 				gL.setColor( CMPLabel.Background.rgb );
@@ -219,8 +208,9 @@ public class FacadeTexApp extends App {
 				gL.setColor( CMPLabel.Facade.rgb );
 				gL.fillRect( inset, inset, resolution - 2*inset, resolution - 2*inset );
 				
-				p2.addInput( labels, empty, null, m2, mf.app.styleZ,  0.3 );
-				mf.app.setChimneyTexture( "in progress" );
+				
+				p2.addInput( labels, empty, null, m2, mfa.styleZ,  0.3 );
+				mfa.setChimneyTexture( appCache, "in progress" );
 			}
 		}
 		
@@ -245,17 +235,22 @@ public class FacadeTexApp extends App {
 						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, new BufferedImage[3] );
 
 						
+						FacadeTexApp mfa = appCache.get(FacadeTexApp.class, meta.mf );
+						
 						if ( dest != null ) {
 							
 							if (isChimney) {
-								meta.mf.app.setChimneyTexture( dest );
+								mfa.setChimneyTexture( appCache, dest );
 							} else {
-								meta.mf.app.coarse = meta.mf.app.texture = dest;
-								meta.mf.app.coarseWithWindows = null;
+								mfa.coarse = mfa.texture = dest;
+								mfa.coarseWithWindows = null;
 
 								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
-									r.app.panes = null;
-									r.app.texture = null;
+									
+									PanesLabelApp pla = appCache.get(PanesLabelApp.class, r);
+									
+									pla.panes = null;
+									pla.texture = null;
 								}
 							}
 							
@@ -270,12 +265,12 @@ public class FacadeTexApp extends App {
 		} ) );
 	}
 	
-	public String getChimneyTexture() {
-		return ((MiniFacade)hasA).appLabel.superFace.app.chimneyTexture;
+	public String getChimneyTexture(AppStore ac) {
+		return  ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, ha).mf.sf ).chimneyTexture ;
 	}
 
-	public void setChimneyTexture( String tex ) {
-		((MiniFacade)hasA).appLabel.superFace.app.chimneyTexture = tex;
+	public void setChimneyTexture( AppStore ac, String tex ) {
+		ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, ha).mf.sf ).chimneyTexture = tex;
 	}
 
 	private static class Meta {

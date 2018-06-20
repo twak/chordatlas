@@ -24,7 +24,7 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.PanesLabelApp;
 
-public class FRect extends DRectangle implements ICanEdit, HasApp {
+public class FRect extends DRectangle implements ICanEdit {
 	
 	// these are variously used around the Regularizer...
 	public MultiMap<Feature, FRect> attached = new MultiMap<>();
@@ -32,7 +32,6 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
-	public PanesLabelApp app;
 	public MiniFacade mf;
 	
 	public Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
@@ -45,7 +44,7 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 //		this (o, false);
 //	}
 	
-	public FRect( FRect o, boolean duplicateApp ) {
+	public FRect( FRect o ) {
 		super(o);
 		
 		f = o.f;
@@ -60,39 +59,35 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
 		
-		if (duplicateApp) {
-			app =   (PanesLabelApp ) o.app.copy();
-			app.hasA = this;
-		}
-		else
-			app = o.app;
+//		if (duplicateApp) {
+//			app =   (PanesLabelApp ) o.app.copy();
+//			app.hasA = this;
+//		}
+//		else
+//			app = o.app;
 		
 		this.mf = o.mf;
 	}
 	
 	public FRect(MiniFacade mf) {
 		super();
-		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 	
 	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
 
 	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
-		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.f = feature;
-		app = new PanesLabelApp( this );
 		this.mf = mf;
 	}
 
@@ -185,8 +180,8 @@ public class FRect extends DRectangle implements ICanEdit, HasApp {
 			after.add( toSplit );
 		} else {
 			
-			FRect g = new FRect( toSplit, true ), 
-					p = new FRect( toSplit, true );
+			FRect g = new FRect( toSplit ), 
+					p = new FRect( toSplit );
 			
 			g.set( minMax[1], l, true );
 			before.add (g);

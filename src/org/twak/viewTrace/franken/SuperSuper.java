@@ -1,7 +1,6 @@
 package org.twak.viewTrace.franken;
 
 import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -17,44 +16,34 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.twak.camp.Tag;
-import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.RoofTag;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.HasApp;
-import org.twak.viewTrace.facades.NormSpecGen;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public abstract class SuperSuper <A extends HasApp> extends App implements HasApp {
+public abstract class SuperSuper <A> extends App {
 
-	App parent;
 	public double scale = 120;
 	
 	final static int overlap = 20, tileWidth = 256 - overlap * 2, outputPPM = 40, MAX_CONCURRENT = 32;
 	
-	public SuperSuper( App parent ) {
-		super( (HasApp) null );
-		this.hasA = this;
-		this.parent = parent;
-	}
-
+	public SuperSuper() {}
+	
 	public SuperSuper( SuperSuper facadeCoarse ) {
 		super( (App) facadeCoarse );
 	}
 
 	@Override
-	public App getUp() {
-		return (App) parent;
-	}
+	public abstract App getUp(AppStore ac);
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		return new MultiMap<>();
 	}
 
@@ -62,11 +51,10 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 	public abstract App copy();
 
 	// add to the todo list; remember to pad coarse by overlap in all directions
-	public abstract void drawCoarse( MultiMap<A, FacState> todo, A mf ) throws IOException;
+	public abstract void drawCoarse( MultiMap<A, FacState> todo, AppStore ac ) throws IOException;
 	
-	public abstract void setTexture( A mf, FacState<A> state, BufferedImage maps );
+	public abstract void setTexture( FacState<A> state, BufferedImage maps, AppStore ac );
 	
-	public abstract double[] getZFor( A a );
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
@@ -75,7 +63,10 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		
 		out.add ( new AutoDoubleSlider( this, "scale", "scale", 20, 200 ) {
 			public void updated(double value) {
-//				System.out.println( globalUpdate );
+				
+				for (App a : apps)
+					((SuperSuper)a).scale = value;
+				
 				globalUpdate.run();
 			};
 		}.notWhileDragging() );
@@ -83,29 +74,30 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 		return out;
 	}
 	
+	
+	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
 		
 		MultiMap<A, FacState> todo = new MultiMap<>();
 		
 		for (App a : batch)
 		{
 			SuperSuper fs = (SuperSuper ) a;
-			A mf = (A) fs.parent.hasA;
 			
 			try {
-				drawCoarse( todo, mf );
+				fs.drawCoarse( todo, ac );
 				
 			} catch ( Throwable e ) {
 				e.printStackTrace();
 			}
 		}
 		
-		facadeContinue (todo, whenDone );
+		facadeContinue (todo, whenDone, ac );
 	}
 
 	
-	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone ) {
+	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone, AppStore ac ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
@@ -138,10 +130,11 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 						
 						ts.coarse = toProcess;
 						
+						SuperSuper ss = ac.get(this.getClass(), a);
 						
-						System.out.println (" z is " + Arrays.toString( getZFor( a )) );
+						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
 						
-						p2.addInput( toProcess, null, null, ts, getZFor( a ), null );
+						p2.addInput( toProcess, null, null, ts, ss.styleZ, null );
 					}
 					count++;
 				}
@@ -244,12 +237,12 @@ public abstract class SuperSuper <A extends HasApp> extends App implements HasAp
 										state.bigFine.getWidth() - overlap, state.bigFine.getHeight() - overlap, null );
 							}
 							
-							setTexture( mf, state, cropped );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
+							ac.get(SuperSuper.this.getClass(), mf).setTexture( state, cropped, ac );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
 
 						}
 					}
 
-					facadeContinue( nextTime, whenDone );
+					facadeContinue( nextTime, whenDone, ac );
 				}
 
 			} ) );

@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
@@ -19,14 +20,17 @@ public class BuildingApp extends App {
 	public SkelGen parent;
 	public boolean createDormers = Math.random() < 0.5;
 	public String chimneyTexture;
+	public SuperFace superFace;
 	
 	public BuildingApp( SuperFace superFace ) {
-		super( superFace );
+		super( );
+		this.superFace = superFace;
 	}
 
 	public BuildingApp( BuildingApp buildingApp ) {
 		super (buildingApp);
 		this.parent = buildingApp.parent;
+		this.superFace = buildingApp.superFace;
 	}
 
 	@Override
@@ -35,27 +39,25 @@ public class BuildingApp extends App {
 	}
 
 	@Override
-	public App getUp() {
-		return parent.app;
+	public App getUp(AppStore ac) {
+		return ac.get ( BlockApp.class, parent );
 	}
 
 	@Override
-	public MultiMap<String, App> getDown() {
+	public MultiMap<String, App> getDown(AppStore ac) {
 		
 		MultiMap<String, App> down = new MultiMap<>();
 		
-		SuperFace sf = (SuperFace)hasA;
+		down.put( "roof",  ac.get( RoofGreebleApp.class, superFace.mr ) ); 
 		
-		down.put( "roof",  sf.mr.app.greebles ); 
-		
-		for (HalfEdge e : sf) 
-			down.put ( "facade", ((SuperEdge)e).toEdit.appLabel );
+		for (HalfEdge e : superFace) 
+			down.put ( "facade", ac.get(FacadeLabelApp.class, e ) );
 		
 		return down;
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
 		whenDone.run();
 	}
 	
@@ -66,7 +68,7 @@ public class BuildingApp extends App {
 		out.add (new AutoCheckbox( this, "createDormers", "dormers" ) {
 			@Override
 			public void updated( boolean selected ) {
-				updateDormers(selected);
+				updateDormers(selected, apps.ac);
 				globalUpdate.run();
 			}
 		});
@@ -74,11 +76,7 @@ public class BuildingApp extends App {
 		return out;
 	}
 	
-	public void updateDormers(boolean dormers) {
-
+	public void updateDormers(boolean dormers, AppStore ac) {
 		createDormers = dormers;
-		
-		for (HalfEdge e: (SuperFace)hasA ) 
-			((SuperEdge)e).toEdit.app.dormer = createDormers;	
 	}
 }

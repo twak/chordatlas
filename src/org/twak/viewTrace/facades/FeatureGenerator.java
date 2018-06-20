@@ -63,7 +63,7 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		FeatureGenerator out = new FeatureGenerator( n );
 		for (Map.Entry<Feature, List<FRect>> ee : entrySet()) {
 			for (FRect e : ee.getValue()) {
-				FRect fr = new FRect( e, true );
+				FRect fr = new FRect( e );
 				out.put( ee.getKey(), fr );
 			}
 		}

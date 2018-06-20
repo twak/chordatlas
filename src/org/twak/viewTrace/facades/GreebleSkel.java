@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
@@ -30,7 +30,7 @@ import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.tweed.gen.WindowGen;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
@@ -52,6 +52,9 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.RoofSuperApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 
 import com.jme3.scene.Node;
@@ -83,12 +86,14 @@ public class GreebleSkel {
 			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	
 	SuperFace sf;
+	AppStore ac;
 	
 	public Map<SuperEdge, Face> occluderLookup;
 	
-	public GreebleSkel( Tweed tweed, SuperFace sf ) {
+	public GreebleSkel( Tweed tweed, AppStore ac, SuperFace sf ) {
 		this.tweed = tweed;
 		this.sf = sf;
+		this.ac = ac;
 	}
 
 	public Node showSkeleton( Output output, OnClick onClick, MiniRoof roof ) {
@@ -101,7 +106,7 @@ public class GreebleSkel {
 	
 	
 
-	public void createMesh( Output output ) {
+	private void createMesh( Output output ) {
 		
 		float[] roofColor = BLANK_ROOF;
 		
@@ -113,7 +118,7 @@ public class GreebleSkel {
 		
 //		roofBounds = new DRectangle.Enveloper();
 		
-		roofColor = Colourz.toF4( HasApp.get( miniroof ).color );
+		roofColor = Colourz.toF4( ac.get(RoofTexApp.class, miniroof ).color );
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
 		for ( Face f : output.faces.values() )  {
@@ -232,7 +237,7 @@ public class GreebleSkel {
 				}
 			}
 			
-			if ( ( wt != null && wt.miniFacade.app.dormer) ||  
+			if ( ( wt != null && ac.get(BuildingApp.class, sf ).createDormers ) ||  
 					TweedSettings.settings.createDormers ) {
 				
 				Iterator<QuadF> quit = processedFeatures.iterator();
@@ -243,8 +248,8 @@ public class GreebleSkel {
 						mf2.postState.generatedWindows.add(w.original);
 						
 						if (greebleGrid != null)
-							greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
-								(float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+							greebleGrid.createDormerWindow( ac, miniroof, w, greebleGrid.mbs.WOOD, 
+								greebleGrid.mbs.GLASS, (float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 						
 						quit.remove();
 					}
@@ -265,7 +270,7 @@ public class GreebleSkel {
 							@Override
 							public void run() {
 								selected( output, node, findSuperEdge( output, chain ),
-										data instanceof Spatial ? ((HasApp)((Object[])((Spatial) data).getUserData( Appearance ) ) [0])  
+										data instanceof Spatial ? (((Object[])((Spatial) data).getUserData( Appearance ) ) [0])  
 												: null);
 							}
 						} );
@@ -297,10 +302,10 @@ public class GreebleSkel {
 	
 
 	public interface OnClick {
-		void selected( Output output, Node node, SuperEdge superEdge, HasApp ha );
+		void selected( Output output, Node node, SuperEdge superEdge, Object ha );
 	}
 
-	private void selected( Output output, Node out, SuperEdge superEdge, HasApp ha ) {
+	private void selected( Output output, Node out, SuperEdge superEdge, Object ha ) {
 		if (onClick != null)
 			onClick.selected (output, out, superEdge, ha );
 	}
@@ -366,29 +371,30 @@ public class GreebleSkel {
 				
 				wt = ( (WallTag) t );
 				
-				switch ( mf.app.appMode ) {
+				FacadeTexApp mfa = ac.get( FacadeTexApp.class, mf );
+				
+				switch ( mfa.appMode ) {
 				
 				case Off:
 					// hashcode to force unique for selection.
-					faceColor = greebleGrid.mbs.get( BRICK+mf.app.hashCode(), mf.app.color, mf );
+					faceColor = greebleGrid.mbs.get( BRICK+mfa.hashCode(), mfa.color, mf );
 //					faceColor = greebleGrid.mbs.get( BRICK, mf.app.color != null ? Colourz mf.app.color : wallColor, mf );
 					break;
 				case Bitmap:
-					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED+mf.app.hashCode(), TILE_JPG, mf );
+					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED+mfa.hashCode(), TILE_JPG, mf );
 					break;
 				case Net:
-					if (mf.app.texture == null)
-						faceColor = greebleGrid.mbs.get( BRICK+mf.app.hashCode(), mf.app.color, mf );
+					if (mfa.texture == null)
+						faceColor = greebleGrid.mbs.get( BRICK+mfa.hashCode(), mfa.color, mf );
 					else
-						faceColor = greebleGrid.mbs.getTexture( "texture_"+mf.app.texture+mf.app.hashCode() , mf.app.texture, mf );
+						faceColor = greebleGrid.mbs.getTexture( "texture_"+mfa.texture+mfa.hashCode() , mfa.texture, mf );
 					break;
 				}
 
 			} else if ( t instanceof RoofTag ) {
 				
 				RoofTag rt = (RoofTag)t;
-				
-				RoofTexApp ra = (RoofTexApp) HasApp.get ( miniroof );
+				RoofTexApp ra = ac.get (RoofTexApp.class, miniroof);
 				
 				switch ( ra.appMode ) {
 
@@ -403,7 +409,7 @@ public class GreebleSkel {
 						faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					
 					else {
-						String texture = ra.getTexture (rt);
+						String texture = ra.getTexture (ac, rt);
 						faceColor = greebleGrid.mbs.getTexture( "roof_" + texture, texture, miniroof );
 					}
 					break;
@@ -591,7 +597,7 @@ public class GreebleSkel {
 		
 		DRectangle uvs;
 		
-		if (mf != null && mf.app.textureUVs == TextureUVs.SQUARE) {
+		if (mf != null && ac.get( FacadeTexApp.class, mf ).textureUVs == TextureUVs.SQUARE) {
 			uvs = new DRectangle(mf.postState.outerWallRect);
 
 			{ // for faces not at the bottom, move to the bottom's uv space
@@ -653,7 +659,7 @@ public class GreebleSkel {
 						wallTag != null && floorRect != null && toRecess != null ) {
 
 					// set the vertical bounds, so we can just render in 2d
-					FRect bounds = new FRect( n.original, false );
+					FRect bounds = new FRect( n.original );
 					n.setBounds( to2d, bounds );
 
 					if ( floorRect.contains( bounds ) ) 
@@ -664,14 +670,15 @@ public class GreebleSkel {
 				}
 			}
 			
-			
+			FacadeTexApp mfa = ac.get( FacadeTexApp.class, mf );
 			
 			if ( floorRect == null || wallTag == null || toRecess == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
 			}
-			else if ( mf.app.appMode == AppMode.Off || mf.app.texture == null )
+			else if ( mfa.appMode == AppMode.Off || mfa.texture == null )
 				
 				greebleGrid.buildGrid (
+					ac,
 					floorRect,
 					to3d,
 					toRecess,
@@ -681,6 +688,7 @@ public class GreebleSkel {
 			else {
 				
 				greebleGrid.textureGrid (
+					ac,
 					floorRect,
 					uvs,
 					to3d,
@@ -696,8 +704,8 @@ public class GreebleSkel {
 		
 		LoopL<Point2d> roofUVs;
 		
-		RoofTexApp ra = (RoofTexApp) HasApp.get( miniroof );
-		MiniRoof mr = (MiniRoof) ra.hasA;
+		RoofTexApp ra = ac.get (RoofTexApp.class, miniroof );
+		RoofSuperApp rsa = ac.get (RoofSuperApp.class, miniroof );
 		
 		switch ( ra.appMode ) {
 			default:
@@ -707,7 +715,7 @@ public class GreebleSkel {
 				if ( ra.texture != null && ra.textureUVs == TextureUVs.SQUARE )
 					roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 				
-				else if ( ra.zuper.appMode == AppMode.Net && ra.zuper.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
+				else if ( rsa.appMode == AppMode.Net && rsa.textures != null && ra.textureUVs == TextureUVs.ZERO_ONE ) {
 					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( end ), Pointz.to2XZ( start ) );
 				}
 				else
@@ -718,7 +726,7 @@ public class GreebleSkel {
 		faceMaterial.add( loop, roofUVs, to3d );
 		
 //		if (false)
-		for (FCircle feature : mr.getGreebles(f) ) {
+		for (FCircle feature : miniroof.getGreebles(f) ) {
 			
 			Point3d onRoof = f.edge.linearForm.collide( new Point3d(feature.loc.x, feature.loc.y, 0 ), Mathz.Z_UP );
 			onRoof.set(onRoof.x, onRoof.z, onRoof.y);
@@ -732,11 +740,12 @@ public class GreebleSkel {
 			switch ( feature.f ) {
 
 			case Chimney:
-				greebleGrid.createChimney ( onRoof, mr, feature, f.edge.projectDown().dir() , f.edge.linearForm, mr.app.superFace.app.chimneyTexture );
+				greebleGrid.createChimney ( onRoof, miniroof, feature, f.edge.projectDown().dir() , f.edge.linearForm, 
+						ac.get ( BuildingApp.class, sf ).chimneyTexture );
 				break;
 				
 			case Velux:
-				if (mr.app.texture == null)
+				if ( ra.texture == null)
 					greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
 				else
 					continue;
@@ -753,7 +762,7 @@ public class GreebleSkel {
 
 		MatMeshBuilder mmb;
 		
-		App a = HasApp.get( miniroof );
+		RoofTexApp a = ac.get( RoofTexApp.class, miniroof );
 		
 		switch ( a.appMode ) {
 			case Off: 
