@@ -43,6 +43,7 @@ public class FacadeTexApp extends App {
 	
 	MiniFacade ha;
 	public String texture;
+	public Color color;
 	
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );

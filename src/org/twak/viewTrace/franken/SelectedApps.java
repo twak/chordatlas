@@ -191,19 +191,20 @@ public class SelectedApps extends ArrayList<App>{
 		
 		switch (appMode) {
 		case Off:
-			JButton col = new JButton("color");
-			
-			col.addActionListener( e -> new ColourPicker(null, exemplar.color) {
-				@Override
-				public void picked( Color color ) {
-					for (App a : SelectedApps.this) {
-						a.color = color;
-					}
-					
-					update.run();
-				}
-			} );
-			out.add( col );
+//			JButton col = new JButton("color");
+//			
+//			col.addActionListener( e -> new ColourPicker(null, exemplar.color) {
+//				@Override
+//				public void picked( Color color ) {
+//					for (App a : SelectedApps.this) {
+//						a.color = color;
+//					}
+//					
+//					update.run();
+//				}
+//			} );
+//			out.add( col );
+			out.add( new JLabel("fixme: no options") );
 			break;
 		case Bitmap:
 		default:

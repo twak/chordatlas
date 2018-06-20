@@ -35,6 +35,7 @@ public class PanesTexApp extends App {
 	public boolean useCoarseStyle = false;
 	FRect fr;
 	public String texture;
+	public Color color;
 	
 	public PanesTexApp(FRect fr) {
 		super( );

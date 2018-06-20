@@ -37,7 +37,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 //	public String texture;
 	public TextureUVs textureUVs = TextureUVs.SQUARE;
-	public Color color = Color.gray;
+//	public Color color = Color.gray;
 	public double[] styleZ;
 	public StyleSource styleSource;
 	
@@ -57,7 +57,6 @@ public abstract class App /*earance*/ implements Cloneable {
 	public App( App a ) {
 		this.appMode = a.appMode;
 		this.textureUVs = a.textureUVs;
-		this.color = a.color;
 		this.styleZ = a.styleZ;
 		this.name = a.name;
 		this.styleSource = a.styleSource.copy();
