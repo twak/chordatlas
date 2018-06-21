@@ -62,21 +62,41 @@ public class PanesTexApp extends App {
 	
 	@Override
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
-		
-		JPanel p = new JPanel();
-		
-		p.add (new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
-			@Override
-			public void updated( boolean selected ) {
-				
-				for (App a : apps)
-					((PanesTexApp)a).useCoarseStyle = selected;
-				
-				globalUpdate.run();
-			}
-		});
-		
-		return p;
+
+		JPanel out = new JPanel(new ListDownLayout() );
+
+		if ( appMode == AppMode.Net ) {
+
+			out.add( new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
+				@Override
+				public void updated( boolean selected ) {
+
+					for ( App a : apps )
+						( (PanesTexApp) a ).useCoarseStyle = selected;
+
+					globalUpdate.run();
+				}
+			} );
+		} else if ( appMode == AppMode.Off ) {
+			JButton col = new JButton( "color" );
+
+			col.addActionListener( e -> new ColourPicker( null, color ) {
+				@Override
+				public void picked( Color color ) {
+
+					for ( App a : apps ) {
+						( (PanesTexApp) a ).color = color;
+						( (PanesTexApp) a ).texture = null;
+					}
+
+					globalUpdate.run();
+				}
+			} );
+
+			out.add( col );
+		}
+
+		return out;
 	}
 	
 	@Override
@@ -400,28 +420,5 @@ public class PanesTexApp extends App {
 
 	public Enum[] getValidAppModes() {
 		return new Enum[] { AppMode.Off, AppMode.Net };
-	}
-	
-	@Override
-	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
-
-		JPanel out = new JPanel( new ListDownLayout() );
-		JButton col = new JButton( "color" );
-
-		col.addActionListener( e -> new ColourPicker( null, color ) {
-			@Override
-			public void picked( Color color ) {
-
-				for ( App a : selectedApps ) {
-					( (PanesTexApp) a ).color = color;
-					( (PanesTexApp) a ).texture = null;
-				}
-
-				update.run();
-			}
-		} );
-
-		out.add( col );
-		return out;
 	}
 }

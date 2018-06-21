@@ -30,7 +30,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public enum AppMode {
-		Off, Bitmap, Parent, Net
+		Off, Bitmap, Parent, Net, Procedural
 	}
 	
 	public AppMode appMode = AppMode.Off;
@@ -75,7 +75,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		return out;
 	}
-
+	
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
@@ -202,11 +202,4 @@ public abstract class App /*earance*/ implements Cloneable {
 		return new Enum[] {AppMode.Off, AppMode.Net};
 	}
 
-	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
-		 return new JLabel("no options");
-	}
-
-	public Component createBitmapUI( Runnable update, SelectedApps selectedApps ) {
-		return new JLabel("no options");
-	}
 }

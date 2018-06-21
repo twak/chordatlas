@@ -23,7 +23,6 @@ import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
-import org.twak.tweed.tools.TextureTool;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -118,11 +117,8 @@ public class FacadeTexApp extends App {
 
 		for ( MiniFacade mf : mfb ) {
 			
-			if (!TweedSettings.settings.sitePlanInteractiveTextures &&
-					mf.featureGen instanceof CGAMini) {
-				
+			if (!TweedSettings.settings.sitePlanInteractiveTextures && mf.featureGen instanceof CGAMini) {
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
-				TweedFrame.instance.tweed.setTool( TextureTool.class );
 			}
 
 			DRectangle mini = Pix2Pix.findBounds( mf, false );
@@ -294,25 +290,28 @@ public class FacadeTexApp extends App {
 	}
 	
 	@Override
-	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
-		JButton col = new JButton("color");
-		
-		col.addActionListener( e -> new ColourPicker(null, color) {
-			@Override
-			public void picked( Color color ) {
-				
-				for (App a : selectedApps)  {
-					((FacadeTexApp)a).color = color;
-					((FacadeTexApp)a).texture = null;
+		if (appMode == AppMode.Off) {
+			JButton col = new JButton("color");
+			
+			col.addActionListener( e -> new ColourPicker(null, color) {
+				@Override
+				public void picked( Color color ) {
+					
+					for (App a : apps)  {
+						((FacadeTexApp)a).color = color;
+						((FacadeTexApp)a).texture = null;
+					}
+					
+					globalUpdate.run();
 				}
-				
-				update.run();
-			}
-		} );
-		
-		out.add( col );
+			} );
+			
+			out.add( col );
+			
+		}
 		
 		return out;
 	}

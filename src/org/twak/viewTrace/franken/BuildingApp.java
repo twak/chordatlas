@@ -3,6 +3,7 @@ package org.twak.viewTrace.franken;
 import java.awt.Graphics;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -65,6 +66,8 @@ public class BuildingApp extends App {
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
+		addRemoveButton (globalUpdate, out);
+		
 		out.add (new AutoCheckbox( this, "createDormers", "dormers" ) {
 			@Override
 			public void updated( boolean selected ) {
@@ -76,6 +79,15 @@ public class BuildingApp extends App {
 		return out;
 	}
 	
+	private void addRemoveButton( Runnable globalUpdate, JPanel out ) {
+		JButton remove = new JButton( "remove building" );
+		remove.addActionListener( e -> {
+			parent.block.faces.remove( superFace );
+			parent.calculateOnJmeThread();
+		} );
+		out.add( remove );
+	}
+
 	public void updateDormers(boolean dormers, AppStore ac) {
 		createDormers = dormers;
 	}

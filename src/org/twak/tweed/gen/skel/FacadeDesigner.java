@@ -11,18 +11,32 @@ import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
-import org.twak.viewTrace.franken.FacadeLabelApp;
-import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class FacadeDesigner {
 	
+	public FacadeDesigner (AppStore ac,MiniFacade mf, Runnable update) {
+
+		FacadeTexApp ma = ac.get (FacadeTexApp.class, mf);
+		
+		if ( ma.appMode == AppMode.Off )
+			mf.groundFloorHeight = 2;
+			
+		Changed c = new Changed() {
+			@Override
+			public void changed() {
+				update.run();
+			}
+		};
+		
+		Plot p = new Plot( mf );
+		p.addEditListener( c );
+	}
 	
 	public FacadeDesigner( AppStore ac, PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
 
-//		JToggleButton texture = new JToggleButton( "textured" );
-//		texture.setSelected( se.toEdit != null && se.toEdit.app.texture != null );
-		
 		if ( se.toEdit == null ) {
 			sg.ensureMF( sf, se );
 		}

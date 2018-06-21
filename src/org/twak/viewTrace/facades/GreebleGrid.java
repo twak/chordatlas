@@ -821,6 +821,7 @@ public class GreebleGrid {
 						}
 					} );
 			}
+			
 			for ( FRect w : filteredFeatures.getRects( Feature.CORNICE ) ) {
 				
 				if ( allGeom.contains( w ) )

@@ -189,18 +189,14 @@ public class SelectedApps extends ArrayList<App>{
 		for (App a : this)
 			a.appMode = appMode;
 		
-		switch (appMode) {
-		case Off:
-			out.add( exemplar.createColorUI ( update, this ) );
-			break;
-		case Bitmap:
-		default:
-			out.add( exemplar.createBitmapUI ( update, this ) );
-			break;
-		case Net:
+//		switch (appMode) {
+//		default:
+//			exemplar.createNetUI ( update, this );
+//			break;
+//		case Net:
 			out.add( createDistEditor(update) );
-			break;
-		}
+//			break;
+//		}
 	}
 
 	private enum StyleSources {
@@ -257,44 +253,45 @@ public class SelectedApps extends ArrayList<App>{
 		
 		JPanel north = new JPanel( new ListDownLayout() );
 		
-		AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get(exemplar.styleSource.getClass()), new ValueSet() {
-			public void valueSet( Enum num ) {
-				
-				StyleSources sss = (StyleSources) num;
-				StyleSource ss;
-				
-				if (exemplar.styleSource.getClass() == sss.klass)
-					ss = exemplar.styleSource;
-				else
-					ss = sss.instance(exemplar);
+		north.add( exemplar.createNetUI( update, SelectedApps.this ) );
+		if ( exemplar.appMode == AppMode.Net ) {
+			AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get( exemplar.styleSource.getClass() ), new ValueSet() {
+				public void valueSet( Enum num ) {
 
-				boolean changed = false;
-				
-				if ( !ss.install( SelectedApps.this ) ) {
+					StyleSources sss = (StyleSources) num;
+					StyleSource ss;
 
-					for ( App a : SelectedApps.this ) {
-						changed |= a.styleSource != ss;
-						a.styleSource = ss;
+					if ( exemplar.styleSource.getClass() == sss.klass )
+						ss = exemplar.styleSource;
+					else
+						ss = sss.instance( exemplar );
+
+					boolean changed = false;
+
+					if ( !ss.install( SelectedApps.this ) ) {
+
+						for ( App a : SelectedApps.this ) {
+							changed |= a.styleSource != ss;
+							a.styleSource = ss;
+						}
 					}
+
+					options.removeAll();
+					options.setLayout( new BorderLayout() );
+					options.add( ss.getUI( update, SelectedApps.this ), BorderLayout.CENTER );
+					options.repaint();
+					options.revalidate();
+
+					if ( changed )
+						update.run();
 				}
 
-				options.removeAll();
-				options.setLayout( new BorderLayout() );
-				options.add( ss.getUI(update, SelectedApps.this), BorderLayout.CENTER );
-				options.repaint();
-				options.revalidate();
-				
-				if (changed)
-					update.run();
-			}
+			}, "distribution:" );
 
-		}, "distribution:" );
-		
-		combo.fire();
-		
-		north.add( exemplar.createNetUI( update, SelectedApps.this ) );
-		north.add( combo );
-		
+			combo.fire();
+
+			north.add( combo );
+		}		
 		out.add( north, BorderLayout.NORTH );
 		out.add( options, BorderLayout.CENTER );
 		

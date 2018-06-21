@@ -36,6 +36,7 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -314,25 +315,28 @@ public class RoofTexApp extends App {
 	}
 	
 	@Override
-	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
-
+	public JComponent createNetUI( Runnable update, SelectedApps selectedApps ) {
+		
 		JPanel out = new JPanel( new ListDownLayout() );
-		JButton col = new JButton( "color" );
+		if ( appMode == AppMode.Net ) {
+		} else if ( appMode == AppMode.Off ) {
+			JButton col = new JButton( "color" );
 
-		col.addActionListener( e -> new ColourPicker( null, color ) {
-			@Override
-			public void picked( Color color ) {
+			col.addActionListener( e -> new ColourPicker( null, color ) {
+				@Override
+				public void picked( Color color ) {
 
-				for ( App a : selectedApps ) {
-					( (RoofTexApp) a ).color = color;
-					( (RoofTexApp) a ).texture = null;
+					for ( App a : selectedApps ) {
+						( (PanesTexApp) a ).color = color;
+						( (PanesTexApp) a ).texture = null;
+					}
+
+					update.run();
 				}
+			} );
 
-				update.run();
-			}
-		} );
-
-		out.add( col );
+			out.add( col );
+		}
 		return out;
 	}
 }

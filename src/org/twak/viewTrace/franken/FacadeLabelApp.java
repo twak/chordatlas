@@ -12,16 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
+import org.twak.tweed.gen.skel.FacadeDesigner;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -83,6 +86,10 @@ public class FacadeLabelApp extends App {
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
+		JButton fac = new JButton( "edit facade" );
+		fac.addActionListener( e -> new FacadeDesigner( apps.ac, mf, globalUpdate ) );
+		out.add( fac );
+		
 		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
 			public void updated(double value) {
 				
@@ -124,6 +131,25 @@ public class FacadeLabelApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
 
+		if ( appMode != AppMode.Net ) {
+			for ( App a : batch ) {
+
+				MiniFacade mf = ( (FacadeLabelApp) a ).mf;
+
+				if ( appMode == AppMode.Off ) {
+					if ( !( mf.featureGen.getClass() == FeatureGenerator.class ) )
+						mf.featureGen = new FeatureGenerator( mf.featureGen );
+				} else if ( appMode == AppMode.Procedural )
+					if ( !( mf.featureGen.getClass() == CGAMini.class ) ) {
+						mf.featureGen = new CGAMini( mf );
+					}
+			}
+
+			whenDone.run();
+			return;
+		}
+		
+		
 		NetInfo ni = NetInfo.get(this);
 		
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -320,7 +346,7 @@ public class FacadeLabelApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {AppMode.Off /* manual */, AppMode.Procedural, AppMode.Net};
 	}
 	
 	public void finishedBatches( AppStore ac, List<App> list, List<App> all ) {
