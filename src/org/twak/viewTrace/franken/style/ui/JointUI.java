@@ -27,7 +27,7 @@ import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 
 import org.twak.tweed.TweedFrame;
-import org.twak.tweed.tools.TextureTool;
+import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
@@ -322,7 +322,7 @@ public class JointUI extends JPanel {
 							jd.redraw(sa.ac);
 							
 							// current joint ui is invalid
-							TweedFrame.instance.tweed.setTool( new TextureTool( TweedFrame.instance.tweed ) );
+							TweedFrame.instance.tweed.setTool( new SelectTool( TweedFrame.instance.tweed ) );
 							
 							selectedJoint = jd.joints.get( 0 );
 							buildNetSelectUI();
