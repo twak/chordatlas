@@ -344,7 +344,7 @@ public class JointStyle implements StyleSource {
 		but.addActionListener( e -> new JointUI( sa, update ).openFrame() );
 		out.add( but );
 
-		JButton redaw = new JButton( "redraw" );
+		JButton redaw = new JButton( "redraw distribution" );
 		redaw.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
