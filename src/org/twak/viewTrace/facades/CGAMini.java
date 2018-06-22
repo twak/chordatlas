@@ -10,12 +10,14 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
 import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.Pix2Pix;
 
 /**
@@ -179,20 +181,22 @@ public class CGAMini extends FeatureGenerator {
 		return true;
 	}
 	
-	public void update () {
+	public void update (AppStore ass) {
 
-		DRectangle all = Pix2Pix.findBounds( mf, false );
+		DRectangle all = Pix2Pix.findBounds( mf, false, ass );
 		
-		if  ( !TweedSettings.settings.createDormers && mf.postState != null ) {
+		PostProcessState pps = ass.get( FacadeTexApp.class, mf ).postState;
+		
+		if  ( !TweedSettings.settings.createDormers && pps != null ) {
 			
 			all = new DRectangle ( all );
 			
-			OptionalDouble od = mf.postState.wallFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
+			OptionalDouble od = pps.wallFaces.stream().flatMap( e -> e.stream() ).mapToDouble( p -> p.y ).max();
 			
 			if (od.isPresent())
 				all.height = od.getAsDouble();
 			
-			double[] bounds = mf.postState.wallFaces.stream()
+			double[] bounds = pps.wallFaces.stream()
 					.flatMap( e -> e.stream() )
 					.collect( new InaxPoint2dCollector() );
 			

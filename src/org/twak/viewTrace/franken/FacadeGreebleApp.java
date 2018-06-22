@@ -113,7 +113,7 @@ public class FacadeGreebleApp extends App {
 	}; 
 	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) {
 
 		NetInfo ni = NetInfo.get(this) ;
 		int resolution = ni.resolution;
@@ -138,7 +138,9 @@ public class FacadeGreebleApp extends App {
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
 				MiniFacade mf = (MiniFacade) fga.mf;
 
-				if (mf.postState == null)
+				FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
+				
+				if (fta.postState == null)
 					continue;
 				
 				mf.featureGen.removeAll( toGenerate );
@@ -152,7 +154,7 @@ public class FacadeGreebleApp extends App {
 				gE.setColor( CMPLabel.Background.rgb );
 				gE.fillRect( 0, 0, resolution, resolution );
 
-				DRectangle mini = Pix2Pix.findBounds( mf, false );
+				DRectangle mini = Pix2Pix.findBounds( mf, false, ass );
 
 				DRectangle maskLabel = new DRectangle( mini );
 
@@ -164,13 +166,13 @@ public class FacadeGreebleApp extends App {
 					maskLabel.y = 0;
 				}
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( appCache.get( FacadeTexApp.class, mf ).coarse ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( ass.get( FacadeTexApp.class, mf ).coarse ) );
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
-				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );
+				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false, ass );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ), ass );
 
-				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
+				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false, ass );
 
 				Meta meta = new Meta( mf, maskLabel, mini, rgb );
 
@@ -203,7 +205,7 @@ public class FacadeGreebleApp extends App {
 						
 						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
 						
-						importLabels(meta, boxFile, appCache );
+						importLabels(meta, boxFile, ass );
 					}
 
 				} catch ( Throwable e ) {

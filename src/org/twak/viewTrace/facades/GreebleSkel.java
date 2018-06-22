@@ -86,14 +86,14 @@ public class GreebleSkel {
 			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
 	
 	SuperFace sf;
-	AppStore ac;
+	AppStore ass;
 	
 	public Map<SuperEdge, Face> occluderLookup;
 	
-	public GreebleSkel( Tweed tweed, AppStore ac, SuperFace sf ) {
+	public GreebleSkel( Tweed tweed, AppStore ass, SuperFace sf ) {
 		this.tweed = tweed;
 		this.sf = sf;
-		this.ac = ac;
+		this.ass = ass;
 	}
 
 	public Node showSkeleton( Output output, OnClick onClick, MiniRoof roof ) {
@@ -118,7 +118,7 @@ public class GreebleSkel {
 		
 //		roofBounds = new DRectangle.Enveloper();
 		
-		roofColor = Colourz.toF4( ac.get(RoofTexApp.class, miniroof ).color );
+		roofColor = Colourz.toF4( ass.get(RoofTexApp.class, miniroof ).color );
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
 		for ( Face f : output.faces.values() )  {
@@ -133,7 +133,7 @@ public class GreebleSkel {
 		
 		if (tweed != null)
 		for (MiniFacade mf : allMFs) {
-				mf.postState = new PostProcessState();
+			ass.get(FacadeTexApp.class, mf).resetPostProcessState();
 		}
 		
 //		roofBounds.grow( 2 );
@@ -151,6 +151,7 @@ public class GreebleSkel {
 			for (WallTag wt : opt) {
 				
 				MiniFacade mf = wt.miniFacade;
+				PostProcessState pps = ass.get(FacadeTexApp.class, mf).postState;
 				
 				Edge e = chain.get( 0 ).edge;
 				Line megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y );
@@ -161,24 +162,25 @@ public class GreebleSkel {
 				for (Face f : chain) 
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
 							if (GreebleHelper.getTag( f.profile, WallTag.class ) != null)
-								mf.postState.wallFaces.add( face );
+								pps.wallFaces.add( face );
 							else
-								mf.postState.roofFaces.add( face );
+								pps.roofFaces.add( face );
 				
 				if ( occluderLookup != null )
 					for ( Object o : wt.occlusions ) {
 						Face f = occluderLookup.get( o );
 						if ( f != null ) 
-							mf.postState.occluders.addAll( projectTo( megafacade, mfl, lf, f ) );
+							pps.occluders.addAll( projectTo( megafacade, mfl, lf, f ) );
 				}
 				
 				mf.width = chain.get( 0 ).edge.length();
 			}
 		}
 		
-		for (MiniFacade mf : allMFs) {
-				mf.postState.outerWallRect = GreebleHelper.findRect(mf.postState.wallFaces);
-				mf.featureGen.update();
+		for ( MiniFacade mf : allMFs ) {
+			PostProcessState pps = ass.get( FacadeTexApp.class, mf ).postState;
+			pps.outerWallRect = GreebleHelper.findRect( pps.wallFaces );
+			mf.featureGen.update( ass );
 		}
 		
 		if (tweed != null) // just calculating dormer locations
@@ -209,7 +211,11 @@ public class GreebleSkel {
 				if (false && TweedSettings.settings.snapFacadeWidth) {
 					
 					mf2 = new MiniFacade ( wt.miniFacade );
-					mf2.postState = wt.miniFacade.postState;
+					
+					ass.set( FacadeTexApp.class, mf2, (App) ass.get(FacadeTexApp.class, wt.miniFacade) );
+					
+//					ass.get( FacadeTexApp.class, mf2 ).postState = ass.get( FacadeTexApp.class, mf2 ).postState; 
+//					mf2.postState = wt.miniFacade.postState;
 					
 					// move/scale mf horizontally from mean-image-location to mesh-facade-location
 					double[] meshSE = findSE ( wt.miniFacade, megafacade, chain );
@@ -232,12 +238,12 @@ public class GreebleSkel {
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) {
 					if (q1.original.f == Feature.WINDOW || q1.original.f == Feature.SHOP) {
-						mf2.postState.generatedWindows.add( q1.original );
+						ass.get(FacadeTexApp.class, mf2).postState.generatedWindows.add( q1.original );
 					}
 				}
 			}
 			
-			if ( ( wt != null && ac.get(BuildingApp.class, sf ).createDormers ) ||  
+			if ( ( wt != null && ass.get(BuildingApp.class, sf ).createDormers ) ||  
 					TweedSettings.settings.createDormers ) {
 				
 				Iterator<QuadF> quit = processedFeatures.iterator();
@@ -245,10 +251,10 @@ public class GreebleSkel {
 					QuadF w = quit.next();
 					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
 						
-						mf2.postState.generatedWindows.add(w.original);
+						ass.get(FacadeTexApp.class, mf2).postState.generatedWindows.add(w.original);
 						
 						if (greebleGrid != null)
-							greebleGrid.createDormerWindow( ac, miniroof, w, greebleGrid.mbs.WOOD, 
+							greebleGrid.createDormerWindow( ass, miniroof, w, greebleGrid.mbs.WOOD, 
 								greebleGrid.mbs.GLASS, (float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
 						
 						quit.remove();
@@ -371,7 +377,7 @@ public class GreebleSkel {
 				
 				wt = ( (WallTag) t );
 				
-				FacadeTexApp mfa = ac.get( FacadeTexApp.class, mf );
+				FacadeTexApp mfa = ass.get( FacadeTexApp.class, mf );
 				
 				switch ( mfa.appMode ) {
 				
@@ -394,7 +400,7 @@ public class GreebleSkel {
 			} else if ( t instanceof RoofTag ) {
 				
 				RoofTag rt = (RoofTag)t;
-				RoofTexApp ra = ac.get (RoofTexApp.class, miniroof);
+				RoofTexApp ra = ass.get (RoofTexApp.class, miniroof);
 				
 				switch ( ra.appMode ) {
 
@@ -409,7 +415,7 @@ public class GreebleSkel {
 						faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					
 					else {
-						String texture = ra.getTexture (ac, rt);
+						String texture = ra.getTexture (ass, rt);
 						faceColor = greebleGrid.mbs.getTexture( "roof_" + texture, texture, miniroof );
 					}
 					break;
@@ -518,6 +524,8 @@ public class GreebleSkel {
 		
 		Matrix4d to2dXY = new Matrix4d();
 		
+		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		
 		Vector3d up    = f.edge.uphill,
 				 along = f.edge.direction(),
 				 out   = f.edge.getPlaneNormal();
@@ -597,8 +605,8 @@ public class GreebleSkel {
 		
 		DRectangle uvs;
 		
-		if (mf != null && ac.get( FacadeTexApp.class, mf ).textureUVs == TextureUVs.Square) {
-			uvs = new DRectangle(mf.postState.outerWallRect);
+		if (mf != null && fta.textureUVs == TextureUVs.Square) {
+			uvs = new DRectangle(fta.postState.outerWallRect);
 
 			{ // for faces not at the bottom, move to the bottom's uv space
 				Face f2 = f;
@@ -632,7 +640,7 @@ public class GreebleSkel {
 				Loop<Point2d>[] cut = Loopz.cutConvex( loop, new LinearForm( 0, 1, mf.groundFloorHeight ) );
 				faceMaterial.add( cut[ 1 ].singleton(), to3d );
 				LoopL<Point2d> pts = cut[ 0 ].singleton();
-				gfm.add( pts, GreebleHelper.wallUVs(pts, mf.postState.outerWallRect), to3d );
+				gfm.add( pts, GreebleHelper.wallUVs(pts, fta.postState.outerWallRect), to3d );
 			}
 			
 			materials.add( gfm );
@@ -670,15 +678,13 @@ public class GreebleSkel {
 				}
 			}
 			
-			FacadeTexApp mfa = ac.get( FacadeTexApp.class, mf );
-			
 			if ( floorRect == null || wallTag == null || toRecess == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
 			}
-			else if ( mfa.appMode == AppMode.Off || mfa.texture == null )
+			else if ( fta.appMode == AppMode.Off || fta.texture == null )
 				
 				greebleGrid.buildGrid (
-					ac,
+					ass,
 					floorRect,
 					to3d,
 					toRecess,
@@ -688,7 +694,7 @@ public class GreebleSkel {
 			else {
 				
 				greebleGrid.textureGrid (
-					ac,
+					ass,
 					floorRect,
 					uvs,
 					to3d,
@@ -704,8 +710,8 @@ public class GreebleSkel {
 		
 		LoopL<Point2d> roofUVs;
 		
-		RoofTexApp ra = ac.get (RoofTexApp.class, miniroof );
-		RoofSuperApp rsa = ac.get (RoofSuperApp.class, miniroof );
+		RoofTexApp ra = ass.get (RoofTexApp.class, miniroof );
+		RoofSuperApp rsa = ass.get (RoofSuperApp.class, miniroof );
 		
 		switch ( ra.appMode ) {
 			default:
@@ -741,7 +747,7 @@ public class GreebleSkel {
 
 			case Chimney:
 				greebleGrid.createChimney ( onRoof, miniroof, feature, f.edge.projectDown().dir() , f.edge.linearForm, 
-						ac.get ( BuildingApp.class, sf ).chimneyTexture );
+						ass.get ( BuildingApp.class, sf ).chimneyTexture );
 				break;
 				
 			case Velux:
@@ -762,7 +768,7 @@ public class GreebleSkel {
 
 		MatMeshBuilder mmb;
 		
-		RoofTexApp a = ac.get( RoofTexApp.class, miniroof );
+		RoofTexApp a = ass.get( RoofTexApp.class, miniroof );
 		
 		switch ( a.appMode ) {
 			case Off: 

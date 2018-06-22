@@ -52,7 +52,6 @@ public class MiniFacade {
 	
 	double imageXM, scale;
 
-	public PostProcessState postState = null;
 	public Color wallColor;
 
 	public SuperFace sf;
@@ -68,24 +67,12 @@ public class MiniFacade {
 		this.height = m.height;
 		this.groundFloorHeight = m.groundFloorHeight;
 		this.left = m.left;
-//		this.color = Arrays.copyOf( m.color, m.color.length );
-//		if (m.groundColor != null)
-//			this.groundColor = Arrays.copyOf( m.groundColor, m.groundColor.length );
 		this.softLeft = m.softLeft;
 		this.softRight = m.softRight;
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
-		
-//		this.app = m.app;// m.app.copy();
-//		this.appLabel = m.appLabel;
-		
 		this.featureGen = m.featureGen.copy(this);
-		this.postState = m.postState;
-		
-		
-//		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
-		
 		this.hMargin = new ArrayList(m.hMargin);
 		this.vMargin = new ArrayList(m.vMargin);
 		

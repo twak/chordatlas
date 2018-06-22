@@ -35,13 +35,13 @@ public class FacadeDesigner {
 		p.addEditListener( c );
 	}
 	
-	public FacadeDesigner( AppStore ac, PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
+	public FacadeDesigner( AppStore ass, PlanSkeleton skel, SuperFace sf, SuperEdge se, SkelGen sg ) {
 
 		if ( se.toEdit == null ) {
 			sg.ensureMF( sf, se );
 		}
 		
-		FacadeTexApp ma = ac.get (FacadeTexApp.class, se.toEdit);
+		FacadeTexApp ma = ass.get (FacadeTexApp.class, se.toEdit);
 		
 		if ( ma.appMode == AppMode.Off )
 			se.toEdit.groundFloorHeight = 2;
@@ -51,7 +51,7 @@ public class FacadeDesigner {
 		}
 		
 		if (se.toEdit.featureGen instanceof CGAMini) { // de-proecuralize before editing 
-			((CGAMini) se.toEdit.featureGen).update();
+			((CGAMini) se.toEdit.featureGen).update(ass);
 			se.toEdit.featureGen = new FeatureGenerator( se.toEdit, se.toEdit.featureGen );
 		}
 		
@@ -70,7 +70,7 @@ public class FacadeDesigner {
 							sg.tweed.getRootNode().updateGeometricState();
 							
 							sg.block.faces.stream().map( x -> (SuperFace) x ).collect(Collectors.toSet() ).stream().
-								forEach( x -> new GreebleSkel( null, ac, x ).
+								forEach( x -> new GreebleSkel( null, ass, x ).
 										showSkeleton( x.skel.output, null, x.mr ) );
 							
 						if ( ma.appMode == AppMode.Net ) // needs prior setSkel to compute visible windows.

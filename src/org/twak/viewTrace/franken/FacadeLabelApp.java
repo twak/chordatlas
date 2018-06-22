@@ -129,7 +129,7 @@ public class FacadeLabelApp extends App {
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
 
 		if ( appMode != AppMode.Net ) {
 			for ( App a : batch ) {
@@ -162,9 +162,9 @@ public class FacadeLabelApp extends App {
 		for (App a : batch) {
 
 			MiniFacade amf = ((FacadeLabelApp)a).mf;
-			BuildingApp ba = appCache.get (BuildingApp.class, amf.sf );
+			BuildingApp ba = ass.get (BuildingApp.class, amf.sf );
 			
-			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers );
+			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers, ass );
 
 			if (mini.area() < 0.1)
 				continue;
@@ -183,11 +183,11 @@ public class FacadeLabelApp extends App {
 				mask.y = 0; 
 			}
 
-			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers );
+			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers, ass );
 
 			Meta meta = new Meta( amf, mask, mini );
 
-			p2.addInput( bi, bi, null, meta, appCache.get(FacadeLabelApp.class, amf).styleZ, FLOOR_HEIGHT * scale / 255.  );
+			p2.addInput( bi, bi, null, meta, ass.get(FacadeLabelApp.class, amf).styleZ, FLOOR_HEIGHT * scale / 255.  );
 		}
 
 		g.dispose();
@@ -204,12 +204,12 @@ public class FacadeLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						importLabels( appCache, meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						importLabels( ass, meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ), ass );
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
 						if ( dest != null ) 
-							appCache.get (FacadeLabelApp.class, meta.mf ).texture = dest; // todo: set on FacadeTexApp after cropping for dormers
+							ass.get (FacadeLabelApp.class, meta.mf ).texture = dest; // todo: set on FacadeTexApp after cropping for dormers
 					}
 					
 				} catch ( Throwable e ) {
@@ -226,7 +226,7 @@ public class FacadeLabelApp extends App {
     //{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
     //"wall": [[62, 196, 0, 255]], 
     // "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
-	private void importLabels( AppStore ac, Meta m,  File file ) {
+	private void importLabels( AppStore ac, Meta m,  File file, AppStore ass ) {
 		
 		if (file.exists()) {
 			
@@ -238,10 +238,13 @@ public class FacadeLabelApp extends App {
 				root = om.readTree( FileUtils.readFileToString( file ) );
 				JsonNode node = root.get( "window" );
 				
-				if (m.mf.postState == null)
-					m.mf.postState = new PostProcessState();
+				FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
+
 				
-				m.mf.postState.generatedWindows.clear();
+				if (fta.postState == null)
+					fta.postState = new PostProcessState();
+				
+				fta.postState.generatedWindows.clear();
 				
 				i:
 				for (int i = 0; i < node.size(); i++) {
@@ -309,7 +312,7 @@ public class FacadeLabelApp extends App {
 				}
 				
 
-				m.mf.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
+				fta.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();
@@ -349,11 +352,11 @@ public class FacadeLabelApp extends App {
 		return new Enum[] {AppMode.Off /* manual */, AppMode.Procedural, AppMode.Net};
 	}
 	
-	public void finishedBatches( AppStore ac, List<App> list, List<App> all ) {
+	public void finishedBatches( AppStore ass, List<App> list, List<App> all ) {
 
 		for (App a : all) 
 			if (! list.contains( a )) {
-				PostProcessState ps = ( (FacadeLabelApp)a).mf.postState;
+				PostProcessState ps = ass.get(FacadeTexApp.class, mf ).postState;
 				if (ps != null)
 					ps.generatedWindows.clear();
 			}
@@ -361,7 +364,7 @@ public class FacadeLabelApp extends App {
 		for (App a : all) {
 			if (! list.contains( a )) {
 				MiniFacade mf = ( (FacadeLabelApp)a).mf;
-				 PostProcessState ps = mf.postState;
+				 PostProcessState ps = ass.get(FacadeTexApp.class, mf ).postState;
 				 if (ps != null)
 					 for (FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
 						 ps.generatedWindows.add( f );
@@ -370,14 +373,14 @@ public class FacadeLabelApp extends App {
 		
 		for (App a : list) {
 			MiniFacade mf = ( (FacadeLabelApp)a).mf;
-			FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+			FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
 			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
-			fta.setChimneyTexture( ac, null );
+			fta.setChimneyTexture( ass, null );
 		}
 		
 		// compute dormer-roof locations
 		list.stream().map( x -> ((FacadeLabelApp)x).mf.sf ).collect(Collectors.toSet() ).stream().
-			forEach( x -> new GreebleSkel( null, ac, x ).
+			forEach( x -> new GreebleSkel( null, ass, x ).
 			showSkeleton( x.skel.output, null, x.mr ) );
 	}
 }

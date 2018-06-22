@@ -34,6 +34,7 @@ import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.PostProcessState;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -48,6 +49,8 @@ public class FacadeTexApp extends App {
 	MiniFacade ha;
 	public String texture;
 	public Color color;
+	public PostProcessState postState = null;
+
 	
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );
@@ -74,8 +77,8 @@ public class FacadeTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		if (ha.postState != null)
-			for (FRect r : ha.postState.generatedWindows ) 
+		if (postState != null)
+			for (FRect r : postState.generatedWindows ) 
 				out.put( "window", ac.get (PanesLabelApp.class, r ) );
 		
 		out.put( "super", ac.get(FacadeSuperApp.class, ha) );
@@ -97,7 +100,7 @@ public class FacadeTexApp extends App {
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
 
 		NetInfo ni =NetInfo.get(this) ;
 		int resolution = ni.resolution;
@@ -113,15 +116,18 @@ public class FacadeTexApp extends App {
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
 		
-		List<MiniFacade> mfb = batch.stream().map( x -> ((FacadeTexApp)x).ha ).collect( Collectors.toList() );
+//		List<MiniFacade> mfb = batch.stream().map( x -> ((FacadeTexApp)x).ha ).collect( Collectors.toList() );
 
-		for ( MiniFacade mf : mfb ) {
+		for (App a : batch) {
+			
+			FacadeTexApp fta = (FacadeTexApp )a;
+			MiniFacade mf = fta.ha;
 			
 			if (!TweedSettings.settings.sitePlanInteractiveTextures && mf.featureGen instanceof CGAMini) {
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 			}
 
-			DRectangle mini = Pix2Pix.findBounds( mf, false );
+			DRectangle mini = Pix2Pix.findBounds( mf, false, ass );
 
 			gL.setColor( CMPLabel.Background.rgb );
 			gL.fillRect( 0, 0, resolution, resolution );
@@ -129,7 +135,7 @@ public class FacadeTexApp extends App {
 			gE.setColor( CMPLabel.Background.rgb );
 			gE.fillRect( 0, 0, resolution, resolution );
 
-			mini = Pix2Pix.findBounds( mf, false );
+			mini = Pix2Pix.findBounds( mf, false, ass );
 
 			if (mini == null)
 				continue;
@@ -150,10 +156,10 @@ public class FacadeTexApp extends App {
 
 			
 
-			if ( mf.postState == null ) {
+			if ( fta.postState == null ) {
 				
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ), ass );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ), ass );
 				
 			} else {
 				
@@ -165,7 +171,7 @@ public class FacadeTexApp extends App {
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				
-				for ( Loop<? extends Point2d> l : mf.postState.wallFaces ) {
+				for ( Loop<? extends Point2d> l : fta.postState.wallFaces ) {
 					
 					Polygon p = Pix2Pix.toPoly( mf, maskLabel, mini, l ) ; 
 					
@@ -179,7 +185,7 @@ public class FacadeTexApp extends App {
 				gL.setStroke( stroke );
 				gE.setStroke( stroke );
 				
-				for ( Loop<Point2d> l : mf.postState.occluders ) {
+				for ( Loop<Point2d> l : fta.postState.occluders ) {
 						Polygon poly = Pix2Pix.toPoly( mf, maskLabel, mini, l );
 						gL.setColor( CMPLabel.Background.rgb );
 						gE.setColor( CMPLabel.Background.rgb );
@@ -191,16 +197,16 @@ public class FacadeTexApp extends App {
 						gE.draw( poly );
 					}
 				
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ), ass );// featureGen.getRects( Feature.WINDOW ) );
 			}
 
 			Meta meta = new Meta( mf, maskLabel );
 
-			FacadeTexApp mfa = appCache.get(FacadeTexApp.class, mf );
+			FacadeTexApp mfa = ass.get(FacadeTexApp.class, mf );
 			
 			p2.addInput( labels, empty, null, meta, mfa.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
 			
-			if ( mfa.getChimneyTexture(appCache) == null) {
+			if ( mfa.getChimneyTexture(ass) == null) {
 				Meta m2 = new Meta (mf, null);
 
 				gL.setColor( CMPLabel.Background.rgb );
@@ -212,7 +218,7 @@ public class FacadeTexApp extends App {
 				
 				
 				p2.addInput( labels, empty, null, m2, mfa.styleZ,  0.3 );
-				mfa.setChimneyTexture( appCache, "in progress" );
+				mfa.setChimneyTexture( ass, "in progress" );
 			}
 		}
 		
@@ -237,19 +243,19 @@ public class FacadeTexApp extends App {
 						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, new BufferedImage[3] );
 
 						
-						FacadeTexApp mfa = appCache.get(FacadeTexApp.class, meta.mf );
+						FacadeTexApp mfa = ass.get(FacadeTexApp.class, meta.mf );
 						
 						if ( dest != null ) {
 							
 							if (isChimney) {
-								mfa.setChimneyTexture( appCache, dest );
+								mfa.setChimneyTexture( ass, dest );
 							} else {
 								mfa.coarse = mfa.texture = dest;
 								mfa.coarseWithWindows = null;
 
 								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
 									
-									PanesLabelApp pla = appCache.get(PanesLabelApp.class, r);
+									PanesLabelApp pla = ass.get(PanesLabelApp.class, r);
 									
 									pla.panes = null;
 									pla.texture = null;
@@ -314,5 +320,9 @@ public class FacadeTexApp extends App {
 		}
 		
 		return out;
+	}
+
+	public void resetPostProcessState() {
+		postState = new PostProcessState();
 	}
 }

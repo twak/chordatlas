@@ -44,7 +44,7 @@ public class AppStore {
 		appCache.cache.get(k).put(o, null);
 	}
 
-	public <E extends App> void set( Class<? extends E> k, FRect o, E e ) {
+	public <E extends App> void set( Class<? extends E> k, Object o, E e ) {
 		appCache.put(k, o, e );
 	}
 

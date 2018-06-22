@@ -21,9 +21,9 @@ import javax.vecmath.Point2d;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
@@ -303,43 +303,48 @@ public class Pix2Pix {
 		return out;
 	}
 
-	public static DRectangle findBounds( MiniFacade toEdit, boolean includeRoof ) {
+	public static DRectangle findBounds( MiniFacade toEdit, boolean includeRoof, AppStore ass ) {
 		
-		if ( toEdit.postState == null ) 
+		FacadeTexApp fta = ass.get(FacadeTexApp.class, toEdit);
+		
+		if ( fta.postState == null ) 
 			return toEdit.getAsRect();
 		
 		else if ( includeRoof ) {
-			DRectangle out =  GreebleHelper.findRect( toEdit.postState.wallFaces, toEdit.postState.roofFaces );
+			DRectangle out =  GreebleHelper.findRect( fta.postState.wallFaces, fta.postState.roofFaces );
 			if (out != null )
 				return out;
 		}
 		else {
-			DRectangle out =  GreebleHelper.findRect( toEdit.postState.wallFaces );
+			DRectangle out =  GreebleHelper.findRect( fta.postState.wallFaces );
 			if (out != null )
 				return out;
 		}
 
-		if ( toEdit.postState == null || toEdit.postState.outerWallRect == null ) 
+		if ( fta.postState == null || fta.postState.outerWallRect == null ) 
 			return toEdit.getAsRect();
 		else
-			return toEdit.postState.outerWallRect;
+			return fta.postState.outerWallRect;
 	}
 	
-	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask, boolean drawRoofs ) {
-		if ( mf.postState == null ) {
-			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
+	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask, boolean drawRoofs, AppStore ass ) {
+		
+		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		
+		if ( fta.postState == null ) {
+			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ), ass );
 		} else {
 			g.setColor( Color.blue );
 			
-			for ( Loop<? extends Point2d> l : mf.postState.wallFaces )
+			for ( Loop<? extends Point2d> l : fta.postState.wallFaces )
 				g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 			
 			if (drawRoofs)
-				for ( Loop<? extends Point2d> l : mf.postState.roofFaces )
+				for ( Loop<? extends Point2d> l : fta.postState.roofFaces )
 					g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 
 			g.setColor( CMPLabel.Background.rgb );
-			for ( Loop<Point2d> l : mf.postState.occluders ) 
+			for ( Loop<Point2d> l : fta.postState.occluders ) 
 				g.fill( Pix2Pix.toPoly( mf, mask, mini, l ) );
 		}
 	}
@@ -414,7 +419,9 @@ public class Pix2Pix {
 	}
 	
 
-	public static void cmpRects( MiniFacade toEdit, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
+	public static void cmpRects( MiniFacade mf, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects, AppStore ass ) {
+
+		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
 
 		//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
 		//		
@@ -428,7 +435,7 @@ public class Pix2Pix {
 		
 		for ( FRect r : rects ) {
 
-			if ( toEdit.postState == null || toEdit.postState.generatedWindows.contains( r ) ) {
+			if ( fta.postState == null || fta.postState.generatedWindows.contains( r ) ) {
 				
 				DRectangle w = bounds.transform( mini.normalize( r ) );
 

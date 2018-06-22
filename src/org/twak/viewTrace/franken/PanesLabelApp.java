@@ -105,7 +105,7 @@ public class PanesLabelApp extends App {
 	public final static int pad = 20;
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
+	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
 
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -123,7 +123,7 @@ public class PanesLabelApp extends App {
 				
 				FRect r = a.fr;
 				
-				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r ) )
+				if ( !Pix2Pix.findBounds( a.fr.mf, true, ass ).contains( r ) )
 					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
@@ -182,7 +182,7 @@ public class PanesLabelApp extends App {
 						
 						if ( dest != null ) {
 							
-							PanesLabelApp pla = ac.get( PanesLabelApp.class, meta.r );
+							PanesLabelApp pla = ass.get( PanesLabelApp.class, meta.r );
 							
 							pla.textureUVs = TextureUVs.Zero_One;
 							pla.texture = pla.label = dest;

@@ -121,7 +121,7 @@ public class PanesTexApp extends App {
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) { // first compute latent variables
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) { // first compute latent variables
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
@@ -134,8 +134,8 @@ public class PanesTexApp extends App {
 			try {
 
 				PanesTexApp pta = (PanesTexApp) a;
-				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
-				FacadeTexApp fta = ac.get(FacadeTexApp.class, pla.fr.mf );
+				PanesLabelApp pla = ass.get(PanesLabelApp.class, pta.fr );
+				FacadeTexApp fta = ass.get(FacadeTexApp.class, pla.fr.mf );
 				
 				if ( pla.label == null )
 					continue;
@@ -143,7 +143,7 @@ public class PanesTexApp extends App {
 				MiniFacade mf = pla.fr.mf;
 
 
-				DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
+				DRectangle mfBounds = Pix2Pix.findBounds( mf, false, ass );
 
 				FRect r = (FRect) pta.fr;
 
@@ -208,13 +208,13 @@ public class PanesTexApp extends App {
 				
 				next.addAll( otherMeta );
 
-				computeTextures( whenDone, next, ac );
+				computeTextures( whenDone, next, ass );
 			}
 		} ) );
 				
 	}
 	
-	public void computeTextures( Runnable whenDone, List<Meta> batch, AppStore ac ) {
+	public void computeTextures( Runnable whenDone, List<Meta> batch, AppStore ass ) {
 
 		
 		NetInfo ni = NetInfo.get(this); 
@@ -232,7 +232,7 @@ public class PanesTexApp extends App {
 			try {
 				
 				PanesTexApp pta = (PanesTexApp)meta.pta;
-				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
+				PanesLabelApp pla = ass.get(PanesLabelApp.class, pta.fr );
 				
 				if (pla.label == null)
 					continue;
@@ -283,7 +283,7 @@ public class PanesTexApp extends App {
 						
 						String src;
 						
-						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+						FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
 						
 						if (fta.coarseWithWindows != null)
 							src = fta.coarseWithWindows;
@@ -316,7 +316,7 @@ public class PanesTexApp extends App {
 							
 							FRect frect = meta.pta.fr;
 							MiniFacade mf = frect.mf;
-							PanesLabelApp pla = ac.get(PanesLabelApp.class, frect);
+							PanesLabelApp pla = ass.get(PanesLabelApp.class, frect);
 							
 							
 							meta.pta.texture = dest;
@@ -324,7 +324,7 @@ public class PanesTexApp extends App {
 							meta.pta.textureUVs = TextureUVs.Square;
 							pla.textureUVs = TextureUVs.Square;
 							
-							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
+							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false, ass ).normalize( frect ) );
 							
 							d.y = ni.resolution - d.y - d.height;
 							
@@ -370,7 +370,7 @@ public class PanesTexApp extends App {
 						
 						MiniFacade mf = updated.getKey();
 						
-						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+						FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
 						fta.coarseWithWindows = fta.texture = fileName;
 //						updated.getKey().app.textureUVs = TextureUVs.Rectangle;
 					}
