@@ -51,6 +51,9 @@ public class FacadeTexApp extends App {
 	public Color color;
 	public PostProcessState postState = null;
 
+
+	public TextureUVs textureUVs = TextureUVs.Square;
+	public DRectangle textureRect;
 	
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );
@@ -65,6 +68,8 @@ public class FacadeTexApp extends App {
 		this.coarse = fta.coarse;
 		this.coarseWithWindows = fta.coarseWithWindows;
 		this.texture = fta.texture;
+		this.textureUVs = fta.textureUVs;
+		this.textureRect = new DRectangle(fta.textureRect);
 	}
 
 	@Override

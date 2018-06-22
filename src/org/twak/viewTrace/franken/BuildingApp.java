@@ -71,7 +71,7 @@ public class BuildingApp extends App {
 		out.add (new AutoCheckbox( this, "createDormers", "dormers" ) {
 			@Override
 			public void updated( boolean selected ) {
-				updateDormers(selected, apps.ac);
+				updateDormers(selected, apps.ass);
 				globalUpdate.run();
 			}
 		});

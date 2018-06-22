@@ -1,14 +1,24 @@
 package org.twak.viewTrace.franken;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
-import org.twak.tweed.gen.SuperFace;
+import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle;
 
 public class BlockApp extends App {
@@ -46,13 +56,57 @@ public class BlockApp extends App {
 		return down;
 	}
 
+	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
+	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) {
 		whenDone.run();
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
-		return super.createNetUI( globalUpdate, apps );
+	public JComponent createNetUI( Runnable globalUpdate, SelectedApps sa ) {
+		
+		JPanel out = new JPanel(new ListDownLayout());
+
+		if (styleSource instanceof JointStyle) {
+			JButton g = new JButton("set normal");
+			
+			g.addActionListener( new ActionListener() {
+				@Override
+				public void actionPerformed( ActionEvent e ) {
+					setGauss( Collections.singletonList( BlockApp.this ) );
+					TweedFrame.instance.tweed.frame.setGenUI( sa.createUI( globalUpdate ) );
+					globalUpdate.run();
+				}
+
+				private void setGauss( List<App> hashSet ) {
+					for (App a : hashSet) { 
+						a.styleSource = new GaussStyle( a.getNetInfo() );
+						a.appMode = AppMode.Net;
+						setGauss (a.getDown( sa.ass ).valueList());
+					}
+				}
+			} );
+			
+			out.add(g);
+		}
+		else {
+			
+			JButton j = new JButton("set joint");
+			
+			j.addActionListener( new ActionListener() {
+				
+				@Override
+				public void actionPerformed( ActionEvent e ) {
+					styleSource = new JointStyle(null);
+					appMode = AppMode.Net;
+					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass ) );
+					TweedFrame.instance.tweed.frame.setGenUI( sa.createUI( globalUpdate ) );
+				}
+			} );
+			
+			out.add(j);
+		}
+		
+		return out;
 	}
 }

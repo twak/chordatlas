@@ -29,7 +29,7 @@ public class SelectTool extends Tool {
 				Object[] directHandler = target.getUserData( ClickMe.class.getSimpleName() );
 
 				if ( directHandler != null ) {
-					( (ClickMe) directHandler[ 0 ] ).clicked( vector3f );
+					( (ClickMe) directHandler[ 0 ] ).clicked( target );
 					break;
 				}
 

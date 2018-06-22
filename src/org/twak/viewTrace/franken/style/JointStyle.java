@@ -159,7 +159,7 @@ public class JointStyle implements StyleSource {
 
 		if ( this.root != ba ) {
 			this.root = ba;
-			redraw( root.ac );
+			redraw( root.ass );
 		}
 		
 		return true;
@@ -343,7 +343,7 @@ public class JointStyle implements StyleSource {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				
-				redraw(sa.ac);
+				redraw(sa.ass);
 				update.run();
 				
 //				new Thread() {

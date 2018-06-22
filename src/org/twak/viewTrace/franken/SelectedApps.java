@@ -2,8 +2,13 @@ package org.twak.viewTrace.franken;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -12,10 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
+import javax.swing.border.LineBorder;
 
 import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.skel.AppStore;
@@ -31,27 +38,36 @@ import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.StyleSource;
 
+import com.jme3.texture.Image;
+
 
 public class SelectedApps extends ArrayList<App>{
 	
 	public App exemplar;
 	
-	public AppStore ac;
+	public AppStore ass;
+	
 	
 	public SelectedApps(App app, AppStore ac) {
 		add(app);
 		exemplar = app;
-		this.ac = ac;
+		this.ass = ac;
 	}
 	
 	public SelectedApps(AppStore ac) {
-		this.ac = ac;
+		this.ass = ac;
 	}
 	
-	public SelectedApps( List<App> list, AppStore ac ) {
+	public SelectedApps (SelectedApps sa) {
+		this.exemplar = sa.exemplar;
+		this.ass = sa.ass;
+		addAll(sa);
+	}
+	
+	public SelectedApps( Collection<App> list, AppStore ac ) {
 		super (new ArrayList (new LinkedHashSet<>(list) ) );
-		exemplar = list.get( 0 );
-		this.ac = ac;
+		exemplar = list.iterator().next();
+		this.ass = ac;
 	}
 
 	@Override
@@ -66,11 +82,11 @@ public class SelectedApps extends ArrayList<App>{
 		Set<App> ups = new LinkedHashSet<>();
 		
 		for (App a : this) {
-			App up = a.getUp(ac);
+			App up = a.getUp(ass);
 			if (up != null)
 				ups.add(up);
 		}
-		SelectedApps sa = new SelectedApps(ac);
+		SelectedApps sa = new SelectedApps(ass);
 		for (App a : ups)
 			sa.add( a );
 		
@@ -81,11 +97,11 @@ public class SelectedApps extends ArrayList<App>{
 		MultiMap<String, App> as = new MultiMap<>();
 		
 		for (App a : this) 
-			as.putAll( a.getDown(ac) );
+			as.putAll( a.getDown(ass) );
 		
 		Map<String, SelectedApps> out = new LinkedHashMap<>();
 		for (String name : as.keySet())
-			out.put( name, new SelectedApps(as.get( name ), ac ) );
+			out.put( name, new SelectedApps(as.get( name ), ass ) );
 			
 		return out;
 	}
@@ -96,7 +112,7 @@ public class SelectedApps extends ArrayList<App>{
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
 		todo.putAll( i , this );
 		
-		App.computeWithChildren( ac, i, todo, globalUpdate );
+		App.computeWithChildren( ass, i, todo, globalUpdate );
 	}
 	
 	public JPanel createUI( Runnable update_ ) {
@@ -106,11 +122,11 @@ public class SelectedApps extends ArrayList<App>{
 			public void run() {
 				
 				if (exemplar instanceof BlockApp)
-					for (App building : exemplar.getDown(ac).valueList())
+					for (App building : exemplar.getDown(ass).valueList())
 						building.isDirty = true;
 				else
 					for (App a : SelectedApps.this)
-						a.markDirty(ac);
+						a.markDirty(ass);
 				
 				update_.run();
 			}
@@ -121,29 +137,74 @@ public class SelectedApps extends ArrayList<App>{
 		
 		JPanel options = new JPanel();
 
-		top.add( new JLabel( exemplar.name +" ("+size()+" selected)"), BorderLayout.NORTH );
+		JPanel countPanel = new JPanel(new BorderLayout() );
+		
+		JLabel jl = new JLabel( exemplar.name +" ("+size()+" selected)");
+				jl.setFont(jl.getFont().deriveFont(jl.getFont().getStyle() | Font.BOLD));
+
+		countPanel.add( jl, BorderLayout.CENTER );
+		
+		JButton all = new JButton ("all");
+		all.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findAll( exemplar.getClass() ).createUI( update ) ) );
+		countPanel.add(all, BorderLayout.EAST);
+		
+		top.add( countPanel, BorderLayout.NORTH );
 		
 		
-		SelectedApps ups = findUp();
-		Map<String, SelectedApps> downs = findDown();
+//		SelectedApps ups = findUp();
+//		Map<String, SelectedApps> downs = findDown();
 		
-		JPanel upDown = new JPanel(new GridLayout(1, 1 + downs.size() ) );
+		JPanel nets = new JPanel(new GridLayout(1, NetInfo.evaluationOrder.size() ) );
 		
-		if ( !ups.isEmpty() ) {
-			JButton up   = new JButton("↑" + ups.exemplar.name);
-			up.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findUp().createUI ( update) ));
-			upDown.add( up, BorderLayout.WEST);
+		int currentIndex = NetInfo.evaluationOrder.indexOf( exemplar.getClass() );
+		
+		for (Class<? extends App> k : NetInfo.evaluationOrder) {
+			
+			NetInfo target = NetInfo.get( k );
+			int targetIndex = NetInfo.evaluationOrder.indexOf( k );
+			
+			JButton j = new JButton( new ImageIcon( target.icon ) );
+			
+			SelectedApps sa = new SelectedApps(this);
+			
+			if (targetIndex < currentIndex ) {
+				while ( ! sa.isEmpty() && sa.exemplar.getClass() != k ) 
+					sa = sa.findUp();
+				
+				if (sa.isEmpty())
+					sa = findAll( k );
+			}
+			else if ( targetIndex > currentIndex) {
+				
+				sa  = findDown (k, sa);
+				
+				if (sa == null )
+					sa = findAll(k);
+			}
+			
+			
+			if (target == exemplar.getNetInfo()) {
+				j.setBorder( new LineBorder( Color.magenta, 3 ) );
+			}
+			
+			j.setToolTipText( target.name + (sa == null ? "" : ("(" +sa.size()+")") ) );
+			j.setEnabled( target != exemplar.getNetInfo() && sa != null);
+			
+			nets.add(j);
+			
+			SelectedApps sa_ = sa;
+			
+			j.addActionListener( new ActionListener() {
+				@Override
+				public void actionPerformed( ActionEvent e ) {
+					TweedFrame.instance.tweed.frame.setGenUI( sa_.createUI( update ) );
+				}
+			} );
+			
+			
 		}
 		
-		
-		if (downs != null)
-		for (String wayDown : downs.keySet()) {
-			JButton down = new JButton("↓ "+wayDown+"("+downs.get( wayDown ).size()+")");
-			upDown.add( down );
-			down.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( downs.get( wayDown ).createUI ( update) ) );
-		}
-		
-		top.add(upDown);
+		top.add(nets);
 		
 		options.setLayout( new ListDownLayout() );
 		
@@ -236,14 +297,32 @@ public class SelectedApps extends ArrayList<App>{
 			Set<App> ups = new HashSet<>();
 			
 			for (App a : current)
-				if (a.getUp(ac) != null)
-					ups.add(a.getUp(ac));
+				if (a.getUp(ass) != null)
+					ups.add(a.getUp(ass));
 			
 			if (ups.isEmpty())
 				return current;
 			
 			current = ups;
 		}
+	}
+
+	private SelectedApps findAll( Class<? extends App> k ) {
+		return findDown (k, new SelectedApps(findRoots(), ass));
+	}
+
+	private SelectedApps findDown( Class k, SelectedApps sa ) {
+		
+		if (sa.exemplar.getClass() == k)
+			return sa;
+		
+		for (SelectedApps sa2 : sa.findDown().values()) {
+			SelectedApps out = findDown(k, sa2);
+			if (out != null)
+				return out;
+		}
+		
+		return null;
 	}
 	
 	private Component createDistEditor( Runnable update ) {
@@ -254,43 +333,61 @@ public class SelectedApps extends ArrayList<App>{
 		JPanel north = new JPanel( new ListDownLayout() );
 		
 		north.add( exemplar.createNetUI( update, SelectedApps.this ) );
+		
 		if ( exemplar.appMode == AppMode.Net ) {
-			AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get( exemplar.styleSource.getClass() ), new ValueSet() {
-				public void valueSet( Enum num ) {
+			
+			options.removeAll();
+			options.setLayout( new BorderLayout() );
+			options.add( exemplar.styleSource.getUI( update, SelectedApps.this ), BorderLayout.CENTER );
+			options.repaint();
+			options.revalidate();
+			
+			
+			boolean changed = false;
+			
+			for ( App a : SelectedApps.this ) {
+				changed |= a.styleSource != exemplar.styleSource;
+				a.styleSource = exemplar.styleSource;
+			}
+			
+			if ( changed )
+				update.run();
+			
+//			AutoEnumCombo combo = new AutoEnumCombo( ss2Klass.get( exemplar.styleSource.getClass() ), new ValueSet() {
+//				public void valueSet( Enum num ) {
+//
+//					StyleSources sss = (StyleSources) num;
+//					StyleSource ss;
+//
+//					if ( exemplar.styleSource.getClass() == sss.klass )
+//						ss = exemplar.styleSource;
+//					else
+//						ss = sss.instance( exemplar );
+//
+//					boolean changed = false;
+//
+//					if ( !ss.install( SelectedApps.this ) ) {
+//
+//						for ( App a : SelectedApps.this ) {
+//							changed |= a.styleSource != ss;
+//							a.styleSource = ss;
+//						}
+//					}
+//
+//					options.removeAll();
+//					options.setLayout( new BorderLayout() );
+//					options.add( ss.getUI( update, SelectedApps.this ), BorderLayout.CENTER );
+//					options.repaint();
+//					options.revalidate();
+//
+//					if ( changed )
+//						update.run();
+//				}
+//
+//			}, "distribution:" );
 
-					StyleSources sss = (StyleSources) num;
-					StyleSource ss;
-
-					if ( exemplar.styleSource.getClass() == sss.klass )
-						ss = exemplar.styleSource;
-					else
-						ss = sss.instance( exemplar );
-
-					boolean changed = false;
-
-					if ( !ss.install( SelectedApps.this ) ) {
-
-						for ( App a : SelectedApps.this ) {
-							changed |= a.styleSource != ss;
-							a.styleSource = ss;
-						}
-					}
-
-					options.removeAll();
-					options.setLayout( new BorderLayout() );
-					options.add( ss.getUI( update, SelectedApps.this ), BorderLayout.CENTER );
-					options.repaint();
-					options.revalidate();
-
-					if ( changed )
-						update.run();
-				}
-
-			}, "distribution:" );
-
-			combo.fire();
-
-			north.add( combo );
+//			combo.fire();
+//			north.add( combo );
 		}		
 		out.add( north, BorderLayout.NORTH );
 		out.add( options, BorderLayout.CENTER );

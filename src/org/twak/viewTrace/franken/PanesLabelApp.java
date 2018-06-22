@@ -21,6 +21,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -39,6 +40,9 @@ public class PanesLabelApp extends App {
 	
 	FRect fr;
 	public String texture;
+
+	public TextureUVs textureUVs = TextureUVs.Square;
+	public DRectangle textureRect;
 	
 	public PanesLabelApp(FRect fr) {
 		
@@ -63,6 +67,8 @@ public class PanesLabelApp extends App {
 		this.coveringRoof = t.coveringRoof;
 		
 		this.texture = t.texture;
+		this.textureUVs = t.textureUVs;
+		this.textureRect = new DRectangle(t.textureRect);
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;

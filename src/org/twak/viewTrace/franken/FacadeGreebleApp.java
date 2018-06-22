@@ -61,7 +61,7 @@ public class FacadeGreebleApp extends App {
 
 	@Override
 	public App getUp(AppStore ac) {
-		return ac.get(FacadeGreebleApp.class, mf);
+		return ac.get(FacadeTexApp.class, mf);
 	}
 
 	@Override
@@ -73,30 +73,34 @@ public class FacadeGreebleApp extends App {
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
-			public void updated(double value) {
-				
-				for (App a : apps)
-					((FacadeGreebleApp)a).regFrac = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeGreebleApp)a).regAlpha = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeGreebleApp)a).regScale = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
+		if ( appMode == AppMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+				public void updated( double value ) {
+
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regFrac = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regAlpha = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regScale = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+		}
 		
 		return out;
 	}

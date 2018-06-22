@@ -97,13 +97,13 @@ public class JointUI extends JPanel {
 		Runnable modalUpdate = new Runnable() {
 			@Override
 			public void run() {
-				jd.redraw(sa.ac);
+				jd.redraw(sa.ass);
 //				globalUpdate.run();
 			}
 		};
 		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate, sa.ac ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate, sa.ass ), 
 				BorderLayout.CENTER );
 		
 		modalPanel.revalidate();
@@ -129,7 +129,7 @@ public class JointUI extends JPanel {
 		JButton close = new JButton( "ok" );
 
 		close.addActionListener( l -> {
-			jd.redraw(sa.ac);
+			jd.redraw(sa.ass);
 			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 //			globalUpdate.run();
 		} );
@@ -176,7 +176,7 @@ public class JointUI extends JPanel {
 		AutoListCombo<Class> lc = new AutoListCombo<Class> ( selectedJoint.appInfo.get( ns.klass ), "bakeWith", "fixZ", options ) {
 			
 			public void fire(Class e) {
-				jd.redraw(sa.ac);
+				jd.redraw(sa.ass);
 			}
 
 			@Override
@@ -319,7 +319,7 @@ public class JointUI extends JPanel {
 						try {
 							jd = (JointStyle) new XStream().fromXML( f );
 							jd.root = editing;
-							jd.redraw(sa.ac);
+							jd.redraw(sa.ass);
 							
 							// current joint ui is invalid
 							TweedFrame.instance.tweed.setTool( new SelectTool( TweedFrame.instance.tweed ) );

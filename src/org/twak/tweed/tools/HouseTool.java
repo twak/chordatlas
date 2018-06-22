@@ -117,7 +117,7 @@ public class HouseTool extends Tool {
 		
 		for (HalfFace hf : mesh)
 		for (HalfEdge he : hf) {
-			FacadeTexApp mfa = sg.appFact.get( FacadeTexApp.class, ((SuperEdge)he).toEdit );
+			FacadeTexApp mfa = sg.ass.get( FacadeTexApp.class, ((SuperEdge)he).toEdit );
 
 			mfa.appMode = AppMode.Off;//"tex.jpg";
 			mfa.color = Colourz.to4 ( GreebleSkel.BLANK_WALL );	

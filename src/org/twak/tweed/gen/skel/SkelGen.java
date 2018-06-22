@@ -87,7 +87,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	transient Cache<SuperFace, Rendered> geometry = new Cach<>( sf -> new Rendered() );
 
-	public AppStore appFact = new AppStore();
+	public AppStore ass = new AppStore();
 	
 	static {
 		PlanSkeleton.TAGS = new String[][] { { "org.twak.tweed.gen.skel.WallTag", "wall" }, { "org.twak.tweed.gen.skel.RoofTag", "roof" }, };
@@ -144,7 +144,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		this.block = mesh;
 
 		for ( HalfFace f : block )
-			appFact.get (BuildingApp.class, f ).parent = this;
+			ass.get (BuildingApp.class, f ).parent = this;
 	}
 
 	@Override
@@ -231,7 +231,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		if ( sf.mr == null )
 			sf.mr = new MiniRoof( sf ); // deserialization
 
-		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4(  appFact.get( RoofTexApp.class, sf.mr ).color ) ) );
+		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4(  ass.get( RoofTexApp.class, sf.mr ).color ) ) );
 		sf.mr.setOutline( sf.skel.output );
 
 		return skel;
@@ -376,12 +376,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
-		appFact.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
+		ass.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
 
 		for ( HalfFace hf : block ) {
 
 			SuperFace sf = (SuperFace) hf;
-			BuildingApp sfa = appFact.get ( BuildingApp.class, sf );
+			BuildingApp sfa = ass.get ( BuildingApp.class, sf );
 			
 			if ( sfa.isDirty ) {
 
@@ -403,7 +403,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					}
 				};
 
-				GreebleSkel greeble = new GreebleSkel( tweed, appFact, sf );
+				GreebleSkel greeble = new GreebleSkel( tweed, ass, sf );
 				greeble.occluderLookup = lastOccluders;
 
 				house = greeble.showSkeleton( sf.skel.output, onclick, sf.mr );
@@ -484,14 +484,14 @@ public class SkelGen extends Gen implements IDumpObjs {
 //	}
 
 	public void updateTexture( SuperFace sf, Runnable update ) {
-		new Thread( () -> new SelectedApps( appFact.get( BuildingApp.class, sf ), appFact ).computeAll( update, null ) ).start();
+		new Thread( () -> new SelectedApps( ass.get( BuildingApp.class, sf ), ass ).computeAll( update, null ) ).start();
 	}
 
 	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, Object ha ) {
 		if ( ha == null )
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else {
-			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps(  appFact.uiAppFor(ha) , appFact ).createUI( new Runnable() {
+			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps(  ass.uiAppFor(ha) , ass ).createUI( new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -547,7 +547,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				double[] range = findRange( se, s, e, null );
 
 				if ( range != null )
-					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null, appFact );
+					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null, ass );
 			}
 		}
 		ensureMF( sf, se );
@@ -729,7 +729,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 
 		closeSitePlan();
-		new FacadeDesigner( appFact, skel, sf, se, this );
+		new FacadeDesigner( ass, skel, sf, se, this );
 	}
 
 	public void ensureMF( SuperFace sf, SuperEdge se ) {
@@ -743,8 +743,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.width = se.length();
 		}
 		
-		appFact.get (FacadeTexApp.class, se.toEdit).parent = sf;
-		appFact.get (FacadeLabelApp.class, se.toEdit).mf.sf = sf;
+		ass.get (FacadeTexApp.class, se.toEdit).parent = sf;
+		ass.get (FacadeLabelApp.class, se.toEdit).mf.sf = sf;
 
 		if ( se.toRegularize != null && !se.toRegularize.isEmpty() )
 			se.toEdit.height = se.toRegularize.get( 0 ).height;

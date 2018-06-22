@@ -71,7 +71,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		
 		NormSpecGen ns = new NormSpecGen( cropped, null, null);
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
-
 		
 		String fileName = "scratch/" + UUID.randomUUID() +".png";
 
@@ -88,7 +87,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if (textures == null)
 			textures = new HashMap<>();
 		
-		textureUVs = TextureUVs.Zero_One;
+		ac.get(PanesLabelApp.class, state.mf ).textureUVs = TextureUVs.Zero_One;
 		textures.put (state.tag, fileName );
 	}
 	
@@ -153,7 +152,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 //			if (count ++  != 1)
 //				continue;
 			
-			TwoRects toPix = new TwoRects( textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
+			TwoRects toPix = new TwoRects( rta.textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
 			
 			Loop<Point2d> pixPts = toPix.tranform( verticalPts );
 			

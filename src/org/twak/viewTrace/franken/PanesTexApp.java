@@ -321,7 +321,7 @@ public class PanesTexApp extends App {
 							
 							meta.pta.texture = dest;
 							pla.texture = dest;
-							meta.pta.textureUVs = TextureUVs.Square;
+//							meta.pta.textureUVs = TextureUVs.Square;
 							pla.textureUVs = TextureUVs.Square;
 							
 							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false, ass ).normalize( frect ) );

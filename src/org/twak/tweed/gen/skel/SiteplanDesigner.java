@@ -37,7 +37,7 @@ public class SiteplanDesigner {
 		for ( HalfEdge he : sf ) {
 			SuperEdge ee = (SuperEdge) he;
 			if ( ee.toEdit != null )
-				sg.appFact.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Off;
+				sg.ass.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Off;
 		}
 
 		SkelGen.siteplan = new Siteplan( sf.skel.plan, false ) {
@@ -71,14 +71,14 @@ public class SiteplanDesigner {
 										SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
 
 										if ( set != null ) // created by siteplan --> set correct face
-											sg.appFact.get (FacadeTexApp.class,  wt.miniFacade ).parent = (SuperFace) set.se.face;
+											sg.ass.get (FacadeTexApp.class,  wt.miniFacade ).parent = (SuperFace) set.se.face;
 									}
 									
 									
 									
 								}
 
-								sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sg.appFact.get ( RoofTexApp.class, sf.mr ).color ) ) );
+								sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sg.ass.get ( RoofTexApp.class, sf.mr ).color ) ) );
 								sf.mr.setOutline( sf.skel.output );
 
 								sg.setSkel( (PlanSkeleton) threadKey, sf );
@@ -121,7 +121,7 @@ public class SiteplanDesigner {
 				Profile profile = new Profile( defpts );
 				sg.tagWalls( sf, profile, se, bar.start, bar.end );
 				
-				FacadeTexApp mfa = sg.appFact.get(FacadeTexApp.class, se.toEdit);
+				FacadeTexApp mfa = sg.ass.get(FacadeTexApp.class, se.toEdit);
 				
 				if (oldTag != null)
 					mfa.parent = oldTag.sf;

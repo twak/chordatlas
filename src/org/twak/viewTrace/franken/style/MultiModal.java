@@ -79,7 +79,7 @@ public class MultiModal implements StyleSource {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );
-		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update, sa.ac ).openFrame() );
+		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update, sa.ass ).openFrame() );
 		out.add( but );
 		
 		return out;

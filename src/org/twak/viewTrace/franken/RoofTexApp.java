@@ -49,6 +49,8 @@ public class RoofTexApp extends App {
 	public String texture;
 	public MiniRoof mr;
 	public Color color  = Color.gray;
+	public TextureUVs textureUVs = TextureUVs.Square;
+	public DRectangle textureRect;
 	
 	public RoofTexApp(MiniRoof mr) {
 		
@@ -64,6 +66,9 @@ public class RoofTexApp extends App {
 		this.texture = ruf.texture;
 		this.mr = ruf.mr;
 		this.color = ruf.color;
+		
+		this.textureUVs = ruf.textureUVs;
+		this.textureRect = ruf.textureRect;
 	}
 
 	@Override

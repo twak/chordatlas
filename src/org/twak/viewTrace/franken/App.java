@@ -35,9 +35,6 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public AppMode appMode = AppMode.Off;
 	
-//	public String texture;
-	public TextureUVs textureUVs = TextureUVs.Square;
-//	public Color color = Color.gray;
 	public double[] styleZ;
 	public StyleSource styleSource;
 	
@@ -46,12 +43,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	// marks as needing geometry recreation
 	public boolean isDirty = true; 
 	
-	public DRectangle textureRect;
 	public Joint lastJoint;
 	
 	public App( App a ) {
 		this.appMode = a.appMode;
-		this.textureUVs = a.textureUVs;
 		this.styleZ = a.styleZ;
 		this.name = a.name;
 		this.styleSource = a.styleSource.copy();
@@ -59,11 +54,15 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public App() {
 		
-		NetInfo ni = NetInfo.index.get(this.getClass());
+		NetInfo ni = getNetInfo();
 		
 		this.name = ni.name;
 		this.styleZ = new double[ni.sizeZ];
 		this.styleSource = new GaussStyle(NetInfo.get(this));
+	}
+
+	public NetInfo getNetInfo() {
+		return NetInfo.index.get(this.getClass());
 	}
 
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
@@ -79,7 +78,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static synchronized void computeWithChildren ( AppStore ac, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static synchronized void computeWithChildren ( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
 		ProgressMonitor pm =
 				TweedSettings.settings.sitePlanInteractiveTextures ? null : 
@@ -88,7 +87,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		long startTime = System.currentTimeMillis();
 		
 		try {
-			computeWithChildren_( ac, Math.max (1,stage), todo, globalUpdate, pm );
+			computeWithChildren_( ass, Math.max (1,stage), todo, globalUpdate, pm );
 		} finally {
 			if (pm != null)
 				pm.close();
@@ -99,7 +98,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 	}
 	
-	private static void computeWithChildren_ ( AppStore ac, int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
+	private static void computeWithChildren_ ( AppStore ass, int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
 
 		if ( stage >= NetInfo.index.size() ) {
 			return;
@@ -126,7 +125,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		// collect all current children from preivous stages
 		for ( int i = 0; i < stage; i++ )
 			for ( App a : done.get( i ) ) 
-				for ( App n : a.getDown(ac).valueList() )
+				for ( App n : a.getDown(ass).valueList() )
 					if ( n.getClass() == k ) { 
 						if ( n.appMode == AppMode.Net ) 
 							todo.add( n );
@@ -136,23 +135,23 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		for (App a : todo)
 			if ( a.styleSource != null )
-				a.styleZ = a.styleSource.draw( randy, a, ac );
+				a.styleZ = a.styleSource.draw( randy, a, ass );
 
 		List<App> list = new ArrayList(todo);
-		computeBatch ( list, ac, 0, globalUpdate, pm);
+		computeBatch ( list, ass, 0, globalUpdate, pm);
 		
 		System.out.println ("finished "+todo.size()+" " + k.getSimpleName() +"s" );
 
 		done.putAll( stage, all, true );
 		
 		if (!all.isEmpty()) 
-			all.iterator().next().finishedBatches( new ArrayList<>( todo ), new ArrayList<>(all), ac );
+			all.iterator().next().finishedBatches( new ArrayList<>( todo ), new ArrayList<>(all), ass );
 			
 		globalUpdate.run();
 		
-		App.computeWithChildren_( ac, stage + 1, done, globalUpdate, pm );
+		App.computeWithChildren_( ass, stage + 1, done, globalUpdate, pm );
 	}
-	private static void computeBatch( List<App> todo, AppStore ac, int batchStart, Runnable globalUpdate, ProgressMonitor pm ) {
+	private static void computeBatch( List<App> todo, AppStore ass, int batchStart, Runnable globalUpdate, ProgressMonitor pm ) {
 
 		if (batchStart >= todo.size())
 			return;
@@ -170,7 +169,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		System.out.println( "batch " + batchStart + "/" + todo.size() + " " );
 		batch.get( 0 ).computeBatch( () -> 
-			App.computeBatch( todo, ac, batchStart + Batch_Size, globalUpdate, pm ), batch, ac );
+			App.computeBatch( todo, ass, batchStart + Batch_Size, globalUpdate, pm ), batch, ass );
 		
 		globalUpdate.run();
 	}
@@ -194,9 +193,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public abstract App copy();
-	public abstract App getUp(AppStore ac);
-	public abstract MultiMap<String, App> getDown(AppStore ac);
-	public abstract void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache);
+	public abstract App getUp(AppStore ass);
+	public abstract MultiMap<String, App> getDown(AppStore ass);
+	public abstract void computeBatch(Runnable whenDone, List<App> batch, AppStore ass);
 
 	public Enum[] getValidAppModes() {
 		return new Enum[] {AppMode.Off, AppMode.Net};

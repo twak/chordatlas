@@ -87,7 +87,7 @@ public class FacadeLabelApp extends App {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		JButton fac = new JButton( "edit facade" );
-		fac.addActionListener( e -> new FacadeDesigner( apps.ac, mf, globalUpdate ) );
+		fac.addActionListener( e -> new FacadeDesigner( apps.ass, mf, globalUpdate ) );
 		out.add( fac );
 		
 		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
