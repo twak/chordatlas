@@ -36,7 +36,6 @@ import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
-import org.twak.tweed.tools.TextureTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
 import org.twak.utils.ui.ListDownLayout;
@@ -70,7 +69,6 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.ColorOverlayFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
@@ -103,7 +101,7 @@ public class Tweed extends SimpleApplication {
 //			new AlignTool(this), 
 			new FacadeTool(this),
 //			new PlaneTool(this) 
-			new TextureTool(this),
+//			new TextureTool(this),
 };
 	
 	public Tool tool;
