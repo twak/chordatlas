@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -147,7 +148,8 @@ public class JointUI extends JPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder( MultiModalEditor.BORDER );
 		
-		JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( ns.klass.getSimpleName() ).replaceAll( " App", "" ) );
+		JToggleButton select = new JToggleButton ( new ImageIcon(  NetInfo.index.get(ns.klass).icon ) );
+		select.setToolTipText(  Stringz.splitCamelCase( ns.klass.getSimpleName() ).replaceAll( " App", "" ) );
 		bg.add( select );
 		
 		select.setSelected( selected );
@@ -185,7 +187,7 @@ public class JointUI extends JPanel {
 			};
 		};
 		
-		panel.setPreferredSize( new Dimension( 180, panel.getPreferredSize().height ) );
+		panel.setPreferredSize( new Dimension( 150, panel.getPreferredSize().height ) );
 		panel.add(lc, BorderLayout.CENTER);
 		
 		return panel;
