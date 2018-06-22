@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken.style;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.twak.tweed.gen.skel.AppStore;
@@ -321,18 +323,22 @@ public class JointStyle implements StyleSource {
 		JPanel out = new JPanel(new ListDownLayout() );
 		
 
-		JButton low = new JButton( "set low detail" );
+		JPanel detail = new JPanel (new GridLayout( 1,  3 ));
+		
+		JButton low = new JButton( "low" );
 		low.addActionListener( e -> nets.stream().forEach( n -> n.setLow() ) );
-		out.add(low);
+		detail.add(low);
 		
-		JButton medium = new JButton( "set normal detail" );
+		JButton medium = new JButton( "medium" );
 		medium.addActionListener( e -> nets.stream().forEach( n -> n.setMedium() ) );
-		out.add(medium);
+		detail.add(medium);
 		
-		JButton high = new JButton( "set high detail" );
+		JButton high = new JButton( "super" );
 		high.addActionListener( e -> nets.stream().forEach( n -> n.setHigh() ) );
-		out.add(high);
+		detail.add(high);
 		
+		out.add(new JLabel("level of detail:"));
+		out.add(detail);
 		
 		JButton but = new JButton( "edit joint" );
 		but.addActionListener( e -> new JointUI( sa, update ).openFrame() );
