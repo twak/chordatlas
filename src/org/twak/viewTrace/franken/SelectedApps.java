@@ -245,8 +245,6 @@ public class SelectedApps extends ArrayList<App>{
 
 	protected void refresh( Runnable update ) {
 		
-		System.out.println(">>>> ");
-		
 		new Thread () {
 			@Override
 			public void run() {

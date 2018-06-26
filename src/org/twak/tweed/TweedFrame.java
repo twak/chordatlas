@@ -313,7 +313,7 @@ public class TweedFrame {
 		settings.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				new Auto( TweedSettings.settings ).frame();
+				new Auto( TweedSettings.settings, false ).frame();
 			};
 		} );
 		

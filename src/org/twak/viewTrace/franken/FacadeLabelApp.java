@@ -24,6 +24,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
@@ -93,11 +94,21 @@ public class FacadeLabelApp extends App {
 			fac.addActionListener( e -> new FacadeDesigner( apps.ass, mf, globalUpdate ) );
 			out.add( fac );
 		}
-		else if (appMode == AppMode.Procedural && mf.featureGen instanceof CGAMini ) {
+		else if (appMode == AppMode.Procedural ) {
+			
+			if ( ! ( mf.featureGen instanceof CGAMini ) )
+				mf.featureGen = new CGAMini( mf );
 			
 			CGAMini cga = (CGAMini) mf.featureGen;
 			
-			
+			out.add( new Auto( cga, true ) {
+				
+				public void updateOkayCancel() {
+					super.updateOkayCancel();
+					apply();
+					globalUpdate.run();
+				};
+			} .build() ); 
 			
 			
 

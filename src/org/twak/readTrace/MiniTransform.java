@@ -75,10 +75,8 @@ public class MiniTransform {
 		
 		MiniOptions options =  new MiniOptions(outputDir);
 		
-		new Auto( options ) {
-			public void apply() {
-				
-				super.apply();
+		new Auto( options, false ) {
+			public void done() {
 				
 				List<File> files = new ArrayList();
 

@@ -181,6 +181,14 @@ public class CGAMini extends FeatureGenerator {
 		return true;
 	}
 	
+	public double groundFloorHeight = 3;
+	public double otherFloorHeight = 2.5;
+	public double topFloorHeight = 2;
+	public double doorHeight = 2;
+	public double windowHeight = 1;
+	public double windowWidth = 1.5;
+	public double shopHeight = 1.5;
+	
 	public void update (AppStore ass) {
 
 		DRectangle all = Pix2Pix.findBounds( mf, false, ass );
@@ -208,7 +216,7 @@ public class CGAMini extends FeatureGenerator {
 		
 		double groundFloorHeight = 0;
 
-		List<DRectangle> floors = all.splitY( r -> splitFloors( r, 3, 2.5, 2 ) );
+		List<DRectangle> floors = all.splitY( r -> splitFloors( r, CGAMini.this.groundFloorHeight, otherFloorHeight, topFloorHeight ) );
 
 		Random randy = new Random( (long) ( all.height * 1000 + all.width * 10000 ) );
 		
@@ -243,7 +251,7 @@ public class CGAMini extends FeatureGenerator {
 						}
 						else if ( true /* door */ ) {
 							
-							List<DRectangle> doorHeight = groundPanel.get( 0 ).splitY( r -> split1( r, 2.2 ) );
+							List<DRectangle> doorHeight = groundPanel.get( 0 ).splitY( r -> split1( r, CGAMini.this.doorHeight ) );
 
 							if (visible(  doorHeight.get( 0 ), occlusions )) {
 								doorHeight.get( 0 ).y += 0.01; // otherwise it gets culled out
@@ -254,7 +262,11 @@ public class CGAMini extends FeatureGenerator {
 
 								List<DRectangle> gWindowPanelH = groundPanel.get( 1 ).splitX( r -> split3( r, 0.5, 0.0 ) );
 								if ( gWindowPanelH.size() > 2 ) {
-									List<DRectangle> gWindowPanelV = gWindowPanelH.get( 1 ).splitY( r -> split3( r, 0.5, 0.5 ) );
+									
+									DRectangle ws = gWindowPanelH.get( 1 );
+									double pad = (ws.height - shopHeight) /2;
+									
+									List<DRectangle> gWindowPanelV = gWindowPanelH.get( 1 ).splitY( r -> split3( r, pad, pad ) );
 									if ( gWindowPanelV.size() > 2 ) {
 										
 										if (visible( gWindowPanelV.get(1), occlusions ))
@@ -294,12 +306,13 @@ public class CGAMini extends FeatureGenerator {
 		if ( cen.width < 0.7 ) 
 			return;
 		
-		List<DRectangle> fPanels = cen.splitX( r -> stripe( r, 1.5, 0.8 ) );
+		List<DRectangle> fPanels = cen.splitX( r -> stripe( r, windowWidth, 0.8 ) );
 
 		for ( int p = 0; p < fPanels.size(); p++ ) {
 			if ( p % 2 == 0 ) {
 
-				List<DRectangle> winPanel = fPanels.get( p ).splitY( r -> split3Y( r, 1, 0.2 ) );
+				DRectangle dr = fPanels.get( p );
+				List<DRectangle> winPanel = dr.splitY( r -> split3Y( r, dr.height - 0.2 - windowHeight, 0.2 ) );
 
 				if ( winPanel.size() == 3 ) {
 
