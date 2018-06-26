@@ -381,7 +381,7 @@ public class GreebleSkel {
 				
 				switch ( mfa.appMode ) {
 				
-				case Off:
+				case Manual:
 					// hashcode to force unique for selection.
 					faceColor = greebleGrid.mbs.get( BRICK+mfa.hashCode(), mfa.color, mf );
 //					faceColor = greebleGrid.mbs.get( BRICK, mf.app.color != null ? Colourz mf.app.color : wallColor, mf );
@@ -404,7 +404,7 @@ public class GreebleSkel {
 				
 				switch ( ra.appMode ) {
 
-				case Off:
+				case Manual:
 					faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					break;
 				case Bitmap:
@@ -681,7 +681,7 @@ public class GreebleSkel {
 			if ( floorRect == null || wallTag == null || toRecess == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
 			}
-			else if ( fta.appMode == AppMode.Off || fta.texture == null )
+			else if ( fta.appMode == AppMode.Manual || fta.texture == null )
 				
 				greebleGrid.buildGrid (
 					ass,
@@ -771,7 +771,7 @@ public class GreebleSkel {
 		RoofTexApp a = ass.get( RoofTexApp.class, miniroof );
 		
 		switch ( a.appMode ) {
-			case Off: 
+			case Manual: 
 			default:
 				mmb = greebleGrid.mbs.get( TILE, roofColor, miniroof );
 				break;

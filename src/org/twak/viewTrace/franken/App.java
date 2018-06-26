@@ -30,10 +30,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public enum AppMode {
-		Off, Bitmap, Parent, Net, Procedural
+		Manual, Bitmap, Parent, Net, Procedural
 	}
 	
-	public AppMode appMode = AppMode.Off;
+	public AppMode appMode = AppMode.Manual;
 	
 	public double[] styleZ;
 	public StyleSource styleSource;
@@ -80,9 +80,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren ( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 		
-		ProgressMonitor pm =
+		ProgressMonitor pm = 
 				TweedSettings.settings.sitePlanInteractiveTextures ? null : 
-				new ProgressMonitor( TweedFrame.instance.frame, "Computing...", "...", 0, 100 );
+				new ProgressMonitor( null, "Computing...", "...", 0, 100 );
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -105,7 +105,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		}
 
 		
-		Set<App> todo = new LinkedHashSet<>(), all = new LinkedHashSet<>();
+		Set<App> /*todo = new LinkedHashSet<>(), */ all = new LinkedHashSet<>();
 
 		Class k = NetInfo.evaluationOrder.get( stage );
 
@@ -120,41 +120,46 @@ public abstract class App /*earance*/ implements Cloneable {
 				return;
 		}
 		
-		todo.addAll( done.get( stage ) ); 
+//		todo.addAll( done.get( stage ) ); 
+		all .addAll( done.get( stage ) ); 
 		
 		// collect all current children from preivous stages
 		for ( int i = 0; i < stage; i++ )
 			for ( App a : done.get( i ) ) 
 				for ( App n : a.getDown(ass).valueList() )
-					if ( n.getClass() == k ) { 
-						if ( n.appMode == AppMode.Net ) 
-							todo.add( n );
+					if ( n.getClass() == k ) {
+//						if ( n.appMode == AppMode.Net ) 
+//							todo.add( n );
 						
 						all.add(n);
 					}
 		
-		for (App a : todo)
+		for (App a : all)
 			if ( a.styleSource != null )
 				a.styleZ = a.styleSource.draw( randy, a, ass );
 
-		List<App> list = new ArrayList(todo);
-		computeBatch ( list, ass, 0, globalUpdate, pm);
-		
-		System.out.println ("finished "+todo.size()+" " + k.getSimpleName() +"s" );
+		computeBatch( new ArrayList( all ), ass, 0, new Runnable() {
+			@Override
+			public void run() {
+				System.out.println( "finished " + all.size() + " " + k.getSimpleName() + "s" );
 
-		done.putAll( stage, all, true );
-		
-		if (!all.isEmpty()) 
-			all.iterator().next().finishedBatches( new ArrayList<>( todo ), new ArrayList<>(all), ass );
-			
-		globalUpdate.run();
-		
-		App.computeWithChildren_( ass, stage + 1, done, globalUpdate, pm );
+				done.putAll( stage, all, true );
+
+				if ( !all.isEmpty() )
+					all.iterator().next().finishedBatches( new ArrayList<>( all ), ass );
+
+				globalUpdate.run();
+
+				App.computeWithChildren_( ass, stage + 1, done, globalUpdate, pm );
+			}
+		}, pm );
 	}
-	private static void computeBatch( List<App> todo, AppStore ass, int batchStart, Runnable globalUpdate, ProgressMonitor pm ) {
+	private static void computeBatch( List<App> todo, AppStore ass, int batchStart, Runnable onDone, ProgressMonitor pm ) {
 
-		if (batchStart >= todo.size())
+		if (batchStart >= todo.size()) {
+			onDone.run();
 			return;
+		}
 		
 		if ( pm != null ) {
 
@@ -168,13 +173,12 @@ public abstract class App /*earance*/ implements Cloneable {
 		List<App> batch = todo.subList( batchStart, Math.min( todo.size(), batchStart + Batch_Size ) );
 		
 		System.out.println( "batch " + batchStart + "/" + todo.size() + " " );
-		batch.get( 0 ).computeBatch( () -> 
-			App.computeBatch( todo, ass, batchStart + Batch_Size, globalUpdate, pm ), batch, ass );
 		
-		globalUpdate.run();
+		batch.get( 0 ).computeBatch( () -> 
+			App.computeBatch( todo, ass, batchStart + Batch_Size, onDone, pm ), batch, ass );
 	}
 
-	public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
+	public void finishedBatches( List<App> all, AppStore ass ) {
 		// hook to compute after all batches have run
 	}
 
@@ -198,7 +202,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract void computeBatch(Runnable whenDone, List<App> batch, AppStore ass);
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {AppMode.Manual, AppMode.Net};
 	}
 
 }

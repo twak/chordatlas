@@ -7,6 +7,7 @@ import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener.Changed;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
@@ -21,7 +22,7 @@ public class FacadeDesigner {
 
 		FacadeTexApp ma = ac.get (FacadeTexApp.class, mf);
 		
-		if ( ma.appMode == AppMode.Off )
+		if ( ma.appMode == AppMode.Manual )
 			mf.groundFloorHeight = 2;
 			
 		Changed c = new Changed() {
@@ -31,7 +32,11 @@ public class FacadeDesigner {
 			}
 		};
 		
+		DRectangle bounds = mf.getAsRect();
+		bounds.y -= bounds.height;
+		PaintThing.setBounds( bounds );
 		Plot p = new Plot( mf );
+		
 		p.addEditListener( c );
 	}
 	
@@ -43,7 +48,7 @@ public class FacadeDesigner {
 		
 		FacadeTexApp ma = ass.get (FacadeTexApp.class, se.toEdit);
 		
-		if ( ma.appMode == AppMode.Off )
+		if ( ma.appMode == AppMode.Manual )
 			se.toEdit.groundFloorHeight = 2;
 		else {
 			SkelGen.patchWallTag (skel, se, se.toEdit);

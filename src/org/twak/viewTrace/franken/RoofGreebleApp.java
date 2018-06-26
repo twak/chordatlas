@@ -59,6 +59,12 @@ public class RoofGreebleApp extends App {
 
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) {
+		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
+		
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
@@ -154,7 +160,7 @@ public class RoofGreebleApp extends App {
 	}
     
     @Override
-    public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
+    public void finishedBatches( List<App> all, AppStore ac ) {
 //    	for (App a : list)
 //    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
     }

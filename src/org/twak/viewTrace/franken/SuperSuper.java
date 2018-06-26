@@ -79,6 +79,11 @@ public abstract class SuperSuper <A> extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
 		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
+		
 		MultiMap<A, FacState> todo = new MultiMap<>();
 		
 		for (App a : batch)
@@ -323,6 +328,6 @@ public abstract class SuperSuper <A> extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {AppMode.Manual, AppMode.Net};
 	}
 }

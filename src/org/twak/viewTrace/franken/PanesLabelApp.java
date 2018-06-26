@@ -112,7 +112,12 @@ public class PanesLabelApp extends App {
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
-
+		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
+		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
 
@@ -342,6 +347,6 @@ public class PanesLabelApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Off, AppMode.Net };
+		return new Enum[] { AppMode.Manual, AppMode.Net };
 	}
 }

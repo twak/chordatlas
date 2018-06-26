@@ -365,7 +365,7 @@ public class JointStyle implements StyleSource {
 
 	public void setMode( App appMode ) {
 		NetProperties ns = klass2Net.get(appMode.getClass()); 
-		appMode.appMode = (ns.on || !ns.show) ? AppMode.Net : AppMode.Off; // ui for block, building, not others
+		appMode.appMode = (ns.on || !ns.show) ? AppMode.Net : AppMode.Manual; // ui for block, building, not others
 		appMode.styleSource = this;
 	}
 

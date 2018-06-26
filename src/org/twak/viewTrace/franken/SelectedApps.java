@@ -128,6 +128,8 @@ public class SelectedApps extends ArrayList<App>{
 					for (App a : SelectedApps.this)
 						a.markDirty(ass);
 				
+				System.out.println("update called!");
+				
 				update_.run();
 			}
 		};
@@ -242,8 +244,16 @@ public class SelectedApps extends ArrayList<App>{
 	}
 
 	protected void refresh( Runnable update ) {
-		new Thread ( () ->  SelectedApps.this.computeAll(update, null) ).start();
-	}
+		
+		System.out.println(">>>> ");
+		
+		new Thread () {
+			@Override
+			public void run() {
+				SelectedApps.this.computeAll(update, null);
+			}
+		}.start(); 
+	};
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
 		

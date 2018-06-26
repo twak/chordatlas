@@ -86,44 +86,48 @@ public class FacadeLabelApp extends App {
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		JButton fac = new JButton( "edit facade" );
-		fac.addActionListener( e -> new FacadeDesigner( apps.ass, mf, globalUpdate ) );
-		out.add( fac );
 		
-		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
-			public void updated(double value) {
-				
-				for (App a : apps)
-					((FacadeLabelApp)a).regFrac = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeLabelApp)a).regAlpha = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeLabelApp)a).regScale = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-//		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
-//			public void updated(boolean selected) {
-//				for (App a : apps)
-//					apps.ac.get(BuildingApp.class, sf)
-//					
-//					((MiniFacade)a.hasA).app.dormer = selected;
-//				globalUpdate.run();
-//			}
-//		} );
+		if ( appMode == AppMode.Manual ) {
+
+			JButton fac = new JButton( "edit facade" );
+			fac.addActionListener( e -> new FacadeDesigner( apps.ass, mf, globalUpdate ) );
+			out.add( fac );
+		}
+		else if (appMode == AppMode.Procedural && mf.featureGen instanceof CGAMini ) {
+			
+			CGAMini cga = (CGAMini) mf.featureGen;
+			
+			
+			
+			
+
+		} else if ( appMode == AppMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+				public void updated( double value ) {
+
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regFrac = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regAlpha = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regScale = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+		}
 		
 		return out;
 	}
@@ -136,7 +140,7 @@ public class FacadeLabelApp extends App {
 
 				MiniFacade mf = ( (FacadeLabelApp) a ).mf;
 
-				if ( appMode == AppMode.Off ) {
+				if ( appMode == AppMode.Manual ) {
 					if ( !( mf.featureGen.getClass() == FeatureGenerator.class ) )
 						mf.featureGen = new FeatureGenerator( mf.featureGen );
 				} else if ( appMode == AppMode.Procedural )
@@ -239,12 +243,6 @@ public class FacadeLabelApp extends App {
 				JsonNode node = root.get( "window" );
 				
 				FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
-
-				
-				if (fta.postState == null)
-					fta.postState = new PostProcessState();
-				
-				fta.postState.generatedWindows.clear();
 				
 				i:
 				for (int i = 0; i < node.size(); i++) {
@@ -310,7 +308,6 @@ public class FacadeLabelApp extends App {
 					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null, ac ).get( 0 ).featureGen;
 					m.mf.featureGen.setMF(m.mf);
 				}
-				
 
 				fta.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
 				
@@ -349,38 +346,33 @@ public class FacadeLabelApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off /* manual */, AppMode.Procedural, AppMode.Net};
+		return new Enum[] {AppMode.Manual /* manual */, AppMode.Procedural, AppMode.Net};
 	}
 	
-	public void finishedBatches( AppStore ass, List<App> list, List<App> all ) {
+	@Override
+	public void finishedBatches( List<App> all, AppStore ass ) {
 
-		for (App a : all) 
-			if (! list.contains( a )) {
-				PostProcessState ps = ass.get(FacadeTexApp.class, mf ).postState;
-				if (ps != null)
-					ps.generatedWindows.clear();
-			}
-		
 		for (App a : all) {
-			if (! list.contains( a )) {
-				MiniFacade mf = ( (FacadeLabelApp)a).mf;
-				 PostProcessState ps = ass.get(FacadeTexApp.class, mf ).postState;
-				 if (ps != null)
-					 for (FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
-						 ps.generatedWindows.add( f );
-			}
-		}
-		
-		for (App a : list) {
-			MiniFacade mf = ( (FacadeLabelApp)a).mf;
-			FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
-			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
+			
+			FacadeLabelApp fla = ( (FacadeLabelApp) a );
+			MiniFacade mf = fla.mf;
+			FacadeTexApp fta = ass.get( FacadeTexApp.class, ( (FacadeLabelApp) a ).mf );
+
+			if ( fta.postState == null )
+				fta.postState = new PostProcessState();
+			else
+				fta.postState.generatedWindows.clear();
+			
+			for ( FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
+				fta.postState.generatedWindows.add( f );
+
+			System.out.println("                                     adding windows " + fta.postState.generatedWindows.size() );
+			
+			fta.oldWindows = new ArrayList<FRect>( mf.featureGen.getRects( Feature.WINDOW ) );
 			fta.setChimneyTexture( ass, null );
+
+			// compute dormer-roof locations
+			new GreebleSkel( null, ass, mf.sf ).showSkeleton( mf.sf.skel.output, null, mf.sf.mr );
 		}
-		
-		// compute dormer-roof locations
-		list.stream().map( x -> ((FacadeLabelApp)x).mf.sf ).collect(Collectors.toSet() ).stream().
-			forEach( x -> new GreebleSkel( null, ass, x ).
-			showSkeleton( x.skel.output, null, x.mr ) );
 	}
 }

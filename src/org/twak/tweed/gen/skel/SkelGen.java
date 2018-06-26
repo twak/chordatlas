@@ -413,6 +413,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 				tweed.getRootNode().updateGeometricState();
 				tweed.getRootNode().updateModelBound();
+				
+//				tweed.getContext().setAutoFlushFrames( true );
+//				tweed.update();
 				tweed.gainFocus();
 			}
 		}

@@ -108,6 +108,11 @@ public class RoofTexApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
 		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
+		
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
@@ -316,7 +321,7 @@ public class RoofTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net, AppMode.Bitmap};
+		return new Enum[] {AppMode.Manual, AppMode.Net, AppMode.Bitmap};
 	}
 	
 	@Override
@@ -324,7 +329,7 @@ public class RoofTexApp extends App {
 		
 		JPanel out = new JPanel( new ListDownLayout() );
 		if ( appMode == AppMode.Net ) {
-		} else if ( appMode == AppMode.Off ) {
+		} else if ( appMode == AppMode.Manual ) {
 			JButton col = new JButton( "color" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
@@ -332,8 +337,8 @@ public class RoofTexApp extends App {
 				public void picked( Color color ) {
 
 					for ( App a : selectedApps ) {
-						( (PanesTexApp) a ).color = color;
-						( (PanesTexApp) a ).texture = null;
+						( (RoofTexApp) a ).color = color;
+						( (RoofTexApp) a ).texture = null;
 					}
 
 					update.run();

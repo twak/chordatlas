@@ -38,7 +38,7 @@ public class PanesTexApp extends App {
 	public boolean useCoarseStyle = false;
 	FRect fr;
 	public String texture;
-	public Color color;
+	public Color color = Color.gray;
 	
 	public PanesTexApp(FRect fr) {
 		super( );
@@ -77,7 +77,7 @@ public class PanesTexApp extends App {
 					globalUpdate.run();
 				}
 			} );
-		} else if ( appMode == AppMode.Off ) {
+		} else if ( appMode == AppMode.Manual ) {
 			JButton col = new JButton( "color" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
@@ -122,6 +122,11 @@ public class PanesTexApp extends App {
 
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) { // first compute latent variables
+		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
@@ -386,20 +391,20 @@ public class PanesTexApp extends App {
 	}
 	
 	@Override
-	public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
+	public void finishedBatches( List<App> all, AppStore ass ) {
 		
-		for (App a : list) {
+		for (App a : all) {
 			PanesTexApp pta = (PanesTexApp) a;
-			PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
+			PanesLabelApp pla = ass.get(PanesLabelApp.class, pta.fr );
 
 			if ( pla.label == null )
 				continue;
 
-			ac.get(FacadeTexApp.class, pla.fr.mf ).coarseWithWindows = null;
+			ass.get(FacadeTexApp.class, pla.fr.mf ).coarseWithWindows = null;
 		}
 			
 		
-		super.finishedBatches( list, all, ac );
+		super.finishedBatches( all, ass );
 	}
 	
 
@@ -419,6 +424,6 @@ public class PanesTexApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Off, AppMode.Net };
+		return new Enum[] { AppMode.Manual, AppMode.Net };
 	}
 }

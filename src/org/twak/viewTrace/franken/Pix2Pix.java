@@ -433,9 +433,12 @@ public class Pix2Pix {
 
 		g.setColor( col );
 		
+		System.out.println("                       ::: " + rects.size() );
+		
 		for ( FRect r : rects ) {
 
-			if ( fta.postState == null || fta.postState.generatedWindows.contains( r ) ) {
+//			if ( fta.postState == null || fta.postState.generatedWindows.contains( r ) ) 
+			{
 				
 				DRectangle w = bounds.transform( mini.normalize( r ) );
 

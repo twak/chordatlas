@@ -37,7 +37,7 @@ public class SiteplanDesigner {
 		for ( HalfEdge he : sf ) {
 			SuperEdge ee = (SuperEdge) he;
 			if ( ee.toEdit != null )
-				sg.ass.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Off;
+				sg.ass.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Manual;
 		}
 
 		SkelGen.siteplan = new Siteplan( sf.skel.plan, false ) {

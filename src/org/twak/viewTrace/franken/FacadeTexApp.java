@@ -106,7 +106,12 @@ public class FacadeTexApp extends App {
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
-
+		
+		if ( appMode != AppMode.Net ) {
+			whenDone.run();
+			return;
+		}
+		
 		NetInfo ni =NetInfo.get(this) ;
 		int resolution = ni.resolution;
 		
@@ -117,7 +122,7 @@ public class FacadeTexApp extends App {
 			empty  = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		
 		Graphics2D gL = labels.createGraphics(),
-				gE = empty.createGraphics();
+				   gE = empty.createGraphics();
 
 //		Map<MiniFacade, Meta> index = new HashMap<>();
 		
@@ -201,6 +206,8 @@ public class FacadeTexApp extends App {
 						gL.draw( poly );
 						gE.draw( poly );
 					}
+				
+				
 				
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ), ass );// featureGen.getRects( Feature.WINDOW ) );
 			}
@@ -297,14 +304,14 @@ public class FacadeTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Bitmap, AppMode.Net};
+		return new Enum[] {AppMode.Manual, AppMode.Bitmap, AppMode.Net};
 	}
 	
 	@Override
 	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
-		if (appMode == AppMode.Off) {
+		if (appMode == AppMode.Manual) {
 			JButton col = new JButton("color");
 			
 			col.addActionListener( e -> new ColourPicker(null, color) {
