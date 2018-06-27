@@ -654,8 +654,8 @@ public class GreebleGrid {
 							
 							createWindow( rect, to3d, 
 									wallColorMat, mbs.WOOD, mbs.GLASS, // wood, glass,
-									wallTag.windowDepth, 
-									(float) wallTag.sillDepth, 
+									0.4, 
+									(float) w.attachedHeight.get(Feature.SILL).depth, 
 									(float) w.attachedHeight.get(Feature.SILL).d, 
 									(float) w.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
 						}
@@ -669,7 +669,7 @@ public class GreebleGrid {
 					balcon.grow (0.2);
 					balcon.height = bHeight;
 					
-					createBalcony( balcon, to3d, mbs.BALCONY, wallTag.balconyDepth );
+					createBalcony( balcon, to3d, mbs.BALCONY, w.attachedHeight.get(Feature.BALCONY).depth );
 				}
 				
 			}
@@ -691,8 +691,8 @@ public class GreebleGrid {
 							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+s.hashCode(), mbs.glass, s );
 							
 							createWindow( rect, to3d, wallColorMat, wood, glass, 
-									wallTag.windowDepth, 
-									(float) wallTag.sillDepth, 
+									0.4, 
+									(float) s.attachedHeight.get(Feature.SILL).depth, 
 									(float) s.attachedHeight.get(Feature.SILL).d, 
 									(float) s.attachedHeight.get(Feature.CORNICE).d,
 									1.5, 2 );
@@ -705,7 +705,7 @@ public class GreebleGrid {
 					g.insert( d, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", new float[] {0,0,0.3f, 1} ), wallTag.doorDepth );
+							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", new float[] {0,0,0.3f, 1} ), 0.4 );
 						}
 					} );
 			}
@@ -715,7 +715,7 @@ public class GreebleGrid {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createBalcony( rect, to3d, mbs.BALCONY, wallTag.balconyDepth );
+							createBalcony( rect, to3d, mbs.BALCONY, 0.7 );
 						}
 
 						@Override

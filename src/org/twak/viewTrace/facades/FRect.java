@@ -34,7 +34,22 @@ public class FRect extends DRectangle implements ICanEdit {
 	
 	public MiniFacade mf;
 	
-	public Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
+	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
+	
+	public static class HeightDepth extends MutableDouble {
+		
+		public double depth = -1;
+		
+		public HeightDepth( double height ) {
+			super( height );
+		}
+		
+		public HeightDepth( double height, double depth ) {
+			super( height );
+			this.depth = depth;
+		}
+
+	}
 	
 	AOuter outer;
 	int xi, yi; // grid coords

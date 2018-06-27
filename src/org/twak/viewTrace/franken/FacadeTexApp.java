@@ -48,7 +48,7 @@ public class FacadeTexApp extends App {
 	
 	MiniFacade ha;
 	public String texture;
-	public Color color;
+	public Color color, groundFloorColor;
 	public PostProcessState postState = null;
 
 
@@ -108,6 +108,11 @@ public class FacadeTexApp extends App {
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
 		
 		if ( appMode != AppMode.Net ) {
+			
+			if (appMode == AppMode.Manual) {
+				texture = null;
+			}
+			
 			whenDone.run();
 			return;
 		}
@@ -308,11 +313,13 @@ public class FacadeTexApp extends App {
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
+		
 		if (appMode == AppMode.Manual) {
-			JButton col = new JButton("color");
+			
+			JButton col = new JButton("main color");
 			
 			col.addActionListener( e -> new ColourPicker(null, color) {
 				@Override
@@ -328,6 +335,23 @@ public class FacadeTexApp extends App {
 			} );
 			
 			out.add( col );
+			
+			JButton gc = new JButton("ground floor color");
+			
+			gc.addActionListener( e -> new ColourPicker(null, color) {
+				@Override
+				public void picked( Color color ) {
+					
+					for (App a : apps)  {
+						((FacadeTexApp)a).groundFloorColor = color;
+						((FacadeTexApp)a).texture = null;
+					}
+					
+					globalUpdate.run();
+				}
+			} );
+			
+			out.add( gc );
 			
 		}
 		

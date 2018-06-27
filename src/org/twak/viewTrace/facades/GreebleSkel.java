@@ -255,7 +255,9 @@ public class GreebleSkel {
 						
 						if (greebleGrid != null)
 							greebleGrid.createDormerWindow( ass, miniroof, w, greebleGrid.mbs.WOOD, 
-								greebleGrid.mbs.GLASS, (float) wt.sillDepth, (float) wt.sillHeight, (float) wt.corniceHeight, 0.6, 0.9 );
+								greebleGrid.mbs.GLASS, (float)  w.original.attachedHeight.get(Feature.SILL).depth,
+								(float) w.original.attachedHeight.get(Feature.SILL).d,
+								(float) w.original.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
 						
 						quit.remove();
 					}
@@ -433,10 +435,6 @@ public class GreebleSkel {
 		}
 
 		for ( Loop<LPoint3d> ll : GreebleHelper.findPerimeter( f ) ) {
-				
-			if (wt != null) 
-				wt.isGroundFloor = f.definingCorners.iterator().next().z < 1;
-				
 			mapTo2d( f, ll, mf, wt, features, faceColor, megafacade );
 		}
 	}
@@ -626,14 +624,19 @@ public class GreebleSkel {
 		List<DRectangle> floors = new ArrayList();
 		List<MatMeshBuilder> materials = new ArrayList();
 		
+		boolean isGroundFloor = wallTag != null && 
+				facadeRect != null && 
+				mf != null && 
+				f.definingCorners.iterator().next().z < 1;
+		
 		if (wallTag != null && facadeRect != null && mf != null && 
-			wallTag.isGroundFloor && mf.groundFloorHeight > 0 && wallTag.groundFloorColor != null &&
+			isGroundFloor && mf.groundFloorHeight > 0 &&
 			facadeRect.x < mf.groundFloorHeight && facadeRect.getMaxX() > mf.groundFloorHeight) 
 		{
 			
 			floors.addAll ( facadeRect.splitY( mf.groundFloorHeight ) );
 			
-			MatMeshBuilder gfm = greebleGrid.mbs.get( BRICK, wallTag.groundFloorColor ); 
+			MatMeshBuilder gfm = greebleGrid.mbs.get( BRICK,Colourz.toF4( ass.get (FacadeTexApp.class, mf).groundFloorColor ) ); 
 			
 			for ( Loop<Point2d> loop : sides ) {
 				

@@ -16,6 +16,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.RectDir;
 import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.Colourz;
+import org.twak.utils.ui.auto.AutoRange;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.Pix2Pix;
@@ -181,12 +182,19 @@ public class CGAMini extends FeatureGenerator {
 		return true;
 	}
 	
+	@AutoRange(min = 1, max = 10, step = 0.1)
 	public double groundFloorHeight = 3;
+	@AutoRange(min = 1, max = 3, step = 0.1)
 	public double otherFloorHeight = 2.5;
+	@AutoRange(min = 1, max = 3, step = 0.1)
 	public double topFloorHeight = 2;
+	@AutoRange(min = 0.1, max = 3, step = 0.1)
 	public double doorHeight = 2;
+	@AutoRange(min = 0.1, max = 3, step = 0.1)
 	public double windowHeight = 1;
+	@AutoRange(min = 0.1, max = 3, step = 0.1)
 	public double windowWidth = 1.5;
+	@AutoRange(min = 0.1, max = 3, step = 0.1)
 	public double shopHeight = 1.5;
 	
 	public void update (AppStore ass) {

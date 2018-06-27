@@ -63,7 +63,7 @@ public class BlockApp extends App {
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps sa ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps sa ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 
@@ -74,7 +74,7 @@ public class BlockApp extends App {
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					setGauss( Collections.singletonList( BlockApp.this ) );
-					TweedFrame.instance.tweed.frame.setGenUI( sa.createUI( globalUpdate ) );
+					sa.showUI();
 					globalUpdate.run();
 				}
 
@@ -99,8 +99,8 @@ public class BlockApp extends App {
 				public void actionPerformed( ActionEvent e ) {
 					styleSource = new JointStyle(null);
 					appMode = AppMode.Net;
-					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass ) );
-					TweedFrame.instance.tweed.frame.setGenUI( sa.createUI( globalUpdate ) );
+					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass, sa.globalUpdate ) );
+					sa.showUI();
 				}
 			} );
 			

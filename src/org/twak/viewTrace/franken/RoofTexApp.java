@@ -325,7 +325,7 @@ public class RoofTexApp extends App {
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable update, SelectedApps selectedApps ) {
+	public JComponent createUI( Runnable update, SelectedApps selectedApps ) {
 		
 		JPanel out = new JPanel( new ListDownLayout() );
 		if ( appMode == AppMode.Net ) {

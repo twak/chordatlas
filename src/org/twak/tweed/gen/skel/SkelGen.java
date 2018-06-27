@@ -65,6 +65,8 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
+import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
@@ -376,6 +378,17 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
+		
+		
+//		if (exemplar instanceof BlockApp)
+//			for (App building : exemplar.getDown(ass).valueList())
+//				building.isDirty = true;
+//		else
+//			for (App a : SelectedApps.this)
+//				a.markDirty(ass);
+//		System.out.println("update called!");
+		
+		
 		ass.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
 
 		for ( HalfFace hf : block ) {
@@ -487,14 +500,26 @@ public class SkelGen extends Gen implements IDumpObjs {
 //	}
 
 	public void updateTexture( SuperFace sf, Runnable update ) {
-		new Thread( () -> new SelectedApps( ass.get( BuildingApp.class, sf ), ass ).computeAll( update, null ) ).start();
+		new Thread( new Runnable() {
+			
+			@Override
+			public void run() {
+				 new SelectedApps( (App) ass.get( BuildingApp.class, sf ), ass, update ).computeAll( null ); 
+			}
+			
+			@Override
+			public String toString() {
+				return "SkelGen.updateTexture";
+			}
+		}).start();
 	}
-
+	
 	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, Object ha ) {
 		if ( ha == null )
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else {
-			TweedFrame.instance.tweed.frame.setGenUI( new SelectedApps(  ass.uiAppFor(ha) , ass ).createUI( new Runnable() {
+			
+			SelectedApps sa = new SelectedApps(  ass.uiAppFor(ha) , ass, new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -504,7 +529,14 @@ public class SkelGen extends Gen implements IDumpObjs {
 						}
 					} );
 				}
-			} ) );
+				
+				@Override
+				public String toString() {
+					return "SkelGen.textureSelected";
+				}
+				
+			} );
+			sa.showUI();
 		}
 	}
 
@@ -557,7 +589,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 		Tag wall = new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit ), roof = new RoofTag( sf.roofColor );
 
-		boolean first = true;
 		for ( Loop<Bar> lb : profile.points ) {
 			for ( Loopable<Bar> ll : lb.loopableIterator() ) {
 
@@ -565,14 +596,9 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 				if ( isRoof( b ) ) // || ll != lb.start && isRoof ( ll.getPrev().get() ) && b.start.distanceSquared( b.end ) < 16 )
 					b.tags.add( roof );
-				else {
-					if ( first )
-						b.tags.add( new WallTag( se.profLine, se, new HashSet<>( se.occlusions ), se.toEdit, true ) );
-					else
-						b.tags.add( wall );
-				}
+				else 
+					b.tags.add( wall );
 			}
-			first = false;
 		}
 
 		return profile;

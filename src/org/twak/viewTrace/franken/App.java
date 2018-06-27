@@ -1,7 +1,6 @@
 package org.twak.viewTrace.franken;
 
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,11 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 
-import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
-import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
@@ -39,9 +36,6 @@ public abstract class App /*earance*/ implements Cloneable {
 	public StyleSource styleSource;
 	
 	String name;
-	
-	// marks as needing geometry recreation
-	public boolean isDirty = true; 
 	
 	public Joint lastJoint;
 	
@@ -65,7 +59,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		return NetInfo.index.get(this.getClass());
 	}
 
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
@@ -78,39 +72,49 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static synchronized void computeWithChildren ( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
-		
-		ProgressMonitor pm = 
-				TweedSettings.settings.sitePlanInteractiveTextures ? null : 
-				new ProgressMonitor( null, "Computing...", "...", 0, 100 );
-		
-		long startTime = System.currentTimeMillis();
-		
-		try {
-			computeWithChildren_( ass, Math.max (1,stage), todo, globalUpdate, pm );
-		} finally {
-			if (pm != null)
-				pm.close();
+	static boolean alreadyIn = false;
+
+	public static /* synchronized */ void computeWithChildren( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+
+		if ( alreadyIn ) {
+			System.out.println( "                  skipping eval" );
+			return;
+			//			throw new Error();
 		}
-		
-		
-		System.out.println("time taken " + (System.currentTimeMillis() - startTime));
-		
+
+		try {
+			alreadyIn = true;
+
+			ProgressMonitor pm = TweedSettings.settings.sitePlanInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
+
+			long startTime = System.currentTimeMillis();
+
+			try {
+				computeWithChildren_( ass, Math.max( 1, stage ), todo, globalUpdate, pm );
+			} finally {
+				if ( pm != null )
+					pm.close();
+			}
+
+			System.out.println( "time taken " + ( System.currentTimeMillis() - startTime ) );
+		} finally {
+			alreadyIn = false;
+		}
+
 	}
-	
-	private static void computeWithChildren_ ( AppStore ass, int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
+
+	private static void computeWithChildren_( AppStore ass, int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
 
 		if ( stage >= NetInfo.index.size() ) {
 			return;
 		}
 
-		
-		Set<App> /*todo = new LinkedHashSet<>(), */ all = new LinkedHashSet<>();
+		Set<App> /* todo = new LinkedHashSet<>(), */ all = new LinkedHashSet<>();
 
 		Class k = NetInfo.evaluationOrder.get( stage );
 
-		System.out.println ("computing " + k.getSimpleName() );
-		
+		System.out.println( "computing " + k.getSimpleName() );
+
 		if ( pm != null ) {
 			pm.setMaximum( NetInfo.index.size() );
 			pm.setProgress( stage );
@@ -119,22 +123,22 @@ public abstract class App /*earance*/ implements Cloneable {
 			if ( pm.isCanceled() )
 				return;
 		}
-		
-//		todo.addAll( done.get( stage ) ); 
-		all .addAll( done.get( stage ) ); 
-		
+
+		//		todo.addAll( done.get( stage ) ); 
+		all.addAll( done.get( stage ) );
+
 		// collect all current children from preivous stages
 		for ( int i = 0; i < stage; i++ )
-			for ( App a : done.get( i ) ) 
-				for ( App n : a.getDown(ass).valueList() )
+			for ( App a : done.get( i ) )
+				for ( App n : a.getDown( ass ).valueList() )
 					if ( n.getClass() == k ) {
-//						if ( n.appMode == AppMode.Net ) 
-//							todo.add( n );
-						
-						all.add(n);
+						//						if ( n.appMode == AppMode.Net ) 
+						//							todo.add( n );
+
+						all.add( n );
 					}
-		
-		for (App a : all)
+
+		for ( App a : all )
 			if ( a.styleSource != null )
 				a.styleZ = a.styleSource.draw( randy, a, ass );
 
@@ -152,30 +156,36 @@ public abstract class App /*earance*/ implements Cloneable {
 
 				App.computeWithChildren_( ass, stage + 1, done, globalUpdate, pm );
 			}
+
+			@Override
+			public String toString() {
+				return "App.computerWithChildren_";
+			}
+
 		}, pm );
 	}
+	
 	private static void computeBatch( List<App> todo, AppStore ass, int batchStart, Runnable onDone, ProgressMonitor pm ) {
 
-		if (batchStart >= todo.size()) {
+		if ( batchStart >= todo.size() ) {
 			onDone.run();
 			return;
 		}
-		
+
 		if ( pm != null ) {
 
-			pm.setNote(  todo.get( 0 ).name + " " + batchStart + "/"+todo.size() );
+			pm.setNote( todo.get( 0 ).name + " " + batchStart + "/" + todo.size() );
 			pm.setMaximum( todo.size() );
 			pm.setProgress( batchStart );
 			if ( pm.isCanceled() )
 				return;
 		}
-		
+
 		List<App> batch = todo.subList( batchStart, Math.min( todo.size(), batchStart + Batch_Size ) );
-		
+
 		System.out.println( "batch " + batchStart + "/" + todo.size() + " " );
-		
-		batch.get( 0 ).computeBatch( () -> 
-			App.computeBatch( todo, ass, batchStart + Batch_Size, onDone, pm ), batch, ass );
+
+		batch.get( 0 ).computeBatch( () -> App.computeBatch( todo, ass, batchStart + Batch_Size, onDone, pm ), batch, ass );
 	}
 
 	public void finishedBatches( List<App> all, AppStore ass ) {
@@ -183,7 +193,6 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 
 	public void markDirty(AppStore ac) {
-		isDirty = true;
 		App up = getUp(ac);
 		if (up != null)
 			up.markDirty(ac);

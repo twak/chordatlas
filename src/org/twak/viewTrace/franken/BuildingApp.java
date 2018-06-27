@@ -22,6 +22,7 @@ public class BuildingApp extends App {
 	public boolean createDormers = Math.random() < 0.5;
 	public String chimneyTexture;
 	public SuperFace superFace;
+	public boolean isDirty;
 	
 	public BuildingApp( SuperFace superFace ) {
 		super( );
@@ -63,7 +64,7 @@ public class BuildingApp extends App {
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		addRemoveButton (globalUpdate, out);
@@ -90,5 +91,11 @@ public class BuildingApp extends App {
 
 	public void updateDormers(boolean dormers, AppStore ac) {
 		createDormers = dormers;
+	}
+	
+	@Override
+	public void markDirty( AppStore ac ) {
+		this.isDirty = true;
+		super.markDirty( ac );
 	}
 }

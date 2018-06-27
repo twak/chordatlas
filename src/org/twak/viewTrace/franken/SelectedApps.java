@@ -8,12 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +27,6 @@ import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
-import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
@@ -38,8 +35,6 @@ import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.MultiModal;
 import org.twak.viewTrace.franken.style.StyleSource;
 
-import com.jme3.texture.Image;
-
 
 public class SelectedApps extends ArrayList<App>{
 	
@@ -47,20 +42,24 @@ public class SelectedApps extends ArrayList<App>{
 	
 	public AppStore ass;
 	
+	public Runnable globalUpdate;
 	
-	public SelectedApps(App app, AppStore ac) {
+	public SelectedApps(App app, AppStore ac, Runnable globalUpdate) {
 		add(app);
 		exemplar = app;
 		this.ass = ac;
+		this.globalUpdate = globalUpdate;
 	}
 	
-	public SelectedApps(AppStore ac) {
+	public SelectedApps(AppStore ac, Runnable globalUpdate2) {
 		this.ass = ac;
+		this.globalUpdate = globalUpdate2;
 	}
 	
 	public SelectedApps (SelectedApps sa) {
 		this.exemplar = sa.exemplar;
 		this.ass = sa.ass;
+		this.globalUpdate = sa.globalUpdate;
 		addAll(sa);
 	}
 	
@@ -86,7 +85,7 @@ public class SelectedApps extends ArrayList<App>{
 			if (up != null)
 				ups.add(up);
 		}
-		SelectedApps sa = new SelectedApps(ass);
+		SelectedApps sa = new SelectedApps(ass, globalUpdate);
 		for (App a : ups)
 			sa.add( a );
 		
@@ -106,7 +105,7 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	public void computeAll( Runnable globalUpdate, ProgressMonitor m ) {
+	public void computeAll( ProgressMonitor m ) {
 		
 		MultiMap<Integer, App> todo = new MultiMap<>();
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
@@ -115,24 +114,12 @@ public class SelectedApps extends ArrayList<App>{
 		App.computeWithChildren( ass, i, todo, globalUpdate );
 	}
 	
-	public JPanel createUI( Runnable update_ ) {
+	public void showUI() {
+		TweedFrame.instance.tweed.frame.setGenUI( createUI() );
+	}
+	
+	public JPanel createUI() {
 
-		Runnable update = new Runnable() {
-			@Override
-			public void run() {
-				
-				if (exemplar instanceof BlockApp)
-					for (App building : exemplar.getDown(ass).valueList())
-						building.isDirty = true;
-				else
-					for (App a : SelectedApps.this)
-						a.markDirty(ass);
-				
-				System.out.println("update called!");
-				
-				update_.run();
-			}
-		};
 		
 		JPanel top = new JPanel(new ListDownLayout() );
 		JPanel main = new JPanel(new BorderLayout() );
@@ -147,7 +134,7 @@ public class SelectedApps extends ArrayList<App>{
 		countPanel.add( jl, BorderLayout.CENTER );
 		
 		JButton all = new JButton ("all");
-		all.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findAll( exemplar.getClass() ).createUI( update ) ) );
+		all.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findAll( exemplar.getClass() ).createUI() ) );
 		countPanel.add(all, BorderLayout.EAST);
 		
 		top.add( countPanel, BorderLayout.NORTH );
@@ -199,11 +186,9 @@ public class SelectedApps extends ArrayList<App>{
 			j.addActionListener( new ActionListener() {
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					TweedFrame.instance.tweed.frame.setGenUI( sa_.createUI( update ) );
+					TweedFrame.instance.tweed.frame.setGenUI( sa_.createUI() );
 				}
 			} );
-			
-			
 		}
 		
 		top.add(nets);
@@ -219,20 +204,43 @@ public class SelectedApps extends ArrayList<App>{
 				options.removeAll();
 				options.setLayout( new ListDownLayout() );
 
-				buildLayout(exemplar.appMode, options, () -> refresh ( update ) );
+				buildLayout(exemplar.appMode, options, new Runnable() {
+					
+					@Override
+					public void run() {
+						refresh ();
+						
+					}
+					
+					@Override
+					public String toString() {
+						return "combo in selected apps";
+					}
+				} );
 				
 				options.repaint();
 				options.revalidate();
 				
 				new Thread("combo app select") {
 					public void run() {
-						refresh( update );
+						refresh();
 					};
 				}.start();
 			}
 		}, "texture", exemplar.getValidAppModes() );
 		
-		buildLayout(exemplar.appMode, options, () -> refresh( update ) );
+		buildLayout(exemplar.appMode, options, new Runnable() {
+			
+			@Override
+			public void run() {
+				 refresh();
+			
+			}
+			@Override
+			public String toString() {
+				return "SelectedApps buildLayout";
+			}
+		});
 		
 //		if ( NetInfo.get( exemplar ).resolution > 0)
 		top.add(combo); // building doesn't have options yet
@@ -243,13 +251,36 @@ public class SelectedApps extends ArrayList<App>{
 		return main;
 	}
 
-	protected void refresh( Runnable update ) {
+	protected void refresh() {
+		
+		System.err.println("SelectedApps.run() ");
+		
+		
+		todo start: this needs to run before calling globalupdate
+		if (exemplar instanceof BlockApp)
+			for (App building : exemplar.getDown(ass).valueList())
+				((BuildingApp)building).isDirty = true;
+		else
+			for (App a : SelectedApps.this)
+				a.markDirty(ass);
+		
+		System.out.println("update called!");
+		todo end::
+	
+		
+		Thread.dumpStack();
 		
 		new Thread () {
 			@Override
 			public void run() {
-				SelectedApps.this.computeAll(update, null);
+				SelectedApps.this.computeAll( null);
 			}
+			
+			@Override
+			public String toString() {
+				return "SelectedApps.refresh";
+			}
+			
 		}.start(); 
 	};
 
@@ -340,7 +371,7 @@ public class SelectedApps extends ArrayList<App>{
 		
 		JPanel north = new JPanel( new ListDownLayout() );
 		
-		north.add( exemplar.createNetUI( update, SelectedApps.this ) );
+		north.add( exemplar.createUI( update, SelectedApps.this ) );
 		
 		if ( exemplar.appMode == AppMode.Net ) {
 			
