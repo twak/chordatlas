@@ -2,37 +2,44 @@ package org.twak.viewTrace.franken;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle;
 
 public class BlockApp extends App {
 
+	public static final int SKIRT_RES = 2048;
+
 	SkelGen skelGen;
+
+	public boolean doSkirt = false;
+	public DRectangle skirt;
+	public String skirtTexture;
 	
 	public BlockApp( BlockApp buildingApp ) {
 		super (buildingApp);
 		this.skelGen = buildingApp.skelGen;
+		
+		skirt = skelGen.block.getBounds(); 
 	}
 
 	public BlockApp( SkelGen skelGen ) {
 		super ( );
 		this.skelGen = skelGen;
+		skirt = skelGen.block.getBounds().grow( 10 ); 
 	}
 
 	@Override
@@ -59,6 +66,9 @@ public class BlockApp extends App {
 	
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) {
+		
+		skirtTexture = null;
+		
 		whenDone.run();
 	}
 	
@@ -67,6 +77,7 @@ public class BlockApp extends App {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 
+		
 		if (styleSource instanceof JointStyle) {
 			JButton g = new JButton("set normal");
 			
@@ -88,6 +99,15 @@ public class BlockApp extends App {
 			} );
 			
 			out.add(g);
+			
+			out.add ( new AutoCheckbox( this, "doSkirt", "create skirt" ) {
+				public void updated(boolean selected) {
+					for (App a : sa) 
+						((BlockApp)a).doSkirt = selected;
+					globalUpdate.run();
+				};
+			} );
+			
 		}
 		else {
 			

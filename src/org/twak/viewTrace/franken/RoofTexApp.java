@@ -9,8 +9,10 @@ import java.awt.image.RescaleOp;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -19,8 +21,9 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
+import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedFrame;
 import org.twak.tweed.gen.SuperEdge;
-import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
@@ -36,15 +39,15 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+
+import com.jme3.asset.AssetKey;
+import com.jme3.asset.TextureKey;
 
 
 public class RoofTexApp extends App {
 
-	public SuperFace superFace;
-	
 	public String coarse;
 	public String texture;
 	public MiniRoof mr;
@@ -61,7 +64,6 @@ public class RoofTexApp extends App {
 	public RoofTexApp( RoofTexApp ruf ) {
 		super( ruf );
 		
-		this.superFace = ruf.superFace;
 		this.coarse = ruf.coarse;
 		this.texture = ruf.texture;
 		this.mr = ruf.mr;
@@ -142,6 +144,9 @@ public class RoofTexApp extends App {
 							rsa.textures = null;
 							rta.coarse = rta.texture = dest;
 							rta.textureUVs = TextureUVs.Rectangle;
+							
+							rta.splatToSkirt ( ac.get( BlockApp.class, ac.get(BuildingApp.class, mr.superFace ).parent ) );
+							
 						}
 					}
 
@@ -154,6 +159,39 @@ public class RoofTexApp extends App {
 		} ) );
 	}
 
+	private void splatToSkirt( BlockApp block ) {
+
+		if ( block.doSkirt ) {
+			try {
+				
+				BufferedImage dest, 
+					src = ImageIO.read (new File (Tweed.DATA, coarse));
+				
+				String out = "scratch/"+ UUID.randomUUID() + ".png";
+				
+				if ( block.skirtTexture == null ) {
+					dest = new BufferedImage( BlockApp.SKIRT_RES, BlockApp.SKIRT_RES, BufferedImage.TYPE_3BYTE_BGR );
+				} else {
+					dest = ImageIO.read( new File( Tweed.DATA, block.skirtTexture ) );
+				}
+
+				Graphics2D g = dest.createGraphics();
+				
+				DRectangle s = new DRectangle( BlockApp.SKIRT_RES,BlockApp.SKIRT_RES ).transform( block.skirt.normalize( textureRect ) );
+				
+				s.y+=s.height;
+				s.height = -s.height;
+				
+				g.drawImage( src, s.xI(), s.yI(), s.widthI(), s.heightI(), null );
+				
+				ImageIO.write( dest, "png", new File( Tweed.DATA, out ) );
+				block.skirtTexture = out;
+				
+			} catch ( Throwable th ) {
+				th.printStackTrace();
+			}
+		}
+	}
 	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution, AppStore ac, boolean greebles ) {
 		
 		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
@@ -174,7 +212,6 @@ public class RoofTexApp extends App {
 	}
 	
 	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr, AppStore ac, boolean greebles ) {
-		
 		
 		DRectangle bounds = new DRectangle(mr.bounds);
 		

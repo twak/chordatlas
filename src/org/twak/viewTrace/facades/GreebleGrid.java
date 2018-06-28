@@ -100,47 +100,9 @@ public class GreebleGrid {
 			}
 			*/
 			
-			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			Material mat;
 			
-			if (new File( Tweed.DATA +"/" +texture ).exists()) {
-				Texture t = tweed.getAssetManager().loadTexture( texture );
-				t.setWrap( WrapMode.Repeat );
-//				t.setWrap( WrapMode.EdgeClamp );
-				
-				mat.setTexture( "DiffuseMap", t );
-				mat.setColor( "Diffuse", ColorRGBA.White );
-				mat.setBoolean( "UseMaterialColors", true );
-				
-				String ext = Filez.getExtn( texture );
-				
-				String normal   = Filez.stripExtn( texture )+"_norm." + ext,
-						specular = Filez.stripExtn( texture )+"_spec." + ext;
-				
-				if (new File( Tweed.DATA +"/" +normal ).exists()) {
-					Texture n = tweed.getAssetManager().loadTexture( normal );
-					n.setWrap( WrapMode.Repeat );
-					mat.setTexture( "NormalMap", n );
-				}
-				
-			mat.setColor( "Ambient", ColorRGBA.Gray );
-				
-				if (new File( Tweed.DATA +"/" +specular ).exists()) {
-					Texture s = tweed.getAssetManager().loadTexture( specular );
-//					mat.setVector4( "Specular", ColorRGBA.Black.toVector4f() );
-					s.setWrap( WrapMode.Repeat );
-					mat.setFloat( "Shininess", 50 );
-					mat.setTexture( "SpecularMap", s );
-				}
-				mat.setColor( "Specular", ColorRGBA.White );
-//			else
-//				mat.setColor( "Specular", ColorRGBA.Red );
-			}
-			else
-			{
-				System.out.println( this.getClass().getSimpleName() + " can't find "+ tweed.SCRATCH+texture );
-				mat.setColor( "Diffuse", ColorRGBA.Red );
-				mat.setBoolean( "UseMaterialColors", true );
-			}
+			mat = buildTextureMaterial( tweed, texture );
 //			mat.setColor( "Ambient", ColorRGBA.White );
 
 			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
@@ -154,6 +116,47 @@ public class GreebleGrid {
 
 		}
 		return geom;
+	}
+
+	public static Material buildTextureMaterial( Tweed tweed, String texture ) {
+		Material mat;
+		mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+		
+		if ( new File( Tweed.DATA + "/" + texture ).exists() ) {
+			Texture t = tweed.getAssetManager().loadTexture( texture );
+			t.setWrap( WrapMode.Repeat );
+
+			mat.setTexture( "DiffuseMap", t );
+			mat.setColor( "Diffuse", ColorRGBA.White );
+			mat.setBoolean( "UseMaterialColors", true );
+
+			String ext = Filez.getExtn( texture );
+
+			String normal = Filez.stripExtn( texture ) + "_norm." + ext, specular = Filez.stripExtn( texture ) + "_spec." + ext;
+
+			if ( new File( Tweed.DATA + "/" + normal ).exists() ) {
+				Texture n = tweed.getAssetManager().loadTexture( normal );
+				n.setWrap( WrapMode.Repeat );
+				mat.setTexture( "NormalMap", n );
+			}
+
+			mat.setColor( "Ambient", ColorRGBA.Gray );
+
+			if ( new File( Tweed.DATA + "/" + specular ).exists() ) {
+				Texture s = tweed.getAssetManager().loadTexture( specular );
+				s.setWrap( WrapMode.Repeat );
+				mat.setFloat( "Shininess", 50 );
+				mat.setTexture( "SpecularMap", s );
+			}
+			mat.setColor( "Specular", ColorRGBA.White );
+		}
+		else
+		{
+			System.out.println( " can't find "+ tweed.SCRATCH+texture );
+			mat.setColor( "Diffuse", ColorRGBA.Red );
+			mat.setBoolean( "UseMaterialColors", true );
+		}
+		return mat;
 	}
 
 	private Geometry mb2Geom( Output output, List<Face> chain, String name, 

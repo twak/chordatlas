@@ -7,6 +7,7 @@ import org.twak.utils.Cache2;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.PanesTexApp;
 import org.twak.viewTrace.franken.RoofTexApp;
@@ -56,6 +57,7 @@ public class AppStore {
 		uiLookup.put( MiniFacade.class, FacadeTexApp.class );
 		uiLookup.put( MiniRoof.class, RoofTexApp.class );
 		uiLookup.put( FRect.class, PanesTexApp.class );
+		uiLookup.put( SkelGen.class, BlockApp.class );
 	}
 	
 	public App uiAppFor( Object o) {

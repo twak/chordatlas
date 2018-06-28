@@ -191,7 +191,7 @@ public class SelectedApps extends ArrayList<App>{
 			}
 			
 			j.setToolTipText( target.name + (sa == null ? "" : ("(" +sa.size()+")") ) );
-			j.setEnabled( target != exemplar.getNetInfo() && sa != null);
+			j.setEnabled( sa != null);
 			
 			nets.add(j);
 			

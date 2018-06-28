@@ -704,7 +704,7 @@ public class TweedFrame {
 
 	public static void main( String[] args ) throws Throwable {
 
-		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon128.png" );
+		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon256.png" );
 
 		UIManager.put( "Slider.paintValue", false );
 

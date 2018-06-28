@@ -520,7 +520,9 @@ public class GreebleSkel {
 		
 		Matrix4d to2dXY = new Matrix4d();
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		FacadeTexApp fta = null;
+		if (mf != null)
+			fta = ass.get(FacadeTexApp.class, mf);
 		
 		Vector3d up    = f.edge.uphill,
 				 along = f.edge.direction(),
@@ -679,10 +681,9 @@ public class GreebleSkel {
 				}
 			}
 			
-			if ( floorRect == null || wallTag == null || toRecess == null ) {
+			if ( floorRect == null || wallTag == null || toRecess == null || mf == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
-			}
-			else if ( fta.appMode == AppMode.Manual || fta.texture == null )
+			} else if ( fta.appMode == AppMode.Manual || fta.texture == null )
 				
 				greebleGrid.buildGrid (
 					ass,

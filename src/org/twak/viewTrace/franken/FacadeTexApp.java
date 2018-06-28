@@ -13,14 +13,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
+import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -59,6 +62,8 @@ public class FacadeTexApp extends App {
 
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
+	
+	public final static int CHIMNEY_PAD = 20;
 	
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );
@@ -235,9 +240,8 @@ public class FacadeTexApp extends App {
 				gL.setColor( CMPLabel.Background.rgb );
 				gL.fillRect( 0, 0, resolution, resolution );
 				
-				int inset = 20;
 				gL.setColor( CMPLabel.Facade.rgb );
-				gL.fillRect( inset, inset, resolution - 2*inset, resolution - 2*inset );
+				gL.fillRect( CHIMNEY_PAD, CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD );
 				
 				
 				p2.addInput( labels, empty, null, m2, mfa.styleZ,  0.3 );
@@ -263,7 +267,8 @@ public class FacadeTexApp extends App {
 						
 						boolean isChimney = meta.mask == null;
 						
-						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, new BufferedImage[3] );
+						BufferedImage[] channels = new BufferedImage[3];
+						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, channels );
 
 						
 						FacadeTexApp mfa = ass.get(FacadeTexApp.class, meta.mf );
@@ -271,7 +276,19 @@ public class FacadeTexApp extends App {
 						if ( dest != null ) {
 							
 							if (isChimney) {
+								
+								BufferedImage rgb = Imagez.clone( channels[0] );
+								
+								Graphics2D g = channels[0].createGraphics();
+								g.drawImage( rgb, 
+										0, 0, rgb.getWidth(), rgb.getHeight(),
+										CHIMNEY_PAD*2, CHIMNEY_PAD*2, rgb.getWidth() - CHIMNEY_PAD*2, rgb.getHeight() - CHIMNEY_PAD*2, 
+										null );
+								
+								ImageIO.write( channels[0], "png", new File (Tweed.DATA, dest ) );
+								
 								mfa.setChimneyTexture( ass, dest );
+								
 							} else {
 								mfa.coarse = mfa.texture = dest;
 								mfa.coarseWithWindows = null;

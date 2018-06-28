@@ -13,6 +13,7 @@ import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SiteplanDesigner;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.ListDownLayout;
@@ -79,7 +80,7 @@ public class BuildingApp extends App {
 		});
 		
 		JButton siteplan = new JButton( "edit plan/profile" );
-		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, apps.ass.get ( BlockApp.class, parent ).skelGen ) );
+		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, parent ) );
 		out.add(siteplan);
 		
 		return out;

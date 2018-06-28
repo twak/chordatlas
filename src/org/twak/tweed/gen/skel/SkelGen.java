@@ -60,6 +60,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.SimpleFileChooser;
+import org.twak.viewTrace.facades.GreebleGrid;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
@@ -73,8 +74,11 @@ import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 
+import com.jme3.math.Quaternion;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Quad;
 import com.thoughtworks.xstream.XStream;
 
 public class SkelGen extends Gen implements IDumpObjs {
@@ -376,20 +380,28 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 	}
 
+	Geometry skirtG;
+	
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
+		BlockApp ba = ass.get(BlockApp.class, this);
 		
+		if (skirtG != null )
+			skirtG.removeFromParent();
 		
-//		if (exemplar instanceof BlockApp)
-//			for (App building : exemplar.getDown(ass).valueList())
-//				building.isDirty = true;
-//		else
-//			for (App a : SelectedApps.this)
-//				a.markDirty(ass);
-//		System.out.println("update called!");
-		
-		
-		ass.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
+		if (ba.skirtTexture != null) {
+			
+			Quad skirt = new Quad(ba.skirt.widthF(), ba.skirt.heightF());
+			skirtG = new Geometry( "skirt", skirt );
+			skirtG.setMaterial(  GreebleGrid.buildTextureMaterial( tweed, ba.skirtTexture ) );
+			skirtG.setLocalTranslation( ba.skirt.xF(), 0, ba.skirt.yF()  + ba.skirt.heightF() );
+			skirtG.setLocalRotation( new Quaternion (new float[] { (float) -Math.PI / 2f, 0 , 0 }) );
+			
+			gNode.attachChild( skirtG );
+		}
+
+		if (sft_ != null)
+			ass.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
 
 		for ( HalfFace hf : block ) {
 
@@ -412,7 +424,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				OnClick onclick = new OnClick() {
 					@Override
 					public void selected( Output output, Node house2, SuperEdge se, Object ha ) {
-						SkelGen.this.textureSelected( sf.skel, house2, sf, se, ha );
+						SkelGen.this.textureSelected( sf.skel, sf, ha );
 					}
 				};
 
@@ -432,6 +444,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				tweed.gainFocus();
 			}
 		}
+		
 	}
 
 	void removeGeometryFor( SuperFace sf ) {
@@ -514,7 +527,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}).start();
 	}
 	
-	protected void textureSelected( PlanSkeleton skel, Node house2, SuperFace sf, SuperEdge se, Object ha ) {
+	protected void textureSelected( PlanSkeleton skel, SuperFace sf, Object ha ) {
 		if ( ha == null )
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else {
@@ -584,6 +597,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 				if ( range != null )
 					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null, ass );
 			}
+			else
+				se.toEdit = new MiniFacade();
 		}
 		ensureMF( sf, se );
 
@@ -689,6 +704,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JButton compare = new JButton( "compare to mesh" );
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
 		ui.add( compare );
+		
+		JButton dec = new JButton( "decorate" );
+		dec.addActionListener( l -> textureSelected( null, null, SkelGen.this ) );
+		ui.add( dec );
 
 		JButton save = new JButton( "save..." );
 		save.addActionListener( new ActionListener() {
