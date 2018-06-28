@@ -86,7 +86,6 @@ public class BlockApp extends App {
 				public void actionPerformed( ActionEvent e ) {
 					setGauss( Collections.singletonList( BlockApp.this ) );
 					sa.showUI();
-					globalUpdate.run();
 				}
 
 				private void setGauss( List<App> hashSet ) {
