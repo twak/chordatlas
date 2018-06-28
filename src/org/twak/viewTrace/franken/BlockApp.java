@@ -99,7 +99,7 @@ public class BlockApp extends App {
 				public void actionPerformed( ActionEvent e ) {
 					styleSource = new JointStyle(null);
 					appMode = AppMode.Net;
-					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass, sa.globalUpdate ) );
+					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass, sa.geometryUpdate ) );
 					sa.showUI();
 				}
 			} );

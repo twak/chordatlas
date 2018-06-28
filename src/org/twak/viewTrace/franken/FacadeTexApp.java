@@ -48,7 +48,10 @@ public class FacadeTexApp extends App {
 	
 	MiniFacade ha;
 	public String texture;
-	public Color color, groundFloorColor;
+	
+	private static Color defaultGFColor = new Color (188,156,255);
+	
+	public Color color, groundFloorColor = defaultGFColor;
 	public PostProcessState postState = null;
 
 

@@ -42,29 +42,30 @@ public class SelectedApps extends ArrayList<App>{
 	
 	public AppStore ass;
 	
-	public Runnable globalUpdate;
+	public Runnable geometryUpdate;
 	
 	public SelectedApps(App app, AppStore ac, Runnable globalUpdate) {
 		add(app);
 		exemplar = app;
 		this.ass = ac;
-		this.globalUpdate = globalUpdate;
+		this.geometryUpdate = globalUpdate;
 	}
 	
-	public SelectedApps(AppStore ac, Runnable globalUpdate2) {
+	private SelectedApps(AppStore ac, Runnable globalUpdate2) {
 		this.ass = ac;
-		this.globalUpdate = globalUpdate2;
+		this.geometryUpdate = globalUpdate2;
 	}
 	
-	public SelectedApps (SelectedApps sa) {
+	private SelectedApps (SelectedApps sa) {
 		this.exemplar = sa.exemplar;
 		this.ass = sa.ass;
-		this.globalUpdate = sa.globalUpdate;
+		this.geometryUpdate = sa.geometryUpdate;
 		addAll(sa);
 	}
 	
-	public SelectedApps( Collection<App> list, AppStore ac ) {
+	private SelectedApps( Collection<App> list, AppStore ac, Runnable globalUpdate ) {
 		super (new ArrayList (new LinkedHashSet<>(list) ) );
+		this.geometryUpdate = globalUpdate;
 		exemplar = list.iterator().next();
 		this.ass = ac;
 	}
@@ -85,7 +86,7 @@ public class SelectedApps extends ArrayList<App>{
 			if (up != null)
 				ups.add(up);
 		}
-		SelectedApps sa = new SelectedApps(ass, globalUpdate);
+		SelectedApps sa = new SelectedApps(ass, geometryUpdate);
 		for (App a : ups)
 			sa.add( a );
 		
@@ -100,18 +101,34 @@ public class SelectedApps extends ArrayList<App>{
 		
 		Map<String, SelectedApps> out = new LinkedHashMap<>();
 		for (String name : as.keySet())
-			out.put( name, new SelectedApps(as.get( name ), ass ) );
+			out.put( name, new SelectedApps(as.get( name ), ass, geometryUpdate ) );
 			
 		return out;
 	}
 	
-	public void computeAll( ProgressMonitor m ) {
+	private void computeTexturesNewThread() {
+		
+		new Thread () {
+			@Override
+			public void run() {
+				computeTextures( null );
+			}
+			
+			@Override
+			public String toString() {
+				return "SelectedApps.refresh";
+			}
+			
+		}.start(); 
+	}
+	
+	public void computeTextures( ProgressMonitor m ) {
 		
 		MultiMap<Integer, App> todo = new MultiMap<>();
 		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
 		todo.putAll( i , this );
 		
-		App.computeWithChildren( ass, i, todo, globalUpdate );
+		App.computeWithChildren( ass, i, todo, geometryUpdate );
 	}
 	
 	public void showUI() {
@@ -138,10 +155,6 @@ public class SelectedApps extends ArrayList<App>{
 		countPanel.add(all, BorderLayout.EAST);
 		
 		top.add( countPanel, BorderLayout.NORTH );
-		
-		
-//		SelectedApps ups = findUp();
-//		Map<String, SelectedApps> downs = findDown();
 		
 		JPanel nets = new JPanel(new GridLayout(1, NetInfo.evaluationOrder.size() ) );
 		
@@ -208,8 +221,8 @@ public class SelectedApps extends ArrayList<App>{
 					
 					@Override
 					public void run() {
-						refresh ();
-						
+						markDirty();
+						computeTexturesNewThread ();
 					}
 					
 					@Override
@@ -223,7 +236,8 @@ public class SelectedApps extends ArrayList<App>{
 				
 				new Thread("combo app select") {
 					public void run() {
-						refresh();
+						markDirty();
+						computeTexturesNewThread();
 					};
 				}.start();
 			}
@@ -233,8 +247,8 @@ public class SelectedApps extends ArrayList<App>{
 			
 			@Override
 			public void run() {
-				 refresh();
-			
+				markDirty();
+				computeTexturesNewThread();
 			}
 			@Override
 			public String toString() {
@@ -242,61 +256,28 @@ public class SelectedApps extends ArrayList<App>{
 			}
 		});
 		
-//		if ( NetInfo.get( exemplar ).resolution > 0)
-		top.add(combo); // building doesn't have options yet
-		
+		top.add(combo); 
 		main.add( top, BorderLayout.NORTH );
 		main.add( options, BorderLayout.CENTER );
 
 		return main;
 	}
 
-	protected void refresh() {
-		
-		System.err.println("SelectedApps.run() ");
-		
-		
-		todo start: this needs to run before calling globalupdate
+	public void markDirty() {
 		if (exemplar instanceof BlockApp)
 			for (App building : exemplar.getDown(ass).valueList())
 				((BuildingApp)building).isDirty = true;
 		else
 			for (App a : SelectedApps.this)
 				a.markDirty(ass);
-		
-		System.out.println("update called!");
-		todo end::
-	
-		
-		Thread.dumpStack();
-		
-		new Thread () {
-			@Override
-			public void run() {
-				SelectedApps.this.computeAll( null);
-			}
-			
-			@Override
-			public String toString() {
-				return "SelectedApps.refresh";
-			}
-			
-		}.start(); 
-	};
+	}
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
-		
-		for (App a : this)
+
+		for ( App a : this )
 			a.appMode = appMode;
-		
-//		switch (appMode) {
-//		default:
-//			exemplar.createNetUI ( update, this );
-//			break;
-//		case Net:
-			out.add( createDistEditor(update) );
-//			break;
-//		}
+
+		out.add( createEditor( update ) );
 	}
 
 	private enum StyleSources {
@@ -347,7 +328,7 @@ public class SelectedApps extends ArrayList<App>{
 	}
 
 	private SelectedApps findAll( Class<? extends App> k ) {
-		return findDown (k, new SelectedApps(findRoots(), ass));
+		return findDown (k, new SelectedApps(findRoots(), ass, geometryUpdate));
 	}
 
 	private SelectedApps findDown( Class k, SelectedApps sa ) {
@@ -364,7 +345,7 @@ public class SelectedApps extends ArrayList<App>{
 		return null;
 	}
 	
-	private Component createDistEditor( Runnable update ) {
+	private Component createEditor( Runnable update ) {
 		
 		JPanel out = new JPanel( new BorderLayout() );
 		JPanel options = new JPanel();

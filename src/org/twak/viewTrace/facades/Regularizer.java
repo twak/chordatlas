@@ -54,8 +54,11 @@ public class Regularizer {
 	
 	public Feature[] toReg  = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
 	public Feature[] toReg2 = toReg;
+	Feature[] forceNoOverlaps = new Feature[] {Feature.WINDOW, Feature.SHOP, Feature.DOOR };
 	
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
+	
+	boolean earlyReturn = false;
 	
 	double targetWidth = -1;
 	AppStore ac;
@@ -65,7 +68,6 @@ public class Regularizer {
 		this.alpha = alpha;
 	}
 	
-//	public static int miniFacadesUsed = 0, regularised = 0, totalFeature = 0;
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
@@ -78,10 +80,12 @@ public class Regularizer {
 		
 	}
 	
-	public List<MiniFacade> go (List<MiniFacade> in, double targetS, double targetE, double debugFrac, AppStore ac ) {
+	public List<MiniFacade> debug (List<MiniFacade> in, double targetS, double targetE, double debugFrac, AppStore ac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
+		
+		this.earlyReturn = debugFrac < 1;
 		
 		return go(in, debugFrac, null, ac);
 		
@@ -104,12 +108,7 @@ public class Regularizer {
 		System.out.println(" adding tween for " + in.size() + " facades");
 		
 		
-		List<MiniFacade> out;
-		
-		if (true)
-			out = newFromWindows( in );
-		else 
-			out = in.stream().map( mf -> new MiniFacade( mf  ) ).collect( Collectors.toList() );
+		List<MiniFacade> out = newFromWindows( in );
 			
 		System.out.println(" included grids for " + out.size() + " facades...");
 
@@ -118,8 +117,7 @@ public class Regularizer {
 			return out;
 		}
 		
-		
-		if (toReg.length > 0)
+		if (out.size() > 1)
 			alignMFs (out);
 		else {
 			lp = in.get( 0 ).left;
@@ -152,9 +150,6 @@ public class Regularizer {
 				mf.featureGen.get( f ).stream().forEach( r -> r.f = f );
 		
 
-//		if (new Object() != new Object())
-//			return out;
-		
 		for (int i = 0; i < 50 * debugFrac; i++) {
 			
 			for (MiniFacade mf : out)
@@ -187,8 +182,8 @@ public class Regularizer {
 				clusterDeltas(allRects, 0.2* scale, alpha, dir );
 			
 			for ( MiniFacade mf : out ) { 
-				
-				if (toReg.length > 0)
+				 
+				if ( Arrayz.contains (toReg, Feature.DOOR) )
 				for (FRect d :  mf.featureGen.get(Feature.DOOR))
 					constrainDoor (mf, d, alpha);
 				
@@ -218,10 +213,10 @@ public class Regularizer {
 		}
 
 		
-//		if (debugFrac < 1) { fixme
-//			out.add(0, new MiniFacade());
-//			return out;
-//		}
+		if (earlyReturn) { 
+			out.add(0, new MiniFacade());
+			return out;
+		}
 		
 		for ( MiniFacade mf : out ) {
 			findOuters( mf );
@@ -280,8 +275,6 @@ public class Regularizer {
 		}
 		
 		out.add(0, combine(out));
-		
-		System.out.println("done");
 		
 		return out;
 	}
@@ -627,8 +620,6 @@ public class Regularizer {
 		return Math. min ( Math.abs( width - tmp.width ) / width, Math.abs ( height - tmp.height ) / height );
 	}
 
-	Feature[] forceNoOverlaps = new Feature[] {Feature.WINDOW, Feature.SHOP, Feature.DOOR };
-	
 	private void fixOverlaps( MiniFacade out ) {
 		
 		

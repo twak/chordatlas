@@ -169,6 +169,8 @@ public class JointStyle implements StyleSource {
 	
 	public void redraw(AppStore ac) {
 		
+		root.markDirty(ac);
+		
 //		Random randy = new Random(0xDEADBEEF);//System.nanoTime());
 		Random randy = new Random(System.nanoTime());
 
@@ -348,14 +350,8 @@ public class JointStyle implements StyleSource {
 		redaw.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				
 				redraw(sa.ass);
 				update.run();
-				
-//				new Thread() {
-//					public void run() {
-//					};
-//				}.start();
 			}
 		} );
 		out.add( redaw );

@@ -181,6 +181,7 @@ public class GreebleSkel {
 			PostProcessState pps = ass.get( FacadeTexApp.class, mf ).postState;
 			pps.outerWallRect = GreebleHelper.findRect( pps.wallFaces );
 			mf.featureGen.update( ass );
+			pps.generatedWindows.clear();
 		}
 		
 		if (tweed != null) // just calculating dormer locations

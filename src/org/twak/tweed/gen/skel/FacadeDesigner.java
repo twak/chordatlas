@@ -1,5 +1,6 @@
 package org.twak.tweed.gen.skel;
 
+import java.awt.Color;
 import java.util.stream.Collectors;
 
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -13,17 +14,24 @@ import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacadePainter;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class FacadeDesigner {
 	
+	static Plot p;
+	
+	public static void close() {
+		p.closeLast();
+	}
+	
 	public FacadeDesigner (AppStore ac,MiniFacade mf, Runnable update) {
 
 		FacadeTexApp ma = ac.get (FacadeTexApp.class, mf);
 		
-		if ( ma.appMode == AppMode.Manual )
-			mf.groundFloorHeight = 2;
+//		if ( ma.appMode == AppMode.Manual )
+//			mf.groundFloorHeight = 2;
 			
 		Changed c = new Changed() {
 			@Override
@@ -34,8 +42,17 @@ public class FacadeDesigner {
 		
 		DRectangle bounds = mf.getAsRect();
 		bounds.y -= bounds.height;
+		
+		FacadeTexApp fta = ac.get( FacadeTexApp.class, mf );
+		
+		if (fta.postState != null) {
+			
+			PaintThing.debug( Color.lightGray, 1f, MiniFacadePainter.yFlip ( fta.postState.roofFaces ) );
+			PaintThing.debug( Color.gray, 1f, MiniFacadePainter.yFlip ( fta.postState.wallFaces ) );
+		}
+		
 		PaintThing.setBounds( bounds );
-		Plot p = new Plot( mf );
+		p = new Plot( mf );
 		
 		p.addEditListener( c );
 	}
@@ -97,7 +114,7 @@ public class FacadeDesigner {
 			}
 		};
 		
-		Plot p = new Plot( se.toEdit );
+		p = new Plot( se.toEdit );
 		
 //		c.changed();
 //		p.addEditListener( c );

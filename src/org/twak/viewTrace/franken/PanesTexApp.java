@@ -393,6 +393,8 @@ public class PanesTexApp extends App {
 	@Override
 	public void finishedBatches( List<App> all, AppStore ass ) {
 		
+		super.finishedBatches( all, ass );
+		
 		for (App a : all) {
 			PanesTexApp pta = (PanesTexApp) a;
 			PanesLabelApp pla = ass.get(PanesLabelApp.class, pta.fr );

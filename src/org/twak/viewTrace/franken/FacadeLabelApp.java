@@ -93,6 +93,17 @@ public class FacadeLabelApp extends App {
 			JButton fac = new JButton( "edit facade" );
 			fac.addActionListener( e -> new FacadeDesigner( apps.ass, mf, globalUpdate ) );
 			out.add( fac );
+			
+			AutoDoubleSlider gfh = new AutoDoubleSlider( mf, "groundFloorHeight", "ground floor", 0, 5 ) {
+				public void updated(double value) {
+					FacadeDesigner.close();
+					for (App a : apps) {
+						((FacadeLabelApp)a).mf.groundFloorHeight = value;
+						globalUpdate.run();
+					}
+				};
+			};
+			
 		}
 		else if (appMode == AppMode.Procedural ) {
 			
@@ -183,6 +194,8 @@ public class FacadeLabelApp extends App {
 
 			if (mini.area() < 0.1)
 				continue;
+
+			amf.groundFloorHeight = 0;
 			
 			g.setColor( Color.black );
 			g.fillRect( 0, 0, ni.resolution, ni.resolution );
@@ -313,14 +326,17 @@ public class FacadeLabelApp extends App {
 				}
 				
 				if (regFrac > 0) {
+					
 					Regularizer reg = new Regularizer();
+					
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
+					
 					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null, ac ).get( 0 ).featureGen;
 					m.mf.featureGen.setMF(m.mf);
 				}
 
-				fta.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
+//				fta.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();
@@ -363,22 +379,14 @@ public class FacadeLabelApp extends App {
 	@Override
 	public void finishedBatches( List<App> all, AppStore ass ) {
 
+		super.finishedBatches( all, ass );
+		
 		for (App a : all) {
 			
 			FacadeLabelApp fla = ( (FacadeLabelApp) a );
 			MiniFacade mf = fla.mf;
 			FacadeTexApp fta = ass.get( FacadeTexApp.class, ( (FacadeLabelApp) a ).mf );
 
-			if ( fta.postState == null )
-				fta.postState = new PostProcessState();
-			else
-				fta.postState.generatedWindows.clear();
-			
-			for ( FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
-				fta.postState.generatedWindows.add( f );
-
-			System.out.println("                                     adding windows " + fta.postState.generatedWindows.size() );
-			
 			fta.oldWindows = new ArrayList<FRect>( mf.featureGen.getRects( Feature.WINDOW ) );
 			fta.setChimneyTexture( ass, null );
 

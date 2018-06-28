@@ -74,12 +74,10 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	static boolean alreadyIn = false;
 
-	public static /* synchronized */ void computeWithChildren( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static synchronized void computeWithChildren( AppStore ass, int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 
 		if ( alreadyIn ) {
-			System.out.println( "                  skipping eval" );
-			return;
-			//			throw new Error();
+			throw new Error();
 		}
 
 		try {
@@ -100,7 +98,6 @@ public abstract class App /*earance*/ implements Cloneable {
 		} finally {
 			alreadyIn = false;
 		}
-
 	}
 
 	private static void computeWithChildren_( AppStore ass, int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
@@ -109,7 +106,7 @@ public abstract class App /*earance*/ implements Cloneable {
 			return;
 		}
 
-		Set<App> /* todo = new LinkedHashSet<>(), */ all = new LinkedHashSet<>();
+		Set<App> all = new LinkedHashSet<>();
 
 		Class k = NetInfo.evaluationOrder.get( stage );
 
@@ -124,16 +121,13 @@ public abstract class App /*earance*/ implements Cloneable {
 				return;
 		}
 
-		//		todo.addAll( done.get( stage ) ); 
 		all.addAll( done.get( stage ) );
 
-		// collect all current children from preivous stages
+		// collect all current children from previous stages
 		for ( int i = 0; i < stage; i++ )
 			for ( App a : done.get( i ) )
 				for ( App n : a.getDown( ass ).valueList() )
 					if ( n.getClass() == k ) {
-						//						if ( n.appMode == AppMode.Net ) 
-						//							todo.add( n );
 
 						all.add( n );
 					}
@@ -149,9 +143,9 @@ public abstract class App /*earance*/ implements Cloneable {
 
 				done.putAll( stage, all, true );
 
-				if ( !all.isEmpty() )
+				if ( !all.isEmpty() ) 
 					all.iterator().next().finishedBatches( new ArrayList<>( all ), ass );
-
+				
 				globalUpdate.run();
 
 				App.computeWithChildren_( ass, stage + 1, done, globalUpdate, pm );
@@ -189,7 +183,8 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 
 	public void finishedBatches( List<App> all, AppStore ass ) {
-		// hook to compute after all batches have run
+		for (App a : all)
+			a.markDirty( ass );
 	}
 
 	public void markDirty(AppStore ac) {

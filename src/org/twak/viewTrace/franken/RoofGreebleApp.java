@@ -158,10 +158,4 @@ public class RoofGreebleApp extends App {
 			}
 		}		
 	}
-    
-    @Override
-    public void finishedBatches( List<App> all, AppStore ac ) {
-//    	for (App a : list)
-//    		((MiniRoof) ((RoofGreebleApp)a).child.hasA).greebles.clear();
-    }
 }

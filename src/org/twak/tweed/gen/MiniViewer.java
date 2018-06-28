@@ -69,7 +69,7 @@ public class MiniViewer {
 		if (range == null)
 			range = new double[] {0, se.length() };
 		
-		minis = new Regularizer().go( toViz, range[0], range[1], animation.getValue() / 100., ac );
+		minis = new Regularizer().debug( toViz, range[0], range[1], animation.getValue() / 100., ac );
 		
 		{
 			int selected = mini.getValue();

@@ -319,6 +319,7 @@ public class JointUI extends JPanel {
 					public void heresTheFile( File f ) throws Throwable {
 						BlockApp editing = jd.root;
 						try {
+							
 							jd = (JointStyle) new XStream().fromXML( f );
 							jd.root = editing;
 							jd.redraw(sa.ass);

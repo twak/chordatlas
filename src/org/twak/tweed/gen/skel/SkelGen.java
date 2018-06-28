@@ -504,7 +504,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void run() {
-				 new SelectedApps( (App) ass.get( BuildingApp.class, sf ), ass, update ).computeAll( null ); 
+				 new SelectedApps( (App) ass.get( BuildingApp.class, sf ), ass, update ).computeTextures( null ); 
 			}
 			
 			@Override

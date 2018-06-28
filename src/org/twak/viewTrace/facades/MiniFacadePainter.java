@@ -22,6 +22,7 @@ import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.ui.ColourPicker;
@@ -200,15 +201,28 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		
 	}
 	
-	private Point2d flip (Point2d in )
+	private static Point2d flip (Point2d in )
 	{
 		return new Point2d( in.x, - in.y );
 	}
-
-	/****
-	 * I can edit methods
-	 */
 	
+
+	public static LoopL<? extends Point2d> yFlip( List<Loop<? extends Point2d>> f ) {
+		
+		LoopL<Point2d> out = new LoopL<>();
+
+		for (Loop<? extends Point2d> loop : f) {
+			
+			Loop<Point2d> lo = new Loop<>();
+			out.add(lo);
+			
+			for (Point2d p : loop)
+				lo.append (flip (p));
+		}
+		
+		return out;
+	}
+
 	MiniFacade mf;
 	@Override
 	public void setObject( Object o ) {
@@ -358,4 +372,5 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		pop.show();
 		
 	}
+
 }
