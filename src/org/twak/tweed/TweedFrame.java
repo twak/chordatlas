@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -42,9 +41,9 @@ import javax.swing.border.EmptyBorder;
 import javax.vecmath.Vector3d;
 
 import org.twak.readTrace.MiniTransform;
-import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;

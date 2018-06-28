@@ -28,6 +28,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
@@ -186,7 +187,7 @@ public class SelectedApps extends ArrayList<App>{
 			
 			
 			if (target == exemplar.getNetInfo()) {
-				j.setBorder( new LineBorder( Color.magenta, 3 ) );
+				j.setBorder( new LineBorder(  Rainbow.rainbow[4], 3 ) );
 			}
 			
 			j.setToolTipText( target.name + (sa == null ? "" : ("(" +sa.size()+")") ) );

@@ -119,7 +119,7 @@ public class RoofTexApp extends App {
 		int resolution = ni.resolution;
 		
 		addCoarseRoofInputs( batch.stream().map( x -> ((RoofTexApp)x).mr ).
-				collect( Collectors.toList() ), p2, resolution, ac );
+				collect( Collectors.toList() ), p2, resolution, ac, false );
 
 		p2.submit( new Job( new JobResult() {
 			
@@ -154,7 +154,7 @@ public class RoofTexApp extends App {
 		} ) );
 	}
 
-	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution, AppStore ac ) {
+	public static void addCoarseRoofInputs( List<MiniRoof> mrb, Pix2Pix p2, int resolution, AppStore ac, boolean greebles ) {
 		
 		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D gL = (Graphics2D) label.getGraphics();
@@ -166,14 +166,14 @@ public class RoofTexApp extends App {
 		
 		for ( MiniRoof toEdit : mrb ) {
 
-			DRectangle bounds = draw (gL, drawTo, toEdit, ac);
+			DRectangle bounds = draw (gL, drawTo, toEdit, ac, greebles);
 			drawEmpty (gE, drawTo, toEdit, bounds);
 			
 			p2.addInput( label, empty, null, toEdit, ac.get(RoofTexApp.class, toEdit).styleZ, null );
 		}
 	}
 	
-	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr, AppStore ac ) {
+	private static DRectangle draw( Graphics2D g, DRectangle drawTo, MiniRoof mr, AppStore ac, boolean greebles ) {
 		
 		
 		DRectangle bounds = new DRectangle(mr.bounds);
@@ -226,14 +226,15 @@ public class RoofTexApp extends App {
 		for (Polygon p : pitches)
 			g.draw( p );
 		
-		
-		g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
-		g.setColor( Color.gray );
-		
-		for (Polygon p : flats) 
-			g.draw( p );
-		for (Polygon p : boundary) 
-			g.draw( p );
+		if ( !greebles ) {
+			g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
+			g.setColor( Color.gray );
+
+			for ( Polygon p : flats )
+				g.draw( p );
+			for ( Polygon p : boundary )
+				g.draw( p );
+		}
 		
 		g.setStroke( new BasicStroke( 2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		

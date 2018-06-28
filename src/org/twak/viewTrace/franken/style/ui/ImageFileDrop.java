@@ -19,6 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import org.twak.utils.Imagez;
+import org.twak.utils.ui.Rainbow;
 import org.twak.utils.ui.SimpleFileChooser;
 
 public class ImageFileDrop extends JComponent {
@@ -37,6 +38,9 @@ public class ImageFileDrop extends JComponent {
 //		setOpaque( true );
 //		setBackground( Color.white );
 //		setForeground( Color.black );
+		
+		empty.setHorizontalAlignment( SwingConstants.CENTER );
+		empty.setForeground( Rainbow.rainbow[4] );
 		
 		MouseAdapter ma = new MouseAdapter() {
 			public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -109,7 +113,7 @@ public class ImageFileDrop extends JComponent {
 	protected void paintComponent( Graphics g ) {
 		super.paintComponent( g );
 		
-		g.setColor( hover ? Color.black : Color.darkGray );
+		g.setColor( hover ? Color.darkGray : Color.black );
 		g.fillRect( 0, 0, getWidth(), getHeight() );
 		
 		if (dropped != null) {
@@ -117,20 +121,21 @@ public class ImageFileDrop extends JComponent {
 		}
 		
 		if (hover) {
-			empty.setText( "drop" );
+			empty.setText( "drop (right click for manual)" );
 //			g.setColor( Color.gray );
 			empty.setSize( getSize() );
 			empty.paintComponents( g );
 		}
 		else if (dropped == null ){
-			empty.setText( "drop style image here" );
-			empty.setForeground( Color.white );
+			empty.setText( "[drop style image]" );
+//			empty.setForeground( Color.white );
 //			g.setColor( Color.black );
 			empty.setSize( getSize() );
 			empty.paintComponents( g );
 		}
 		
-		empty.paintComponents( g );
+		empty.setSize( getSize() );
+		empty.paint( g );
 	}
 	
 	public void rightClick() {}

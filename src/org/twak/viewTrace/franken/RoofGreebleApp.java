@@ -78,7 +78,7 @@ public class RoofGreebleApp extends App {
 			toProcess.add(mr);
 		}
 		
-		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution, ac );
+		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution, ac, true );
 		
 		p2.submit( new Job( new JobResult() {
 			
