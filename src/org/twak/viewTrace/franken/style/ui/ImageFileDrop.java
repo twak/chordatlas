@@ -123,13 +123,14 @@ public class ImageFileDrop extends JComponent {
 			empty.paintComponents( g );
 		}
 		else if (dropped == null ){
-			empty.setText( "style" );
+			empty.setText( "drop style image here" );
 			empty.setForeground( Color.white );
 //			g.setColor( Color.black );
 			empty.setSize( getSize() );
 			empty.paintComponents( g );
 		}
-			
+		
+		empty.paintComponents( g );
 	}
 	
 	public void rightClick() {}

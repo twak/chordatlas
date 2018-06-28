@@ -686,11 +686,10 @@ public class Tweed extends SimpleApplication {
 	
 	public void initFrom( String dataDir ) {
 
-		if (JME != null) {
-			
+		if (JME != null) 
 			assetManager.unregisterLocator( JME, FileLocator.class );
-			deleteScratch();
-		}
+		
+		deleteScratch();
 		
 		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;

@@ -83,14 +83,12 @@ public class MiniRoof {
 				if (circ.radius < 0.1)
 					return;
 
-				DRectangle approx = new DRectangle(worldXY.x - circ.radius, worldXY.y - circ.radius, 2 * circ.radius, 2*circ.radius);
-				
 				for (HalfEdge e : superFace ) {
 					
 					SuperEdge se = (SuperEdge)e;
 					
 					for (FRect fr : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) // avoid dormer windows
-						for (Point2d a : approx.points())
+						for (Point2d a : circ.toRect(). points())
 							if ( Loopz.inside( a,  appCache.get(PanesLabelApp.class, fr).coveringRoof ) )
 								return;
 				}

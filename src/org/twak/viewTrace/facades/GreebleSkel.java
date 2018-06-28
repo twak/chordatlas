@@ -103,8 +103,6 @@ public class GreebleSkel {
 		createMesh( output );
 		return node;
 	}
-	
-	
 
 	private void createMesh( Output output ) {
 		
@@ -266,28 +264,27 @@ public class GreebleSkel {
 			}
 			
 			
-			if (greebleGrid != null) {
-//				edges( output, roofColor );
-			// output per-material objects
-			greebleGrid.attachAll(node, chain, output, new ClickMe() {
-				@Override
-				public void clicked( Object data ) {
+			if ( greebleGrid != null ) {
+				edges( output, roofColor );
 
-					try {
-						SwingUtilities.invokeAndWait( new Runnable() {
+				// output per-material objects
+				greebleGrid.attachAll( node, chain, output, new ClickMe() {
+					@Override
+					public void clicked( Object data ) {
 
-							@Override
-							public void run() {
-								selected( output, node, findSuperEdge( output, chain ),
-										data instanceof Spatial ? (((Object[])((Spatial) data).getUserData( Appearance ) ) [0])  
-												: null);
-							}
-						} );
-					} catch ( Throwable th ) {
-						th.printStackTrace();
+						try {
+							SwingUtilities.invokeAndWait( new Runnable() {
+
+								@Override
+								public void run() {
+									selected( output, node, findSuperEdge( output, chain ), data instanceof Spatial ? ( ( (Object[]) ( (Spatial) data ).getUserData( Appearance ) )[ 0 ] ) : null );
+								}
+							} );
+						} catch ( Throwable th ) {
+							th.printStackTrace();
+						}
 					}
-				}
-			});
+				} );
 			}
 		}
 	}
@@ -758,10 +755,9 @@ public class GreebleSkel {
 				if ( ra.texture == null)
 					greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
 				else
-					continue;
-//					GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, mr.app.textureRect , to3d,
-//							greebleGrid.mbs.getTexture( "velux_"+mr.app.texture+"__"+r.hashCode(), mr.app.texture, mr ),
-//							-0.1, 0.05 );
+					GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, ra.textureRect , to3d,
+							greebleGrid.mbs.getTexture( "velux_"+ra.texture+"__"+r.hashCode(), ra.texture, miniroof ),
+							-0.1, 0.05 );
 				break;
 			}
 		}
@@ -783,9 +779,7 @@ public class GreebleSkel {
 				mmb = greebleGrid.mbs.getTexture(TILE_TEXTURED, TILE_JPG, miniroof );
 				break;
 			case Net:
-//				mmb = greebleGrid.mbs.getTexture( TILE_TEXTURED+"_" + a.texture, a.texture, roofApp );
 				return;
-//				break;
 		}
 		
 		GreebleEdge.roowWallGreeble( output, 

@@ -12,14 +12,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
@@ -27,11 +25,13 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
+import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.PostProcessState;
@@ -51,7 +51,9 @@ public class FacadeTexApp extends App {
 	
 	private static Color defaultGFColor = new Color (188,156,255);
 	
-	public Color color, groundFloorColor = defaultGFColor;
+	public Color 
+		color            =  Colourz.to4 ( GreebleSkel.BLANK_WALL ),
+		groundFloorColor = defaultGFColor;
 	public PostProcessState postState = null;
 
 
@@ -61,7 +63,8 @@ public class FacadeTexApp extends App {
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );
 		this.ha = mf;
-		this.color = mf.wallColor;
+		if (mf.wallColor != null)
+			this.color = mf.wallColor;
 	}
 
 	public FacadeTexApp( FacadeTexApp fta ) {

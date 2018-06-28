@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
+import org.twak.tweed.gen.skel.SiteplanDesigner;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
@@ -76,6 +77,10 @@ public class BuildingApp extends App {
 				globalUpdate.run();
 			}
 		});
+		
+		JButton siteplan = new JButton( "edit plan/profile" );
+		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, apps.ass.get ( BlockApp.class, parent ).skelGen ) );
+		out.add(siteplan);
 		
 		return out;
 	}
