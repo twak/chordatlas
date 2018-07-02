@@ -40,20 +40,23 @@ public class MultiModalEditor extends JPanel {
 
 	NetExamples egs;
 	private MultiModal mm;
-	NetInfo exemplar;
+	Class target;
 	JFrame frame;
 	JPanel gList;
 	Runnable globalUpdate ;
 	
-	public MultiModalEditor( MultiModal mm, NetInfo exemplar, Runnable globalUpdate, AppStore ac ) {
+	public MultiModalEditor( MultiModal mm, Class target, Runnable globalUpdate, AppStore ac ) {
 		
 		this.mm = mm;
-		this.exemplar = exemplar;
+		this.target = target;
 		this.globalUpdate = globalUpdate;
 		
 		setLayout( new BorderLayout() );
-		egs = new NetExamples( mm, 10, 6, exemplar, 
-				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + exemplar.name), ac );
+		
+		NetInfo ni = NetInfo.index.get(target);
+		
+		egs = new NetExamples( mm, 10, 6, ni, 
+				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + ni.name), ac );
 		
 		JPanel controls = createControls(() -> egs.changed());
 		
@@ -146,7 +149,7 @@ public class MultiModalEditor extends JPanel {
 			gList.revalidate();
 		}
 		else {
-			new Pix2Pix( exemplar ).encode( meanImage, w.ss.mean, new Runnable() {
+			new Pix2Pix( NetInfo.get( target ) ).encode( meanImage, w.ss.mean, new Runnable() {
 				@Override
 				public void run() {
 					GaussWrapper c = new GaussWrapper( w, localUpdate );

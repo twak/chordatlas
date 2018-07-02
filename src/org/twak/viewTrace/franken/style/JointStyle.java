@@ -63,11 +63,12 @@ public class JointStyle implements StyleSource {
 		NetProperties ns;
 		public MultiModal dist;
 		public Class bakeWith;
+		public transient Set<Class> bake = new HashSet<>();
 		
 		public PerJoint (NetProperties ns) {
 			this.ns = ns;
 			this.bakeWith = ns.klass == BlockApp.class ? ns.klass : BuildingApp.class; // shouldn't bake block anyway
-			this.dist = new MultiModal( NetInfo.get( ns.klass ) );
+			this.dist = new MultiModal( ns.getClass() );
 			this.dist.newMode();
 		}
 	}
@@ -167,26 +168,33 @@ public class JointStyle implements StyleSource {
 		return true;
 	}
 	
-	public void redraw(AppStore ac) {
+	public void redraw(AppStore ass) {
 		
-		root.markDirty(ac);
+		for (Joint j : joints) {
+			
+			for (PerJoint pj : j.appInfo.values()) 
+				pj.bake.clear();
+			
+			for (PerJoint pj : j.appInfo.values())
+				if (pj.bakeWith != null) 
+					j.appInfo.get( pj.bakeWith ).bake.add( pj.ns.klass );
+		}
 		
-//		Random randy = new Random(0xDEADBEEF);//System.nanoTime());
+		root.markGeometryDirty(ass);
+		
 		Random randy = new Random(System.nanoTime());
 
 		root.styleSource = this; 
 		
-		for ( App building : root.getDown(ac).valueList() )  {
+		for ( App building_ : root.getDown(ass).valueList() )  {
 			
-			MultiMap<App, App> bakeWith = new MultiMap<>();
+			BuildingApp building = ((BuildingApp)building_);
 			
 			building.lastJoint = drawJoint( randy );
 			
-			findBake( 1, new MultiMap<>(1, building), building.lastJoint, bakeWith, ac );
+			building.updateDormers( randy );
 			
-			((BuildingApp)building).updateDormers( randy.nextDouble() > 0.25, ac );
-			
-			redraw( 1, new MultiMap<>( 1, building), new HashSet<>(), building.lastJoint, randy, bakeWith, ac );
+			redraw( 1, new MultiMap<>( 1, building), building.lastJoint, randy, ass );
 		}
 	}
 
@@ -219,41 +227,45 @@ public class JointStyle implements StyleSource {
 		return j;
 	}
 	
-	public void findBake( int stage,  MultiMap<Integer, App> todo, 
-			Joint j, MultiMap<App, App> bakeWith, AppStore ac ) {
-
-		if (stage >= NetInfo.evaluationOrder.size())
+	public void process (App app, Random random, AppStore ass) {
+		
+		app.bakeWith.clear();
+		
+		setMode( app );
+		app.styleSource = this;
+		
+		if (app instanceof BlockApp)
 			return;
-
-		for ( App a : todo.get( stage ) ) {
 			
-			PerJoint ai = j.appInfo.get( a.getClass() );
-			Class bw = ai.bakeWith;
-			
-			if ( bw != a.getClass() ) {
-
-				App p = a;
-				
-				while (p != null && p.getClass() != ai.bakeWith) 
-					p = p.getUp(ac);
-				
-				if (p.getClass() == ai.bakeWith)
-					bakeWith.put( p, a );
-				else
-					System.err.println("failed to find bake");
-			}
-			
-			setMode( a  );
-			
-			for (App next : a.getDown(ac).valueList())
-				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
+		Joint j = findParentOfClass (app, BuildingApp.class, ass).lastJoint;
+		
+		PerJoint ai = j.appInfo.get( app.getClass() );
+		Class bw = ai.bakeWith;
+		
+		if (bw != null && bw != app.getClass() ) {
+			App a = findParentOfClass (app, bw, ass);
+			app.styleZ = a.bakeWith.get(app.getClass());
+			if (app.styleZ == null)
+				throw new Error();
 		}
-
-		findBake( stage+1, todo, j, bakeWith, ac );
+		else
+			app.styleZ = ai.dist.draw( random, app, ass );
+		
+		for (Class c : ai.bake) {
+			app.bakeWith.put( c, j.appInfo.get( c ).dist.draw( random, null, ass ) );
+		}
+		
+	}
+	
+	public <E extends App> E findParentOfClass (App app, Class<? extends E> klass, AppStore ass) {
+		if (app.getClass() == klass)
+			return(E) app;
+		
+		return findParentOfClass( app.getUp( ass ), klass, ass);
 	}
 
-	private void redraw( int stage,  MultiMap<Integer, App> todo, Set<App> drawn, Joint j,
-			Random random, MultiMap<App, App> bakeWith, AppStore ac ) {
+	private void redraw( int stage,  MultiMap<Integer, App> todo, Joint j,
+			Random random, AppStore ass ) {
 
 		
 		if (stage >= NetInfo.evaluationOrder.size())
@@ -261,32 +273,13 @@ public class JointStyle implements StyleSource {
 		
 		for ( App a : todo.get( stage ) ) {
 			
-			for (App next : a.getDown(ac).valueList())
+			process( a, random, ass );
+			
+			for (App next : a.getDown(ass).valueList())
 				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
-			
-			if (drawn.contains ( a ) )
-				continue; // pre-baked
-			
-			drawn.add( a );
-			
-			a.styleZ = j.appInfo.get( a.getClass() ).dist.draw( random, a, ac );
-			
-			MultiMap<Class, App> bakeTogether = new MultiMap<>();
-			for (App b : bakeWith.get( a ))
-				bakeTogether.put( b.getClass(), b );
-			
-			for (Class c : bakeTogether.keySet()) {
-				double[] val = j.appInfo.get( c ).dist.draw( random, null, ac );
-				for (App b : bakeTogether.get( c ) ) {
-					b.styleZ = val;
-					drawn.add(b);
-				}
-			}
-			
-			
 		}
 
-		redraw( stage + 1, todo,  drawn, j, random, bakeWith, ac );
+		redraw( stage + 1, todo, j, random,  ass );
 	}
 
 	private Joint drawJoint( Random random ) {
@@ -304,17 +297,10 @@ public class JointStyle implements StyleSource {
 	}
 
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app, AppStore ass ) {
 		
-		if (app.styleZ == null) { // hack: windiow has just been created
-
-			App building = app;
-			while (! ( building instanceof BuildingApp) )
-				building = building.getUp(ac);
-			
-			Joint j = building.lastJoint;
-			
-			app.styleZ = j.appInfo.get( app.getClass() ).dist.draw( random, app, ac );
+		if (app.styleZ == null) { // app wasn't redraw'd earlier
+			process( app, random, ass );
 		}
 			
 		return app.styleZ; // do nothing

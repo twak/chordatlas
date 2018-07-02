@@ -131,12 +131,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 		super( "skel", tweed );
 
 		setRender( mesh );
+		
 		this.blockGen = blockGen;
-
-		ProgressMonitor m = new ProgressMonitor( tweed.frame(), "Optimizing", "", 0, 100 );
-
-		m.setProgress( 1 );
-		m.setMillisToPopup( 0 );
 	}
 
 	private void optimize( ProgressMonitor m ) {
@@ -401,21 +397,21 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 
 		if (sft_ != null)
-			ass.get ( BuildingApp.class, sft_ ).isDirty = true; // todo: dirty hack! can remove sft from this interface
+			ass.get ( BuildingApp.class, sft_ ).markGeometryDirty(ass);
 
 		for ( HalfFace hf : block ) {
 
 			SuperFace sf = (SuperFace) hf;
 			BuildingApp sfa = ass.get ( BuildingApp.class, sf );
 			
-			if ( sfa.isDirty ) {
+			if ( sfa.isGeometryDirty ) {
 
 				for ( HalfEdge he : sf ) {
 					SuperEdge se = (SuperEdge) he;
 					ensureMF( sf, se );
 				}
 
-				sfa.isDirty = false;
+				sfa.isGeometryDirty = false;
 
 				removeGeometryFor( sf );
 
@@ -717,54 +713,48 @@ public class SkelGen extends Gen implements IDumpObjs {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
 
-						Map<HalfFace, PlanSkeleton> store = new HashMap<>();
-						for ( HalfFace f2 : SkelGen.this.block )
-							store.put( f2, ( (SuperFace) f2 ).skel );
-
+						
+						HalfMesh2 nBlock = new HalfMesh2();
+						
 						for ( HalfFace f2 : SkelGen.this.block ) {
-
+							
 							SuperFace sf = (SuperFace) f2;
-							sf.heights = null;
-							sf.maxProfHeights = null;
-							sf.colors = new ArrayList<>();
+							
+							List<Bar> bars = new ArrayList();
+							
+							for ( Bar b : sf.skel.plan.points.eIterator() ) 
+								bars.add(b);
 
-							for ( Bar b : sf.skel.plan.points.eIterator() ) {
-								SETag set = (SETag) GreebleHelper.getTag( b.tags, SETag.class );
-								if ( set != null )
-									set.se.prof = toProf( sf.skel.plan.profiles.get( b ) );
+							Collections.reverse( bars );
+							
+							HalfMesh2.Builder builder = new HalfMesh2.Builder(SuperEdge.class, SuperFace.class);
+							builder.mesh = nBlock;
+							for ( Bar b : bars ) 
+								builder.newPoint( b.start );
+							
+							SuperFace sf3 = (SuperFace) builder.newFace();
+
+							sf3.height = sf.height;
+							sf3.maxProfHeights = new ArrayList<>(sf.maxProfHeights);
+							
+							HalfEdge h3 = sf3.e;
+							
+							
+							for ( Bar b : bars ) {
+								
+								SuperEdge s3 = (SuperEdge) h3;
+								s3.prof = toProf (sf.skel.plan.profiles.get(b));
+								
+								h3 = h3.next;
 							}
-
-							sf.skel = null;
-
-							for ( HalfEdge e : f2 ) {
-								SuperEdge se = (SuperEdge) e;
-
-								//								se.prof = se. 
-
-								if ( se.profLine != null )
-									se.profLine.mega = null;
-
-								if ( e.over != null && ( (SuperEdge) e.over ).profLine != null )
-									( (SuperEdge) e.over ).profLine.mega = null;
-							}
-
 						}
 
-						blockGen = null;
-
-						new XStream().toXML( SkelGen.this, new FileOutputStream( f ) );
-
-						for ( HalfFace f2 : SkelGen.this.block )
-							( (SuperFace) f2 ).skel = store.get( f2 );
+						new XStream().toXML( new SkelGen( nBlock, null, null ), new FileOutputStream( f ) );
 					}
 				};
 			}
 		} );
 		ui.add( save );
-
-		//		JButton tf = new JButton( "texture all facades" );
-		//		tf.addActionListener( l -> textureAll() );
-		//		ui.add( tf );
 
 		return ui;
 	}
@@ -806,77 +796,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 		} else
 			se.toEdit.height = sf.height;
 	}
-
-//	private void cgaFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
-//
-//		ensureMF( sf, se );
-//
-//		
-//		appFact.clear(FacadeTexApp.class, se.toEdit);
-//		appFact.clear(FacadeLabelApp.class, se.toEdit);
-//		
-////		se.toEdit.appLabel = new FacadeLabelApp( se.toEdit );
-////		se.toEdit.app = new FacadeTexApp( se.toEdit );
-//
-//		se.toEdit.featureGen = new CGAMini( se.toEdit );
-//		se.toEdit.featureGen.update();
-//
-//		patchWallTag( skel, se, se.toEdit );
-//
-//		calculateOnJmeThread();
-//	}
-//
-//	private void cgaAll() {
-//
-//		for ( HalfFace hf : block )
-//			for ( HalfEdge he : hf ) {
-//				SuperEdge se = (SuperEdge) he;
-//
-//				ensureMF( (SuperFace) hf, se );
-//				se.toEdit.featureGen = new CGAMini( se.toEdit );
-//				se.toEdit.featureGen.update();
-//			}
-//
-//		calculateOnJmeThread();
-//	}
-//
-	//	private void textureAll() {
-	//		
-	//		List<MiniFacade> mfs = new ArrayList<>();
-	//		
-	//		double[] style = new double[ Pix2Pix.LATENT_SIZE ];
-	//		
-	//		for (int i = 0; i < style.length; i++)
-	//			style[i] = Math.random() - 0.5;
-	//		
-	//		for (HalfFace hf : block )
-	//			for (HalfEdge he : hf) {
-	//				SuperEdge se = (SuperEdge) he;
-	//				
-	//				ensureMF((SuperFace)hf, se);
-	//				mfs.add( se.toEdit );
-	//				se.toEdit.featureGen.facadeStyle = style;
-	//				se.toEdit.featureGen.update();
-	//			}
-	//		new Thread( new Runnable() {
-	//			@Override
-	//			public void run() {
-	//				new Pix2Pix().facade( mfs, new double[8], new Runnable() {
-	//					public void run() {
-	//						tweed.enqueue( new Runnable() {
-	//							@Override
-	//							public void run() {
-	//								for (MiniFacade mf : mfs)
-	//									mf.featureGen = new FeatureGenerator( mf.featureGen ); /* remove procedural facade...it overwrites features */
-	//								calculateOnJmeThread();
-	//							}
-	//						} );
-	//					}
-	//				} );
-	//			}
-	//		} ).start();
-	//		
-	//	}
 
 	public static void patchWallTag( PlanSkeleton skel, SuperEdge se, MiniFacade mf ) {
 

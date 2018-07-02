@@ -28,19 +28,19 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 
 	public double[] mean;
 	double std;
-	NetInfo ni;
 	File meanImage;
+	Class target;
 
-	public GaussStyle( NetInfo ni ) {
-		this.mean = new double[ni.sizeZ];
+	public GaussStyle( Class target ) {
+		this.mean = new double[ NetInfo.get(target).sizeZ];
 		this.std = 0;
-		this.ni = ni;
+		this.target = target;
 	}
 
 	
 	@Override
 	public StyleSource copy() {
-		GaussStyle out = new GaussStyle( ni );
+		GaussStyle out = new GaussStyle( target );
 		out.mean = Arrays.copyOf( mean, mean.length );
 		out.std = std;
 		out.meanImage = meanImage;
@@ -85,7 +85,7 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 		//		go.addActionListener( e -> update.run() );
 		//		out.add( go );
 
-		out.add( new UIVector( mean, this, ni, false, update ) );
+		out.add( new UIVector( mean, this, target, false, update ) );
 
 		return out;
 	}

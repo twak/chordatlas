@@ -1,7 +1,7 @@
 package org.twak.viewTrace.franken;
 
-import java.awt.Graphics;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -13,18 +13,23 @@ import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SiteplanDesigner;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
-import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.franken.style.JointStyle.Joint;
 
 public class BuildingApp extends App {
 
 	public SkelGen parent;
-	public boolean createDormers = Math.random() < 0.5;
+	public double probDormer = 0.5;
+	public boolean createDormers;
 	public String chimneyTexture;
 	public SuperFace superFace;
-	public boolean isDirty;
+	public boolean isGeometryDirty;
+	
+	// if a jointStyle is in use, the joint assigned to this hierarchy
+	public Joint lastJoint;
 	
 	public BuildingApp( SuperFace superFace ) {
 		super( );
@@ -71,13 +76,12 @@ public class BuildingApp extends App {
 		
 		addRemoveButton (globalUpdate, out);
 		
-		out.add (new AutoCheckbox( this, "createDormers", "dormers" ) {
-			@Override
-			public void updated( boolean selected ) {
-				updateDormers(selected, apps.ass);
+		out.add(new AutoDoubleSlider( this, "probDormer", "p (dormer)", 0,1 ) {
+			public void updated(double value) {
+				updateDormers( new Random() );
 				globalUpdate.run();
-			}
-		});
+			};
+		} );
 		
 		JButton siteplan = new JButton( "edit plan/profile" );
 		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, parent ) );
@@ -95,13 +99,13 @@ public class BuildingApp extends App {
 		out.add( remove );
 	}
 
-	public void updateDormers(boolean dormers, AppStore ac) {
-		createDormers = dormers;
+	public void updateDormers(Random randy) {
+		 createDormers = randy.nextDouble() < probDormer;
 	}
 	
 	@Override
-	public void markDirty( AppStore ac ) {
-		this.isDirty = true;
-		super.markDirty( ac );
+	public void markGeometryDirty( AppStore ac ) {
+		this.isGeometryDirty = true;
+		super.markGeometryDirty( ac );
 	}
 }

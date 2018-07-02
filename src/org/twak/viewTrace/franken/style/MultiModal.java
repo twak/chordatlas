@@ -35,16 +35,16 @@ public class MultiModal implements StyleSource {
 	
 	public double totalProb;
 	
-	NetInfo exemplar;
+	Class target;
 	
-	public MultiModal(NetInfo ex) {
-		this.exemplar = ex;
+	public MultiModal(Class target) {
+		this.target = target;
 	}
 
 
 	@Override
 	public StyleSource copy() {
-		MultiModal out = new MultiModal( exemplar );
+		MultiModal out = new MultiModal( target );
 		
 		for (Mode m : modes) 
 			out.modes.add(m.copy());
@@ -71,7 +71,7 @@ public class MultiModal implements StyleSource {
 			if (d < w.accumProb)
 				return w.ss.draw( random, app, ac );
 
-		return new double[exemplar.sizeZ];
+		return new double[ NetInfo.index.get(target).sizeZ];
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class MultiModal implements StyleSource {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );
-		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update, sa.ass ).openFrame() );
+		but.addActionListener( e -> new MultiModalEditor( this, target, update, sa.ass ).openFrame() );
 		out.add( but );
 		
 		return out;
@@ -88,7 +88,7 @@ public class MultiModal implements StyleSource {
 	public Mode newMode() {
 		
 		Mode out = new Mode();
-		out.ss = new GaussStyle( exemplar );
+		out.ss = new GaussStyle( target );
 		modes.add( out );
 		
 		updateModes();

@@ -20,17 +20,17 @@ import org.twak.viewTrace.franken.style.ui.UIVector.MeanImageProvider;
 public class ConstantStyle implements StyleSource, MeanImageProvider {
 	
 	double[] mean;
-	NetInfo app;
+	Class target;
 	File meanImage;
 	
-	public ConstantStyle(NetInfo app) {
-		this.mean = new double[app.sizeZ];
-		this.app = app;
+	public ConstantStyle(Class target) {
+		NetInfo ni = NetInfo.index.get(target);
+		this.mean = new double[ni.sizeZ];
 	}
 
 	@Override
 	public StyleSource copy() {
-		ConstantStyle out = new ConstantStyle( app );
+		ConstantStyle out = new ConstantStyle( target );
 		out.meanImage = meanImage;
 		out.mean = Arrays.copyOf(mean, mean.length);
 		return out;
@@ -47,7 +47,7 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 
 		JPanel out = new JPanel(new ListDownLayout() );
 		
-		out.add( new UIVector (mean, this, app, true, update ) );
+		out.add( new UIVector (mean, this, target, true, update ) );
 		
 		return out;
 	}

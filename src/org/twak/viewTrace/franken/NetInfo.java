@@ -16,6 +16,7 @@ public class NetInfo {
 	public int resolution;
 	public String name;
 	public Color emptyColour;
+	
 	public BufferedImage icon;
 	
 	public NetInfo( String name, int sizeZ, int resolution, Color empty, String icon ) {

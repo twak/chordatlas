@@ -13,14 +13,14 @@ import org.twak.viewTrace.franken.Pix2Pix;
 
 public class UIVector extends JPanel {
 
-	NetInfo netInfo;
 	double[] vector;
 	JToggleButton method ;
 	MeanImageProvider imageFile;
+	Class target;
 	
-	public UIVector( double[] vector, MeanImageProvider imageFile, NetInfo netInfo, boolean showManual, Runnable update ) {
-		
-		this.netInfo = netInfo;
+	public UIVector( double[] vector, MeanImageProvider imageFile, Class target, boolean showManual, Runnable update ) {
+
+		this.target = target;
 		this.vector = vector;
 		this.imageFile = imageFile;
 		
@@ -53,7 +53,7 @@ public class UIVector extends JPanel {
 				
 				public BufferedImage process( File f ) {
 					imageFile.setMeanImage( f );
-					return new Pix2Pix(netInfo).encode( f, vector, update );
+					return new Pix2Pix( NetInfo.index.get( target) ).encode( f, vector, update );
 				};
 				
 				@Override

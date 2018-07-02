@@ -104,7 +104,7 @@ public class JointUI extends JPanel {
 		};
 		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate, sa.ass ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, ns.klass, modalUpdate, sa.ass ), 
 				BorderLayout.CENTER );
 		
 		modalPanel.revalidate();

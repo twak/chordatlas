@@ -90,7 +90,7 @@ public class BlockApp extends App {
 
 				private void setGauss( List<App> hashSet ) {
 					for (App a : hashSet) { 
-						a.styleSource = new GaussStyle( a.getNetInfo() );
+						a.styleSource = new GaussStyle( BlockApp.this.getClass() );
 						a.appMode = AppMode.Net;
 						setGauss (a.getDown( sa.ass ).valueList());
 					}

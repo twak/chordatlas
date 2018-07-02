@@ -267,10 +267,10 @@ public class SelectedApps extends ArrayList<App>{
 	public void markDirty() {
 		if (exemplar instanceof BlockApp)
 			for (App building : exemplar.getDown(ass).valueList())
-				((BuildingApp)building).isDirty = true;
+				((BuildingApp)building).isGeometryDirty = true;
 		else
 			for (App a : SelectedApps.this)
-				a.markDirty(ass);
+				a.markGeometryDirty(ass);
 	}
 
 	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {

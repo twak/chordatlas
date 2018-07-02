@@ -2,8 +2,10 @@ package org.twak.viewTrace.franken;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -37,7 +39,9 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	String name;
 	
-	public Joint lastJoint;
+	
+	// contains latent variables for children (who are created during tree evluation). 
+	public transient Map<Class<? extends App>, double[]> bakeWith = new HashMap<>();
 	
 	public App( App a ) {
 		this.appMode = a.appMode;
@@ -52,7 +56,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		
 		this.name = ni.name;
 		this.styleZ = new double[ni.sizeZ];
-		this.styleSource = new GaussStyle(NetInfo.get(this));
+		this.styleSource = new GaussStyle(this.getClass());
 	}
 
 	public NetInfo getNetInfo() {
@@ -184,13 +188,13 @@ public abstract class App /*earance*/ implements Cloneable {
 
 	public void finishedBatches( List<App> all, AppStore ass ) {
 		for (App a : all)
-			a.markDirty( ass );
+			a.markGeometryDirty( ass );
 	}
 
-	public void markDirty(AppStore ac) {
+	public void markGeometryDirty(AppStore ac) {
 		App up = getUp(ac);
 		if (up != null)
-			up.markDirty(ac);
+			up.markGeometryDirty(ac);
 	}
 	
 	public String zAsString() {
