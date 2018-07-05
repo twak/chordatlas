@@ -51,7 +51,6 @@ public class NormSpecGen {
 
 		double middle = colors.maxI() / 256.;
 		double specThreshold = colors.getAccumulative( 0.95 ) / 256.;
-
 		
 		double[][] octaves = new double[][] {{1, 0.5}, {3, 0.5}};//, {0.5, 5} };
 		int[] t1 = new int[3], t2 = new int[3];
