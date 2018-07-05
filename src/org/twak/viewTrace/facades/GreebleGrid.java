@@ -313,7 +313,7 @@ public class GreebleGrid {
 			to3d.invert();
 		}
 		
-		FRect w = new FRect ( l.original );
+		FRect w = new FRect ( l.original, l.original.panesLabelApp, l.original.panesTexApp );
 		
 		
 		PanesLabelApp wa = w.panesLabelApp;

@@ -322,7 +322,6 @@ public class PanesTexApp extends App {
 							PanesLabelApp pla = frect.panesLabelApp;
 							
 							pla.texture = dest;
-//							meta.pta.textureUVs = TextureUVs.Square;
 							pla.textureUVs = TextureUVs.Square;
 							
 							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
@@ -330,15 +329,6 @@ public class PanesTexApp extends App {
 							d.y = ni.resolution - d.y - d.height;
 							
 							BufferedImage[] toPatch = facadesImages.get(mf);
-							
-//							if (mf.postState != null) 
-//							for (Point2d p : frect.points()) { 
-//								if ( Loopz.inside( p, mf.postState.occluders) )
-//									continue e;
-//								if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.wallFaces) ) || 
-//										 Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.roofFaces) ) ) )
-//									continue e;
-//							}
 							
 							if (toPatch == null)
 								continue;

@@ -54,16 +54,18 @@ public class FRect extends DRectangle implements ICanEdit {
 	}
 	
 	AOuter outer;
-	int xi, yi; // grid coords
+	int xi, yi; 
 	int[] gridCoords;
-	
-//	public FRect( FRect o ) {
-//		this (o, false);
-//	}
 	
 	public FRect( FRect o ) {
 		super(o);
 		
+		init( o );
+		initApps();
+	}
+
+
+	private void init( FRect o ) {
 		f = o.f;
 		id = o.id;
 		
@@ -75,16 +77,17 @@ public class FRect extends DRectangle implements ICanEdit {
 		gridCoords = o.gridCoords == null ? null : Arrays.copyOf( o.gridCoords, o.gridCoords.length );
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
-		
-//		if (duplicateApp) {
-//			app =   (PanesLabelApp ) o.app.copy();
-//			app.hasA = this;
-//		}
-//		else
-//			app = o.app;
-		
 		this.mf = o.mf;
-		initApps();
+	}
+	
+
+	public FRect( FRect o, PanesLabelApp pla, PanesTexApp pta ) {
+		super(o);
+		
+		init( o );
+		
+		this.panesLabelApp = pla;
+		this.panesTexApp = pta;
 	}
 	
 	public FRect(MiniFacade mf) {
@@ -110,8 +113,11 @@ public class FRect extends DRectangle implements ICanEdit {
 		super (x,y,w,h);
 		this.f = feature;
 		this.mf = mf;
+		
+		initApps();
 	}
 	
+
 	private void initApps() {
 		panesLabelApp = new PanesLabelApp( this );
 		panesTexApp   = new PanesTexApp  ( this );

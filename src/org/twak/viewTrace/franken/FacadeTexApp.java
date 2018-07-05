@@ -97,8 +97,6 @@ public class FacadeTexApp extends App {
 		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
 			if (r.panesLabelApp.renderedOnFacade)
 				out.put( "window", r.panesLabelApp );
-
-		
 		
 		out.put( "super", mf.facadeSuperApp );
 		out.put( "greeble", mf.facadeGreebleApp ); 

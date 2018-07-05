@@ -200,6 +200,8 @@ public class PanesLabelApp extends App {
 							meta.app.textureUVs = TextureUVs.Zero_One;
 							meta.app.texture = meta.app.label = dest;
 						}
+						else
+							System.out.println("poot");
 					}
 					
 				} catch (Throwable th) {
