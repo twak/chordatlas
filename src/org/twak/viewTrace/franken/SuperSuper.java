@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 
 import org.twak.camp.Tag;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
@@ -27,7 +26,7 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public abstract class SuperSuper <A> extends App {
+public abstract class SuperSuper <A extends HasSuper> extends App {
 
 	public double scale = 120;
 	
@@ -40,10 +39,10 @@ public abstract class SuperSuper <A> extends App {
 	}
 
 	@Override
-	public abstract App getUp(AppStore ac);
+	public abstract App getUp();
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
 	}
 
@@ -51,9 +50,9 @@ public abstract class SuperSuper <A> extends App {
 	public abstract App copy();
 
 	// add to the todo list; remember to pad coarse by overlap in all directions
-	public abstract void drawCoarse( MultiMap<A, FacState> todo, AppStore ac ) throws IOException;
+	public abstract void drawCoarse( MultiMap<A, FacState> todo ) throws IOException;
 	
-	public abstract void setTexture( FacState<A> state, BufferedImage maps, AppStore ac );
+	public abstract void setTexture( FacState<A> state, BufferedImage maps );
 	
 	
 	@Override
@@ -77,7 +76,7 @@ public abstract class SuperSuper <A> extends App {
 	
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		if ( appMode != AppMode.Net ) {
 			whenDone.run();
@@ -91,18 +90,18 @@ public abstract class SuperSuper <A> extends App {
 			SuperSuper fs = (SuperSuper ) a;
 			
 			try {
-				fs.drawCoarse( todo, ac );
+				fs.drawCoarse( todo );
 				
 			} catch ( Throwable e ) {
 				e.printStackTrace();
 			}
 		}
 		
-		facadeContinue (todo, whenDone, ac );
+		facadeContinue (todo, whenDone );
 	}
 
 	
-	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone, AppStore ac ) {
+	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
@@ -135,7 +134,7 @@ public abstract class SuperSuper <A> extends App {
 						
 						ts.coarse = toProcess;
 						
-						SuperSuper ss = ac.get(this.getClass(), a);
+						SuperSuper ss = a.getSuper();
 						
 						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
 						
@@ -242,12 +241,12 @@ public abstract class SuperSuper <A> extends App {
 										state.bigFine.getWidth() - overlap, state.bigFine.getHeight() - overlap, null );
 							}
 							
-							ac.get(SuperSuper.this.getClass(), mf).setTexture( state, cropped, ac );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
+							mf.getSuper().setTexture( state, cropped );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
 
 						}
 					}
 
-					facadeContinue( nextTime, whenDone, ac );
+					facadeContinue( nextTime, whenDone );
 				}
 
 			} ) );

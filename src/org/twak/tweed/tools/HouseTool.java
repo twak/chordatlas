@@ -117,7 +117,7 @@ public class HouseTool extends Tool {
 		
 		for (HalfFace hf : mesh)
 		for (HalfEdge he : hf) {
-			FacadeTexApp mfa = sg.ass.get( FacadeTexApp.class, ((SuperEdge)he).toEdit );
+			FacadeTexApp mfa =  ((SuperEdge)he).toEdit.facadeTexApp;
 
 			mfa.appMode = AppMode.Manual;//"tex.jpg";
 		}

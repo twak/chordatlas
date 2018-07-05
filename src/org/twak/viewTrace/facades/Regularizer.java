@@ -21,10 +21,12 @@ import javax.vecmath.Vector2d;
 
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Cache2;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.DumbCluster1D.Cluster;
+import org.twak.utils.DumbCluster1DImpl;
+import org.twak.utils.Mathz;
+import org.twak.utils.Pair;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.CountThings;
 import org.twak.utils.collections.MapMapList;
@@ -34,11 +36,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.streams.InAxDouble;
 import org.twak.utils.ui.Colourz;
-import org.twak.utils.DumbCluster1DImpl;
-import org.twak.utils.Mathz;
-import org.twak.utils.Pair;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class Regularizer {
 

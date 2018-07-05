@@ -36,7 +36,6 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.CompareGens;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.BlockGen;
 import org.twak.tweed.gen.Gen;
@@ -60,6 +59,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.SimpleFileChooser;
+import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleGrid;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -69,9 +69,6 @@ import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
-import org.twak.viewTrace.franken.FacadeLabelApp;
-import org.twak.viewTrace.franken.FacadeTexApp;
-import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.math.Quaternion;
@@ -93,7 +90,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 
 	transient Cache<SuperFace, Rendered> geometry = new Cach<>( sf -> new Rendered() );
 
-	public AppStore ass = new AppStore();
+	public BlockApp blockApp = new BlockApp(this);
+
 	
 	static {
 		PlanSkeleton.TAGS = new String[][] { { "org.twak.tweed.gen.skel.WallTag", "wall" }, { "org.twak.tweed.gen.skel.RoofTag", "roof" }, };
@@ -146,7 +144,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		this.block = mesh;
 
 		for ( HalfFace f : block )
-			ass.get (BuildingApp.class, f ).parent = this;
+			((SuperFace)f).buildingApp.parent = this;
 	}
 
 	@Override
@@ -233,7 +231,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		if ( sf.mr == null )
 			sf.mr = new MiniRoof( sf ); // deserialization
 
-		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4(  ass.get( RoofTexApp.class, sf.mr ).color ) ) );
+		sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4(  sf.mr.roofTexApp.color ) ) );
 		sf.mr.setOutline( sf.skel.output );
 
 		return skel;
@@ -380,7 +378,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	
 	public synchronized void setSkel( PlanSkeleton _, SuperFace sft_ ) {
 
-		BlockApp ba = ass.get(BlockApp.class, this);
+		BlockApp ba = this.blockApp;
 		
 		if (skirtG != null )
 			skirtG.removeFromParent();
@@ -397,12 +395,12 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}
 
 		if (sft_ != null)
-			ass.get ( BuildingApp.class, sft_ ).markGeometryDirty(ass);
+			sft_.buildingApp.markGeometryDirty();
 
 		for ( HalfFace hf : block ) {
 
 			SuperFace sf = (SuperFace) hf;
-			BuildingApp sfa = ass.get ( BuildingApp.class, sf );
+			BuildingApp sfa = sf.buildingApp;
 			
 			if ( sfa.isGeometryDirty ) {
 
@@ -424,7 +422,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 					}
 				};
 
-				GreebleSkel greeble = new GreebleSkel( tweed, ass, sf );
+				GreebleSkel greeble = new GreebleSkel( tweed, sf );
 				greeble.occluderLookup = lastOccluders;
 
 				house = greeble.showSkeleton( sf.skel.output, onclick, sf.mr );
@@ -513,7 +511,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 			
 			@Override
 			public void run() {
-				 new SelectedApps( (App) ass.get( BuildingApp.class, sf ), ass, update ).computeTextures( null ); 
+				 new SelectedApps( sf.buildingApp, update ).computeTextures( null ); 
 			}
 			
 			@Override
@@ -523,12 +521,27 @@ public class SkelGen extends Gen implements IDumpObjs {
 		}).start();
 	}
 	
+	/**
+	 * When someone clicks on geometry with userdata GreebleSkel.Appearance of a class, what do we show in the UI?
+	 */
+	public static App getUIAppFor( Object o ) {
+		if ( o instanceof MiniFacade )
+			return ( (MiniFacade) o ).facadeTexApp;
+		else if ( o instanceof MiniRoof )
+			return ( (MiniRoof) o ).roofTexApp;
+		else if ( o instanceof FRect )
+			return ( (FRect) o ).panesTexApp;
+		else if ( o instanceof SkelGen )
+			return ( (SkelGen) o ).blockApp;
+		throw new Error();
+	}
+	
 	protected void textureSelected( PlanSkeleton skel, SuperFace sf, Object ha ) {
 		if ( ha == null )
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else {
 			
-			SelectedApps sa = new SelectedApps(  ass.uiAppFor(ha) , ass, new Runnable() {
+			SelectedApps sa = new SelectedApps( getUIAppFor(ha) , new Runnable() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -767,7 +780,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public void editFacade( PlanSkeleton skel, SuperFace sf, SuperEdge se ) {
 
 		closeSitePlan();
-		new FacadeDesigner( ass, skel, sf, se, this );
+		new FacadeDesigner( skel, sf, se, this );
 	}
 
 	public void ensureMF( SuperFace sf, SuperEdge se ) {
@@ -781,8 +794,8 @@ public class SkelGen extends Gen implements IDumpObjs {
 			se.toEdit.width = se.length();
 		}
 		
-		ass.get (FacadeTexApp.class, se.toEdit).parent = sf;
-		ass.get (FacadeLabelApp.class, se.toEdit).mf.sf = sf;
+		se.toEdit.facadeTexApp.parent = sf;
+		se.toEdit.facadeLabelApp.mf.sf = sf;
 
 		if ( se.toRegularize != null && !se.toRegularize.isEmpty() )
 			se.toEdit.height = se.toRegularize.get( 0 ).height;

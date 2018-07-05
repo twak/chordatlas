@@ -21,7 +21,6 @@ import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Filez;
@@ -45,7 +44,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 
 	MiniRoof mr;
 	
-	public RoofSuperApp( MiniRoof mr, AppStore ass ) {
+	public RoofSuperApp( MiniRoof mr) {
 		
 		super();
 		
@@ -67,7 +66,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 	}
 
 	@Override
-	public void setTexture( FacState<MiniRoof> state, BufferedImage cropped, AppStore ac ) {
+	public void setTexture( FacState<MiniRoof> state, BufferedImage cropped ) {
 		
 		NormSpecGen ns = new NormSpecGen( cropped, null, null);
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
@@ -87,7 +86,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if (textures == null)
 			textures = new HashMap<>();
 		
-		ac.get(PanesLabelApp.class, state.mf ).textureUVs = TextureUVs.Zero_One;
+	    state.mf.roofTexApp.textureUVs = TextureUVs.Zero_One;
 		textures.put (state.tag, fileName );
 	}
 	
@@ -131,15 +130,11 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
  	}
 	
 	@Override
-	public void drawCoarse( MultiMap<MiniRoof, FacState> todo, AppStore ac ) throws IOException {
+	public void drawCoarse( MultiMap<MiniRoof, FacState> todo ) throws IOException {
 		
-		RoofTexApp rta = ac.get(RoofTexApp.class, mr);
+		RoofTexApp rta = mr.roofTexApp;
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( rta.coarse ) );
-		
-//		DRectangle imageBounds = textureRect;
-		
-//		src = Imagez.blur( 25, src );
 		
 		
 		NetInfo ni = NetInfo.get( this );
@@ -223,7 +218,8 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 					MiniFacade mf = ((SuperEdge)e).toEdit; 
 					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
 						
-						PanesLabelApp pla = ac.get(PanesLabelApp.class, f );
+						PanesLabelApp pla = f.panesLabelApp;
+						
 						if ( pla.coveringRoof != null) {
 							for (Loopable <Point2d> pt : pla.coveringRoof.loopableIterator() ) {
 								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
@@ -271,8 +267,8 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 	}
 
 	@Override
-	public App getUp( AppStore ac ) {
-		return ac.get(RoofTexApp.class, mr);
+	public App getUp( ) {
+		return mr.roofTexApp;
 	}
 
 }

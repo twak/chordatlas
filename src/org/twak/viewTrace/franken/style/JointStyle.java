@@ -16,10 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
@@ -113,20 +111,20 @@ public class JointStyle implements StyleSource {
 			klass2Net.put (k, this);
 		}
 
-		public App findExemplar (App root, AppStore ac) {
+		public App findExemplar (App root) {
 			
 			if (root.getClass() == klass)
 				return root;
 			
-			return findExemplar( Collections.singletonList( root ), ac );
+			return findExemplar( Collections.singletonList( root ) );
 		}
 		
-		public App findExemplar (List<App> root, AppStore ac) {
+		public App findExemplar (List<App> root) {
 			
 			List<App> next = new ArrayList<>();
 			
 			for (App a : root)
-				for (App b : a.getDown(ac).valueList())
+				for (App b : a.getDown().valueList())
 					if (b.getClass() == klass)
 						return b;
 					else
@@ -135,7 +133,7 @@ public class JointStyle implements StyleSource {
 			if (next.isEmpty())
 				return null;
 			
-			return findExemplar( next, ac );
+			return findExemplar( next );
 		}
 
 		public void setHigh() {
@@ -165,14 +163,14 @@ public class JointStyle implements StyleSource {
 
 		if ( this.root != ba ) {
 			this.root = ba;
-			redraw( root.ass );
+			redraw( );
 		}
 		
 		return true;
 	}
 	
 	Random randy = new Random();
-	public void redraw(AppStore ass) {
+	public void redraw() {
 		
 		for (Joint j : joints) {
 			
@@ -184,13 +182,13 @@ public class JointStyle implements StyleSource {
 					j.appInfo.get( pj.bakeWith ).bake.add( pj.ns.klass );
 		}
 		
-		root.markGeometryDirty(ass);
+		root.markGeometryDirty();
 		
 		Random randy = new Random(System.nanoTime());
 
 		root.styleSource = this; 
 		
-		for ( App building_ : root.getDown(ass).valueList() )  {
+		for ( App building_ : root.getDown().valueList() )  {
 			
 			BuildingApp building = ((BuildingApp)building_);
 			
@@ -198,7 +196,7 @@ public class JointStyle implements StyleSource {
 			
 			building.updateDormers( randy );
 			
-			redraw( 1, new MultiMap<>( 1, building), building.lastJoint, randy, ass );
+			redraw( 1, new MultiMap<>( 1, building), building.lastJoint, randy );
 		}
 	}
 
@@ -231,7 +229,7 @@ public class JointStyle implements StyleSource {
 		return j;
 	}
 	
-	public void process (App app, Random random, AppStore ass) {
+	public void process (App app, Random random) {
 		
 		app.bakeWith.clear();
 		
@@ -241,34 +239,34 @@ public class JointStyle implements StyleSource {
 		if (app instanceof BlockApp)
 			return;
 			
-		Joint j = findParentOfClass (app, BuildingApp.class, ass).lastJoint;
+		Joint j = findParentOfClass (app, BuildingApp.class).lastJoint;
 		
 		PerJoint ai = j.appInfo.get( app.getClass() );
 		Class bw = ai.bakeWith;
 		
 		if (bw != null && bw != app.getClass() ) {
-			App a = findParentOfClass (app, bw, ass);
+			App a = findParentOfClass (app, bw);
 			app.styleZ = a.bakeWith.get(app.getClass());
 			if (app.styleZ == null)
 				throw new Error();
 		}
 		else
-			app.styleZ = ai.dist.draw( random, app, ass );
+			app.styleZ = ai.dist.draw( random, app );
 		
 		for (Class c : ai.bake) {
-			app.bakeWith.put( c, j.appInfo.get( c ).dist.draw( random, null, ass ) );
+			app.bakeWith.put( c, j.appInfo.get( c ).dist.draw( random, null ) );
 		}
 		
 	}
 	
-	public <E extends App> E findParentOfClass (App app, Class<? extends E> klass, AppStore ass) {
+	public <E extends App> E findParentOfClass (App app, Class<? extends E> klass) {
 		if (app.getClass() == klass)
 			return(E) app;
 		
-		return findParentOfClass( app.getUp( ass ), klass, ass);
+		return findParentOfClass( app.getUp( ), klass);
 	}
 
-	private void redraw( int stage,  MultiMap<Integer, App> todo, Joint j, Random random, AppStore ass ) {
+	private void redraw( int stage,  MultiMap<Integer, App> todo, Joint j, Random random ) {
 
 		
 		if (stage >= NetInfo.evaluationOrder.size())
@@ -276,13 +274,13 @@ public class JointStyle implements StyleSource {
 		
 		for ( App a : todo.get( stage ) ) {
 			
-			process( a, random, ass );
+			process( a, random );
 			
-			for (App next : a.getDown(ass).valueList())
+			for (App next : a.getDown().valueList())
 				todo.put( NetInfo.evaluationOrder.indexOf( next.getClass() ), next );
 		}
 
-		redraw( stage + 1, todo, j, random,  ass );
+		redraw( stage + 1, todo, j, random );
 	}
 
 	private Joint drawJoint( Random random ) {
@@ -300,10 +298,10 @@ public class JointStyle implements StyleSource {
 	}
 
 	@Override
-	public double[] draw( Random random, App app, AppStore ass ) {
+	public double[] draw( Random random, App app ) {
 		
 		if (app.styleZ == null) { // app wasn't redraw'd earlier
-			process( app, random, ass );
+			process( app, random );
 		}
 			
 		return app.styleZ; // do nothing
@@ -339,7 +337,7 @@ public class JointStyle implements StyleSource {
 		redaw.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				redraw(sa.ass);
+				redraw();
 				update.run();
 			}
 		} );
@@ -355,8 +353,8 @@ public class JointStyle implements StyleSource {
 	}
 
 	@Override
-	public void install( App app, AppStore ass ) {
-		process( app, randy, ass );
+	public void install( App app ) {
+		process( app, randy );
 	}
 
 }

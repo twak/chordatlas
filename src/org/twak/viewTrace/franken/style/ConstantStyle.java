@@ -9,7 +9,6 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
@@ -38,7 +37,7 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 
 	
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app ) {
 		return mean;
 	}
 	
@@ -74,7 +73,7 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 	}
 
 	@Override
-	public void install( App app, AppStore ass ) {
+	public void install( App app ) {
 		app.styleSource = new ConstantStyle( app.getClass() );
 	}
 }

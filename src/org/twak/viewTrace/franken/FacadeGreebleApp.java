@@ -18,20 +18,16 @@ import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
-import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -45,7 +41,7 @@ public class FacadeGreebleApp extends App {
 
 	MiniFacade mf;
 	
-	public FacadeGreebleApp( MiniFacade mf, AppStore ass ) {
+	public FacadeGreebleApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;
 	}
@@ -63,12 +59,12 @@ public class FacadeGreebleApp extends App {
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get(FacadeTexApp.class, mf);
+	public App getUp() {
+		return mf.facadeTexApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
 	}
 	
@@ -120,7 +116,7 @@ public class FacadeGreebleApp extends App {
 	}; 
 	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) {
+	public void computeBatch( Runnable whenDone, List<App> batch ) {
 		
 		
 		NetInfo ni = NetInfo.get(this) ;
@@ -149,7 +145,7 @@ public class FacadeGreebleApp extends App {
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
 				MiniFacade mf = (MiniFacade) fga.mf;
 
-				FacadeTexApp fta = ass.get(FacadeTexApp.class, mf );
+				FacadeTexApp fta = mf.facadeTexApp;
 				
 				if (fta.postState == null || fta.coarse == null)
 					continue;
@@ -165,7 +161,7 @@ public class FacadeGreebleApp extends App {
 				gE.setColor( CMPLabel.Background.rgb );
 				gE.fillRect( 0, 0, resolution, resolution );
 
-				DRectangle mini = Pix2Pix.findBounds( mf, false, ass );
+				DRectangle mini = Pix2Pix.findBounds( mf, false );
 
 				DRectangle maskLabel = new DRectangle( mini );
 
@@ -180,10 +176,10 @@ public class FacadeGreebleApp extends App {
 				BufferedImage src = ImageIO.read( Tweed.toWorkspace( fta.coarse ) );
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
-				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false, ass );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ), ass );
+				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ) );
 
-				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false, ass );
+				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
 
 				Meta meta = new Meta( mf, maskLabel, mini, rgb );
 
@@ -216,7 +212,7 @@ public class FacadeGreebleApp extends App {
 						
 						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
 						
-						importLabels(meta, boxFile, ass );
+						importLabels( meta, boxFile );
 					}
 
 				} catch ( Throwable e ) {
@@ -228,7 +224,7 @@ public class FacadeGreebleApp extends App {
 	}
     private final static ObjectMapper om = new ObjectMapper();
 
-	private void importLabels( Meta m, File file, AppStore ac ) {
+	private void importLabels( Meta m, File file ) {
 
 		if ( file.exists() ) {
 
@@ -379,7 +375,7 @@ public class FacadeGreebleApp extends App {
 						if ( feat.height > 0 ) {
 							FRect f = m.mf.featureGen.add( ff, feat );
 							if (c != null)
-								ac.get (PanesTexApp.class, f ).color = c;
+								f.panesTexApp.color = c; 
 						}
 					}
 

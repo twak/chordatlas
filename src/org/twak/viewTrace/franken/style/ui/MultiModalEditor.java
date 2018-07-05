@@ -28,7 +28,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.NetInfo;
@@ -45,7 +44,7 @@ public class MultiModalEditor extends JPanel {
 	JPanel gList;
 	Runnable globalUpdate ;
 	
-	public MultiModalEditor( MultiModal mm, Class target, Runnable globalUpdate, AppStore ac ) {
+	public MultiModalEditor( MultiModal mm, Class target, Runnable globalUpdate ) {
 		
 		this.mm = mm;
 		this.target = target;
@@ -56,7 +55,7 @@ public class MultiModalEditor extends JPanel {
 		NetInfo ni = NetInfo.index.get(target);
 		
 		egs = new NetExamples( mm, 10, 6, ni, 
-				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + ni.name), ac );
+				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + ni.name) );
 		
 		JPanel controls = createControls(() -> egs.changed());
 		

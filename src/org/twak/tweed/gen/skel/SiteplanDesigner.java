@@ -7,8 +7,8 @@ import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 
 import org.twak.camp.Output;
-import org.twak.camp.Skeleton;
 import org.twak.camp.Output.Face;
+import org.twak.camp.Skeleton;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.Profile;
@@ -22,9 +22,8 @@ import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleHelper;
-import org.twak.viewTrace.franken.FacadeTexApp;
-import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class SiteplanDesigner {
 
@@ -37,7 +36,7 @@ public class SiteplanDesigner {
 		for ( HalfEdge he : sf ) {
 			SuperEdge ee = (SuperEdge) he;
 			if ( ee.toEdit != null )
-				sg.ass.get (FacadeTexApp.class,  ee.toEdit ).appMode = AppMode.Manual;
+				 ee.toEdit.facadeTexApp.appMode = AppMode.Manual;
 		}
 
 		SkelGen.siteplan = new Siteplan( sf.skel.plan, false ) {
@@ -71,14 +70,14 @@ public class SiteplanDesigner {
 										SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
 
 										if ( set != null ) // created by siteplan --> set correct face
-											sg.ass.get (FacadeTexApp.class,  wt.miniFacade ).parent = (SuperFace) set.se.face;
+											wt.miniFacade.facadeTexApp.parent = (SuperFace) set.se.face;
 									}
 									
 									
 									
 								}
 
-								sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sg.ass.get ( RoofTexApp.class, sf.mr ).color ) ) );
+								sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.roofTexApp.color ) ) );
 								sf.mr.setOutline( sf.skel.output );
 
 								sg.setSkel( (PlanSkeleton) threadKey, sf );
@@ -121,7 +120,7 @@ public class SiteplanDesigner {
 				Profile profile = new Profile( defpts );
 				sg.tagWalls( sf, profile, se, bar.start, bar.end );
 				
-				FacadeTexApp mfa = sg.ass.get(FacadeTexApp.class, se.toEdit);
+				FacadeTexApp mfa = se.toEdit.facadeTexApp;
 				
 				if (oldTag != null)
 					mfa.parent = oldTag.sf;

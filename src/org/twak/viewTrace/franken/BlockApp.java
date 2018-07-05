@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
+import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -36,7 +36,7 @@ public class BlockApp extends App {
 		skirt = skelGen.block.getBounds(); 
 	}
 
-	public BlockApp( SkelGen skelGen, AppStore ass ) {
+	public BlockApp( SkelGen skelGen ) {
 		super ( );
 		this.skelGen = skelGen;
 		skirt = skelGen.block.getBounds().grow( 10 ); 
@@ -48,24 +48,24 @@ public class BlockApp extends App {
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
+	public App getUp() {
 		return null;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		
 		MultiMap<String, App> down = new MultiMap<>();
 
 		for (HalfFace sf : skelGen.block) 
-			down.put( "building", ac.get(BuildingApp.class, sf ) );
+			down.put( "building", ((SuperFace) sf).buildingApp );
 		
 		return down;
 	}
 
 	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) {
+	public void computeBatch( Runnable whenDone, List<App> batch ) {
 		
 		skirtTexture = null;
 		
@@ -92,7 +92,7 @@ public class BlockApp extends App {
 					for (App a : hashSet) { 
 						a.styleSource = new GaussStyle( BlockApp.this.getClass() );
 						a.appMode = AppMode.Net;
-						setGauss (a.getDown( sa.ass ).valueList());
+						setGauss (a.getDown( ).valueList());
 					}
 				}
 			} );
@@ -118,7 +118,7 @@ public class BlockApp extends App {
 				public void actionPerformed( ActionEvent e ) {
 					styleSource = new JointStyle(null);
 					appMode = AppMode.Net;
-					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.ass, sa.geometryUpdate ) );
+					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.geometryUpdate ) );
 					sa.showUI();
 				}
 			} );

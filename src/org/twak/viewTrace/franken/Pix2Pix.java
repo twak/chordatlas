@@ -21,7 +21,6 @@ import javax.vecmath.Point2d;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
@@ -303,9 +302,9 @@ public class Pix2Pix {
 		return out;
 	}
 
-	public static DRectangle findBounds( MiniFacade toEdit, boolean includeRoof, AppStore ass ) {
+	public static DRectangle findBounds( MiniFacade toEdit, boolean includeRoof ) {
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, toEdit);
+		FacadeTexApp fta = toEdit.facadeTexApp;
 		
 		if ( fta.postState == null ) 
 			return toEdit.getAsRect();
@@ -327,12 +326,12 @@ public class Pix2Pix {
 			return fta.postState.outerWallRect;
 	}
 	
-	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask, boolean drawRoofs, AppStore ass ) {
+	public static void drawFacadeBoundary( Graphics2D g, MiniFacade mf, DRectangle mini, DRectangle mask, boolean drawRoofs ) {
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		FacadeTexApp fta = mf.facadeTexApp;
 		
 		if ( fta.postState == null ) {
-			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ), ass );
+			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
 		} else {
 			g.setColor( Color.blue );
 			
@@ -419,9 +418,9 @@ public class Pix2Pix {
 	}
 	
 
-	public static void cmpRects( MiniFacade mf, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects, AppStore ass ) {
+	public static void cmpRects( MiniFacade mf, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
 
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		FacadeTexApp fta = mf.facadeTexApp;
 
 		//		double scale = 1/ ( mini.width < mini.height ? mini.height : mini.width );
 		//		

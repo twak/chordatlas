@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.vecmath.Point2d;
 
 import org.apache.commons.io.FileUtils;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofGreeble;
 import org.twak.utils.collections.MultiMap;
@@ -26,7 +25,7 @@ public class RoofGreebleApp extends App {
 //	private RoofTexApp child;
 	private MiniRoof mr;
 	
-	public RoofGreebleApp( MiniRoof mr, AppStore ass ) {
+	public RoofGreebleApp( MiniRoof mr ) {
 		super( );
 		this.mr = mr;
 	}
@@ -44,21 +43,21 @@ public class RoofGreebleApp extends App {
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get( BuildingApp.class, mr.superFace );
+	public App getUp() {
+		return mr.superFace.buildingApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		MultiMap out = new MultiMap<>();
 		
-		out.put ("roof textures", ac.get(RoofTexApp.class, mr));
+		out.put ("roof textures", mr.roofTexApp );
 		
 		return out;
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) {
+	public void computeBatch( Runnable whenDone, List<App> batch ) {
 		
 		if ( appMode != AppMode.Net ) {
 			whenDone.run();
@@ -78,7 +77,7 @@ public class RoofGreebleApp extends App {
 			toProcess.add(mr);
 		}
 		
-		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution, ac, true );
+		RoofTexApp.addCoarseRoofInputs( toProcess, p2, resolution, true );
 		
 		p2.submit( new Job( new JobResult() {
 			
@@ -91,7 +90,7 @@ public class RoofGreebleApp extends App {
 						
 						Pix2Pix.importTexture( e.getValue(), -1, null, null, null, new BufferedImage[3] );
 						
-						createGreebles(mr, ac, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
+						createGreebles(mr, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
 					}
 
 				} catch ( Throwable e ) {
@@ -106,7 +105,7 @@ public class RoofGreebleApp extends App {
 	
     private final static ObjectMapper om = new ObjectMapper();
 
-    private void createGreebles( MiniRoof mr, AppStore ac, File file ) {
+    private void createGreebles( MiniRoof mr, File file ) {
 
 		if ( file.exists() ) {
 
@@ -140,13 +139,13 @@ public class RoofGreebleApp extends App {
 								y = ni.resolution - circle.get(1).asDouble(), 
 								r = circle.get( 2 ).asDouble();
 						
-						RoofTexApp rta = ac.get( RoofTexApp.class, mr );
+						RoofTexApp rta = mr.roofTexApp;
 						
 						Point2d worldXY = rta.textureRect.transform( imRect.normalize( new Point2d(x, y) ) );
 						
 						r = r * rta.textureRect.height / ni.resolution;
 						
-						mr.addFeature (ac, f, r, worldXY );
+						mr.addFeature ( f, r, worldXY );
 						
 //						m.mf.featureGen.add( f, m.mfBounds.transform( m.mask.normalize( r ) ) );
 

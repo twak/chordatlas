@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Filez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
@@ -31,7 +30,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 
 	MiniFacade mf;
 	
-	public FacadeSuperApp( MiniFacade mf, AppStore ass ) {
+	public FacadeSuperApp( MiniFacade mf) {
 		super();
 		this.mf = mf;
 	}
@@ -47,16 +46,16 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 	}
 
 	@Override
-	public void setTexture( FacState<MiniFacade> state, BufferedImage cropped, AppStore ass ) {
+	public void setTexture( FacState<MiniFacade> state, BufferedImage cropped ) {
 		
-		NormSpecGen ns = renderLabels( mf, cropped, ass );
+		NormSpecGen ns = renderLabels( mf, cropped );
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.spec, ns.norm };
 
 		NetInfo ni = NetInfo.get( this );
 
 		String fileName = "scratch/" + UUID.randomUUID() + ".png";
 
-		DRectangle mfBounds = Pix2Pix.findBounds( mf, false, ass );
+		DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
 		
 		try {
 			for ( FRect f : mf.featureGen.get( Feature.WINDOW ) ) {
@@ -66,7 +65,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 
 				d.y = maps[ 0 ].getHeight() - d.y - d.height;
 
-				PanesLabelApp pla = ass.get( PanesLabelApp.class, f );
+				PanesLabelApp pla = f.panesLabelApp;
 				
 				File wf = new File( Tweed.DATA + "/" + pla.texture );
 				
@@ -96,18 +95,16 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 			e1.printStackTrace();
 		}
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
-		
-		fta.textureUVs = TextureUVs.Square;
-		fta.texture = fileName;
+		mf.facadeTexApp.textureUVs = TextureUVs.Square;
+		mf.facadeTexApp.texture = fileName;
 	}
 
-	private NormSpecGen renderLabels( MiniFacade mf, BufferedImage cropped, AppStore ass ) {
+	private NormSpecGen renderLabels( MiniFacade mf, BufferedImage cropped ) {
 		
 		
 		BufferedImage labels = new BufferedImage( cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
 		
-		DRectangle bounds = Pix2Pix.findBounds( mf, false, ass );
+		DRectangle bounds = Pix2Pix.findBounds( mf, false );
 		DRectangle cropRect = new DRectangle(cropped.getWidth(), cropped.getHeight()); 
 		
 		Graphics2D g = labels.createGraphics();
@@ -118,7 +115,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		
 		g.setStroke( stroke );
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		FacadeTexApp fta = mf.facadeTexApp;
 		
 		for ( Loop<? extends Point2d> l : fta.postState.wallFaces ) {
 			
@@ -128,11 +125,11 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 			g.draw( p );
 		}
 		
-		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ), ass );
+		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ) );
 		
 		for (Feature f : mf.featureGen.keySet())
 			if (f != Feature.WINDOW)
-				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f), ass );
+				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f) );
 		
 		g.dispose();
 		
@@ -140,13 +137,13 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		return ns;
 	}
 	
-	public void drawCoarse( MultiMap<MiniFacade, FacState> todo, AppStore ass ) throws IOException {
+	public void drawCoarse( MultiMap<MiniFacade, FacState> todo ) throws IOException {
 		
-		FacadeTexApp fta = ass.get(FacadeTexApp.class, mf);
+		FacadeTexApp fta = mf.facadeTexApp;
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( fta.coarse ) );
 
-		DRectangle mini = Pix2Pix.findBounds( mf, false, ass );
+		DRectangle mini = Pix2Pix.findBounds( mf, false );
 		
 		int 
 			outWidth  =   (int) Math.ceil ( ( mini.width  * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
@@ -210,7 +207,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 	}
 
 	@Override
-	public App getUp( AppStore ac ) {
-		return ac.get(FacadeTexApp.class, mf);
+	public App getUp( ) {
+		return mf.facadeTexApp;
 	}
 }

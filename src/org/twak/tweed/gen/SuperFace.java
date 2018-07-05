@@ -9,6 +9,9 @@ import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.RoofSuperApp;
+import org.twak.viewTrace.franken.SuperSuper;
 
 public class SuperFace extends HalfFace {
 
@@ -21,9 +24,10 @@ public class SuperFace extends HalfFace {
 	public int classification;
 	
 	public transient MiniRoof mr = new MiniRoof(this);
+	public BuildingApp buildingApp = new BuildingApp(this);
 	
 //	public BuildingApp app = new BuildingApp(this);
-	public PlanSkeleton skel; 
+	public PlanSkeleton skel;
 	
 	public SuperFace() {
 		super(null);

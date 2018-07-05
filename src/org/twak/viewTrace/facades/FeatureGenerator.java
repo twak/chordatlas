@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.w3c.dom.css.Rect;
 
 public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
@@ -45,7 +43,7 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		return f;
 	}
 
-	public void update(AppStore ass) {/*override me*/}
+	public void update() {/*override me*/}
 	
 	public List<FRect> getRects( Feature... feats ) {
 

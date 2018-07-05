@@ -7,7 +7,6 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
@@ -63,13 +62,13 @@ public class MultiModal implements StyleSource {
 	}
 	
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app ) {
 		
 		double d = random.nextDouble() * totalProb;
 		
 		for (Mode w : modes) 
 			if (d < w.accumProb)
-				return w.ss.draw( random, app, ac );
+				return w.ss.draw( random, app );
 
 		return new double[ NetInfo.index.get(target).sizeZ];
 	}
@@ -79,7 +78,7 @@ public class MultiModal implements StyleSource {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );
-		but.addActionListener( e -> new MultiModalEditor( this, target, update, sa.ass ).openFrame() );
+		but.addActionListener( e -> new MultiModalEditor( this, target, update ).openFrame() );
 		out.add( but );
 		
 		return out;
@@ -101,7 +100,7 @@ public class MultiModal implements StyleSource {
 	}
 
 	@Override
-	public void install( App app, AppStore ass ) {
+	public void install( App app ) {
 		app.styleSource = new MultiModal ( app.getClass() );
 	}
 }

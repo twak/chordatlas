@@ -17,8 +17,14 @@ import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.franken.FacadeGreebleApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeSuperApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.HasSuper;
+import org.twak.viewTrace.franken.SuperSuper;
 
-public class MiniFacade {
+public class MiniFacade implements HasSuper {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
@@ -55,6 +61,13 @@ public class MiniFacade {
 	public Color wallColor;
 
 	public SuperFace sf;
+
+	WinGrid grid;
+	
+	public FacadeLabelApp facadeLabelApp = new FacadeLabelApp( this );
+	public FacadeTexApp facadeTexApp = new FacadeTexApp( this );
+	public FacadeSuperApp facadeSuperApp = new FacadeSuperApp( this );
+	public FacadeGreebleApp facadeGreebleApp = new FacadeGreebleApp( this );
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -221,8 +234,6 @@ public class MiniFacade {
 		}
 	}
 	
-	WinGrid grid;
-	
 	private void readWinGrid( double scale, double imageXM, double topM, Map yGrid ) {
 		{
 			
@@ -382,5 +393,11 @@ public class MiniFacade {
 		g.dispose();
 
 		return bi;
+	}
+
+
+	@Override
+	public SuperSuper getSuper() {
+		return facadeSuperApp;
 	}
 }

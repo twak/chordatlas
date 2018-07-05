@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
-import org.twak.tweed.gen.skel.weakidmap.WeakIdentityHashMap;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
@@ -22,6 +20,8 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 
 public class FRect extends DRectangle implements ICanEdit {
 	
@@ -225,6 +225,8 @@ public class FRect extends DRectangle implements ICanEdit {
 	Bounds dragging = null;
 	
 	Point2d lastPoint = null;
+	public PanesLabelApp panesLabelApp = new PanesLabelApp( this );
+	public PanesTexApp panesTexApp = new PanesTexApp( this );
 	
 	@Override
 	public void mouseDown( MouseEvent e, PanMouseAdaptor ma ) {

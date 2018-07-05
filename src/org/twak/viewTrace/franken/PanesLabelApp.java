@@ -13,15 +13,12 @@ import javax.swing.JComponent;
 import javax.vecmath.Point2d;
 
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -44,7 +41,7 @@ public class PanesLabelApp extends App {
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
 	
-	public PanesLabelApp(FRect fr, AppStore ass) {
+	public PanesLabelApp(FRect fr ) {
 		
 		super();
 		
@@ -53,7 +50,7 @@ public class PanesLabelApp extends App {
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
 		
-		getUp( ass ).styleSource.install(this, ass);
+		getUp( ).styleSource.install(this);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -77,15 +74,15 @@ public class PanesLabelApp extends App {
 	}
 	
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get( FacadeTexApp.class, fr.mf );
+	public App getUp() {
+		return fr.mf.facadeTexApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		MultiMap<String, App>  out = new MultiMap<>();
 		
-		out.put( "texture", ac.get(PanesTexApp.class, fr ) );
+		out.put( "texture", fr.panesTexApp );
 		
 		return out;
 	}
@@ -113,7 +110,7 @@ public class PanesLabelApp extends App {
 	public final static int pad = 20;
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -134,7 +131,7 @@ public class PanesLabelApp extends App {
 				
 				FRect r = a.fr;
 				
-				if ( !Pix2Pix.findBounds( a.fr.mf, true, ass ).contains( r ) )
+				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r ) )
 					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );

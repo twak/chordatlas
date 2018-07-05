@@ -1,4 +1,4 @@
-package org.	twak.viewTrace.facades;
+package org.twak.viewTrace.facades;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.WallTag;
@@ -241,15 +240,15 @@ public class GreebleGrid {
 
 	
 	protected void createDormerWindow( 
-			AppStore appCache,
 			MiniRoof roof,
-			QuadF l, 
+			QuadF l,
 			MeshBuilder window, 
 			MeshBuilder glass, 
-			float sillDepth,
+			float sillDepth, 
 			float sillHeight,
-			float corniceHeight, 
-			double panelWidth, double panelHeight ) {
+			float corniceHeight,
+			double panelWidth, 
+			double panelHeight ) {
 		
 		Vector3d along = new Vector3d(l.corners[3]);
 		along.sub(l.corners[0]);
@@ -317,7 +316,7 @@ public class GreebleGrid {
 		FRect w = new FRect ( l.original );
 		
 		
-		PanesLabelApp wa = appCache.get(PanesLabelApp.class, w);
+		PanesLabelApp wa = w.panesLabelApp;
 		
 		// find roof locations / uv coordinates for roof
 		if (wa != null)
@@ -368,7 +367,7 @@ public class GreebleGrid {
 					}
 				}.run();
 				
-				RoofTexApp rta = appCache.get(RoofTexApp.class, roof);
+				RoofTexApp rta = roof.roofTexApp;
 				
 				LoopL<Point2d> uvs = wa.coveringRoof.singleton().new Map<Point2d>() {
 					@Override
@@ -636,8 +635,8 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void buildGrid( AppStore ac, DRectangle all, Matrix4d to3d, 
-			FeatureGenerator filteredFeatuers, MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
+	protected void buildGrid( DRectangle all, Matrix4d to3d, FeatureGenerator filteredFeatuers, 
+			MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
 
 		Grid g = new Grid( .010, all.x, all.getMaxX(), all.y, all.getMaxY() );
 
@@ -749,9 +748,9 @@ public class GreebleGrid {
 
 	final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
 	
-	protected void textureGrid(AppStore ac, DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
+	protected void textureGrid(DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
 
-		FacadeTexApp fa = ac.get(FacadeTexApp.class, mf);
+		FacadeTexApp fa = mf.facadeTexApp;
 		
 		if ( mf != null && fa.texture != null ) {
 			
@@ -763,7 +762,7 @@ public class GreebleGrid {
 				
 				if ( allGeom.contains( w ) ) {
 					
-					PanesLabelApp pa = ac.get(PanesLabelApp.class, w);
+					PanesLabelApp pa = w.panesLabelApp;
 					
 					g.insert( w, new Griddable() {
 						@Override
@@ -802,7 +801,7 @@ public class GreebleGrid {
 				
 				if ( allGeom.contains( w ) ) {
 					
-					PanesLabelApp pa = ac.get(PanesLabelApp.class, w);
+					PanesLabelApp pa = w.panesLabelApp;
 					
 					g.insert( w, new Griddable() {
 						@Override
@@ -843,8 +842,7 @@ public class GreebleGrid {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							PanesTexApp ba = ac.get(PanesTexApp.class, b);
-							createBalcony( rect, to3d, mbs.get( "balcony_"+ba.color, ba.color, mf ) , 0.3 );
+							createBalcony( rect, to3d, mbs.get( "balcony_"+b.panesTexApp.color, b.panesTexApp.color, mf ) , 0.3 );
 						}
 
 						@Override

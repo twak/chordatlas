@@ -9,12 +9,10 @@ import javax.swing.JPanel;
 
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.SiteplanDesigner;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
-import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.style.JointStyle.Joint;
@@ -31,7 +29,7 @@ public class BuildingApp extends App {
 	// if a jointStyle is in use, the joint assigned to this hierarchy
 	public Joint lastJoint;
 	
-	public BuildingApp( SuperFace superFace, AppStore ass ) {
+	public BuildingApp( SuperFace superFace ) {
 		super( );
 		this.superFace = superFace;
 	}
@@ -48,25 +46,25 @@ public class BuildingApp extends App {
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get ( BlockApp.class, parent );
+	public App getUp() {
+		return parent.blockApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		
 		MultiMap<String, App> down = new MultiMap<>();
 		
-		down.put( "roof",  ac.get( RoofGreebleApp.class, superFace.mr ) ); 
+		down.put( "roof",  superFace.mr.roofGreebleApp ); 
 		
 		for (HalfEdge e : superFace) 
-			down.put ( "facade", ac.get(FacadeLabelApp.class, ((SuperEdge)e).toEdit ) );
+			down.put ( "facade", ((SuperEdge)e).toEdit.facadeLabelApp );
 		
 		return down;
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
+	public void computeBatch( Runnable whenDone, List<App> batch ) {
 		whenDone.run();
 	}
 	
@@ -104,8 +102,8 @@ public class BuildingApp extends App {
 	}
 	
 	@Override
-	public void markGeometryDirty( AppStore ac ) {
+	public void markGeometryDirty( ) {
 		this.isGeometryDirty = true;
-		super.markGeometryDirty( ac );
+		super.markGeometryDirty( );
 	}
 }
