@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
@@ -39,7 +40,7 @@ public class FacadeGreebleApp extends App {
 	
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 
-	MiniFacade mf;
+	public MiniFacade mf;
 	
 	public FacadeGreebleApp( MiniFacade mf ) {
 		super( );
@@ -177,7 +178,8 @@ public class FacadeGreebleApp extends App {
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
 				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ) );
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, renderedWindows );
 
 				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
 

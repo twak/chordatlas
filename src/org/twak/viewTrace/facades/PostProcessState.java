@@ -31,8 +31,6 @@ public class PostProcessState {
 	 * FacadeTextureApp uses these windows to create textures
 	 * 
 	 */
-	public Set<FRect> generatedWindows = new IdentityHashSet<>();
-	
 	public PostProcessState( Loop<LPoint2d> flat ) {
 		this.wallFaces.add( flat );
 	}

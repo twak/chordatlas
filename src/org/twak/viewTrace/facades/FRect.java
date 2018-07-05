@@ -32,6 +32,9 @@ public class FRect extends DRectangle implements ICanEdit {
 	public int id = -1;
 	
 	public MiniFacade mf;
+
+	public PanesLabelApp panesLabelApp;
+	public PanesTexApp panesTexApp;
 	
 	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
 	
@@ -81,28 +84,37 @@ public class FRect extends DRectangle implements ICanEdit {
 //			app = o.app;
 		
 		this.mf = o.mf;
+		initApps();
 	}
 	
 	public FRect(MiniFacade mf) {
 		super();
 		this.mf = mf;
+		initApps();
 	}
 	
 	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.mf = mf;
+		initApps();
 	}
 
 
 	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
 		this.mf = mf;
+		initApps();
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.f = feature;
 		this.mf = mf;
+	}
+	
+	private void initApps() {
+		panesLabelApp = new PanesLabelApp( this );
+		panesTexApp   = new PanesTexApp  ( this );
 	}
 
 	public FRect getAdj(Dir d) {
@@ -223,10 +235,7 @@ public class FRect extends DRectangle implements ICanEdit {
 	}
 
 	Bounds dragging = null;
-	
 	Point2d lastPoint = null;
-	public PanesLabelApp panesLabelApp = new PanesLabelApp( this );
-	public PanesTexApp panesTexApp = new PanesTexApp( this );
 	
 	@Override
 	public void mouseDown( MouseEvent e, PanMouseAdaptor ma ) {

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -48,7 +49,7 @@ public class FacadeTexApp extends App {
 	
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
 	
-	MiniFacade mf;
+	public MiniFacade mf;
 	public String texture;
 	
 	private static Color defaultGFColor = new Color (188,156,255);
@@ -79,7 +80,8 @@ public class FacadeTexApp extends App {
 		this.coarseWithWindows = fta.coarseWithWindows;
 		this.texture = fta.texture;
 		this.textureUVs = fta.textureUVs;
-		this.textureRect = new DRectangle(fta.textureRect);
+		if (fta.textureRect != null)
+			this.textureRect = new DRectangle(fta.textureRect);
 	}
 
 	@Override
@@ -92,9 +94,11 @@ public class FacadeTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		if (postState != null)
-			for (FRect r : postState.generatedWindows ) 
+		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
+			if (r.panesLabelApp.renderedOnFacade)
 				out.put( "window", r.panesLabelApp );
+
+		
 		
 		out.put( "super", mf.facadeSuperApp );
 		out.put( "greeble", mf.facadeGreebleApp ); 
@@ -221,10 +225,9 @@ public class FacadeTexApp extends App {
 						gL.draw( poly );
 						gE.draw( poly );
 					}
-				
-				
-				
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ) );// featureGen.getRects( Feature.WINDOW ) );
+
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( renderedWindows ) );
 			}
 
 			Meta meta = new Meta( mf, maskLabel );
@@ -270,7 +273,7 @@ public class FacadeTexApp extends App {
 						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, channels );
 
 						
-						FacadeTexApp fta = mf.facadeTexApp;
+						FacadeTexApp fta = meta.mf.facadeTexApp;
 						
 						if ( dest != null ) {
 							

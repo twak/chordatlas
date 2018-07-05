@@ -129,6 +129,7 @@ public class GreebleSkel {
 		if (tweed != null)
 		for (MiniFacade mf : allMFs) {
 			mf.facadeTexApp.resetPostProcessState();
+			mf.featureGen.valueList().stream().forEach( r -> r.panesLabelApp.renderedOnFacade = false );
 		}
 		
 //		roofBounds.grow( 2 );
@@ -176,7 +177,6 @@ public class GreebleSkel {
 			PostProcessState pps = mf.facadeTexApp.postState;
 			pps.outerWallRect = GreebleHelper.findRect( pps.wallFaces );
 			mf.featureGen.update( );
-			pps.generatedWindows.clear();
 		}
 		
 		if (tweed != null) // just calculating dormer locations
@@ -236,7 +236,7 @@ public class GreebleSkel {
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) {
 					if (q1.original.f == Feature.WINDOW || q1.original.f == Feature.SHOP) {
-						mf2.facadeTexApp.postState.generatedWindows.add( q1.original );
+						q1.original.panesLabelApp.renderedOnFacade = true;
 					}
 				}
 			}
@@ -249,7 +249,7 @@ public class GreebleSkel {
 					QuadF w = quit.next();
 					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
 						
-						mf2.facadeTexApp.postState.generatedWindows.add(w.original);
+						w.original.panesLabelApp.renderedOnFacade = true;
 						
 						if (greebleGrid != null)
 							greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 

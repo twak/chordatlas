@@ -172,7 +172,7 @@ public class RoofTexApp extends App {
 
 				Graphics2D g = dest.createGraphics();
 				
-				DRectangle s = new DRectangle( BlockApp.SKIRT_RES,BlockApp.SKIRT_RES ).transform( block.skirt.normalize( textureRect ) );
+				DRectangle s = new DRectangle( BlockApp.SKIRT_RES,BlockApp.SKIRT_RES ).transform( block.getSkirt().normalize( textureRect ) );
 				
 				s.y+=s.height;
 				s.height = -s.height;

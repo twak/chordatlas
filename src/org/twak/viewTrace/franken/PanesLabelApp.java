@@ -34,6 +34,7 @@ public class PanesLabelApp extends App {
 	public double frameWidth = 0.07 /*cm */;
 
 	public Loop<Point2d> coveringRoof;
+	public boolean renderedOnFacade = false;
 	
 	FRect fr;
 	public String texture;
@@ -51,6 +52,9 @@ public class PanesLabelApp extends App {
 			appMode = AppMode.Net;
 		
 		getUp( ).styleSource.install(this);
+		
+		if (appMode != AppMode.Net)
+			Thread.dumpStack();
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -67,10 +71,14 @@ public class PanesLabelApp extends App {
 		
 		this.texture = t.texture;
 		this.textureUVs = t.textureUVs;
-		this.textureRect = new DRectangle(t.textureRect);
+		if (t.textureRect != null)
+			this.textureRect = new DRectangle(t.textureRect);
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
+		
+		if (appMode != AppMode.Net)
+			Thread.dumpStack();
 	}
 	
 	@Override

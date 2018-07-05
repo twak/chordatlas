@@ -317,7 +317,9 @@ public class FacadeLabelApp extends App {
 						FRect nearestOld = closest( window, m.mf.facadeTexApp.oldWindows );
 						if ( nearestOld != null ) {
 							window.panesLabelApp = new PanesLabelApp( nearestOld.panesLabelApp );
+							window.panesLabelApp.fr = window;
 							window.panesTexApp = new PanesTexApp( nearestOld.panesTexApp );
+							window.panesTexApp.fr = window;
 						}
 				}
 				

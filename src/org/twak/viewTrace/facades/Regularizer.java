@@ -321,12 +321,12 @@ public class Regularizer {
 		
 		for ( MiniFacade old : in )
 			if ( old != null ) {
-				MiniFacade nmf = new MiniFacade( old );
+				MiniFacade nmf = MiniFacade.newWithApps( old );
 				out.add( nmf );
 
 				if (in.size() < 20)
 				{
-					MiniFacade gridMF = new MiniFacade( nmf );
+					MiniFacade gridMF =   MiniFacade.newWithApps(  nmf );
 
 					gridMF.featureGen.get(Feature.GRID).clear();
 					gridMF.featureGen.get(Feature.WINDOW).clear();
@@ -382,7 +382,7 @@ public class Regularizer {
 			};
 	
 	private MiniFacade combine( List<MiniFacade> in ) {
-		MiniFacade out = new MiniFacade();
+		MiniFacade out = MiniFacade.newWithApps(in.get(0));
 		
 		out.left = lp;
 		out.width = rp - lp;
@@ -418,7 +418,6 @@ public class Regularizer {
 		Cache2<Outer, Integer, List<FRect>> sillX = new ArrayCache2();
 		Cache2<Outer, Integer, List<FRect>> balX = new ArrayCache2();
 
-		
 		out.groundFloorHeight = in.stream().mapToDouble( mf -> mf.groundFloorHeight ).average().getAsDouble();
 		
 		for (int i = 0; i < ids; i++) {

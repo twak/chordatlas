@@ -26,20 +26,19 @@ public class BlockApp extends App {
 	SkelGen skelGen;
 
 	public boolean doSkirt = false;
-	public DRectangle skirt;
+	private DRectangle skirt;
 	public String skirtTexture;
 	
 	public BlockApp( BlockApp buildingApp ) {
 		super (buildingApp);
 		this.skelGen = buildingApp.skelGen;
 		
-		skirt = skelGen.block.getBounds(); 
+		setSkirt( skelGen.block.getBounds() ); 
 	}
 
 	public BlockApp( SkelGen skelGen ) {
 		super ( );
 		this.skelGen = skelGen;
-		skirt = skelGen.block.getBounds().grow( 10 ); 
 	}
 
 	@Override
@@ -127,5 +126,17 @@ public class BlockApp extends App {
 		}
 		
 		return out;
+	}
+
+	public DRectangle getSkirt() {
+		
+		if (skirt == null)
+			skirt = skelGen.block.getBounds().grow( 10 ); 
+		
+		return skirt;
+	}
+
+	public void setSkirt( DRectangle skirt ) {
+		this.skirt = skirt;
 	}
 }

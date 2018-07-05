@@ -385,10 +385,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		
 		if (ba.skirtTexture != null) {
 			
-			Quad skirt = new Quad(ba.skirt.widthF(), ba.skirt.heightF());
+			Quad skirt = new Quad(ba.getSkirt().widthF(), ba.getSkirt().heightF());
 			skirtG = new Geometry( "skirt", skirt );
 			skirtG.setMaterial(  GreebleGrid.buildTextureMaterial( tweed, ba.skirtTexture ) );
-			skirtG.setLocalTranslation( ba.skirt.xF(), 0, ba.skirt.yF()  + ba.skirt.heightF() );
+			skirtG.setLocalTranslation( ba.getSkirt().xF(), 0, ba.getSkirt().yF()  + ba.getSkirt().heightF() );
 			skirtG.setLocalRotation( new Quaternion (new float[] { (float) -Math.PI / 2f, 0 , 0 }) );
 			
 			gNode.attachChild( skirtG );

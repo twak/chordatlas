@@ -10,7 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
@@ -125,7 +127,8 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 			g.draw( p );
 		}
 		
-		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, new ArrayList<>( fta.postState.generatedWindows ) );
+		List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, renderedWindows );
 		
 		for (Feature f : mf.featureGen.keySet())
 			if (f != Feature.WINDOW)

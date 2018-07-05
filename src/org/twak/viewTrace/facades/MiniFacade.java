@@ -88,6 +88,7 @@ public class MiniFacade implements HasSuper {
 		this.featureGen = m.featureGen.copy(this);
 		this.hMargin = new ArrayList(m.hMargin);
 		this.vMargin = new ArrayList(m.vMargin);
+		this.sf = m.sf;
 		
 		if (m.grid != null)
 			this.grid = new WinGrid ( m.grid ); 
@@ -399,5 +400,23 @@ public class MiniFacade implements HasSuper {
 	@Override
 	public SuperSuper getSuper() {
 		return facadeSuperApp;
+	}
+
+
+	public static MiniFacade newWithApps( MiniFacade miniFacade ) {
+		MiniFacade out = new MiniFacade(miniFacade);
+		
+		out.facadeGreebleApp = new FacadeGreebleApp( miniFacade.facadeGreebleApp );
+		out.facadeGreebleApp.mf = out;
+		
+		out.facadeLabelApp = new FacadeLabelApp( miniFacade.facadeLabelApp );
+		out.facadeLabelApp.mf = out;
+		
+		out.facadeTexApp = new FacadeTexApp( miniFacade.facadeTexApp );
+		out.facadeTexApp.mf = out;
+		
+		
+		
+		return out;
 	}
 }
