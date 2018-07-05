@@ -37,16 +37,17 @@ public class PanesTexApp extends App {
 
 	public boolean useCoarseStyle = false;
 	FRect fr;
-	public String texture;
 	public Color color = Color.gray;
 	
-	public PanesTexApp(FRect fr) {
+	public PanesTexApp(FRect fr, AppStore ass) {
 		super( );
 		
 		this.fr = fr;
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
+		
+		getUp( ass ).styleSource.install(this, ass);
 	}
 	
 	public PanesTexApp(PanesTexApp t) {
@@ -54,7 +55,6 @@ public class PanesTexApp extends App {
 
 		this.useCoarseStyle = t.useCoarseStyle;
 		this.fr = t.fr;
-		this.texture = t.texture;
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
@@ -86,7 +86,7 @@ public class PanesTexApp extends App {
 
 					for ( App a : apps ) {
 						( (PanesTexApp) a ).color = color;
-						( (PanesTexApp) a ).texture = null;
+						apps.ass.get(PanesLabelApp.class, ( (PanesTexApp) a ).fr ).texture = null;
 					}
 
 					globalUpdate.run();
@@ -123,10 +123,6 @@ public class PanesTexApp extends App {
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ass ) { // first compute latent variables
 		
-		if ( appMode != AppMode.Net ) {
-			whenDone.run();
-			return;
-		}
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
@@ -136,6 +132,9 @@ public class PanesTexApp extends App {
 		
 		for ( App a : batch ) {
 
+			if (a.appMode != AppMode.Net)
+				continue;
+			
 			try {
 
 				PanesTexApp pta = (PanesTexApp) a;
@@ -307,7 +306,7 @@ public class PanesTexApp extends App {
 				};
 				
 				try {
-					e:
+//					e:
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
 						Meta meta = (Meta) e.getKey();
@@ -323,8 +322,6 @@ public class PanesTexApp extends App {
 							MiniFacade mf = frect.mf;
 							PanesLabelApp pla = ass.get(PanesLabelApp.class, frect);
 							
-							
-							meta.pta.texture = dest;
 							pla.texture = dest;
 //							meta.pta.textureUVs = TextureUVs.Square;
 							pla.textureUVs = TextureUVs.Square;

@@ -31,7 +31,7 @@ public class BuildingApp extends App {
 	// if a jointStyle is in use, the joint assigned to this hierarchy
 	public Joint lastJoint;
 	
-	public BuildingApp( SuperFace superFace ) {
+	public BuildingApp( SuperFace superFace, AppStore ass ) {
 		super( );
 		this.superFace = superFace;
 	}

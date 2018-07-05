@@ -49,7 +49,7 @@ public class FacadeTexApp extends App {
 	
 	public ArrayList<FRect> oldWindows; // when we create windows, we take the styles from this list
 	
-	MiniFacade ha;
+	MiniFacade mf;
 	public String texture;
 	
 	private static Color defaultGFColor = new Color (188,156,255);
@@ -65,9 +65,9 @@ public class FacadeTexApp extends App {
 	
 	public final static int CHIMNEY_PAD = 20;
 	
-	public FacadeTexApp( MiniFacade mf ) {
+	public FacadeTexApp( MiniFacade mf, AppStore ass ) {
 		super( );
-		this.ha = mf;
+		this.mf = mf;
 		if (mf.wallColor != null)
 			this.color = mf.wallColor;
 	}
@@ -85,7 +85,7 @@ public class FacadeTexApp extends App {
 
 	@Override
 	public App getUp(AppStore ac) {
-		return ac.get( FacadeLabelApp.class, ha );
+		return ac.get( FacadeLabelApp.class, mf );
 	}
 
 	@Override
@@ -97,8 +97,8 @@ public class FacadeTexApp extends App {
 			for (FRect r : postState.generatedWindows ) 
 				out.put( "window", ac.get (PanesLabelApp.class, r ) );
 		
-		out.put( "super", ac.get(FacadeSuperApp.class, ha) );
-		out.put( "greeble", ac.get(FacadeGreebleApp.class, ha) );
+		out.put( "super", ac.get(FacadeSuperApp.class, mf) );
+		out.put( "greeble", ac.get(FacadeGreebleApp.class, mf) );
 		
 		return out;
 	}
@@ -147,7 +147,7 @@ public class FacadeTexApp extends App {
 		for (App a : batch) {
 			
 			FacadeTexApp fta = (FacadeTexApp )a;
-			MiniFacade mf = fta.ha;
+			MiniFacade mf = fta.mf;
 			
 			if (!TweedSettings.settings.sitePlanInteractiveTextures && mf.featureGen instanceof CGAMini) {
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
@@ -271,7 +271,7 @@ public class FacadeTexApp extends App {
 						dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, meta.mask, null, channels );
 
 						
-						FacadeTexApp mfa = ass.get(FacadeTexApp.class, meta.mf );
+						FacadeTexApp fta = ass.get(FacadeTexApp.class, meta.mf );
 						
 						if ( dest != null ) {
 							
@@ -287,18 +287,17 @@ public class FacadeTexApp extends App {
 								
 								ImageIO.write( channels[0], "png", new File (Tweed.DATA, dest ) );
 								
-								mfa.setChimneyTexture( ass, dest );
+								fta.setChimneyTexture( ass, dest );
 								
 							} else {
-								mfa.coarse = mfa.texture = dest;
-								mfa.coarseWithWindows = null;
+								
+								fta.coarse = fta.texture = dest;
+								fta.coarseWithWindows = null;
 
 								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
-									
 									PanesLabelApp pla = ass.get(PanesLabelApp.class, r);
-									
-									pla.panes = null;
 									pla.texture = null;
+									pla.panes = new ArrayList<>();
 								}
 							}
 							
@@ -314,11 +313,11 @@ public class FacadeTexApp extends App {
 	}
 	
 	public String getChimneyTexture(AppStore ac) {
-		return  ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, ha).mf.sf ).chimneyTexture ;
+		return  ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, mf).mf.sf ).chimneyTexture ;
 	}
 
 	public void setChimneyTexture( AppStore ac, String tex ) {
-		ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, ha).mf.sf ).chimneyTexture = tex;
+		ac.get (BuildingApp.class, ac.get(FacadeLabelApp.class, mf).mf.sf ).chimneyTexture = tex;
 	}
 
 	private static class Meta {

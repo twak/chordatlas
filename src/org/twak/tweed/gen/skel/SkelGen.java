@@ -591,7 +591,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 				double[] range = findRange( se, s, e, null );
 
 				if ( range != null )
-					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null, ass );
+					se.toEdit = new Regularizer().go( se.toRegularize, range[ 0 ], range[ 1 ], null );
 			}
 			else
 				se.toEdit = new MiniFacade();

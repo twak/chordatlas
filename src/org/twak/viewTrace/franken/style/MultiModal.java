@@ -99,4 +99,9 @@ public class MultiModal implements StyleSource {
 	public boolean install( SelectedApps next ) {
 		return false;
 	}
+
+	@Override
+	public void install( App app, AppStore ass ) {
+		app.styleSource = new MultiModal ( app.getClass() );
+	}
 }

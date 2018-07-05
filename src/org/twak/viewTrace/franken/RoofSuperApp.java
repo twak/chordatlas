@@ -45,7 +45,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 
 	MiniRoof mr;
 	
-	public RoofSuperApp( MiniRoof mr ) {
+	public RoofSuperApp( MiniRoof mr, AppStore ass ) {
 		
 		super();
 		

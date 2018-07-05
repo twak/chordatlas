@@ -61,7 +61,6 @@ public class Regularizer {
 	boolean earlyReturn = false;
 	
 	double targetWidth = -1;
-	AppStore ac;
 	
 	public Regularizer () {}
 	public Regularizer (double alpha) {
@@ -71,29 +70,27 @@ public class Regularizer {
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
-	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade, AppStore ac ) {
+	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return go (in, 1, wantsFacade, ac).get(0);
+		return go (in, 1, wantsFacade).get(0);
 		
 	}
 	
-	public List<MiniFacade> debug (List<MiniFacade> in, double targetS, double targetE, double debugFrac, AppStore ac ) {
+	public List<MiniFacade> debug (List<MiniFacade> in, double targetS, double targetE, double debugFrac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
 		this.earlyReturn = debugFrac < 1;
 		
-		return go(in, debugFrac, null, ac);
+		return go(in, debugFrac, null);
 		
 	}
 	
-	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures, AppStore ac ) {
-		
-		this.ac = ac;
+	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures ) {
 		
 		for (MiniFacade mf : in) 
 			if (mf.imageFeatures != null)
@@ -477,7 +474,7 @@ public class Regularizer {
 					o.f = t.f;
 					o.id = i;
 					
-					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
+//					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
 //					ac.setFrom ( o.app = t.app;
 					
 					o.attached = t.attached;

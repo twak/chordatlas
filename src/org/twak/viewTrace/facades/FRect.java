@@ -3,13 +3,14 @@ package org.twak.viewTrace.facades;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.gen.skel.weakidmap.WeakIdentityHashMap;
 import org.twak.utils.Cach;
 import org.twak.utils.Cache;
 import org.twak.utils.Line;
@@ -21,8 +22,6 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class FRect extends DRectangle implements ICanEdit {
 	

@@ -44,7 +44,7 @@ public class PanesLabelApp extends App {
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
 	
-	public PanesLabelApp(FRect fr) {
+	public PanesLabelApp(FRect fr, AppStore ass) {
 		
 		super();
 		
@@ -52,6 +52,8 @@ public class PanesLabelApp extends App {
 		
 		if (TweedSettings.settings.sitePlanInteractiveTextures)
 			appMode = AppMode.Net;
+		
+		getUp( ass ).styleSource.install(this, ass);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -113,11 +115,6 @@ public class PanesLabelApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ass) {
 		
-		if ( appMode != AppMode.Net ) {
-			whenDone.run();
-			return;
-		}
-		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
 
@@ -129,6 +126,9 @@ public class PanesLabelApp extends App {
 		
 		for ( App a_ : batch ) {
 			try {
+				
+				if (a_.appMode != AppMode.Net)
+					continue;
 				
 				PanesLabelApp a = (PanesLabelApp)a_;
 				
@@ -192,11 +192,8 @@ public class PanesLabelApp extends App {
 						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null, new BufferedImage[3] );
 						
 						if ( dest != null ) {
-							
-							PanesLabelApp pla = ass.get( PanesLabelApp.class, meta.r );
-							
-							pla.textureUVs = TextureUVs.Zero_One;
-							pla.texture = pla.label = dest;
+							meta.app.textureUVs = TextureUVs.Zero_One;
+							meta.app.texture = meta.app.label = dest;
 						}
 					}
 					

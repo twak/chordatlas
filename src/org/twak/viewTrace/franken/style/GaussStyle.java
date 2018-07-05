@@ -109,4 +109,9 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	public void setMeanImage( File f ) {
 		this.meanImage = f;
 	}
+	
+	@Override
+	public void install( App app, AppStore ass ) {
+		app.styleSource = new GaussStyle( app.getClass() );
+	}
 }

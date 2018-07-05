@@ -36,7 +36,7 @@ public class BlockApp extends App {
 		skirt = skelGen.block.getBounds(); 
 	}
 
-	public BlockApp( SkelGen skelGen ) {
+	public BlockApp( SkelGen skelGen, AppStore ass ) {
 		super ( );
 		this.skelGen = skelGen;
 		skirt = skelGen.block.getBounds().grow( 10 ); 

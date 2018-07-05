@@ -10,14 +10,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
-import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FacadeDesigner;
 import org.twak.utils.collections.MultiMap;
@@ -31,11 +29,9 @@ import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.PostProcessState;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
-import org.twak.viewTrace.franken.style.JointStyle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +44,7 @@ public class FacadeLabelApp extends App {
 	public MiniFacade mf;
 	public String texture;
 	
-	public FacadeLabelApp( MiniFacade mf ) {
+	public FacadeLabelApp( MiniFacade mf, AppStore ass ) {
 		super( );
 		this.mf = mf;
 	}
@@ -240,6 +236,8 @@ public class FacadeLabelApp extends App {
 							ass.get (FacadeLabelApp.class, meta.mf ).texture = dest; // todo: set on FacadeTexApp after cropping for dormers
 					}
 					
+					System.out.println("done here");
+					
 				} catch ( Throwable e ) {
 					e.printStackTrace();
 				}
@@ -299,30 +297,7 @@ public class FacadeLabelApp extends App {
 //						}
 //					}
 					
-					FRect window = m.mf.featureGen.add( Feature.WINDOW, f );
-					
-					PanesLabelApp wla = ac.get( PanesLabelApp.class, window );
-					PanesTexApp pta = ac.get( PanesTexApp.class, window );
-					FacadeTexApp mfa = ac.get ( FacadeTexApp.class, m.mf);
-					
-					if (mfa.styleSource instanceof JointStyle) {
-						
-						JointStyle js = (JointStyle) mfa.styleSource;
-						pta.styleSource = wla.styleSource = js; // fixme: dirty hack
-						pta.styleZ = wla.styleZ = null;
-						js.setMode(wla);
-						js.setMode(pta);
-						
-					} else {
-						
-						FRect nearestOld = closest( window, mfa.oldWindows );
-						if ( nearestOld != null ) {
-							PanesLabelApp opla = ac.get (PanesLabelApp.class, nearestOld );
-							ac.set(PanesLabelApp.class, window, opla );
-							wla.styleZ = Arrays.copyOf ( opla.styleZ, opla.styleZ.length );
-						}
-					}
-					
+					m.mf.featureGen.add( Feature.WINDOW, f );
 				}
 				
 				if (regFrac > 0) {
@@ -332,11 +307,26 @@ public class FacadeLabelApp extends App {
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
 					
-					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null, ac ).get( 0 ).featureGen;
+					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
 					m.mf.featureGen.setMF(m.mf);
 				}
-
-//				fta.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
+				
+				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP )) {
+					
+					PanesLabelApp wla = ac.get ( PanesLabelApp.class , window );
+					FacadeTexApp  mfa = ac.get ( FacadeTexApp.class  , m.mf);
+					
+						FRect nearestOld = closest( window, mfa.oldWindows );
+						if ( nearestOld != null ) {
+							PanesLabelApp opla = ac.get (PanesLabelApp.class, nearestOld );
+							ac.set(PanesLabelApp.class, window, opla );
+							PanesTexApp opta = ac.get (PanesTexApp.class, nearestOld );
+							ac.set(PanesTexApp.class, window, opta );
+							wla.styleZ = Arrays.copyOf ( opla.styleZ, opla.styleZ.length );
+						}
+				}
+				
+				System.out.println("done");
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();

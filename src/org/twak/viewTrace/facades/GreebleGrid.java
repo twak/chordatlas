@@ -764,26 +764,28 @@ public class GreebleGrid {
 				if ( allGeom.contains( w ) ) {
 					
 					PanesLabelApp pa = ac.get(PanesLabelApp.class, w);
-				
+					
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (pa == null || pa.texture == null) // no texture info
+							if ( pa.texture == null) // no texture info
 								createInnie( rect, allUV.normalize( rect ), to3d, 
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), 
 												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
-							else if (pa.panes == null) { // just coarse facade
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
-								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
+							else if ( pa.panes == null ) { // just coarse facade
+								DRectangle uvr = allUV.normalize( rect );
+								createInnie( rect, uvr, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+//								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
+								mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), fa.texture, w ).add( rect, uvr, to3d, -0.2 );
 							
 							} else if (pa.textureUVs == TextureUVs.Zero_One){ // labels
 								
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
 								createWindowFromPanes (pa.panes, rect, rect, to3d,
-										mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ),
+										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), pa.texture, w ),
 										0.2, 0.17 );
 							}
-							else { // textures
+							else { // textures and panes
 								
 								DRectangle uvs = allUV.normalize( rect );
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );

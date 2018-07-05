@@ -26,7 +26,7 @@ public class RoofGreebleApp extends App {
 //	private RoofTexApp child;
 	private MiniRoof mr;
 	
-	public RoofGreebleApp( MiniRoof mr ) {
+	public RoofGreebleApp( MiniRoof mr, AppStore ass ) {
 		super( );
 		this.mr = mr;
 	}

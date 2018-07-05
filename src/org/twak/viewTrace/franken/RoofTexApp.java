@@ -55,7 +55,7 @@ public class RoofTexApp extends App {
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
 	
-	public RoofTexApp(MiniRoof mr) {
+	public RoofTexApp(MiniRoof mr, AppStore ass) {
 		
 		super( );
 		this.mr = mr;

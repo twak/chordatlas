@@ -31,7 +31,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 
 	MiniFacade mf;
 	
-	public FacadeSuperApp( MiniFacade mf ) {
+	public FacadeSuperApp( MiniFacade mf, AppStore ass ) {
 		super();
 		this.mf = mf;
 	}

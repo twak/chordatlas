@@ -1,12 +1,12 @@
 package org.twak.viewTrace.facades;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.vecmath.Point2d;
 
+import org.twak.utils.IdentityHashSet;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
@@ -31,7 +31,7 @@ public class PostProcessState {
 	 * FacadeTextureApp uses these windows to create textures
 	 * 
 	 */
-	public Set<FRect> generatedWindows = new LinkedHashSet<>();
+	public Set<FRect> generatedWindows = new IdentityHashSet<>();
 	
 	public PostProcessState( Loop<LPoint2d> flat ) {
 		this.wallFaces.add( flat );

@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
@@ -68,7 +69,7 @@ public class JointStyle implements StyleSource {
 		public PerJoint (NetProperties ns) {
 			this.ns = ns;
 			this.bakeWith = ns.klass == BlockApp.class ? ns.klass : BuildingApp.class; // shouldn't bake block anyway
-			this.dist = new MultiModal( ns.getClass() );
+			this.dist = new MultiModal( ns.klass );
 			this.dist.newMode();
 		}
 	}
@@ -158,6 +159,8 @@ public class JointStyle implements StyleSource {
 
 	public boolean install( SelectedApps root ) {
 		
+		nets.stream().forEach( n -> n.setMedium() );
+		
 		BlockApp ba = (BlockApp) root.findRoots().iterator().next();
 
 		if ( this.root != ba ) {
@@ -168,6 +171,7 @@ public class JointStyle implements StyleSource {
 		return true;
 	}
 	
+	Random randy = new Random();
 	public void redraw(AppStore ass) {
 		
 		for (Joint j : joints) {
@@ -264,8 +268,7 @@ public class JointStyle implements StyleSource {
 		return findParentOfClass( app.getUp( ass ), klass, ass);
 	}
 
-	private void redraw( int stage,  MultiMap<Integer, App> todo, Joint j,
-			Random random, AppStore ass ) {
+	private void redraw( int stage,  MultiMap<Integer, App> todo, Joint j, Random random, AppStore ass ) {
 
 		
 		if (stage >= NetInfo.evaluationOrder.size())
@@ -349,6 +352,11 @@ public class JointStyle implements StyleSource {
 		NetProperties ns = klass2Net.get(appMode.getClass()); 
 		appMode.appMode = (ns.on || !ns.show) ? AppMode.Net : AppMode.Manual; // ui for block, building, not others
 		appMode.styleSource = this;
+	}
+
+	@Override
+	public void install( App app, AppStore ass ) {
+		process( app, randy, ass );
 	}
 
 }
