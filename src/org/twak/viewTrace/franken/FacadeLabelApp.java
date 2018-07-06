@@ -9,19 +9,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
+import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.skel.FacadeDesigner;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.facades.CGAMini;
+import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -41,6 +47,8 @@ public class FacadeLabelApp extends App {
 	
 	public MiniFacade mf;
 	public String texture;
+	
+	public boolean projectLabels = false, showRawLabels = true;
 	
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
@@ -143,6 +151,23 @@ public class FacadeLabelApp extends App {
 					globalUpdate.run();
 				};
 			}.notWhileDragging() );
+			
+			out.add (new AutoCheckbox( this, "projectLabels", "debug labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).projectLabels = selected;
+					globalUpdate.run();
+				};
+			});
+			
+			out.add (new AutoCheckbox( this, "showRawLabels", "debug raw labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).projectLabels = selected;
+					globalUpdate.run();
+				};
+			});
+			
 		}
 		
 		return out;
@@ -184,7 +209,7 @@ public class FacadeLabelApp extends App {
 			MiniFacade amf = ((FacadeLabelApp)a).mf;
 			BuildingApp ba = amf.sf.buildingApp;
 			
-			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers );
+			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers ), facadeOnly = Pix2Pix.findBounds( amf,  false );
 
 			if (mini.area() < 0.1)
 				continue;
@@ -203,11 +228,15 @@ public class FacadeLabelApp extends App {
 				mask = mask.scale( scale );
 				mask.x = ( ni.resolution - mask.width ) * 0.5;
 				mask.y = 0; 
+				
+				facadeOnly = facadeOnly.scale( scale );
+				facadeOnly.x = 0;
+				facadeOnly.y = 0;
 			}
 
 			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers );
 
-			Meta meta = new Meta( amf, mask, mini );
+			Meta meta = new Meta( amf, mask, facadeOnly, mini );
 
 			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, FLOOR_HEIGHT * scale / 255.  );
 		}
@@ -230,8 +259,35 @@ public class FacadeLabelApp extends App {
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
+						
 						if ( dest != null ) 
 							 meta.mf.facadeLabelApp.texture = dest; // todo: set on FacadeTexApp after cropping for dormers
+						
+						if (projectLabels) {
+							
+							if (showRawLabels) {
+							
+								String dF = Pix2Pix.importTexture( e.getValue(), -1, null, meta.facadeOnly, null, new BufferedImage[3] );
+								meta.mf.facadeTexApp.texture = dest;
+							}
+							else {
+								List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+								
+								NetInfo ni = NetInfo.get(FacadeLabelApp.this.getClass());
+								
+								BufferedImage regularized = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+								Graphics2D gL = regularized.createGraphics();
+								
+								Pix2Pix.cmpRects( mf, gL, new DRectangle(ni.resolution, ni.resolution), meta.facadeOnly, Color.green, new ArrayList<>( renderedWindows ) );
+
+								gL.dispose();
+								
+								String rawLabelFile = "scratch/"+UUID.randomUUID();
+								
+								ImageIO.write( regularized, "png", new File( Tweed.DATA + "/" + rawLabelFile ) );
+								meta.mf.facadeTexApp.texture = dest;
+							}
+						}
 					}
 					
 					System.out.println("done here");
@@ -349,11 +405,12 @@ public class FacadeLabelApp extends App {
 	}
 
 	private static class Meta {
-		DRectangle mask, mfBounds;
+		DRectangle mask, mfBounds, facadeOnly;
 		MiniFacade mf;
 		
-		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds ) {
+		private Meta( MiniFacade mf, DRectangle mask, DRectangle facadeOnly, DRectangle mfBounds ) {
 			this.mask = mask;
+			this.facadeOnly = facadeOnly;
 			this.mf = mf;
 			this.mfBounds = mfBounds;
 		}

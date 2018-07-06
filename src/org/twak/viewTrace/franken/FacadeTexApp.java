@@ -156,12 +156,6 @@ public class FacadeTexApp extends App {
 
 			DRectangle mini = Pix2Pix.findBounds( mf, false );
 
-			gL.setColor( CMPLabel.Background.rgb );
-			gL.fillRect( 0, 0, resolution, resolution );
-			
-			gE.setColor( CMPLabel.Background.rgb );
-			gE.fillRect( 0, 0, resolution, resolution );
-
 			mini = Pix2Pix.findBounds( mf, false );
 
 			if (mini == null)
@@ -183,6 +177,13 @@ public class FacadeTexApp extends App {
 
 			
 
+			gL.setColor( CMPLabel.Background.rgb );
+			gL.fillRect( 0, 0, resolution, resolution );
+			
+			gE.setColor( CMPLabel.Background.rgb );
+			gE.fillRect( 0, 0, resolution, resolution );
+
+			
 			if ( fta.postState == null ) {
 				
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
