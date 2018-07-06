@@ -32,7 +32,7 @@ public class SiteplanDesigner {
 		sg.closeSitePlan();
 		Plot.closeLast();
 
-		if (!TweedSettings.settings.sitePlanInteractiveTextures)
+		if (!TweedSettings.settings.siteplanInteractiveTextures)
 		for ( HalfEdge he : sf ) {
 			SuperEdge ee = (SuperEdge) he;
 			if ( ee.toEdit != null )
@@ -82,7 +82,7 @@ public class SiteplanDesigner {
 
 								sg.setSkel( (PlanSkeleton) threadKey, sf );
 								
-								if (TweedSettings.settings.sitePlanInteractiveTextures)
+								if (TweedSettings.settings.siteplanInteractiveTextures)
 									sg.updateTexture( sf, new Runnable() {
 									public void run() {
 										
@@ -125,7 +125,7 @@ public class SiteplanDesigner {
 				if (oldTag != null)
 					mfa.parent = oldTag.sf;
 				
-				if (TweedSettings.settings.sitePlanInteractiveTextures) {
+				if (TweedSettings.settings.siteplanInteractiveTextures) {
 					
 					mfa.appMode = AppMode.Net;
 					se.toEdit.height = 5;

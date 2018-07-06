@@ -48,7 +48,7 @@ public class PanesLabelApp extends App {
 		
 		this.fr = fr;
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
+		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
 		
 		getUp( ).styleSource.install(this);
@@ -74,7 +74,7 @@ public class PanesLabelApp extends App {
 		if (t.textureRect != null)
 			this.textureRect = new DRectangle(t.textureRect);
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
+		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
 		
 		if (appMode != AppMode.Net)

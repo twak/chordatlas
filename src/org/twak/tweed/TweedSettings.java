@@ -93,7 +93,7 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
-	public boolean sitePlanInteractiveTextures = true;
+	public boolean siteplanInteractiveTextures = true;
 	public boolean importMiniMeshTextures = false;
 
 	
@@ -115,7 +115,11 @@ public class TweedSettings {
 			if (!def.exists())
 				settings = new TweedSettings();
 			else
-				settings = (TweedSettings) new XStream(new PureJavaReflectionProvider()).fromXML( def );
+			{
+				XStream xs = new XStream(new PureJavaReflectionProvider());
+				xs.ignoreUnknownElements();
+				settings = (TweedSettings) xs.fromXML( def );
+			}
 			
 			TweedFrame.instance.tweed.initFrom( folder.toString() );
 			

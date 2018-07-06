@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -37,6 +38,8 @@ public class NormSpecGen {
 		Bin colors = new Bin( 0, 256, 256, false );
 		
 		int width = rgb.getWidth(), height = rgb.getHeight();
+		
+		Random randy = new Random();
 		
 		double[][][] heights = new double[rgb.getWidth()][rgb.getHeight()][4];
 		
@@ -77,6 +80,10 @@ public class NormSpecGen {
 		norm = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		spec = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		
+		int 
+			normX = ( 128 + (int) ( randy.nextGaussian() * 10 )) << 8,
+			normY = ( 128 + (int) ( randy.nextGaussian() * 10 )) << 16;
+		
 		for ( int x = 0; x < width; x++ )
 			for ( int y = 0; y < height; y++ ) {
 				
@@ -101,21 +108,12 @@ public class NormSpecGen {
 						if ( distance( s, src.getRGB(), t1, t2 ) < 10 ) {
 							specOut = dest.getRGB();
 							
-							if (specOut == Color.white.getRGB()) // shiny things are float
-								normOut = 0x8080ff;
+							if (specOut == Color.white.getRGB()) { // shiny things are flat
+								normOut  = 0xff + normX + normY; // but sometimes wonky
+//								normOut = 0x8080ff; 
+							}
 						}
 					}
-					
-					
-//					if ( distance( s, Pix2Pix.CMPLabel.Window.rgb.getRGB(), t1, t2 ) < 10 ) {
-//						specOut = Color.white.getRGB();
-//						normOut = 0x8080ff;
-//					} else if ( distance( s, Pix2Pix.CMPLabel.Door.rgb.getRGB(), t1, t2 ) < 10 || 
-//							    distance( s, Pix2Pix.CMPLabel.Shop.rgb.getRGB(), t1, t2 ) < 10 ) {
-//						specOut = Color.darkGray.getRGB();
-//					} else {
-//					
-//					}
 				}
 				
 				spec.setRGB( x, y, specOut );

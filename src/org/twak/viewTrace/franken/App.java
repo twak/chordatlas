@@ -86,7 +86,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		try {
 			alreadyIn = true;
 
-			ProgressMonitor pm = TweedSettings.settings.sitePlanInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
+			ProgressMonitor pm = TweedSettings.settings.siteplanInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
 
 			long startTime = System.currentTimeMillis();
 
