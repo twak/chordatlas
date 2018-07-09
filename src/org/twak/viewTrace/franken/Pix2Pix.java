@@ -87,6 +87,37 @@ public class Pix2Pix {
 		}
 	}
 	
+
+	static final String [] inputMapNames = new String[] {"", "_empty", "_mlabels" }; 
+	
+	public void addInput( BufferedImage input, BufferedImage empty,
+			BufferedImage mLabels, Object key, double[] styleZ, Double scale ) {
+		
+		BufferedImage[] bis = new BufferedImage[] {input, empty, mLabels};
+		String name = UUID.randomUUID() +  ( scale == null? "" : ("@" + scale ));
+		
+		for ( int i = 0; i < bis.length; i++ ) {
+			try {
+
+				BufferedImage bi = bis[ i ];
+				
+				if ( bi == null )
+					continue;
+
+				File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + inputMapNames[i] + "/val/" );
+				dir.mkdirs();
+				String nameWithZ = name + zAsString( styleZ );
+
+				ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
+				inputs.put( key, nameWithZ );
+
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
 	public void submit( Job job ) {
 		
 		String network = netName;
@@ -194,7 +225,6 @@ public class Pix2Pix {
 			BufferedImage bi = ImageIO.read( f );
 			BufferedImage orig = bi;
 			bi = Imagez.scaleSquare( bi, resolution );
-			bi = Imagez.join( bi, bi );
 
 			File dir = new File( TweedSettings.settings.bikeGanRoot + "input/" + netName + "_e/val/" );
 			dir.mkdirs();
@@ -341,35 +371,6 @@ public class Pix2Pix {
 		}
 	}
 
-	static final String [] inputMapNames = new String[] {"", "_empty", "_mlabels" }; 
-	
-	public void addInput( BufferedImage input, BufferedImage empty,
-			BufferedImage mLabels, Object key, double[] styleZ, Double scale ) {
-		
-		BufferedImage[] bis = new BufferedImage[] {input, empty, mLabels};
-		String name = UUID.randomUUID() +  ( scale == null? "" : ("@" + scale ));
-		
-		for ( int i = 0; i < bis.length; i++ ) {
-			try {
-
-				BufferedImage bi = bis[ i ];
-				
-				if ( bi == null )
-					continue;
-
-				File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + inputMapNames[i] + "/val/" );
-				dir.mkdirs();
-				String nameWithZ = name + zAsString( styleZ );
-
-				ImageIO.write( bi, "png", new File( dir, nameWithZ + ".png" ) );
-				inputs.put( key, nameWithZ );
-
-			} catch ( IOException e ) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	public void addEInput ( BufferedImage bi, Object key ) {
 		try {
 			
