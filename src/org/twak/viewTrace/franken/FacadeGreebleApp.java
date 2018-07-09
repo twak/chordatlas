@@ -254,12 +254,12 @@ public class FacadeGreebleApp extends App {
 				
 				for ( Feature f : toGenerate ) {
 
-					JsonNode node = root.get( f.name().toLowerCase().replace ("moulding", "molding") );
+					JsonNode node = root.get( f.name().toLowerCase() );//.replace ("moulding", "molding") );
 
 					if ( node == null )
 						continue;
 
-					List<DRectangle> frects = new ArrayList<>(), balconies = new ArrayList<>();
+					List<DRectangle> frects = new ArrayList<>();
 					
 					for ( int i = 0; i < node.size(); i++ ) {
 

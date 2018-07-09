@@ -184,7 +184,6 @@ public class PanesLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-//						File labelFile = new File( e.getValue(), meta.name+ ".png" ) ;
 						BufferedImage labels = ImageIO.read( e.getValue() );
 						
 						if (regularize) {
@@ -200,8 +199,6 @@ public class PanesLabelApp extends App {
 							meta.app.textureUVs = TextureUVs.Zero_One;
 							meta.app.texture = meta.app.label = dest;
 						}
-						else
-							System.out.println("poot");
 					}
 					
 				} catch (Throwable th) {

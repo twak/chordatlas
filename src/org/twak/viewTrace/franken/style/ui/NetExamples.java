@@ -156,9 +156,6 @@ public class NetExamples extends JComponent {
 						
 						int index = randy.nextInt(inputs.size());
 						
-						double[] z = styleSource.draw( randy, null );
-						
-						
 						Double scale = 0.1;
 						
 						if (exemplar.name.contains ("pane") )
@@ -175,7 +172,7 @@ public class NetExamples extends JComponent {
 					
 					batchSize = BATCH_SIZE;
 					
-					p2.submitSafe( new Job() {
+					p2.submit( new Job() {
 						public void finished(java.util.Map<Object,File> results) {
 							
 							endTime = System.currentTimeMillis();

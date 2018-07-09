@@ -88,12 +88,6 @@ public class Pix2Pix {
 	}
 	
 	public void submit( Job job ) {
-//		synchronized (job.network.intern()) {
-			submitSafe(job);
-//		}
-	}
-	
-	public void submitSafe( Job job ) {
 		
 		String network = netName;
 		
@@ -154,7 +148,6 @@ public class Pix2Pix {
 		} while ( System.currentTimeMillis() - startTime < 6000 );
 		
 		System.out.println( "timeout trying to get result "+ job.name );
-		
 	}
 
 	private void finished( Job job, File outDir ) {
@@ -364,9 +357,6 @@ public class Pix2Pix {
 				if ( bi == null )
 					continue;
 
-				if (i == 0)
-					bi = Imagez.join( bi, bi ); // main channel is aligned
-				
 				File dir = new File( TweedSettings.settings.bikeGanRoot + "/input/" + netName + inputMapNames[i] + "/val/" );
 				dir.mkdirs();
 				String nameWithZ = name + zAsString( styleZ );
