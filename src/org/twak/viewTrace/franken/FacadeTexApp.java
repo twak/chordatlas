@@ -94,7 +94,7 @@ public class FacadeTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
+		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) )
 			if (r.panesLabelApp.renderedOnFacade)
 				out.put( "window", r.panesLabelApp );
 		

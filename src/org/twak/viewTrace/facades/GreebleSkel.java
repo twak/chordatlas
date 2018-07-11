@@ -669,7 +669,7 @@ public class GreebleSkel {
 						wallTag != null && floorRect != null && toRecess != null ) {
 
 					// set the vertical bounds, so we can just render in 2d
-					FRect bounds = new FRect( n.original, n.original.panesLabelApp, n.original.panesTexApp );
+					FRect bounds = new FRect( n.original, n.original.panesLabelApp, n.original.panesTexApp, null );
 					
 					n.setBounds( to2d, bounds );
 

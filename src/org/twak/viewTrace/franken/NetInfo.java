@@ -45,6 +45,8 @@ public class NetInfo {
 		index.put ( d( PanesLabelApp.class   ), new NetInfo ( "pane labels"    , 8, 256, Color.red , "pane_label.png"     ) );
 		index.put ( d( PanesTexApp.class     ), new NetInfo ( "pane textures"  , 8, 256, Color.red , "pane_tex.png"       ) );
 		
+		index.put ( d( DoorTexApp.class     ), new NetInfo  ( "door textures"  , 8, 256, Color.red , "door_tex.png"       ) );
+		
 		index.put ( d( FacadeSuperApp.class  ), new NetInfo ( "facade super"   , 8, 256, null      , "facade_super.png"   ) );
 		index.put ( d( RoofSuperApp.class    ), new NetInfo ( "roof super"     , 8, 256, null      , "roof_super.png"     ) );
 	}

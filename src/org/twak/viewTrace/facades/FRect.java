@@ -20,6 +20,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
 import org.twak.viewTrace.franken.PanesTexApp;
 
@@ -35,6 +36,7 @@ public class FRect extends DRectangle implements ICanEdit {
 
 	public PanesLabelApp panesLabelApp;
 	public PanesTexApp panesTexApp;
+	public DoorTexApp doorTexApp;
 	
 	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
 	
@@ -81,13 +83,14 @@ public class FRect extends DRectangle implements ICanEdit {
 	}
 	
 
-	public FRect( FRect o, PanesLabelApp pla, PanesTexApp pta ) {
+	public FRect( FRect o, PanesLabelApp pla, PanesTexApp pta, DoorTexApp dta ) {
 		super(o);
 		
 		init( o );
 		
 		this.panesLabelApp = pla;
 		this.panesTexApp = pta;
+		this.doorTexApp = dta;
 	}
 	
 	public FRect(MiniFacade mf) {
@@ -121,6 +124,7 @@ public class FRect extends DRectangle implements ICanEdit {
 	private void initApps() {
 		panesLabelApp = new PanesLabelApp( this );
 		panesTexApp   = new PanesTexApp  ( this );
+		doorTexApp    = new DoorTexApp  ( this );
 	}
 
 	public FRect getAdj(Dir d) {

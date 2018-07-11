@@ -123,8 +123,6 @@ public class PanesLabelApp extends App {
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
 
-		panes = null;
-		
 		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 		
@@ -137,9 +135,11 @@ public class PanesLabelApp extends App {
 				
 				PanesLabelApp a = (PanesLabelApp)a_;
 				
+				a.panes = null;
+				
 				FRect r = a.fr;
 				
-				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r ) )
+				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r.getCenter() ) )
 					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
@@ -156,16 +156,14 @@ public class PanesLabelApp extends App {
 				g.setColor( Color.red );
 				g.fillRect ( (int) imBounds.x, (int)imBounds.y, (int)imBounds.width, (int) imBounds.height);
 				
-				Meta meta = new Meta( (PanesLabelApp) a, r, imBounds );
+				Meta meta = new Meta( a, r, imBounds );
 				
-				PanesLabelApp pla =  (PanesLabelApp)a;
-
-				pla.frameScale = 0.5 * pla.frameWidth * scale / ni.resolution;
+				a.frameScale = 0.5 * a.frameWidth * scale / ni.resolution;
 				
 				if (r.width > 3) // small frame sizes start to look strange 
-					pla.frameScale *= 8;
+					a.frameScale *= 8;
 				
-				p2.addInput( bi, bi, null, meta, a.styleZ, pla.frameScale );
+				p2.addInput( bi, bi, null, meta, a.styleZ, a.frameScale );
 
 			} catch ( Throwable e1 ) {
 				e1.printStackTrace();

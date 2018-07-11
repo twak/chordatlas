@@ -38,9 +38,9 @@ import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
 import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
-import org.twak.viewTrace.franken.PanesTexApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 
 import com.jme3.material.Material;
@@ -313,7 +313,7 @@ public class GreebleGrid {
 			to3d.invert();
 		}
 		
-		FRect w = new FRect ( l.original, l.original.panesLabelApp, l.original.panesTexApp );
+		FRect w = new FRect ( l.original, l.original.panesLabelApp, l.original.panesTexApp, null );
 		
 		
 		PanesLabelApp wa = w.panesLabelApp;
@@ -801,7 +801,7 @@ public class GreebleGrid {
 				
 				if ( allGeom.contains( w ) ) {
 					
-					PanesLabelApp pa = w.panesLabelApp;
+					DoorTexApp pa = w.doorTexApp;
 					
 					g.insert( w, new Griddable() {
 						@Override
