@@ -16,6 +16,7 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacadePainter;
 import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.FacadeGreebleApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class FacadeDesigner {
@@ -28,6 +29,9 @@ public class FacadeDesigner {
 	
 	public FacadeDesigner (MiniFacade mf,Runnable update) {
 
+		FacadeGreebleApp fga = mf.facadeGreebleApp;
+		fga.appMode = AppMode.Manual;
+		
 		FacadeTexApp ma = mf.facadeTexApp;
 		
 //		if ( ma.appMode == AppMode.Manual )
@@ -45,8 +49,9 @@ public class FacadeDesigner {
 		
 		FacadeTexApp fta = mf.facadeTexApp;
 		
+		PaintThing.debug.clear();
+		
 		if (fta.postState != null) {
-			
 			PaintThing.debug( Color.lightGray, 1f, MiniFacadePainter.yFlip ( fta.postState.roofFaces ) );
 			PaintThing.debug( Color.gray, 1f, MiniFacadePainter.yFlip ( fta.postState.wallFaces ) );
 		}

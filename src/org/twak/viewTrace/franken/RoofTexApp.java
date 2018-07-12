@@ -105,18 +105,44 @@ public class RoofTexApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
-		if ( appMode != AppMode.Net ) {
-			whenDone.run();
-			return;
-		}
-		
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
 		
 		int resolution = ni.resolution;
 		
-		addCoarseRoofInputs( batch.stream().map( x -> ((RoofTexApp)x).mr ).
-				collect( Collectors.toList() ), p2, resolution, false );
+		BufferedImage label = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gL = (Graphics2D) label.getGraphics();
+		
+		BufferedImage empty = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+		Graphics2D gE = (Graphics2D) empty.getGraphics();
+
+		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
+		
+		for (App a : batch) {
+
+			RoofTexApp rta = (RoofTexApp)a;
+			MiniRoof mr = rta.mr;
+			
+			if (a.appMode != AppMode.Net) {
+				
+				if (a.appMode == AppMode.Parent) {
+					rta.texture = mr.roofGreebleApp.greebleTex;
+					rta.textureUVs = TextureUVs.Rectangle;
+					mr.roofSuperApp.textures = null;
+				}
+				
+				continue;
+			}
+			
+			
+			DRectangle bounds = draw (gL, drawTo, mr, false);
+			drawEmpty (gE, drawTo, mr, bounds);
+			
+			p2.addInput( label, empty, null, mr, mr.roofTexApp.styleZ, null );
+		}
+		
+//		addCoarseRoofInputs( batch.stream().map( x -> ((RoofTexApp)x).mr ).
+//				collect( Collectors.toList() ), p2, resolution, false );
 
 		p2.submit( new Job( new JobResult() {
 			
@@ -159,8 +185,7 @@ public class RoofTexApp extends App {
 		if ( block.doSkirt ) {
 			try {
 				
-				BufferedImage dest, 
-					src = ImageIO.read (new File (Tweed.DATA, coarse));
+				BufferedImage dest, src = ImageIO.read (new File (Tweed.DATA, coarse));
 				
 				String out = "scratch/"+ UUID.randomUUID() + ".png";
 				
@@ -354,7 +379,7 @@ public class RoofTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Net, AppMode.Bitmap};
+		return new Enum[] {AppMode.Manual, AppMode.Net, AppMode.Bitmap, AppMode.Parent};
 	}
 	
 	@Override

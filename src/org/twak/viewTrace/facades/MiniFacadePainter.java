@@ -58,7 +58,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		for ( Feature f : Feature.values() )
 			if (f != Feature.GRID)
 			for ( FRect w : mf.featureGen.get( f ) ) {
-				if ( w.outer == null ) 
+//				if ( w.outer == null ) 
 				{
 					g.setColor( f.color );
 					
@@ -302,7 +302,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 			@Override
 			public void run() {
 				if (dragging != null)
-					mf.featureGen.remove( dragging.f, dragging );
+					mf.featureGen.remove( dragging.getFeat(), dragging );
 				
 				cl.stateChanged( null );
 			}
@@ -321,7 +321,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 					FRect rec = new FRect( dragging );
 //					rec.x += 0.5;
 					rec.x += rec.width + 0.3;
-					mf.featureGen.put( rec.f, rec );
+					mf.featureGen.put( rec.getFeat(), rec );
 					cl.stateChanged( null );
 					
 				}
@@ -338,7 +338,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 					Point2d pt = flip ( ma.from( e ) );
 					
 					FRect rec = new FRect( pt.x, pt.y, pt.x + 0.5, pt.y + 0.5, mf);
-					rec.f = f;
+					rec.setFeat( f );
 					
 					mf.featureGen.put( f, rec );
 				

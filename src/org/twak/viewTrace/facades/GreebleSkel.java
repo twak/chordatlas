@@ -235,7 +235,7 @@ public class GreebleSkel {
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) {
-					if (q1.original.f == Feature.WINDOW || q1.original.f == Feature.SHOP) {
+					if (q1.original.getFeat() == Feature.WINDOW || q1.original.getFeat() == Feature.SHOP) {
 						q1.original.panesLabelApp.renderedOnFacade = true;
 					}
 				}
@@ -247,7 +247,7 @@ public class GreebleSkel {
 				Iterator<QuadF> quit = processedFeatures.iterator();
 				while ( quit.hasNext() ) {
 					QuadF w = quit.next();
-					if ( ( w.original.f == Feature.WINDOW || w.original.f == Feature.SHOP ) && w.foundAll() ) {
+					if ( ( w.original.getFeat() == Feature.WINDOW || w.original.getFeat() == Feature.SHOP ) && w.foundAll() ) {
 						
 						w.original.panesLabelApp.renderedOnFacade = true;
 						
@@ -410,6 +410,7 @@ public class GreebleSkel {
 					faceColor = greebleGrid.mbs.getTexture( TILE_TEXTURED, TILE_JPG, miniroof );
 					break;
 				case Net:
+				case Parent:
 					if ( ra.texture == null )
 						faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					
@@ -675,7 +676,7 @@ public class GreebleSkel {
 
 					if ( floorRect.contains( bounds ) ) 
 					{
-						toRecess.put( n.original.f, bounds );
+						toRecess.put( n.original.getFeat(), bounds );
 						quit.remove();
 					}
 				}
@@ -683,7 +684,7 @@ public class GreebleSkel {
 			
 			if ( floorRect == null || wallTag == null || toRecess == null || mf == null ) {
 				greebleRoof( f, ll, faceMaterial, start, end, flat, to3d, to2d );
-			} else if ( fta.appMode == AppMode.Manual || fta.texture == null )
+			} else if ( fta.texture == null )
 				
 				greebleGrid.buildGrid (
 					floorRect,

@@ -14,6 +14,8 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 	
 	public double[] facadeStyle;
 	
+	public FeatureGenerator() {}
+	
 	public FeatureGenerator( MiniFacade mf ) {
 		this.mf = mf;
 	}
@@ -25,8 +27,8 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 		for (Map.Entry<Feature, List<FRect>> ee : features.entrySet()) {
 			for (FRect e : ee.getValue()) {
 				FRect fr = new FRect( e, mf);
-				fr.f = ee.getKey();
-				put( fr.f, fr );
+				fr.setFeat( ee.getKey() );
+				put( fr.getFeat(), fr );
 			}
 		}
 	}
@@ -38,7 +40,7 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
 	public FRect add( Feature feat, DRectangle rect ) {
 		FRect f = new FRect( rect, mf );
-		f.f = feat;
+		f.setFeat( feat );
 		put( feat, f );
 		return f;
 	}

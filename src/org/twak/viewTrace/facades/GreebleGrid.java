@@ -1,5 +1,6 @@
 package org.twak.viewTrace.facades;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.GreebleSkel.QuadF;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -41,6 +43,7 @@ import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 
 import com.jme3.material.Material;
@@ -702,12 +705,19 @@ public class GreebleGrid {
 					} );
 				}
 			}
-			for ( DRectangle d : filteredFeatuers.get( Feature.DOOR ) ) {
+			for ( FRect d : filteredFeatuers.get( Feature.DOOR ) ) {
 				if ( all.contains( d ) )
 					g.insert( d, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", new float[] {0,0,0.3f, 1} ), 0.4 );
+							
+							Color c;
+							if (d.panesTexApp != null)
+								c = d.panesTexApp.color;
+							else
+								c = Color.darkGray;
+							
+							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( c ) ), 0.4 );
 						}
 					} );
 			}
@@ -801,15 +811,23 @@ public class GreebleGrid {
 				
 				if ( allGeom.contains( w ) ) {
 					
-					DoorTexApp pa = w.doorTexApp;
+					PanesLabelApp pa =w.panesLabelApp;
 					
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (pa.texture == null)
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f, 0, MeshBuilder.ALL_BUT_FRONT );
+							
+//							if (w.panesTexApp != null && w.panesTexApp.color != null)
+//								createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
+							if (pa. texture == null)
+								createInnie( rect, allUV.normalize( rect ), to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ), 0.5f, 0, MeshBuilder.ALL_BUT_FRONT );
+							else if (pa.textureUVs == TextureUVs.Zero_One) // labels
+								createInnie( rect, ZERO_ONE_UVS, to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), pa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+fa.texture, fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
+								createInnie( rect, allUV.normalize( rect ), to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
 						}
 					} );
 				}

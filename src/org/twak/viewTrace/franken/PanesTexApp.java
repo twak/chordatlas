@@ -24,10 +24,12 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.EResult;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
@@ -65,7 +67,7 @@ public class PanesTexApp extends App {
 		JPanel out = new JPanel(new ListDownLayout() );
 
 		if ( appMode == AppMode.Net ) {
-
+			
 			out.add( new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
 				@Override
 				public void updated( boolean selected ) {
@@ -152,7 +154,7 @@ public class PanesTexApp extends App {
 
 				Meta meta = new Meta( pta, ni.sizeZ, mf, r );
 				
-				if ( fta.texture == null || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
+				if ( fta.texture == null || r.getFeat() == Feature.DOOR || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
 					
 					meta.styleZ = a.styleZ;
 					otherMeta.add( meta );
@@ -220,8 +222,10 @@ public class PanesTexApp extends App {
 	public void computeTextures( Runnable whenDone, List<Meta> batch ) {
 
 		
-		NetInfo ni = NetInfo.get(this); 
-		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
+		NetInfo ni = NetInfo.get(this);
+		
+		Pix2Pix pWindows = new Pix2Pix( ni );
+		Pix2Pix pDoors = new Pix2Pix( "door textures", 256 );
 
 		BufferedImage lBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D lg =  lBi.createGraphics();
@@ -262,8 +266,7 @@ public class PanesTexApp extends App {
 				
 				meta.imBounds = imBounds;
 				
-				p2.addInput( lBi, eBi, null, meta, meta.styleZ, pla.frameScale );
-
+				(pta.fr.getFeat() == Feature.DOOR ? pDoors : pWindows ).addInput( lBi, eBi, null, meta, meta.styleZ, pla.frameScale );
 
 			} catch ( IOException e1 ) {
 				e1.printStackTrace();
@@ -273,106 +276,125 @@ public class PanesTexApp extends App {
 		lg.dispose();
 		eg.dispose();
 		
-		p2.submit( new Job( new JobResult() {
+		pWindows.submit( new Job( new JobResult() {
 			
 			@Override
-			public void finished( Map<Object, File> results ) {
+			public void finished( Map<Object, File> windowResults ) {
 
-				
-				Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
-
+				pDoors.submit( new Job (new JobResult() {
+					
 					@Override
-					public BufferedImage[] create( MiniFacade mf ) {
+					public void finished( Map<Object, File> doorResults ) {
 						
-						String src;
+						doorResults.putAll( windowResults );
 						
-						FacadeTexApp fta = mf.facadeTexApp;
+						assignTextures (doorResults);
 						
-						if (fta.coarseWithWindows != null)
-							src = fta.coarseWithWindows;
-						else
-							src = fta.coarse;
-						
-						if (src == null)
-							return null;
-						
-						return new BufferedImage[] {
-								Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_norm.png" ) ) ) 
-						};
+						whenDone.run();
 					}
-				};
-				
-				try {
-//					e:
-					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-						Meta meta = (Meta) e.getKey();
-						
-						BufferedImage[] maps = new BufferedImage[3];
-						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, 
-								meta.imBounds, null, maps );
-
-						if ( dest != null ) {
-							
-							FRect frect = meta.pta.fr;
-							MiniFacade mf = frect.mf;
-							PanesLabelApp pla = frect.panesLabelApp;
-							
-							pla.texture = dest;
-							pla.textureUVs = TextureUVs.Square;
-							
-							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
-							
-							d.y = ni.resolution - d.y - d.height;
-							
-							BufferedImage[] toPatch = facadesImages.get(mf);
-							
-							if (toPatch == null)
-								continue;
-							
-//							if (false)
-							for (int i = 0; i < 3; i++ ) {
-								Graphics2D tpg = toPatch[i].createGraphics();
-								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
-//								tpg.setColor (Color.magenta);
-//								tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
-								tpg.dispose();
-							}
-						}
-							
-					}
-					
-//					if (false)
-					for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
-						
-						if (updated.getValue() == null)
-							continue;
-						
-						String fileName = "scratch/" + UUID.randomUUID() +".png";
-						
-						BufferedImage[] imgs = updated.getValue();
-						
-						ImageIO.write( imgs[0], "png", new File(Tweed.DATA + "/" +fileName ) );
-						ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
-						ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
-						
-						MiniFacade mf = updated.getKey();
-						
-						FacadeTexApp fta = mf.facadeTexApp;
-						fta.coarseWithWindows = fta.texture = fileName;
-					}
-					
-
-				} catch ( Throwable th ) {
-					th.printStackTrace();
-				} finally {
-					whenDone.run();
-				}
+				}) );
 			}
 		} ) );
+	}
+	
+	private void assignTextures( Map<Object, File> results ) {
+		
+		NetInfo ni = NetInfo.get(this);
+		
+		Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
+
+			@Override
+			public BufferedImage[] create( MiniFacade mf ) {
+				
+				String src;
+				
+				FacadeTexApp fta = mf.facadeTexApp;
+				
+				if (fta.coarseWithWindows != null)
+					src = fta.coarseWithWindows;
+				else
+					src = fta.coarse;
+				
+				if (src == null)
+					return null;
+				
+				return new BufferedImage[] {
+						Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_norm.png" ) ) ) 
+				};
+			}
+		};
+		
+		try {
+//			e:
+			for ( Map.Entry<Object, File> e : results.entrySet() ) {
+
+				Meta meta = (Meta) e.getKey();
+				
+				BufferedImage[] maps = new BufferedImage[3];
+
+				boolean isDoor = meta.pta.fr.getFeat() == Feature.DOOR;
+				
+				String dest = Pix2Pix.importTexture( e.getValue(),  isDoor ? 100 : -1, isDoor ? null : specLookup, 
+						meta.imBounds, null, maps );
+
+				if ( dest != null ) {
+					
+					FRect frect = meta.pta.fr;
+					MiniFacade mf = frect.mf;
+					PanesLabelApp pla = frect.panesLabelApp;
+					
+					pla.texture = dest;
+					pla.textureUVs = TextureUVs.Square;
+					
+					DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
+					
+					d.y = ni.resolution - d.y - d.height;
+					
+					BufferedImage[] toPatch = facadesImages.get(mf);
+					
+					if (toPatch == null)
+						continue;
+					
+//					if (false)
+					for (int i = 0; i < 3; i++ ) {
+						Graphics2D tpg = toPatch[i].createGraphics();
+						tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
+//						tpg.setColor (Color.magenta);
+//						tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
+						tpg.dispose();
+					}
+				}
+					
+			}
+			
+//			if (false)
+			for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
+				
+				if (updated.getValue() == null)
+					continue;
+				
+				String fileName = "scratch/" + UUID.randomUUID() +".png";
+				
+				BufferedImage[] imgs = updated.getValue();
+				
+				ImageIO.write( imgs[0], "png", new File(Tweed.DATA + "/" +fileName ) );
+				ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
+				ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
+				
+				MiniFacade mf = updated.getKey();
+				
+				FacadeTexApp fta = mf.facadeTexApp;
+				fta.coarseWithWindows = fta.texture = fileName;
+			}
+			
+
+		} catch ( Throwable th ) {
+			th.printStackTrace();
+		} 
+		
 	}
 	
 	@Override

@@ -115,6 +115,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		double goodLength;
 
 		
+		public LineAtHeight () {}
+		
 		public LineAtHeight ( int height, Line line ) {
 			this.line = line;
 			this.height = height;
@@ -184,6 +186,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		Vector2d normal;
 
 		public double minP = 0, maxP = 1;
+		
+		public MegaFacade() {}
 		
 		public MegaFacade (LineAtHeight origin) {
 			

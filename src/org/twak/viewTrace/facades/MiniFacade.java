@@ -265,13 +265,13 @@ public class MiniFacade implements HasSuper {
 				
 				FRect win = new FRect(this);
 				
-				win.f = Feature.GRID;
+				win.setFeat( Feature.GRID );
 				win.x      = dp.get(1) / scale + imageXM;
 				win.y      = topM - dp.get(2) / scale;
 				win.width  = (dp.get(3) / scale + imageXM) - win.x;
 				win.height = (topM - dp.get(0) / scale) - win.y;
 				
-				featureGen.put( win.f, win );
+				featureGen.put( win.getFeat(), win );
 			}
 		}
 	}

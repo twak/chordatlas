@@ -28,7 +28,7 @@ public class FRect extends DRectangle implements ICanEdit {
 	
 	// these are variously used around the Regularizer...
 	public MultiMap<Feature, FRect> attached = new MultiMap<>();
-	public Feature f;
+	private Feature f;
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
@@ -36,7 +36,6 @@ public class FRect extends DRectangle implements ICanEdit {
 
 	public PanesLabelApp panesLabelApp;
 	public PanesTexApp panesTexApp;
-	public DoorTexApp doorTexApp;
 	
 	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
 	
@@ -68,7 +67,6 @@ public class FRect extends DRectangle implements ICanEdit {
 
 
 	private void init( FRect o ) {
-		f = o.f;
 		id = o.id;
 		
 		outer = o.outer;
@@ -80,6 +78,7 @@ public class FRect extends DRectangle implements ICanEdit {
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
 		this.mf = o.mf;
+		setFeat( o.getFeat() );
 	}
 	
 
@@ -90,7 +89,6 @@ public class FRect extends DRectangle implements ICanEdit {
 		
 		this.panesLabelApp = pla;
 		this.panesTexApp = pta;
-		this.doorTexApp = dta;
 	}
 	
 	public FRect(MiniFacade mf) {
@@ -114,7 +112,7 @@ public class FRect extends DRectangle implements ICanEdit {
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		this.f = feature;
+		this.setFeat( feature );
 		this.mf = mf;
 		
 		initApps();
@@ -122,9 +120,30 @@ public class FRect extends DRectangle implements ICanEdit {
 	
 
 	private void initApps() {
-		panesLabelApp = new PanesLabelApp( this );
-		panesTexApp   = new PanesTexApp  ( this );
-		doorTexApp    = new DoorTexApp  ( this );
+		
+		if (panesLabelApp == null)
+			panesLabelApp = new PanesLabelApp( this );
+		
+		if (panesTexApp == null || 
+				( this.f == Feature.DOOR && this.panesTexApp.getClass() != DoorTexApp.class ) ||
+				( this.f == Feature.WINDOW && this.panesTexApp.getClass() != PanesTexApp.class ) ||
+				( this.f == Feature.SHOP && this.panesTexApp.getClass() != PanesTexApp.class ) )
+		{
+			if (f == null)
+				panesTexApp = new PanesTexApp( this );
+			else
+				switch ( f ) {
+				case SHOP:
+				case WINDOW:
+					panesTexApp = new PanesTexApp( this );
+					break;
+				case DOOR:
+					panesTexApp = new DoorTexApp( this );
+					break;
+				default:
+					panesTexApp = null;
+				}
+		}
 	}
 
 	public FRect getAdj(Dir d) {
@@ -313,7 +332,19 @@ public class FRect extends DRectangle implements ICanEdit {
 		
 		FRect o = (FRect)obj;
 		
-		return super.equals( o ) && o.f == f;
+		return super.equals( o ) && o.getFeat() == getFeat();
+	}
+
+
+	public Feature getFeat() {
+		return f;
+	}
+
+
+	public Feature setFeat( Feature f ) {
+		this.f = f;
+		initApps();
+		return f;
 	}
 }
 

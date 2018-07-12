@@ -57,6 +57,7 @@ public class FacadeTexApp extends App {
 	public Color 
 		color            =  Colourz.to4 ( GreebleSkel.BLANK_WALL ),
 		groundFloorColor = defaultGFColor;
+	
 	public PostProcessState postState = null;
 
 
@@ -94,9 +95,12 @@ public class FacadeTexApp extends App {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) )
+		for (FRect r : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
 			if (r.panesLabelApp.renderedOnFacade)
 				out.put( "window", r.panesLabelApp );
+		
+		for (FRect r : mf.featureGen.getRects( Feature.DOOR ) )
+			out.put( "door", r.panesLabelApp );
 		
 		out.put( "super", mf.facadeSuperApp );
 		out.put( "greeble", mf.facadeGreebleApp ); 
@@ -108,7 +112,7 @@ public class FacadeTexApp extends App {
 	public App copy() {
 		return new FacadeTexApp( this );
 	}
-
+	
 	public final static Map<Color, Color> specLookup = new HashMap<>();
 	static {
 		specLookup.put( CMPLabel.Window.rgb, new Color (180, 180, 180) );
@@ -118,16 +122,6 @@ public class FacadeTexApp extends App {
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
-		
-		if ( appMode != AppMode.Net ) {
-			
-			if (appMode == AppMode.Manual) {
-				texture = null;
-			}
-			
-			whenDone.run();
-			return;
-		}
 		
 		NetInfo ni =NetInfo.get(this) ;
 		int resolution = ni.resolution;
@@ -146,8 +140,19 @@ public class FacadeTexApp extends App {
 //		List<MiniFacade> mfb = batch.stream().map( x -> ((FacadeTexApp)x).ha ).collect( Collectors.toList() );
 
 		for (App a : batch) {
-			
+
 			FacadeTexApp fta = (FacadeTexApp )a;
+			
+			if ( fta.appMode != AppMode.Net ) {
+				
+				if (fta.appMode == AppMode.Manual) 
+					texture = null;
+
+				// if parent, pass-through (label debug)
+				
+				continue;
+			}
+			
 			MiniFacade mf = fta.mf;
 			
 			if (!TweedSettings.settings.siteplanInteractiveTextures && mf.featureGen instanceof CGAMini) {
@@ -233,7 +238,7 @@ public class FacadeTexApp extends App {
 
 			FacadeTexApp mfa = mf.facadeTexApp;
 			
-			p2.addInput( labels, empty, null, meta, mfa.styleZ,  FacadeLabelApp.FLOOR_HEIGHT * scale / 255. );
+			p2.addInput( labels, empty, null, meta, mfa.styleZ,  mf.facadeLabelApp.scale * FacadeLabelApp.FLOOR_HEIGHT * scale / 255.  );
 			
 			if ( mfa.getChimneyTexture() == null) {
 				Meta m2 = new Meta (mf, null);
@@ -332,7 +337,7 @@ public class FacadeTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Bitmap, AppMode.Net};
+		return new Enum[] {AppMode.Manual, AppMode.Bitmap, AppMode.Net, AppMode.Parent};
 	}
 	
 	@Override

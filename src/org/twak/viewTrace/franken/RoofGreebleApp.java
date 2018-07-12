@@ -24,6 +24,7 @@ public class RoofGreebleApp extends App {
 
 //	private RoofTexApp child;
 	private MiniRoof mr;
+	public String greebleTex;
 	
 	public RoofGreebleApp( MiniRoof mr ) {
 		super( );
@@ -88,7 +89,7 @@ public class RoofGreebleApp extends App {
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 						MiniRoof mr = (MiniRoof)e.getKey();
 						
-						Pix2Pix.importTexture( e.getValue(), -1, null, null, null, new BufferedImage[3] );
+						mr.roofGreebleApp.greebleTex = Pix2Pix.importTexture( e.getValue(), -1, null, null, null, new BufferedImage[3] );
 						
 						createGreebles(mr, new File (e.getValue().getParentFile(), e.getValue().getName()+"_circles" ) );
 					}

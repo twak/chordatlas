@@ -74,6 +74,10 @@ public class BuildingApp extends App {
 		
 		addRemoveButton (globalUpdate, out);
 		
+		JButton siteplan = new JButton( "edit plan/profile" );
+		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, parent ) );
+		out.add(siteplan);
+		
 		out.add(new AutoDoubleSlider( this, "probDormer", "p (dormer)", 0,1 ) {
 			public void updated(double value) {
 				updateDormers( new Random() );
@@ -81,9 +85,6 @@ public class BuildingApp extends App {
 			};
 		} );
 		
-		JButton siteplan = new JButton( "edit plan/profile" );
-		siteplan.addActionListener( e -> new SiteplanDesigner( superFace, parent ) );
-		out.add(siteplan);
 		
 		return out;
 	}

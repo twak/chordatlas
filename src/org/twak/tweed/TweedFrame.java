@@ -66,6 +66,7 @@ import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 
 public class TweedFrame {
 
@@ -492,7 +493,9 @@ public class TweedFrame {
 								
 //								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
+										XStream xs = new XStream(new PureJavaReflectionProvider());
+										xs.ignoreUnknownElements();
+										SkelGen sg = (SkelGen) xs.fromXML( skelGen );
 										sg.onLoad( tweed );
 										addGen( sg, true );
 //										break;

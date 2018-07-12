@@ -142,7 +142,7 @@ public class Regularizer {
 		
 		for (Feature f : Feature.values())
 			for (MiniFacade mf : out)
-				mf.featureGen.get( f ).stream().forEach( r -> r.f = f );
+				mf.featureGen.get( f ).stream().forEach( r -> r.setFeat( f ) );
 		
 
 		for (int i = 0; i < 50 * debugFrac; i++) {
@@ -302,8 +302,8 @@ public class Regularizer {
 						sx,
 						sy, out );
 				
-				win.f = Feature.WINDOW;
-				out.featureGen.put( win.f, win );
+				win.setFeat( Feature.WINDOW );
+				out.featureGen.put( win.getFeat(), win );
 				
 			}
 		
@@ -333,8 +333,8 @@ public class Regularizer {
 
 					boolean found = false;
 					for ( FRect f : nmf.featureGen.get( Feature.GRID ) ) {
-						f.f = Feature.WINDOW;
-						gridMF.featureGen.put( f.f, f );
+						f.setFeat( Feature.WINDOW );
+						gridMF.featureGen.put( f.getFeat(), f );
 						found = true;
 					}
 
@@ -468,7 +468,7 @@ public class Regularizer {
 				
 				{
 					FRect t = found.get(0);
-					o.f = t.f;
+					o.setFeat( t.getFeat() );
 					o.id = i;
 					
 //					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
@@ -483,7 +483,7 @@ public class Regularizer {
 					o.attachedHeight.get( Feature.BALCONY ).d = averageAttached (o, Feature.BALCONY, found);
 
 					
-					if ( t.f == Feature.WINDOW || t.f == Feature.SHOP ) {
+					if ( t.getFeat() == Feature.WINDOW || t.getFeat() == Feature.SHOP ) {
 						for ( FRect r : found ) {
 							corniceX.get( r.outer, r.yi ).add( o );
 							sillX   .get( r.outer, r.yi ).add( o );
@@ -492,7 +492,7 @@ public class Regularizer {
 					}
 				}
 				
-				out.featureGen.put( o.f, o );
+				out.featureGen.put( o.getFeat(), o );
 			}
 		}
 		
@@ -634,14 +634,14 @@ public class Regularizer {
 				
 				if (r1.intersects( r2 )) {
 					
-					if (r1.f == r2.f) { // we've already tried and failed to merge same-feature rects in mergeRemoveSmall
+					if (r1.getFeat() == r2.getFeat()) { // we've already tried and failed to merge same-feature rects in mergeRemoveSmall
 						FRect tg = r1.area() < r2.area() ? r1 : r2;
 						togo.add ( tg );
 						toProcess.remove( tg );
 						continue;
 					}
 					
-					FRect infront = r1.f.ordinal() < r2.f.ordinal() ? r1 : r2, 
+					FRect infront = r1.getFeat().ordinal() < r2.getFeat().ordinal() ? r1 : r2, 
 						  behind  = infront == r1 ? r2 : r1;
 				
 					togo.add(behind);
@@ -658,10 +658,10 @@ public class Regularizer {
 			}
 			
 			for (FRect a : toadd)
-				out.featureGen.put( a.f, a );
+				out.featureGen.put( a.getFeat(), a );
 			
 			for (FRect a : togo)
-				out.featureGen.remove( a.f, a );
+				out.featureGen.remove( a.getFeat(), a );
 		}
 	}
 
@@ -1345,7 +1345,7 @@ public class Regularizer {
 			if ( (n.area() + d.area() - ia) / u.area() > 0.7 ) {
 				d.setFrom(u);
 				d.adjacent[j] = null;
-				mf.featureGen.remove( n.f, n );
+				mf.featureGen.remove( n.getFeat(), n );
 			}
 		}
 
@@ -1364,7 +1364,7 @@ public class Regularizer {
 						if ( d.get( min ) < avoid.get( min ) )
 							d.set( max, avoid.get( min ) );
 						else {
-							mf.featureGen.remove( d.f, d );
+							mf.featureGen.remove( d.getFeat(), d );
 							return;
 						}
 					} else if ( d.get( min ) > avoid.get( min ) && d.get( min ) < avoid.get( max ) ) {
@@ -1372,7 +1372,7 @@ public class Regularizer {
 						if ( d.get( max ) > avoid.get( max ) ) {
 							d.set( min, avoid.get( max ) );
 						} else {
-							mf.featureGen.remove( d.f, d );
+							mf.featureGen.remove( d.getFeat(), d );
 							return;
 						}
 					}

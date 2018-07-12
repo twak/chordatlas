@@ -27,7 +27,6 @@ import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.facades.CGAMini;
-import org.twak.viewTrace.facades.CMPLabel;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
@@ -45,10 +44,14 @@ public class FacadeLabelApp extends App {
 	public static final double FLOOR_HEIGHT = 2.5;
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
+	public double scale = 1;
+	
 	public MiniFacade mf;
 	public String texture;
 	
-	public boolean projectLabels = false, showRawLabels = true;
+	public boolean 
+			debugLabels = false, 
+			showRawLabels = false;
 	
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
@@ -127,6 +130,14 @@ public class FacadeLabelApp extends App {
 
 		} else if ( appMode == AppMode.Net ) {
 
+			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).scale = scale;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+			
 			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
 				public void updated( double value ) {
 
@@ -143,6 +154,7 @@ public class FacadeLabelApp extends App {
 					globalUpdate.run();
 				};
 			}.notWhileDragging() );
+			
 
 			out.add( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
 				public void updated( double value ) {
@@ -152,10 +164,10 @@ public class FacadeLabelApp extends App {
 				};
 			}.notWhileDragging() );
 			
-			out.add (new AutoCheckbox( this, "projectLabels", "debug labels" ) {
+			out.add (new AutoCheckbox( this, "debugLabels", "debug labels" ) {
 				public void updated(boolean selected) {
 					for ( App a : apps )
-						( (FacadeLabelApp) a ).projectLabels = selected;
+						( (FacadeLabelApp) a ).debugLabels = selected;
 					globalUpdate.run();
 				};
 			});
@@ -163,7 +175,7 @@ public class FacadeLabelApp extends App {
 			out.add (new AutoCheckbox( this, "showRawLabels", "debug raw labels" ) {
 				public void updated(boolean selected) {
 					for ( App a : apps )
-						( (FacadeLabelApp) a ).projectLabels = selected;
+						( (FacadeLabelApp) a ).showRawLabels = selected;
 					globalUpdate.run();
 				};
 			});
@@ -238,7 +250,7 @@ public class FacadeLabelApp extends App {
 
 			Meta meta = new Meta( amf, mask, facadeOnly, mini );
 
-			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, FLOOR_HEIGHT * scale / 255.  );
+			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, this.scale * FLOOR_HEIGHT * scale / 255.  );
 		}
 
 		g.dispose();
@@ -263,30 +275,39 @@ public class FacadeLabelApp extends App {
 						if ( dest != null ) 
 							 meta.mf.facadeLabelApp.texture = dest; // todo: set on FacadeTexApp after cropping for dormers
 						
-						if (projectLabels) {
+						if (debugLabels) {
+							
+//							meta.mf.featureGen = new FeatureGenerator();
 							
 							if (showRawLabels) {
 							
-								String dF = Pix2Pix.importTexture( e.getValue(), -1, null, meta.facadeOnly, null, new BufferedImage[3] );
+//								String dF = Pix2Pix.importTexture( e.getValue(), -1, null, meta.facadeOnly, null, new BufferedImage[3] );
 								meta.mf.facadeTexApp.texture = dest;
 							}
 							else {
-								List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+//								List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
 								
 								NetInfo ni = NetInfo.get(FacadeLabelApp.this.getClass());
 								
 								BufferedImage regularized = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 								Graphics2D gL = regularized.createGraphics();
 								
-								Pix2Pix.cmpRects( mf, gL, new DRectangle(ni.resolution, ni.resolution), meta.facadeOnly, Color.green, new ArrayList<>( renderedWindows ) );
+								gL.setColor( Color.blue );
+								gL.fillRect( 0, 0, regularized.getWidth(), regularized.getHeight() );
+								
+								Pix2Pix.cmpRects( meta.mf, gL, 
+										new DRectangle(ni.resolution, ni.resolution), meta.mfBounds, Color.green, 
+										meta.mf.featureGen.getRects( Feature.WINDOW ) );
 
 								gL.dispose();
 								
-								String rawLabelFile = "scratch/"+UUID.randomUUID();
+								String rawLabelFile = "scratch/"+UUID.randomUUID()+".png";
 								
 								ImageIO.write( regularized, "png", new File( Tweed.DATA + "/" + rawLabelFile ) );
-								meta.mf.facadeTexApp.texture = dest;
+								meta.mf.facadeTexApp.texture = rawLabelFile;
 							}
+							
+							meta.mf.featureGen = new FeatureGenerator();
 						}
 					}
 					

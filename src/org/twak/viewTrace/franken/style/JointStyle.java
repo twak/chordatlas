@@ -22,6 +22,7 @@ import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeGreebleApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.FacadeSuperApp;
@@ -84,6 +85,7 @@ public class JointStyle implements StyleSource {
 		nets.add (defaultNet = new NetProperties(FacadeTexApp.class, true , true , true  ) );
 		nets.add (new NetProperties(PanesLabelApp            .class, true , false, true  ) );
 		nets.add (new NetProperties(PanesTexApp              .class, true , false, true  ) );
+		nets.add (new NetProperties(DoorTexApp               .class, true , false, true  ) );
 		nets.add (new NetProperties(RoofTexApp               .class, true , true , true  ) );
 		nets.add (new NetProperties(RoofGreebleApp           .class, false, false, true  ) );
 		nets.add (new NetProperties(RoofSuperApp             .class, true , false, false ) );

@@ -5,20 +5,26 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -31,16 +37,18 @@ public class PanesLabelApp extends App {
 	
 	public boolean regularize = true;
 	public List<DRectangle> panes = null;
-	public double frameWidth = 0.07 /*cm */;
+	public final static double frameWidth = 0.07 /*cm */;
 
 	public Loop<Point2d> coveringRoof;
-	public boolean renderedOnFacade = false;
+	public boolean renderedOnFacade = true;
 	
 	FRect fr;
 	public String texture;
 
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
+	
+	public double scale = 1;
 	
 	public PanesLabelApp(FRect fr ) {
 		
@@ -66,7 +74,6 @@ public class PanesLabelApp extends App {
 		this.frameScale = t.frameScale;
 		this.regularize = t.regularize;
 		this.panes = t.panes;
-		this.frameWidth = t.frameScale;
 		this.coveringRoof = t.coveringRoof;
 		
 		this.texture = t.texture;
@@ -102,17 +109,31 @@ public class PanesLabelApp extends App {
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
-		
-		return new AutoCheckbox( this, "regularize", "regularize" ) {
-			@Override
-			public void updated( boolean selected ) {
-				
-				for (App a : apps)
-					((PanesLabelApp)a).regularize = selected;
-				
-				globalUpdate.run();
-			}
-		};
+
+		JPanel out = new JPanel();
+
+		if ( appMode == AppMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (PanesLabelApp) a ).scale = scale;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoCheckbox( this, "regularize", "regularize" ) {
+				@Override
+				public void updated( boolean selected ) {
+
+					for ( App a : apps )
+						( (PanesLabelApp) a ).regularize = selected;
+
+					globalUpdate.run();
+				}
+			} );
+		}
+		return out;
 	}
 
 	public final static int pad = 20;
@@ -126,6 +147,7 @@ public class PanesLabelApp extends App {
 		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 		
+		Map<Object, File> doors = new HashMap<>();
 		
 		for ( App a_ : batch ) {
 			try {
@@ -142,7 +164,7 @@ public class PanesLabelApp extends App {
 				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r.getCenter() ) )
 					continue;
 				
-				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
+				double scale = ( ni.resolution - 2 * pad ) / ( (r.width + r.height ) * 0.5 );
 				
 				DRectangle imBounds = new DRectangle(r);
 				
@@ -158,7 +180,20 @@ public class PanesLabelApp extends App {
 				
 				Meta meta = new Meta( a, r, imBounds );
 				
-				a.frameScale = 0.5 * a.frameWidth * scale / ni.resolution;
+				if (a.fr.getFeat() == Feature.DOOR) { // no labels
+					
+					String name = Tweed.SCRATCH + UUID.randomUUID();
+					
+					File labelAbsFile = new File (name + ".png"); 
+					ImageIO.write( bi, "png", labelAbsFile );
+					ImageIO.write( bi, "png", new File (name + ".png_label") );
+					
+					doors.put( meta, labelAbsFile );
+					
+					continue;
+				}
+				
+				a.frameScale = this.scale * 0.5 * PanesLabelApp.frameWidth * scale / ni.resolution;
 				
 				if (r.width > 3) // small frame sizes start to look strange 
 					a.frameScale *= 8;
@@ -177,6 +212,8 @@ public class PanesLabelApp extends App {
 			public void finished( Map<Object, File> results ) {
 
 				try {
+					
+					results.putAll(doors);
 					
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 

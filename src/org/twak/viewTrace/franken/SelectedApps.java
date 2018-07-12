@@ -99,12 +99,30 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
+	static boolean goAgain = true;
+	static boolean computing = false; 
+	
 	private void computeTexturesNewThread() {
+		
+		if (computing) {
+			goAgain = true;
+			return;
+		}
+		
+		goAgain = false;
+		computing = true;
 		
 		new Thread () {
 			@Override
 			public void run() {
+				try {
 				computeTextures( null );
+				}
+				finally {
+					computing = false;
+					if (goAgain)
+						computeTexturesNewThread();
+				}
 			}
 			
 			@Override

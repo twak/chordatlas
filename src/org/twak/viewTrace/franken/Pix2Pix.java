@@ -46,6 +46,11 @@ public class Pix2Pix {
 		this.resolution = ni.resolution;
 	}
 	
+	public Pix2Pix (String netName, int res) {
+		this.netName = netName;
+		this.resolution = res;
+	}
+	
 	public interface JobResult {
 		public void finished ( Map<Object, File>  results);
 	}
