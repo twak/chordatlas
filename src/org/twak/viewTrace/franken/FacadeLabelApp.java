@@ -140,7 +140,6 @@ public class FacadeLabelApp extends App {
 			
 			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
 				public void updated( double value ) {
-
 					for ( App a : apps )
 						( (FacadeLabelApp) a ).regFrac = value;
 					globalUpdate.run();
