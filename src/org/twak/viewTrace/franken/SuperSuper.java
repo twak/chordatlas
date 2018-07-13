@@ -110,12 +110,12 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 
 		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
-		int count = 0;
+		int count = 0, remaining = 0;
 		for ( A a : todo.keySet() )
 			for (FacState<A> state : todo.get(a)) {
 			try {
 
-				System.out.println("super batch " + state.nextTiles.size());
+				remaining+= state.nextTiles.size();
 				
 				while ( count < MAX_CONCURRENT && !state.nextTiles.isEmpty() ) {
 					
@@ -130,6 +130,7 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 								- tileWidth * ts.nextX ,
 								- tileWidth * ts.nextY ,
 								null );
+						
 						g.dispose();
 						
 						ts.coarse = toProcess;
@@ -147,6 +148,8 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 				th.printStackTrace();
 			}
 		}
+		
+		System.out.println("super remaining " + remaining);
 			
 		p2.submit ( new Job ( new JobResult() {
 				@Override

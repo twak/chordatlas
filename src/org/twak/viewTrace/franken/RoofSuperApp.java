@@ -32,7 +32,6 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Colourz;
-import org.twak.utils.ui.Show;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -194,7 +193,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			t.preConcatenate( AffineTransform.getTranslateInstance ( - pixBounds[0], 0 ));
 			t.preConcatenate( AffineTransform.getScaleInstance ( outWidth / (pixBounds[1] - pixBounds[0] ), outHeight / (pixBounds[3] - pixBounds[2] ) ) );
 			t.preConcatenate( AffineTransform.getTranslateInstance ( overlap, outHeight + overlap ) );
-//			t.preConcatenate( AffineTransform.getTranslateInstance ( 256,256 ) );
 			
 			g.setTransform( t );
 			
@@ -204,15 +202,13 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			if ( true ) { // pad edges
 
 				g.setColor( mean );
-//				g.setColor( Color.magenta );
 				g.setStroke( new BasicStroke( overlap / 8 ) );
 
-				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
+				for ( Loopable<Point2d> lp : pixPts.loopableIterator() )  // flashing
 					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );
-				}
 				
-//				if (false)
 				g.setColor( Colourz.transparent( mean, 128 ) );
+				
 				for (HalfEdge e : mr.superFace) { // dormers
 					MiniFacade mf = ((SuperEdge)e).toEdit; 
 					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
@@ -223,11 +219,9 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 							
 							int c = 0;
 							
-							for (Loopable <Point2d> pt : toPix.tranform( pla.coveringRoof ).loopableIterator() ) {
-								if (c ++ == 3)
-									continue;
-								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
-							}
+							for (Loopable <Point2d> pt : toPix.tranform( pla.coveringRoof ).loopableIterator() ) 
+								if (c ++ != 3)
+									g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
 						}
 					}
 				}
@@ -248,14 +242,23 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 	private Color meanColor( BufferedImage src, Color def, Loop<Point2d> pixPts ) {
 
 		int[] meanCol = new int[3];
-		int[] tmp = new int[3];
 		int count2 = 0;
-		for ( int i = 0; i < 30; i++ ) {
+		
+		double[] minMax = Loopz.minMax2d( pixPts );
+		
+		DRectangle bounds = new DRectangle( src.getWidth(), src.getHeight() );
+		
+		for ( int i = 0; i < 300; i++ ) {
 
-			int x = (int) ( Math.random() * src.getWidth() ), y = (int) ( Math.random() * src.getHeight() );
-			int rgb = src.getRGB( x, y );
-
-			if ( Loopz.inside( new Point2d( x, y ), pixPts ) ) {
+			int 
+				x = (int) (( Math.random() * (minMax[1] - minMax[0]) ) + minMax[0] ), 
+				y = (int) (( Math.random() * (minMax[3] - minMax[2]) ) + minMax[2] ); 
+			
+			
+			if ( Loopz.inside( new Point2d( x, y ), pixPts ) && bounds.contains(x, y + 256) ) {
+				
+				int rgb = src.getRGB( x,  y + 256 );
+				
 				count2++;
 				int[] rgbs = Colourz.toComp( rgb );
 				for ( int j = 0; j < 3; j++ )
@@ -265,7 +268,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if ( count2 > 0 ) {
 			for ( int j = 0; j < 3; j++ )
 				meanCol[ j ] /= count2;
-			return Colourz.to3( meanCol );
+			return Colourz.to3( meanCol ).darker();
 		}
 		return def;
 	}
