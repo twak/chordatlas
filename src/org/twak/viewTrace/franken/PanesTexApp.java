@@ -409,7 +409,7 @@ public class PanesTexApp extends App {
 			if ( pla.label == null )
 				continue;
 
-			pla.fr.mf.facadeTexApp.coarseWithWindows = null;
+//			pla.fr.mf.facadeTexApp.coarseWithWindows = null;
 		}
 			
 		

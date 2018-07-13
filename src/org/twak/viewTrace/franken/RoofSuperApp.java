@@ -32,6 +32,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.Colourz;
+import org.twak.utils.ui.Show;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -77,8 +78,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			ImageIO.write( maps[0], "png", new File(Tweed.DATA + "/" +fileName ) );
 			ImageIO.write( maps[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) ) );
 			ImageIO.write( maps[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) )  );
-			
-			
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}
@@ -136,16 +135,11 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( rta.coarse ) );
 		
-		
 		NetInfo ni = NetInfo.get( this );
 		
 		int count = 0;
 		
 		for ( Loop<Point2d> verticalPts : mr.getAllFaces() ) {
-			
-//			count++;
-//			if (count ++  != 1)
-//				continue;
 			
 			TwoRects toPix = new TwoRects( rta.textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
 			
@@ -173,16 +167,20 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			
 			AffineTransform t = AffineTransform.getTranslateInstance( 0, 0 ); 
 			
+			double[] bounds    = Loopz.minMax2d( Loopz.transform( verticalPts, rot ) ); // bad location, but scale-in-meters.
+			
 			t.preConcatenate( toOrigin );
 			t.preConcatenate( rot );
 			t.preConcatenate( deslope );
 			
-			double[] bounds = Loopz.minMax2d( Loopz.transform( verticalPts, rot ) ); // bad location, but scale-in-meters.
-			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, t ) ); 
+			AffineTransform geom2Big = new AffineTransform( t );
+			
+			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, geom2Big ) );
+			
 			
 			int 
-			outWidth  =   (int) Math.ceil ( ( (bounds[1] - bounds[0] ) * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
-			outHeight =   (int) Math.ceil ( ( (bounds[3] - bounds[2] ) * scale ) / tileWidth ) * tileWidth;
+				outWidth  =   (int) Math.ceil ( ( (bounds[1] - bounds[0] ) * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
+				outHeight =   (int) Math.ceil ( ( (bounds[3] - bounds[2] ) * scale ) / tileWidth ) * tileWidth;
 				
 			BufferedImage bigCoarse = new BufferedImage(
 					outWidth  + overlap * 2,
@@ -197,23 +195,24 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			t.preConcatenate( AffineTransform.getScaleInstance ( outWidth / (pixBounds[1] - pixBounds[0] ), outHeight / (pixBounds[3] - pixBounds[2] ) ) );
 			t.preConcatenate( AffineTransform.getTranslateInstance ( overlap, outHeight + overlap ) );
 //			t.preConcatenate( AffineTransform.getTranslateInstance ( 256,256 ) );
-
 			
 			g.setTransform( t );
 			
-			g.drawImage (src, 0, 0, null);
-			
+			g.drawImage (src, 0, -256, null);
+
 			
 			if ( true ) { // pad edges
 
 				g.setColor( mean );
+//				g.setColor( Color.magenta );
 				g.setStroke( new BasicStroke( overlap / 8 ) );
 
 				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
 					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );
 				}
 				
-				if (false)
+//				if (false)
+				g.setColor( Colourz.transparent( mean, 128 ) );
 				for (HalfEdge e : mr.superFace) { // dormers
 					MiniFacade mf = ((SuperEdge)e).toEdit; 
 					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
@@ -221,7 +220,12 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 						PanesLabelApp pla = f.panesLabelApp;
 						
 						if ( pla.coveringRoof != null) {
-							for (Loopable <Point2d> pt : pla.coveringRoof.loopableIterator() ) {
+							
+							int c = 0;
+							
+							for (Loopable <Point2d> pt : toPix.tranform( pla.coveringRoof ).loopableIterator() ) {
+								if (c ++ == 3)
+									continue;
 								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
 							}
 						}

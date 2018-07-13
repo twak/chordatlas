@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.twak.utils.ImageU;
+import org.twak.utils.geom.DRectangle;
 
 public class NetInfo {
 
@@ -62,5 +63,9 @@ public class NetInfo {
 	
 	public static NetInfo get( Class exemplar ) {
 		return index.get(exemplar);
+	}
+
+	public DRectangle rect() {
+		return new DRectangle(resolution, resolution);
 	}
 }

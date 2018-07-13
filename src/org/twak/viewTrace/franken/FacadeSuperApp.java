@@ -9,7 +9,6 @@ import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -194,8 +193,6 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 				draw.y = bigCoarse.getHeight()  - draw.y - draw.height;
 				g.fillRect( (int) draw.x, (int)draw.y, (int)draw.width, (int) draw.height );
 			}
-			
-			
 		}
 
 		g.dispose();

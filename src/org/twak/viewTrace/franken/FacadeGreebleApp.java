@@ -434,6 +434,7 @@ public class FacadeGreebleApp extends App {
 			values[1] /= count;
 			values[2] /= count;
 		}
+		else return Color.lightGray;
 		
 		return new Color( (int) ( (values[0] <<16) + (values[1] <<8) + values[2]  ) );
 		

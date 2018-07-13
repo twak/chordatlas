@@ -3,6 +3,7 @@ package org.twak.viewTrace.franken;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -110,7 +112,7 @@ public class PanesLabelApp extends App {
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 
-		JPanel out = new JPanel();
+		JPanel out = new JPanel(new ListDownLayout());
 
 		if ( appMode == AppMode.Net ) {
 
@@ -177,6 +179,8 @@ public class PanesLabelApp extends App {
 				
 				g.setColor( Color.red );
 				g.fillRect ( (int) imBounds.x, (int)imBounds.y, (int)imBounds.width, (int) imBounds.height);
+				
+				imBounds = imBounds.intersect( ni.rect() );
 				
 				Meta meta = new Meta( a, r, imBounds );
 				
@@ -248,6 +252,7 @@ public class PanesLabelApp extends App {
 
 	protected static void regularize( PanesLabelApp a, BufferedImage labels, DRectangle mask, double d ) {
 		
+		try {
 		 BufferedImage crop = Imagez.clone ( Imagez.cropShared (labels, mask) );
 		
 		 crop = regularize (a, crop, d);
@@ -259,6 +264,10 @@ public class PanesLabelApp extends App {
 		 g.drawImage( crop, (int) mask.x, (int) mask.y, null );
 		 
 		 g.dispose();
+		}
+		catch (RasterFormatException fre) {
+			fre.printStackTrace();
+		}
 	}
 
 	private static BufferedImage regularize( PanesLabelApp a, BufferedImage crop, double threshold ) {

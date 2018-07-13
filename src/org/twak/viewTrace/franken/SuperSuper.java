@@ -60,7 +60,7 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		out.add ( new AutoDoubleSlider( this, "scale", "scale", 20, 200 ) {
+		out.add ( new AutoDoubleSlider( this, "scale", "patch size (m)", 20, 200 ) {
 			public void updated(double value) {
 				
 				for (App a : apps)
@@ -111,7 +111,7 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
 		int count = 0;
-		for (A a : todo.keySet() ) 
+		for ( A a : todo.keySet() )
 			for (FacState<A> state : todo.get(a)) {
 			try {
 
@@ -136,7 +136,7 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 						
 						SuperSuper ss = a.getSuper();
 						
-						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
+//						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
 						
 						p2.addInput( toProcess, null, null, ts, ss.styleZ, null );
 					}
