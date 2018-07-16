@@ -8,10 +8,12 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.tools.PlaneTool;
 import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.material.Material;
@@ -119,6 +121,15 @@ public class PlanesGen extends Gen implements ICanSave {
 	private void selected( Plane p ) {
 
 		JPanel ui = new JPanel( new ListDownLayout() );
+		
+		JButton edit = new JButton( "edit" );
+		edit.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				tweed.setTool( new PlaneTool( tweed, PlanesGen.this ) );
+			}
+		} );
+		
 		JButton delete = new JButton( "delete" );
 
 		delete.addActionListener( new ActionListener() {
@@ -129,6 +140,7 @@ public class PlanesGen extends Gen implements ICanSave {
 			}
 		} );
 
+		ui.add( edit );
 		ui.add( delete );
 
 		tweed.frame.setGenUI( ui );
@@ -136,6 +148,6 @@ public class PlanesGen extends Gen implements ICanSave {
 
 	@Override
 	public JComponent getUI() {
-		return null;
+		return new JLabel("Use select tool to delete");
 	}
 }

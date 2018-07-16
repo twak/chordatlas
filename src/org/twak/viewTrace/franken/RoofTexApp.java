@@ -25,6 +25,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
+import org.twak.tweed.gen.skel.RoofGreeble;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
@@ -78,7 +79,15 @@ public class RoofTexApp extends App {
 	public MultiMap<String, App> getDown() {
 		
 		MultiMap<String, App> out = new MultiMap<>();
+		
 		out.put( "super", mr.roofSuperApp );
+		
+		out.putAll( "velux", mr.greebles.valueList().stream().filter( g -> g.f == RoofGreeble.Velux ).
+				map( g -> g.veluxTextureApp ).collect(Collectors.toList()) );
+		
+//		out.putAll( "velux", mr.greebles.valueList().stream().filter( g -> g.f == RoofGreeble.Velux ).
+//				map( g -> g.getVeluxTarget().panesLabelApp ).collect(Collectors.toList()) );
+		
 		return out;	
 	}
 

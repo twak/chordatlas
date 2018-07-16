@@ -22,7 +22,7 @@ public class DoorTexApp extends PanesTexApp {
 	}
 	
 	public DoorTexApp(DoorTexApp t) {
-		super (  t);
+		super ( t );
 		color = DEFAULT_COLOR;
 	}
 	
@@ -32,15 +32,16 @@ public class DoorTexApp extends PanesTexApp {
 		JPanel out = new JPanel(new ListDownLayout() );
 
 		if ( appMode == AppMode.Manual ) {
-			JButton col = new JButton( "color" );
+			
+			JButton col = new JButton( "colour" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
 				@Override
 				public void picked( Color color ) {
 
 					for ( App a : apps ) {
-						( (PanesTexApp) a ).color = color;
-						( (PanesTexApp) a ).fr.panesLabelApp.texture = null;
+						( (DoorTexApp) a ).color = color;
+						( (DoorTexApp) a ).fr.panesLabelApp.texture = null;
 					}
 
 					globalUpdate.run();

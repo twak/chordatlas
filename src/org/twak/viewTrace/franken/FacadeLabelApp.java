@@ -361,16 +361,6 @@ public class FacadeLabelApp extends App {
 							f.x -= gap;
 					}
 					
-//					if (m.mf.postState != null) {
-//						for (Point2d p : f.points()) { 
-//							if ( Loopz.inside( p, m.mf.postState.occluders) )
-//								continue i;
-//							if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.wallFaces) ) || 
-//									 Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.roofFaces) ) ) )
-//								continue i;
-//						}
-//					}
-					
 					m.mf.featureGen.add( Feature.WINDOW, f );
 				}
 				
@@ -387,13 +377,12 @@ public class FacadeLabelApp extends App {
 				
 				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP )) {
 					
-//					PanesLabelApp wla = ac.get ( PanesLabelApp.class , window );
-//					FacadeTexApp  mfa = ac.get ( FacadeTexApp.class  , m.mf);
-					
 						FRect nearestOld = closest( window, m.mf.facadeTexApp.oldWindows );
 						if ( nearestOld != null ) {
+							
 							window.panesLabelApp = new PanesLabelApp( nearestOld.panesLabelApp );
 							window.panesLabelApp.fr = window;
+							
 							window.panesTexApp = new PanesTexApp( nearestOld.panesTexApp );
 							window.panesTexApp.fr = window;
 						}

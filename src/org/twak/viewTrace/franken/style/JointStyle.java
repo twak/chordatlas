@@ -34,6 +34,7 @@ import org.twak.viewTrace.franken.RoofGreebleApp;
 import org.twak.viewTrace.franken.RoofSuperApp;
 import org.twak.viewTrace.franken.RoofTexApp;
 import org.twak.viewTrace.franken.SelectedApps;
+import org.twak.viewTrace.franken.VeluxTexApp;
 import org.twak.viewTrace.franken.style.ui.JointUI;
 
 public class JointStyle implements StyleSource {
@@ -88,6 +89,7 @@ public class JointStyle implements StyleSource {
 		nets.add (new NetProperties(DoorTexApp               .class, true , false, true  ) );
 		nets.add (new NetProperties(RoofTexApp               .class, true , true , true  ) );
 		nets.add (new NetProperties(RoofGreebleApp           .class, false, false, true  ) );
+		nets.add (new NetProperties(VeluxTexApp              .class, true , false, true  ) );
 		nets.add (new NetProperties(RoofSuperApp             .class, true , false, false ) );
 	}
 	

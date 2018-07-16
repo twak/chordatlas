@@ -33,6 +33,7 @@ import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
+import org.twak.tweed.tools.PlaneTool;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
@@ -66,6 +67,7 @@ public class BlockGen extends ObjGen {
 	private static SliceParameters P = new SliceParameters(10); // when set by Slice UI, used for all future blocks!
 
 	public Point2d center;
+	protected PlanesGen extraSweeps;
 	
 	public BlockGen( File l, Tweed tweed, LoopL<Point3d> polies ) {
 		
@@ -169,27 +171,6 @@ public class BlockGen extends ObjGen {
 					SolverState SS = (SolverState) new XStream().fromXML( f );
 					SkelFootprint.postProcesss( SS );
 					
-//					PaintThing.debug.clear();
-//					new Plot(SS.mesh).add( new ICanPaint() {
-//
-//						@Override
-//						public void paint( Graphics2D g, PanMouseAdaptor ma ) {
-//
-//							g.setColor( Color.black );
-//							g.setStroke( new BasicStroke( 2 ) );
-//							
-//							if (SS.footprint != null)
-//							for (Line l : SS.footprint) {
-//								g.drawLine( 
-//										ma.toX( l.start.x ), 
-//										ma.toY( l.start.y ), 
-//										ma.toX( l.end.x ), 
-//										ma.toY( l.end.y ) ); 
-//							}
-//							
-//						}
-//					});
-					
 					tweed.frame.addGen( new SkelGen( SS.mesh, tweed, BlockGen.this ), true );
 				} else {
 					JOptionPane.showMessageDialog( tweed.frame(), "Unable to find pre-computed solution.\n" + f );
@@ -215,6 +196,24 @@ public class BlockGen extends ObjGen {
 		JButton b = new JButton("street widths");
 		b.addActionListener( e -> findWidths(polies, tweed.frame.getGenOf( GISGen.class )) );
 		
+		
+		JButton splits = new JButton("suggest sweep edges");
+		splits.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				if (extraSweeps == null) {
+					extraSweeps = new PlanesGen(tweed);
+					extraSweeps.name = "sweeps for " + BlockGen.this.name;
+					tweed.frame.addGen( extraSweeps, true );
+				}
+				
+				PlaneTool pt = new PlaneTool( tweed, extraSweeps );
+				tweed.setTool( pt );
+			}
+		});
+		
 		JTextArea name = new JTextArea( sb.toString() );
 		name.setEditable( false );
 		JScrollPane nameScroller = new JScrollPane( name );
@@ -232,6 +231,7 @@ public class BlockGen extends ObjGen {
 			panel.add( loadSln );
 		panel.add(new JLabel("metadata:") );
 		panel.add( nameScroller );
+		panel.add( splits );
 		
 		
 		return panel;
@@ -495,22 +495,6 @@ public class BlockGen extends ObjGen {
 		return new File( root, "sliced.obj" );
 	};
 	
-	private static abstract class Selected {
-		
-		String name;
-		
-		public Selected(String name) {
-			this.name = name;
-		}
-		
-		public abstract void onSelect();
-		
-		@Override
-		public String toString() {
-			return name;
-		}
-	}
-
 	ObjRead croppedMesh = null;
 	public ObjRead getCroppedMesh() {
 		

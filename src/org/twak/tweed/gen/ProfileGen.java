@@ -33,6 +33,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.PlanesGen.Plane;
 import org.twak.tweed.gen.VizSkelGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Line;
@@ -99,6 +100,11 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		
 		this.extent = blockGen.getCroppedMesh().findExtent();
 		this.gisBias = new GBias ( Loopz.toGraph( this.gis ), 1 );
+		
+		
+		if (blockGen.extraSweeps != null) 
+			for (Plane p : blockGen.extraSweeps.planes ) 
+				footprint.add(new Line( new Point2d(p.a.x,  p.a.z ), new Point2d(p.b.x,  p.b.z ) ) );
 		
 		new Thread(() -> faces = findMegaFaces( TweedSettings.settings.profileVSampleDist ) ).start();
 	}

@@ -732,7 +732,6 @@ public class GreebleSkel {
 		
 		faceMaterial.add( loop, roofUVs, to3d );
 		
-//		if (false)
 		for (FCircle feature : miniroof.getGreebles(f) ) {
 			
 			Point3d onRoof = f.edge.linearForm.collide( new Point3d(feature.loc.x, feature.loc.y, 0 ), Mathz.Z_UP );
@@ -746,22 +745,22 @@ public class GreebleSkel {
 			
 			switch ( feature.f ) {
 
-			case Chimney:
-				greebleGrid.createChimney ( onRoof, miniroof, feature, f.edge.projectDown().dir() , f.edge.linearForm, 
+				case Chimney:
+					greebleGrid.createChimney ( onRoof, miniroof, feature, f.edge.projectDown().dir() , f.edge.linearForm, 
 						sf.buildingApp.chimneyTexture );
-				break;
+					break;
 				
-			case Velux:
-				if ( ra.texture == null)
-					greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
-				else
-					GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, ra.textureRect , to3d,
-							greebleGrid.mbs.getTexture( "velux_"+ra.texture+"__"+r.hashCode(), ra.texture, miniroof ),
+				case Velux:
+					if ( feature.veluxTextureApp.texture == null)
+						greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
+					else
+						GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, r, to3d,
+							greebleGrid.mbs.getTexture( "velux_"+feature.veluxTextureApp.texture+"_"+r.hashCode(),
+									feature.veluxTextureApp.texture, miniroof ),
 							-0.1, 0.05 );
-				break;
+					break;
 			}
 		}
-				
 	}
 	
 	public void edges( Output output, float[] roofColor ) {

@@ -163,8 +163,8 @@ public class PanesLabelApp extends App {
 				
 				FRect r = a.fr;
 				
-				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r.getCenter() ) )
-					continue;
+//				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r.getCenter() ) )
+//					continue;
 				
 				double scale = ( ni.resolution - 2 * pad ) / ( (r.width + r.height ) * 0.5 );
 				

@@ -24,7 +24,6 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
-import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
@@ -79,7 +78,7 @@ public class PanesTexApp extends App {
 				}
 			} );
 		} else if ( appMode == AppMode.Manual ) {
-			JButton col = new JButton( "color" );
+			JButton col = new JButton( "colour" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
 				@Override
@@ -343,12 +342,15 @@ public class PanesTexApp extends App {
 				if ( dest != null ) {
 					
 					FRect frect = meta.pta.fr;
-					MiniFacade mf = frect.mf;
 					PanesLabelApp pla = frect.panesLabelApp;
 					
 					pla.texture = dest;
 					pla.textureUVs = TextureUVs.Square;
+
+					if (frect.mf == null)
+						continue;
 					
+					MiniFacade mf = frect.mf;
 					DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
 					
 					d.y = ni.resolution - d.y - d.height;

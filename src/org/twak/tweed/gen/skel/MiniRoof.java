@@ -56,11 +56,13 @@ public class MiniRoof implements HasSuper {
 	
 	public void addFeature( RoofGreeble f, double radius, Point2d worldXY ) {
 		
+		f = RoofGreeble.Velux;
+		
 		for (Loop<Point2d> face : getAllFaces() ) {
 			if (Loopz.inside( worldXY, face )) {
 				
 				FCircle circ = new FCircle (worldXY, Mathz.clamp (radius * 0.6, 0.1, 0.4 ), f );
-
+				circ.veluxTextureApp.parent = roofTexApp;
 				
 				// 1. try moving the feature away from the edge
 //				if (false)

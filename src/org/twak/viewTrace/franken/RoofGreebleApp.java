@@ -59,11 +59,7 @@ public class RoofGreebleApp extends App {
 
 	@Override
 	public void computeBatch( Runnable whenDone, List<App> batch ) {
-		
-		if ( appMode != AppMode.Net ) {
-			whenDone.run();
-			return;
-		}
+
 		
 		NetInfo ni = NetInfo.get(this);
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -73,6 +69,13 @@ public class RoofGreebleApp extends App {
 		List<MiniRoof> toProcess = new ArrayList<>();
 		
 		for (App a : batch) {
+			
+			if ( appMode != AppMode.Net ) {
+//				for (FCircle fc : ((RoofGreebleApp)a).mr.greebles.valueList() )
+//					fc.
+				continue;
+			}
+			
 			MiniRoof mr = ((RoofGreebleApp) a ).mr;
 			mr.clearGreebles();
 			toProcess.add(mr);

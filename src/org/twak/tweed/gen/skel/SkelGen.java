@@ -438,7 +438,6 @@ public class SkelGen extends Gen implements IDumpObjs {
 				tweed.gainFocus();
 			}
 		}
-		
 	}
 
 	void removeGeometryFor( SuperFace sf ) {

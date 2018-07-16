@@ -756,7 +756,7 @@ public class GreebleGrid {
 		} );
 	}
 
-	final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
+	public final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
 	
 	protected void textureGrid(DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
 

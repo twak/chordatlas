@@ -167,13 +167,17 @@ public class SelectedApps extends ArrayList<App>{
 		
 		top.add( countPanel, BorderLayout.NORTH );
 		
-		JPanel nets = new JPanel(new GridLayout(1, NetInfo.evaluationOrder.size() ) );
+		JPanel nets = new JPanel(new GridLayout(1, NetInfo.evaluationOrder.size()-1 ) );
 		
 		int currentIndex = NetInfo.evaluationOrder.indexOf( exemplar.getClass() );
 		
 		for (Class<? extends App> k : NetInfo.evaluationOrder) {
 			
 			NetInfo target = NetInfo.get( k );
+			
+			if (!target.visible)
+				continue;
+			
 			int targetIndex = NetInfo.evaluationOrder.indexOf( k );
 			
 			JButton j = new JButton( new ImageIcon( target.icon ) );
