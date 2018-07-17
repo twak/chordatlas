@@ -308,6 +308,16 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 			}
 		});
 		
+		
+		if (dragging != null)
+		pop.add("options (in main window)", new Runnable() {
+			
+			@Override
+			public void run() {
+				mf.sf.buildingApp.parent.editFRect(dragging);
+			}
+		} );
+		
 		if (dragging != null)
 		pop.add( "duplicate", new Runnable() {
 			

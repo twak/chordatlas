@@ -56,6 +56,7 @@ public class FacadeLabelApp extends App {
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;
+		
 	}
 
 	public FacadeLabelApp( FacadeLabelApp o ) {
@@ -66,6 +67,7 @@ public class FacadeLabelApp extends App {
 		this.regScale  = o.regScale;
 		
 		this.texture = o.texture;
+		
 	}
 
 	@Override

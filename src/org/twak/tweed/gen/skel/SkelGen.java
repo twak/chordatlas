@@ -795,6 +795,29 @@ public class SkelGen extends Gen implements IDumpObjs {
 		closeSitePlan();
 		new FacadeDesigner( skel, sf, se, this );
 	}
+	
+	public void editFRect( FRect fr ) {
+		
+		closeSitePlan();
+		
+		new SelectedApps( fr.panesTexApp, new Runnable() {
+			@Override
+			public void run() {
+				tweed.enqueue( new Runnable() {
+					@Override
+					public void run() {
+						setSkel( null, fr.mf.sf );
+					}
+				} );
+			}
+			
+			@Override
+			public String toString() {
+				return "SkelGen.textureSelected";
+			}
+			
+		} ).showUI();
+	}
 
 	public void ensureMF( SuperFace sf, SuperEdge se ) {
 
