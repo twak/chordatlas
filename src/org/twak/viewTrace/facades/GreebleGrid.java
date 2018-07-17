@@ -351,11 +351,11 @@ public class GreebleGrid {
 			WindowGen.createWindow( window, glass, new Window( Jme3z.to ( loc ), Jme3z.to(along), Jme3z.to(up), 
 					l.original.width, l.original.height, depth, panelWidth, panelHeight ) );
 		else if (wa.panes == null) {
-			createInnie( w, null, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+			createInnie( w, null, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 			mbs.getTexture( "texture_"+wa.texture+"_window_"+w.hashCode(), wa.texture, w ).add( w, ZERO_ONE_UVS, to3d, -0.2 );
 		} else {
 			createInnie( w, null, to3d, mbs.GRAY, -depth + outset - 0.5, -depth + outset - 0.5, 
-					new boolean[] {true, true /*right*/, false, true /*left*/, false, false } ); // walls around window
+					new boolean[] {true, true /*right*/, false, true /*left*/, false, false }, false ); // walls around window
 
 			
 			if (wa.coveringRoof != null) {
@@ -390,7 +390,7 @@ public class GreebleGrid {
 			}
 			else {
 				createInnie( w, null, to3d, window, -depth + outset - 0.5, -depth + outset - 0.5, 
-					new boolean[] {false, false, true, false, false, false } ); // roof over window
+					new boolean[] {false, false, true, false, false, false }, false ); // roof over window
 			}
 			
 			createWindowFromPanes (wa.panes, w,w, to3d, 
@@ -498,11 +498,11 @@ public class GreebleGrid {
 	
 	
 	protected static void createInnie( DRectangle rect, DRectangle uvs, Matrix4d to3d, MeshBuilder mat, 
-			double depth, double atDepth, boolean[] hasBack ) {
+			double depth, double atDepth, boolean[] faces, boolean flipNormals ) {
 		
 		Vector3f[] jpts = findWorldBox( rect, to3d, depth );
 		
-		Vector3f lo = jpts[0],
+		Vector3f 
 		 		 ou = jpts[1], 
 				 al = jpts[2], 
 				 u  = jpts[3],
@@ -511,11 +511,17 @@ public class GreebleGrid {
 		Vector3f depthOffset = ou.mult( (float) atDepth / ou.length() );
 		p = p.add( depthOffset );
 		
-		mat.addInsideRect( p, ou, al, u, -(float)depth, (float)rect.width, (float) rect.height, 
+		float width = (float) rect.width;
+		if (flipNormals) {
+			width = -width;
+			p.addLocal(al.mult( rect.widthF() ));
+		}
+		
+		mat.addInsideRect( p, ou, al, u, -(float)depth, width, (float) rect.height, 
 				uvs == null ? null :
 				new float[][] { 
 			{ (float) uvs.x, (float)uvs.y},
-			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, hasBack  );
+			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, faces  );
 	}
 	
 	public static void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
@@ -524,7 +530,7 @@ public class GreebleGrid {
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 
 		if (panes.size() == 0) {
-			double delta = 0.02; 
+			double delta = 0.1; 
 			panes.add( new DRectangle ( delta / bounds.width, delta / bounds.height, 
 					(bounds.width - delta *2)/ bounds.width, (bounds.height - delta * 2)/ bounds.height ) );
 		}
@@ -536,7 +542,7 @@ public class GreebleGrid {
 				@Override
 				public void instance( DRectangle rect ) {
 					createInnie( rect, 
-							uvs.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT );
+							uvs.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT, false );
 				}
 			});
 		}
@@ -547,6 +553,10 @@ public class GreebleGrid {
 				window.add( rect, uvs.normalize( rect ), to3d, -frameDepth );
 			}
 		} );
+		
+		// outwards pointing skirt for dormer windwos.
+		createInnie( bounds, uvs.normalize( bounds ), to3d, window, (paneDepth - frameDepth), -frameDepth, 
+				MeshBuilder.NO_FRONT_OR_BACK, true );
 		
 	}
 	
@@ -780,16 +790,16 @@ public class GreebleGrid {
 							if ( pa.texture == null) // no texture info
 								createInnie( rect, allUV.normalize( rect ), to3d, 
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), 
-												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
+												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 							else if ( pa.panes == null ) { // just coarse facade
 								DRectangle uvr = allUV.normalize( rect );
-								createInnie( rect, uvr, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+								createInnie( rect, uvr, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 //								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
 								mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), fa.texture, w ).add( rect, uvr, to3d, -0.2 );
 							
 							} else if (pa.textureUVs == TextureUVs.Zero_One){ // labels
 								
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 								createWindowFromPanes (pa.panes, rect, rect, to3d,
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), pa.texture, w ),
 										0.2, 0.17 );
@@ -797,7 +807,7 @@ public class GreebleGrid {
 							else { // textures and panes
 								
 								DRectangle uvs = allUV.normalize( rect );
-								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );
+								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false );
 								createWindowFromPanes (pa.panes, rect, allUV, to3d,
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode() , fa.texture, w ),
 										0.2, 0.17 );
@@ -821,13 +831,13 @@ public class GreebleGrid {
 //								createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
 							if (pa. texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, 
-										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ), 0.5f, 0, MeshBuilder.ALL_BUT_FRONT );
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ), 0.5f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 							else if (pa.textureUVs == TextureUVs.Zero_One) // labels
 								createInnie( rect, ZERO_ONE_UVS, to3d, 
-										mbs.getTexture( "door_"+w.hashCode(), pa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
+										mbs.getTexture( "door_"+w.hashCode(), pa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 							else 
 								createInnie( rect, allUV.normalize( rect ), to3d, 
-										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 				}
@@ -839,7 +849,7 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 			}
@@ -850,7 +860,7 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 			}

@@ -308,7 +308,7 @@ public class RoofTexApp extends App {
 			for (FCircle greeble : mr.getGreebles( f ) ) {
 				
 				double  radiusW = greeble.radius, 
-						radiusH = greeble.radius * ( greeble.f.verticalProjection ? 1 : Math.cos ( f.edge.getAngle() ) );
+						radiusH = greeble.radius * ( greeble.f.verticalProjection ? 1 : Math.sin ( f.edge.getAngle() ) );
 				
 				Loop<Point2d> loop = new Loop<>();
 				

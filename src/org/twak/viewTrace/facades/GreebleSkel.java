@@ -753,11 +753,15 @@ public class GreebleSkel {
 				case Velux:
 					if ( feature.veluxTextureApp.texture == null)
 						greebleGrid.createWindow( r, to3d, null, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 0.09, -1, -1, -1, 2, 2 );
-					else
+					else {
+						
+						double zOff = -0.08;
+						
 						GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, r, to3d,
 							greebleGrid.mbs.getTexture( "velux_"+feature.veluxTextureApp.texture+"_"+r.hashCode(),
 									feature.veluxTextureApp.texture, miniroof ),
-							-0.1, 0.05 );
+							zOff + 0.05, zOff );
+					}
 					break;
 			}
 		}
