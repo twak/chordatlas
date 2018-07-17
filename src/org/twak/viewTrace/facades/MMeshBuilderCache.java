@@ -46,7 +46,7 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 	}
 	
 	public Cach2<String, String, MatMeshBuilder> textures = new Cach2<String, String, MatMeshBuilder>( (a,b ) -> 
-		new MatMeshBuilder( (String)a, (String)b ).ensureUVs() );
+		new MatMeshBuilder( (String)a, (String)b ).ensureUVs(true) );
 	
 	final static float[] 
 			glass = new float[] {0.0f, 0.0f, 0.0f, 1},

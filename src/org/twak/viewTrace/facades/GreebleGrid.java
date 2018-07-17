@@ -39,6 +39,7 @@ import org.twak.viewTrace.facades.GreebleSkel.QuadF;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
+import org.twak.viewTrace.franken.App.AppMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
@@ -775,7 +776,7 @@ public class GreebleGrid {
 		if ( mf != null && fa.texture != null ) {
 			
 			Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
-			MatMeshBuilder mmb = mbs.getTexture( "texture_"+fa.texture , fa.texture, mf );
+			MatMeshBuilder mmb = mbs.getTexture( "texture_"+fa.texture+"_"+mf.hashCode(), fa.texture, mf );
 
 			for ( FRect w : filteredFeatures.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
@@ -787,7 +788,18 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if ( pa.texture == null) // no texture info
+							
+							
+							if (pa.appMode == AppMode.Bitmap || pa.appMode == AppMode.Manual) {
+								
+								createWindow( rect, to3d, 
+										mbs.WOOD, mbs.WOOD, mbs.GLASS, 
+										0.4, 
+										(float) w.attachedHeight.get(Feature.SILL).depth, 
+										(float) w.attachedHeight.get(Feature.SILL).d, 
+										(float) w.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
+							}
+							else if ( pa.texture == null) // no texture info
 								createInnie( rect, allUV.normalize( rect ), to3d, 
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), 
 												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT, false );
@@ -829,7 +841,9 @@ public class GreebleGrid {
 							
 //							if (w.panesTexApp != null && w.panesTexApp.color != null)
 //								createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
-							if (pa. texture == null)
+							if (pa.appMode == AppMode.Bitmap || pa.appMode == AppMode.Manual) {
+								createDoor( rect, to3d, mbs.WOOD, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
+							} else if (pa. texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, 
 										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ), 0.5f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 							else if (pa.textureUVs == TextureUVs.Zero_One) // labels
@@ -942,10 +956,7 @@ public class GreebleGrid {
 		along = new Vector2d(along);
 		along.normalize();
 
-		
-		
 		Vector2d al = new Vector2d (along), up = new Vector2d( -al.y, al.x ); // up the roof
-		
 
 		al.scale (feature.radius / al.length());
 		up.scale (feature.radius / up.length());
@@ -970,7 +981,6 @@ public class GreebleGrid {
 
 		double height = Math.max (0.5, (max - min) * 2 );
 		
-		
 		Vector3f locJ = new Vector3f( (float) a[1].x, (float) ( min ) , (float) a[1].y),
 				upJ    = new Vector3f(0,1,0),
 				alongJ = new Vector3f ( (float) along.x, 0, (float) along.y);
@@ -980,9 +990,6 @@ public class GreebleGrid {
 				(float)height, (float) feature.radius * 2, (float) feature.radius * 2 ,
 				uvs ? new float[][] {{0.4f,0.4f},{0.6f,0.6f}} : null, MeshBuilder.ALL );
 		
-//		mat.addCube( new Point3d(a[1].x, min + height, a[1].y), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
-//				-height, feature.radius * 2, feature.radius * 2 );
-
 		double step = 0.1;// Math.min ( feature.radius / 2, 0.1 );
 		
 		if (feature.radius > 2*step) {
@@ -1000,12 +1007,6 @@ public class GreebleGrid {
 		
 		
 			mbs.GRAY.addCube( offset, Mathz.Y_UP, alg, -0.02, sl, sl );
-			
-//			offset.scaleAdd (-sl, upp, offset);
-//			offset.scaleAdd (sl, alg, offset);
-			
-//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -sl, -step );
-//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -step, -sl );
 		}
 	}
 	

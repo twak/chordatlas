@@ -147,6 +147,12 @@ public class FacadeTexApp extends App {
 				
 				if (fta.appMode == AppMode.Manual) 
 					texture = null;
+				
+				if (fta.appMode == AppMode.Bitmap) {
+					fta.texture = GreebleSkel.BRICK_JPG;
+					fta.textureUVs = TextureUVs.Rectangle;
+					fta.textureRect = new DRectangle(2,2);
+				}
 
 				// if parent, pass-through (label debug)
 				
@@ -296,7 +302,8 @@ public class FacadeTexApp extends App {
 								fta.setChimneyTexture( dest );
 								
 							} else {
-								
+
+								fta.textureUVs = TextureUVs.Square;
 								fta.coarse = fta.texture = dest;
 								fta.coarseWithWindows = null;
 

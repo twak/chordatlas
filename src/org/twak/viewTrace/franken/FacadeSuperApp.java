@@ -52,7 +52,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		NormSpecGen ns = renderLabels( mf, cropped );
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.spec, ns.norm };
 
-		NetInfo ni = NetInfo.get( this );
+//		NetInfo ni = NetInfo.get( this );
 
 		String fileName = "scratch/" + UUID.randomUUID() + ".png";
 

@@ -28,7 +28,23 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public enum AppMode {
-		Manual, Bitmap, Parent, Net, Procedural
+		Manual, Bitmap, Parent, Net, Procedural;
+
+		public void install( App app ) {
+			
+			app.appMode = this;
+			
+			switch (this) {
+			case Manual:
+			default:
+				app.styleSource = null;
+				app.styleZ = null;
+				break;
+			case Net:
+				app.styleSource = new GaussStyle( app.getClass() );
+				app.styleSource.install( app );;
+			}
+		}
 	}
 	
 	public AppMode appMode = AppMode.Manual;

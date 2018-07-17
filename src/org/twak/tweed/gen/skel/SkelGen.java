@@ -707,7 +707,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public JComponent getUI() {
 
 		JPanel ui = new JPanel( new ListDownLayout() );
-		ui.add( new JLabel( "To edit: use select tool, right click on buildings" ) );
+		ui.add( new JLabel( "edit with select tool: right click on buildings" ) );
 
 		JButton compare = new JButton( "compare to mesh" );
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
@@ -716,6 +716,20 @@ public class SkelGen extends Gen implements IDumpObjs {
 		JButton dec = new JButton( "decorate" );
 		dec.addActionListener( l -> textureSelected( null, null, SkelGen.this ) );
 		ui.add( dec );
+		
+		JButton comptue = new JButton( "refresh geometry" );
+		comptue.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				for (HalfFace hf : block)
+					((SuperFace)hf).buildingApp.isGeometryDirty = true;
+				
+				 setSkel( null, null );
+			}
+		} );
+		ui.add( comptue );
 
 		JButton save = new JButton( "save..." );
 		save.addActionListener( new ActionListener() {

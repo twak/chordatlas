@@ -33,7 +33,7 @@ public class TweedSettings {
 	static File folder; // location of data file
 	
 	public String bikeGanRoot = "/home/twak/code/bikegan";
-	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
+//	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
@@ -96,7 +96,7 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
-	public boolean siteplanInteractiveTextures = true;
+	public boolean siteplanInteractiveTextures = false;
 	public boolean importMiniMeshTextures = false;
 
 	

@@ -61,10 +61,7 @@ public class PanesLabelApp extends App {
 		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
 		
-		getUp( ).styleSource.install(this);
-		
-		if (appMode != AppMode.Net)
-			Thread.dumpStack();
+		getUp( ).appMode.install(this);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -154,10 +151,18 @@ public class PanesLabelApp extends App {
 		for ( App a_ : batch ) {
 			try {
 				
-				if (a_.appMode != AppMode.Net)
-					continue;
-				
 				PanesLabelApp a = (PanesLabelApp)a_;
+				
+				if (a_.appMode != AppMode.Net) {
+					
+					a.texture = null;
+					a.textureRect = null;
+					a.textureUVs = TextureUVs.Square;
+					a.panes = null;
+					
+					continue;
+				}
+				
 				
 				a.panes = null;
 				
