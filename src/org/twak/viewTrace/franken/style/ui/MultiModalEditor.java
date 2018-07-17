@@ -27,7 +27,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.twak.tweed.TweedSettings;
+import org.twak.tweed.Tweed;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.NetInfo;
@@ -54,8 +54,7 @@ public class MultiModalEditor extends JPanel {
 		
 		NetInfo ni = NetInfo.index.get(target);
 		
-		egs = new NetExamples( mm, 10, 6, ni, 
-				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + ni.name) );
+		egs = new NetExamples( mm, 10, 6, ni, new File ( Tweed.DATA + "/network_inputs/" + ni.name) );
 		
 		JPanel controls = createControls(() -> egs.changed());
 		

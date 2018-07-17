@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,10 +12,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
 import javax.vecmath.Matrix4d;
 
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.utils.Filez;
 import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Quaternion;
@@ -119,6 +122,13 @@ public class TweedSettings {
 				XStream xs = new XStream(new PureJavaReflectionProvider());
 				xs.ignoreUnknownElements();
 				settings = (TweedSettings) xs.fromXML( def );
+			}
+			
+			
+			File defaultData = new File (folder, "chordatlas_example_inputs_1.zip");
+			if (!defaultData.exists()) {
+				ProgressMonitor pm = new ProgressMonitor( null, "downloading project data", "...", 0, 1 );
+				Filez.unpackArchive( new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data_s3cr3t/"+defaultData.getName() ), folder, pm );
 			}
 			
 			TweedFrame.instance.tweed.initFrom( folder.toString() );
