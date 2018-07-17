@@ -7,10 +7,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.geom.HalfMesh2.HalfEdge;
+import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -57,6 +62,8 @@ public class VeluxTexApp extends App {
 		BufferedImage eBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D eg =  eBi.createGraphics();
 		
+		double[] style = stealWindowStyle(); // just hide this for now
+		
 		for ( App a : batch ) {
 
 			if (a.appMode != AppMode.Net)
@@ -93,7 +100,7 @@ public class VeluxTexApp extends App {
 				
 				Meta meta = new Meta(imBounds, vta);
 				
-				p2.addInput( lBi, eBi, null, meta, new double[] {0,0,0,0,0,0,0,0},
+				p2.addInput( lBi, eBi, null, meta, style,
 						0.5 * PanesLabelApp.frameWidth * scale / ni.resolution );
 			}
 			catch (Throwable th) {
@@ -120,6 +127,26 @@ public class VeluxTexApp extends App {
 				}
 			}
 		} ) );
+	}
+
+	private double[] stealWindowStyle() {
+
+		Random randy = new Random();
+		for ( HalfEdge he : parent.mr.superFace.edges() ) {
+			try {
+				SuperEdge se = (SuperEdge) he;
+				for ( FRect window : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) {
+					try {
+						return window.panesTexApp.styleSource.draw( randy, this );
+					} catch ( Throwable th ) {
+					}
+				}
+			} catch ( Throwable th ) {
+				continue;
+			}
+		}
+
+		return new double[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 	}
 
 	private static class Meta {

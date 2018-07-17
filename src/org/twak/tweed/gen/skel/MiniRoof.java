@@ -64,7 +64,6 @@ public class MiniRoof implements HasSuper {
 				circ.veluxTextureApp.appMode = roofTexApp.appMode;
 				
 				// 1. try moving the feature away from the edge
-//				if (false)
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
@@ -87,8 +86,6 @@ public class MiniRoof implements HasSuper {
 					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
 				}
 				
-//				circ.radius -= 0.01;
-
 				if (circ.radius < 0.1)
 					return;
 

@@ -81,15 +81,15 @@ public class JointStyle implements StyleSource {
 		nets.add (new NetProperties(BlockApp                 .class, false, false, true  ) );
 		nets.add (new NetProperties(BuildingApp              .class, false, false, true  ) );
 		nets.add (new NetProperties(FacadeLabelApp           .class, true , false, true  ) );
-		nets.add (new NetProperties(FacadeGreebleApp         .class, true , false, true  ) );
-		nets.add (new NetProperties(FacadeSuperApp           .class, true , false, false ) );
+		nets.add (new NetProperties(FacadeGreebleApp         .class, false , false, true  ) );
 		nets.add (defaultNet = new NetProperties(FacadeTexApp.class, true , true , true  ) );
+		nets.add (new NetProperties(RoofTexApp               .class, true , true , true  ) );
+		nets.add (new NetProperties(RoofGreebleApp           .class, false, false, true  ) );
+		nets.add (new NetProperties(VeluxTexApp              .class, false , false, true  ) );
 		nets.add (new NetProperties(PanesLabelApp            .class, true , false, true  ) );
 		nets.add (new NetProperties(PanesTexApp              .class, true , false, true  ) );
 		nets.add (new NetProperties(DoorTexApp               .class, true , false, true  ) );
-		nets.add (new NetProperties(RoofTexApp               .class, true , true , true  ) );
-		nets.add (new NetProperties(RoofGreebleApp           .class, false, false, true  ) );
-		nets.add (new NetProperties(VeluxTexApp              .class, true , false, true  ) );
+		nets.add (new NetProperties(FacadeSuperApp           .class, true , false, false ) );
 		nets.add (new NetProperties(RoofSuperApp             .class, true , false, false ) );
 	}
 	
