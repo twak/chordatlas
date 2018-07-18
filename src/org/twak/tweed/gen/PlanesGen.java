@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.tools.PlaneTool;
+import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.material.Material;
@@ -136,6 +137,7 @@ public class PlanesGen extends Gen implements ICanSave {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
 				planes.remove( p );
+				tweed.setTool( SelectTool.class );
 				PlanesGen.this.calculateOnJmeThread();
 			}
 		} );
@@ -148,6 +150,18 @@ public class PlanesGen extends Gen implements ICanSave {
 
 	@Override
 	public JComponent getUI() {
-		return new JLabel("Use select tool to delete");
+		
+		JPanel ui = new JPanel( new ListDownLayout() );
+
+		JButton edit = new JButton( "edit" );
+		edit.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				tweed.setTool( new PlaneTool( tweed, PlanesGen.this ) );
+			}
+		} );
+		ui.add(edit);
+
+		return ui;
 	}
 }

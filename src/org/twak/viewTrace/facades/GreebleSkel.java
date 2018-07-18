@@ -650,7 +650,7 @@ public class GreebleSkel {
 				floors.add( facadeRect );
 				materials.add( faceMaterial );
 				if ( sides != null && !sides.isEmpty() )
-					faceMaterial.add( sides, GreebleHelper.wallUVs( sides, uvs ), to3d );
+					faceMaterial.add( sides, uvs == null ? null : GreebleHelper.wallUVs( sides, uvs ), to3d );
 		}
 
 		for ( int j = 0; j < floors.size(); j++ ) {
@@ -758,7 +758,7 @@ public class GreebleSkel {
 						GreebleGrid.createWindowFromPanes (new ArrayList<DRectangle>(), r, r, to3d,
 							greebleGrid.mbs.getTexture( "velux_"+feature.veluxTextureApp.texture+"_"+r.hashCode(),
 									feature.veluxTextureApp.texture, miniroof ),
-							zOff + 0.05, zOff );
+							zOff + 0.05, zOff, true );
 					}
 					break;
 			}

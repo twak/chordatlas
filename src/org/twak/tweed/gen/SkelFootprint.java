@@ -152,7 +152,6 @@ public class SkelFootprint {
 			solve( SS, m, skelGen.blockGen.getSolutionFile(), Long.MAX_VALUE );
 		}
 		
-		
 		if ( TRUE )
 			postProcesss(SS);
 		

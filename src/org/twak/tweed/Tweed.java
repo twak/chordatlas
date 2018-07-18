@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -170,7 +171,7 @@ public class Tweed extends SimpleApplication {
 		cam.setLocation(TweedSettings.settings.cameraLocation);
 		cam.setRotation(TweedSettings.settings.cameraOrientation);
 	    
-	
+		setAmbient( 0 );
 		setFov(0);
 		setCameraSpeed( 0 );
 		
@@ -377,8 +378,18 @@ public class Tweed extends SimpleApplication {
 	
 	public void setTool( Tool newTool ) {
 		
-		Tool oldTool = tool;
+		{
+			boolean seenBefore = false;
+
+			for ( Tool t : tools )
+				if ( t.getClass() == newTool.getClass() )
+					seenBefore = true;
+
+			if ( !seenBefore )
+				toolBG.clearSelection();
+		}
 		
+		Tool oldTool = tool;
 		enqueue( new Runnable() {
 			@Override
 			public void run() {
@@ -639,17 +650,19 @@ public class Tweed extends SimpleApplication {
 		tool.clear();
 	}
 
+	private ButtonGroup toolBG = new ButtonGroup();
+	
 	public void addUI( JPanel panel ) {
 
 		panel.setLayout( new ListDownLayout() );
-		ButtonGroup bg = new ButtonGroup();
 
 		panel.add( new JLabel("tools:") );
+		
 		
 		for ( Tool t : tools ) {
 
 			JToggleButton tb = new JToggleButton( t.getName() );
-			bg.add( tb );
+			toolBG.add( tb );
 
 			tb.addActionListener( new ActionListener() {
 
@@ -665,7 +678,7 @@ public class Tweed extends SimpleApplication {
 		((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
 
 	}
-
+	
 	public void resetCamera() {
 		cam.setLocation( new Vector3f() );
 		cam.setRotation( new Quaternion() );

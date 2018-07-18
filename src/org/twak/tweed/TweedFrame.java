@@ -491,10 +491,9 @@ public class TweedFrame {
 						public void heresTheFile( File skelGen ) throws Throwable {
 							try {
 								
-//								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										XStream xs = new XStream(new PureJavaReflectionProvider());
-										xs.ignoreUnknownElements();
+										XStream xs = new XStream ();// new PureJavaReflectionProvider());
+//										xs.ignoreUnknownElements();
 										SkelGen sg = (SkelGen) xs.fromXML( skelGen );
 										sg.onLoad( tweed );
 										addGen( sg, true );
@@ -507,6 +506,32 @@ public class TweedFrame {
 							catch (Throwable th ) {
 								th.printStackTrace();
 								JOptionPane.showMessageDialog( frame, "failed to load "+skelGen.getName() );
+							}
+						};
+					};
+				}
+			} );
+			
+			sp.add( "+ skels", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select one of many skels to load", new File( Tweed.JME ), "xml" ) {
+						public void heresTheFile( File skelGen ) throws Throwable {
+							try {
+
+								for ( File f : skelGen.getParentFile().listFiles() ) {
+									try {
+										XStream xs = new XStream();// new PureJavaReflectionProvider());
+										SkelGen sg = (SkelGen) xs.fromXML( f );
+										sg.onLoad( tweed );
+										addGen( sg, true );
+									} catch ( Throwable th ) {
+										th.printStackTrace();
+									}
+								}
+							} catch ( Throwable th ) {
+								th.printStackTrace();
+								JOptionPane.showMessageDialog( frame, "failed to load " + skelGen.getName() );
 							}
 						};
 					};
@@ -722,13 +747,14 @@ public class TweedFrame {
 	public void somethingChanged() {
 		canvas.repaint();
 	}
-
+	
 	public void setGenUI( JComponent ui ) {
 		genUI.removeAll();
 		if ( ui != null ) {
 			genUI.setLayout( new BorderLayout() );
 			genUI.add( ui, BorderLayout.CENTER );
 		}
+		
 		genUI.revalidate();
 		genUI.doLayout();
 		genUI.repaint();

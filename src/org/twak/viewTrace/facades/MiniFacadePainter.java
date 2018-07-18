@@ -347,7 +347,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 					
 					Point2d pt = flip ( ma.from( e ) );
 					
-					FRect rec = new FRect( pt.x, pt.y, pt.x + 0.5, pt.y + 0.5, mf);
+					FRect rec = new FRect( pt.x, pt.y, 1, 1, mf);
 					rec.setFeat( f );
 					
 					mf.featureGen.put( f, rec );

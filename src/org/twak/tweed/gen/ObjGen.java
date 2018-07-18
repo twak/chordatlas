@@ -78,7 +78,7 @@ public class ObjGen extends Gen implements IDumpObjs {
 			ColorRGBA c = Jme3z.toJme( color );
 			
 			mat.setColor( "Diffuse", c );
-			mat.setColor( "Ambient", c );
+			mat.setColor( "Ambient", c.mult( 0.1f ) );
 			
 			mat.setBoolean( "UseMaterialColors", true );
 

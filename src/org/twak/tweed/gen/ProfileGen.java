@@ -103,8 +103,18 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		
 		
 		if (blockGen.extraSweeps != null) 
-			for (Plane p : blockGen.extraSweeps.planes ) 
-				footprint.add(new Line( new Point2d(p.a.x,  p.a.z ), new Point2d(p.b.x,  p.b.z ) ) );
+			for (Plane p : blockGen.extraSweeps.planes ) {
+				SuperLine sl = new SuperLine( new Point2d(p.a.x,  p.a.z ), new Point2d(p.b.x,  p.b.z ) );
+
+				sl.mega = new MegaFacade();
+				sl.mega.area = sl.length() * 30;
+				sl.mega.origin = new LineAtHeight(0, sl);
+//				sl.mega.origin.
+				
+				sl.mega.oLen = sl.length();
+				sl.mega.pLength = sl.mega.oLen;
+				footprint.add( sl );
+			}
 		
 		new Thread(() -> faces = findMegaFaces( TweedSettings.settings.profileVSampleDist ) ).start();
 	}

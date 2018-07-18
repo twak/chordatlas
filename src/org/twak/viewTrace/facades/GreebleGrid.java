@@ -396,7 +396,7 @@ public class GreebleGrid {
 			
 			createWindowFromPanes (wa.panes, w,w, to3d, 
 					mbs.getTexture( "texture_"+wa.texture+"_window_"+w.hashCode(), wa.texture, w ), 
-					0.1, 0 );
+					0.1, 0, false );
 		}
 	}
 	
@@ -526,7 +526,7 @@ public class GreebleGrid {
 	}
 	
 	public static void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
-			MatMeshBuilder window, double paneDepth, double frameDepth ) {
+			MatMeshBuilder window, double paneDepth, double frameDepth, boolean skirt ) {
 
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 
@@ -556,6 +556,7 @@ public class GreebleGrid {
 		} );
 		
 		// outwards pointing skirt for dormer windwos.
+		if (skirt)
 		createInnie( bounds, uvs.normalize( bounds ), to3d, window, (paneDepth - frameDepth), -frameDepth, 
 				MeshBuilder.NO_FRONT_OR_BACK, true );
 		
@@ -814,7 +815,7 @@ public class GreebleGrid {
 								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 								createWindowFromPanes (pa.panes, rect, rect, to3d,
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), pa.texture, w ),
-										0.2, 0.17 );
+										0.2, 0.17, false );
 							}
 							else { // textures and panes
 								
@@ -822,7 +823,7 @@ public class GreebleGrid {
 								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false );
 								createWindowFromPanes (pa.panes, rect, allUV, to3d,
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode() , fa.texture, w ),
-										0.2, 0.17 );
+										0.2, 0.17, false );
 							}
 						}
 					} );
