@@ -99,8 +99,8 @@ public class FacadeTexApp extends App {
 			if (r.panesLabelApp.renderedOnFacade)
 				out.put( "window", r.panesLabelApp );
 		
-		for (FRect r : mf.featureGen.getRects( Feature.DOOR ) )
-			out.put( "door", r.panesLabelApp );
+//		for (FRect r : mf.featureGen.getRects( Feature.DOOR ) )
+//			out.put( "door", r.panesLabelApp );
 		
 		out.put( "super", mf.facadeSuperApp );
 		out.put( "greeble", mf.facadeGreebleApp ); 
