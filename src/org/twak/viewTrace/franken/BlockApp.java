@@ -78,7 +78,7 @@ public class BlockApp extends App {
 
 		
 		if (styleSource instanceof JointStyle) {
-			JButton g = new JButton("set normal");
+			JButton g = new JButton("set independent");
 			
 			g.addActionListener( new ActionListener() {
 				@Override

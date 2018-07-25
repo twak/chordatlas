@@ -31,6 +31,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
@@ -362,7 +363,7 @@ public class TweedFrame {
 		layers.setLayout( new BorderLayout() );
 		layers.add( new JLabel( "layers:" ), BorderLayout.NORTH );
 
-		JScrollPane listScroll = new JScrollPane( layerList );
+		JScrollPane listScroll = new JScrollPane( layerList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER  );
 		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
 		listScroll.setPreferredSize( new Dimension( 200, 300 ) );
 		layers.add( listScroll, BorderLayout.CENTER );
@@ -385,13 +386,16 @@ public class TweedFrame {
 			addRemoveLayer.add( removeLayer );
 		}
 
-		JPanel options = new JPanel( new BorderLayout() );
+		JScrollPane optionsScroll;
 		{
+			JPanel options = new JPanel( new BorderLayout() );
 			options.add( new JLabel( "options:" ), BorderLayout.NORTH );
 			options.add( genUI, BorderLayout.CENTER );
+			optionsScroll = new JScrollPane( options, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER  );
+			optionsScroll .getVerticalScrollBar().setUnitIncrement( 50 );
 		}
 
-		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, layers, options );
+		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, layers, optionsScroll );
 
 		out.add( pane, BorderLayout.CENTER );
 

@@ -1,5 +1,6 @@
 package org.twak.tweed;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -39,6 +41,7 @@ import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 
@@ -75,6 +78,8 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.terrain.geomipmap.TerrainLodControl;
+import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.ui.Picture;
 
 public class Tweed extends SimpleApplication {
@@ -324,7 +329,10 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.fromOrigin = new Matrix4d( TweedSettings.settings.toOrigin );
 		TweedSettings.settings.fromOrigin.invert();
 		
-		frame.addGen ( new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
+		GISGen gg = new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this );
+		
+		
+		frame.addGen ( gg, true );
 	}
 
 	public void setCameraPerspective() {

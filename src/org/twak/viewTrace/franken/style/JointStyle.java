@@ -3,6 +3,8 @@ package org.twak.viewTrace.franken.style;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,12 +68,21 @@ public class JointStyle implements StyleSource {
 		public Class bakeWith;
 		public transient Set<Class> bake = new HashSet<>();
 		
+		public PerJoint() {
+			System.out.println(">>>");
+		}
+		
 		public PerJoint (NetProperties ns) {
 			this.ns = ns;
 			this.bakeWith = ns.klass == BlockApp.class ? ns.klass : BuildingApp.class; // shouldn't bake block anyway
 			this.dist = new MultiModal( ns.klass );
 			this.dist.newMode();
 		}
+		
+		  private Object readResolve() {
+			    bake = new HashSet<>();
+			    return this;
+		  }
 	}
 
 	public List<NetProperties> nets = new ArrayList<>();

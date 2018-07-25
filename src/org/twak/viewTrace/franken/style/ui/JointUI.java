@@ -24,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 
@@ -125,7 +126,12 @@ public class JointUI extends JPanel {
 		
 		setLayout( new BorderLayout() );
 		add (top, BorderLayout.NORTH);
-		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
+		
+		modalPanel = new JPanel(new BorderLayout() );
+		JScrollPane modalScroll = new JScrollPane( modalPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		modalScroll.getVerticalScrollBar().setUnitIncrement( 50 );
+
+		add (modalScroll, BorderLayout.CENTER);
 		
 		JButton close = new JButton( "ok" );
 

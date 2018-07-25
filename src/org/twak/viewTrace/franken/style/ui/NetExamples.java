@@ -179,7 +179,7 @@ public class NetExamples extends JComponent {
 						else if (exemplar.name.contains ( "roof") )
 							scale = null;
 						else if ( exemplar.name.contains("door") )
-							scale = null;
+							scale = 1/256.;// 0.09;
 						
 						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
@@ -252,8 +252,8 @@ public class NetExamples extends JComponent {
 
 				BufferedImage tmp = new BufferedImage( exemplar.resolution, exemplar.resolution, BufferedImage.TYPE_3BYTE_BGR );
 				Graphics2D g = tmp.createGraphics();
-				int col = (int) ( Math.random() * 100 ) + 50;
-				g.setColor( new Color( col, col, col ) );
+//				int col = Rainbow.getColour( i ).getR (int) ( Math.random() * 100 ) + 50;
+				g.setColor( Rainbow.getColour(i) );
 				g.fillRect( 0, 0, exemplar.resolution, exemplar.resolution );
 				g.dispose();
 
@@ -303,7 +303,7 @@ public class NetExamples extends JComponent {
 		repaint();
 	}
 	
-	private synchronized void addImage (int src, BufferedImage b, double scale) {
+	private synchronized void addImage (int src, BufferedImage b, Double scale) {
 		Pair<Integer, Integer> next = randomOrder.get( (randomLocation ++) % randomOrder.size() );
 		
 		if (next.first() == hx && next.second() == hy)
