@@ -97,13 +97,14 @@ public class MultiModalEditor extends JPanel {
 		
 		gList = new JPanel(new ListDownLayout());
 		
-		gList.setPreferredSize( new Dimension (200, 600) );
+		JPanel out = new JPanel(new BorderLayout());
+		out.setPreferredSize( new Dimension (200, 600) );
 		
 		buildControls(gList, localUpdate);
-		JScrollPane scroll = new JScrollPane( gList );
+//		out.add(gList, BorderLayout.CENTER);
+		JScrollPane scroll = new JScrollPane( gList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		scroll.getVerticalScrollBar().setUnitIncrement( 50 );
 		
-		JPanel out = new JPanel();
-		out.setLayout( new BorderLayout() );
 		out.add (scroll, BorderLayout.CENTER);
 		
 		JPanel northPanel = new JPanel(new BorderLayout());

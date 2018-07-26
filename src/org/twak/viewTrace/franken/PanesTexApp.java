@@ -47,7 +47,7 @@ public class PanesTexApp extends App {
 		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
 		
-		getUp( ).appMode.install(this);
+		getUp( ).install(this);
 	}
 	
 	public PanesTexApp(PanesTexApp t) {

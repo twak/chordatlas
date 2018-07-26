@@ -1,6 +1,8 @@
 package org.twak.viewTrace.franken;
 
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -19,6 +21,7 @@ import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.style.GaussStyle;
+import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.StyleSource;
 
 public abstract class App /*earance*/ implements Cloneable {
@@ -30,20 +33,27 @@ public abstract class App /*earance*/ implements Cloneable {
 	public enum AppMode {
 		Manual, Bitmap, Parent, Net, Procedural;
 
-		public void install( App app ) {
+	}
+	
+	public void install( App child ) {
+		
+		child.appMode = this.appMode;
+		
+		switch (child.appMode) {
+		case Manual:
+		default:
+			child.styleSource = null;
+			child.styleZ = null;
+			break;
+		case Net:
+			if (styleSource instanceof JointStyle)
+				child.styleSource = styleSource;
+			else
+				child.styleSource = new GaussStyle( child.getClass() ); //?! shouldn't we store this somewhere?
 			
-			app.appMode = this;
+			child.styleSource.install( child );
 			
-			switch (this) {
-			case Manual:
-			default:
-				app.styleSource = null;
-				app.styleZ = null;
-				break;
-			case Net:
-				app.styleSource = new GaussStyle( app.getClass() );
-				app.styleSource.install( app );;
-			}
+			break;
 		}
 	}
 	
@@ -58,11 +68,17 @@ public abstract class App /*earance*/ implements Cloneable {
 	// contains latent variables for children (who are created during tree evluation). 
 	public transient Map<Class<? extends App>, double[]> bakeWith = new HashMap<>();
 	
+	  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		    in.defaultReadObject();
+		    this.bakeWith = new HashMap<>();
+	  }	
 	public App( App a ) {
 		this.appMode = a.appMode;
-		this.styleZ = Arrayz.copyOf ( a.styleZ );
+		if (a.styleZ != null )
+			this.styleZ = Arrayz.copyOf ( a.styleZ );
 		this.name = a.name;
-		this.styleSource = a.styleSource.copy();
+		if (a.styleSource != null)
+			this.styleSource = a.styleSource.copy();
 	}
 	
 	public App() {

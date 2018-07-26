@@ -1,12 +1,14 @@
 package org.twak.viewTrace.franken.style.ui;
 
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -36,7 +38,7 @@ public class NSliders extends JPanel {
 			
 			int i_ = i;
 			JSlider s = new JSlider( 0, 1000, 500 );
-			s.setPreferredSize( new Dimension (100, s.getPreferredSize().height) );
+			s.setPreferredSize( new Dimension (100, s.getPreferredSize().height / 2) );
 			s.setValue( (int)( result[i] * 250 + 500) );
 //			s.setOrientation( SwingConstants.HORIZONTAL );
 			sliders[i] = s;
@@ -50,7 +52,7 @@ public class NSliders extends JPanel {
 			} );
 		}
 		
-		JButton zero = new JButton("μ = 0");
+		JButton zero = new JButton("μ=0");
 		zero.addActionListener( new ActionListener() {
 			
 			@Override
@@ -61,9 +63,8 @@ public class NSliders extends JPanel {
 				setValues(result);
 			}
 		} );
-		add (zero);
 		
-		JButton rand = new JButton("μ = rand");
+		JButton rand = new JButton("μ=rand");
 		rand.addActionListener(  new ActionListener() {
 			Random randy = new Random();
 			@Override
@@ -75,7 +76,34 @@ public class NSliders extends JPanel {
 				setValues(result);
 			}
 		}  );
-		add (rand);
+		
+		JButton paste = new JButton("μ=paste");
+		paste.addActionListener(  new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+
+				if ( UIVector.copiedVector != null && UIVector.copiedVector.length == result.length )
+					for ( int i = 0; i < result.length; i++ )
+						result[ i ] = UIVector.copiedVector[ i ];
+				else {
+					JOptionPane.showMessageDialog( null, "nothing found to paste / wrong length vector" );
+					return;
+				}
+				
+				setValues(result);
+			}
+		}  );
+		
+		JButton copy = new JButton("copy(μ)");
+		copy.addActionListener(  e -> UIVector.copiedVector = result );
+		
+		JPanel meanOpts = new JPanel(new GridLayout( 2, 2 ) );
+		meanOpts.add (zero);
+		meanOpts.add (rand);
+		meanOpts.add (paste);
+		meanOpts.add (copy);
+		
+		add(meanOpts);
 		
 		if (extraButton != null) {
 			JButton e = new JButton(extraButton.toString());

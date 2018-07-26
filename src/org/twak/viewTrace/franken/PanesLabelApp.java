@@ -61,7 +61,7 @@ public class PanesLabelApp extends App {
 		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
 		
-		getUp( ).appMode.install(this);
+		getUp( ).install(this);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -82,9 +82,6 @@ public class PanesLabelApp extends App {
 		
 		if (TweedSettings.settings.siteplanInteractiveTextures)
 			appMode = AppMode.Net;
-		
-		if (appMode != AppMode.Net)
-			Thread.dumpStack();
 	}
 	
 	@Override

@@ -96,7 +96,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 //	@Deprecated transient Matrix4d toOrigin;
 	String crs;
 	
-	public boolean showTerrain = true;
+	public boolean showTerrain = false;
 	
 	public GISGen() {}
 	
@@ -112,33 +112,33 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		// TODO Auto-generated method stub
 		super.calculate();
 
-		if (showTerrain) { 
-		// https://wiki.jmonkeyengine.org/jme3/advanced/terrain.html
-		DRectangle bounds = rect();
-		int size = 1+ Mathz.nextPower2( (int) Math.max ( bounds.width, bounds.height ) );
-		Texture heightMapImage = tweed.getAssetManager().loadTexture( GreebleSkel.TILE_JPG );
-		AbstractHeightMap heightmap = null;
-		heightmap = new ImageBasedHeightMap(heightMapImage.getImage(), 1f);
-		heightmap.load();
-		
-		TerrainQuad terrain = new TQ("terrain", 65, size, heightmap.getHeightMap() ) ;
-		
-		Material mat = new Material(tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
-		ColorRGBA c = Jme3z.toJme( color );
-		mat.setColor( "Diffuse", c );
-		mat.setColor( "Ambient", c.mult( 0.1f ) );
-		mat.setBoolean( "UseMaterialColors", true );
-		
-//		mat.setBoolean( "UseMaterialColors", true );
-		terrain.setMaterial( mat );
-		Point2d gc = bounds.getCenter();
-		terrain.setLocalTranslation(  (float) gc.x, -10f, (float) gc.y ); 
-		terrain.setLocalScale(  1f, 0.05f, 1f );
-		
-		TerrainLodControl control = new TerrainLodControl(terrain, Collections.singletonList( tweed.getCamera() ));
-		terrain.addControl( control );
-		
-		gNode.attachChild( terrain );
+		if ( showTerrain ) {
+			// https://wiki.jmonkeyengine.org/jme3/advanced/terrain.html
+			DRectangle bounds = rect();
+			int size = 1 + Mathz.nextPower2( (int) Math.max( bounds.width, bounds.height ) );
+			Texture heightMapImage = tweed.getAssetManager().loadTexture( GreebleSkel.TILE_JPG );
+			AbstractHeightMap heightmap = null;
+			heightmap = new ImageBasedHeightMap( heightMapImage.getImage(), 1f );
+			heightmap.load();
+
+			TerrainQuad terrain = new TQ( "terrain", 65, size, heightmap.getHeightMap() );
+
+			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			ColorRGBA c = Jme3z.toJme( color );
+			mat.setColor( "Diffuse", c );
+			mat.setColor( "Ambient", c.mult( 0.1f ) );
+			mat.setBoolean( "UseMaterialColors", true );
+
+			//		mat.setBoolean( "UseMaterialColors", true );
+			terrain.setMaterial( mat );
+			Point2d gc = bounds.getCenter();
+			terrain.setLocalTranslation( (float) gc.x, -10f, (float) gc.y );
+			terrain.setLocalScale( 1f, 0.05f, 1f );
+
+			TerrainLodControl control = new TerrainLodControl( terrain, Collections.singletonList( tweed.getCamera() ) );
+			terrain.addControl( control );
+
+			gNode.attachChild( terrain );
 		}
 	}
 	

@@ -246,7 +246,7 @@ public class JointStyle implements StyleSource {
 	
 	public void process (App app, Random random) {
 		
-		app.bakeWith.clear();
+		app.bakeWith = new HashMap<>();
 		
 		setMode( app );
 		app.styleSource = this;

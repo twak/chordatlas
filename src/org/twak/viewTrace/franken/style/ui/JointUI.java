@@ -128,10 +128,8 @@ public class JointUI extends JPanel {
 		add (top, BorderLayout.NORTH);
 		
 		modalPanel = new JPanel(new BorderLayout() );
-		JScrollPane modalScroll = new JScrollPane( modalPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-		modalScroll.getVerticalScrollBar().setUnitIncrement( 50 );
 
-		add (modalScroll, BorderLayout.CENTER);
+		add (modalPanel, BorderLayout.CENTER);
 		
 		JButton close = new JButton( "ok" );
 

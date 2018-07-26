@@ -40,6 +40,8 @@ public class NetExamples extends JComponent {
 	BufferedImage[][] images;
 	int[][] inputIdx;
 	Double[][] imageScales;
+	double[][][] styleVectors;
+	
 	List<Pair<Integer, Integer>> randomOrder = new ArrayList<>();
 	int randomLocation = 0;
 	
@@ -72,10 +74,12 @@ public class NetExamples extends JComponent {
 		int i;
 		Double scale;
 		BufferedImage image;
+		double[] style;
 		
-		public UniqueInt (int i, Double scale) {
+		public UniqueInt (int i, Double scale, double[] style) {
 			this.i = i;
 			this.scale = scale;
+			this.style = style;
 		}
 
 		public UniqueInt( int i, Double scale, BufferedImage bi ) {
@@ -98,6 +102,7 @@ public class NetExamples extends JComponent {
 		images = new BufferedImage [x][y];
 		inputIdx = new int[x][y];
 		imageScales = new Double[x][y];
+		styleVectors = new double[x][y][];
 		
 		setPreferredSize( new Dimension ( 
 				(int)( x * DRAW_SIZE) ,
@@ -182,9 +187,11 @@ public class NetExamples extends JComponent {
 							scale = 1/256.;// 0.09;
 						
 						
+						double[] style = styleSource.draw( randy, null );
+						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
-								new UniqueInt ( index, scale ),
-								styleSource.draw( randy, null ),scale ) ;//scales.get(index) );
+								new UniqueInt ( index, scale, style ),
+								style,scale ) ;//scales.get(index) );
 						
 					}
 					
@@ -217,7 +224,9 @@ public class NetExamples extends JComponent {
 		showLoading();
 		
 		MouseAdapter ml = new MouseAdapter() {
+			
 			public void mouseMoved(MouseEvent e) {
+				
 				hx = Mathz.min ( images.length-1, (int)( e.getX() / (DRAW_SIZE ) ) );
 				hy = Mathz.min ( images[0].length-1, (int)( e.getY() / (DRAW_SIZE ) ) );
 				
@@ -226,12 +235,15 @@ public class NetExamples extends JComponent {
 				repaint();
 			};
 			public void mouseExited(MouseEvent e) {
+				
 				hx = hy = -1;
 				repaint();
 			};
 			
 			public void mousePressed(MouseEvent e) {
+				
 				mouseDown = true;
+				UIVector.copiedVector = styleVectors[hx][hy];
 			};
 			
 			public void mouseReleased(MouseEvent e) {
@@ -276,7 +288,7 @@ public class NetExamples extends JComponent {
 					if (startTime < lastChanged)
 						return;
 					
-					addImage( ui.i, ui.image, ui.scale );
+					addImage( ui );
 					try {
 						Thread.sleep( interval );
 					} catch ( InterruptedException f ) {
@@ -303,15 +315,16 @@ public class NetExamples extends JComponent {
 		repaint();
 	}
 	
-	private synchronized void addImage (int src, BufferedImage b, Double scale) {
+	private synchronized void addImage ( UniqueInt ui ) { // int src, BufferedImage b, Double scale) {
 		Pair<Integer, Integer> next = randomOrder.get( (randomLocation ++) % randomOrder.size() );
 		
 		if (next.first() == hx && next.second() == hy)
 			return; // don't updat the thing we're hovering over
 		
-		images[ next.first() ][ next.second() ] = b;
-		inputIdx[ next.first() ][ next.second() ] = src;
-		imageScales[ next.first() ][ next.second() ] = scale;
+		images[ next.first() ][ next.second() ] = ui.image;
+		inputIdx[ next.first() ][ next.second() ] = ui.i;
+		imageScales[ next.first() ][ next.second() ] = ui.scale;
+		styleVectors[ next.first() ][ next.second() ] = ui.style;
 		
 		repaint();
 	}

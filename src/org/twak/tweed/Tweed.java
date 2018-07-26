@@ -76,8 +76,11 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.shadow.EdgeFilteringMode;
+import com.jme3.shadow.PointLightShadowRenderer;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.ui.Picture;
@@ -115,6 +118,8 @@ public class Tweed extends SimpleApplication {
 	private AmbientLight ambient;
 	private DirectionalLight sun;
 	private PointLight point;
+	PointLightShadowRenderer plsr;
+	FilterPostProcessor fpp ;
 	
 	public Node debug;
 	
@@ -128,10 +133,10 @@ public class Tweed extends SimpleApplication {
 		super.reshape( w, h );
 	}
 	
+	
+	
 	public void simpleInitApp() {
 
-//		TweedSettings.load( new File ( Tweed.DATA ) );
-		
 		point = new PointLight();
 		point.setEnabled( true );
 		point.setColor( ColorRGBA.White.mult(4) );
@@ -179,16 +184,6 @@ public class Tweed extends SimpleApplication {
 		setAmbient( 0 );
 		setFov(0);
 		setCameraSpeed( 0 );
-		
-		if ( TweedSettings.settings.SSAO ) {
-			
-			FilterPostProcessor fpp = new FilterPostProcessor( assetManager );
-			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
-//			fpp.addFilter( new ColorOverlayFilter( ColorRGBA.Magenta ));
-			fpp.addFilter( filter );
-			fpp.addFilter( new FXAAFilter() );
-			viewPort.addProcessor( fpp );
-		}
 		
 		TweedSettings.loadDefault();
 		
@@ -734,6 +729,36 @@ public class Tweed extends SimpleApplication {
 		setAmbient( 0 );
 
 		frame.setGens( TweedSettings.settings.genList );
+
+		if (plsr != null) {
+			rootNode.setShadowMode( ShadowMode.Off );
+			viewPort.removeProcessor( plsr );
+		}
+		
+		if ( TweedSettings.settings.shadows ) {
+			plsr = new PointLightShadowRenderer( assetManager, 512 );
+			plsr.setLight( point );
+			plsr.setShadowZExtend( 50 );
+			plsr.setShadowIntensity( 0.5f );
+			plsr.setEdgeFilteringMode( EdgeFilteringMode.PCF4 );
+			rootNode.setShadowMode( ShadowMode.CastAndReceive );
+			viewPort.addProcessor( plsr );
+		}
+
+		
+		if ( fpp != null ) {
+			viewPort.removeProcessor( fpp );
+		}
+
+		if ( TweedSettings.settings.SSAO ) {
+
+			fpp = new FilterPostProcessor( assetManager );
+			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
+			//			fpp.addFilter( new ColorOverlayFilter( ColorRGBA.Magenta ));
+			fpp.addFilter( filter );
+			fpp.addFilter( new FXAAFilter() );
+			viewPort.addProcessor( fpp );
+		}
 		
 		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
 	}

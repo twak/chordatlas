@@ -70,6 +70,7 @@ public class TweedSettings {
 	public boolean calculateFootprintNormals = true;
 	public double  snapFootprintVert = 0;
 	public boolean SSAO = true;
+	public boolean shadows = false;
 	
 	public double megaFacadeAreaThreshold = 30; // 23 for regent
 	public double profileHSampleDist = 0.2;
@@ -98,6 +99,7 @@ public class TweedSettings {
 	public double superResolutionBlend = 0.4;
 	public boolean siteplanInteractiveTextures = false;
 	public boolean importMiniMeshTextures = false;
+	
 
 	
 	

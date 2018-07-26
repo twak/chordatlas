@@ -226,8 +226,13 @@ public class SelectedApps extends ArrayList<App>{
 		AutoEnumCombo combo = new AutoEnumCombo( exemplar.appMode, new ValueSet() {
 			public void valueSet( Enum num ) {
 				
-				for (App a : SelectedApps.this)
+				for (App a : SelectedApps.this) {
 					a.appMode = (AppMode) num;
+					if (a.appMode == AppMode.Net && a.styleSource == null)
+						a.styleSource = new GaussStyle( a.getClass() );
+				}
+				
+				
 				
 				options.removeAll();
 				options.setLayout( new ListDownLayout() );

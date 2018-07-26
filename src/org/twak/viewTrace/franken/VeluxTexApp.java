@@ -116,6 +116,7 @@ public class VeluxTexApp extends App {
 			@Override
 			public void finished( Map<Object, File> results ) {
 				
+				try {
 				for ( Map.Entry<Object, File> e : results.entrySet() ) {
 					Meta meta = (Meta) e.getKey();
 					try {
@@ -124,6 +125,10 @@ public class VeluxTexApp extends App {
 					} catch ( IOException e1 ) {
 						e1.printStackTrace();
 					}
+				}
+				}
+				finally {
+					whenDone.run();
 				}
 			}
 		} ) );
@@ -137,7 +142,7 @@ public class VeluxTexApp extends App {
 				SuperEdge se = (SuperEdge) he;
 				for ( FRect window : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) {
 					try {
-						return window.panesTexApp.styleSource.draw( randy, this );
+						return window.panesTexApp.styleZ;//styleSource.draw( randy, this );
 					} catch ( Throwable th ) {
 					}
 				}
