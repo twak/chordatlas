@@ -40,8 +40,10 @@ public class DoorTexApp extends PanesTexApp {
 				public void picked( Color color ) {
 
 					for ( App a : apps ) {
-						( (DoorTexApp) a ).color = color;
-						( (DoorTexApp) a ).fr.panesLabelApp.texture = null;
+						DoorTexApp da = ( (DoorTexApp) a );
+						da.color = color;
+						da.fr.panesLabelApp.texture = null;
+						da.appMode = da.fr.panesLabelApp.appMode = TextureMode.Off;
 					}
 
 					globalUpdate.run();

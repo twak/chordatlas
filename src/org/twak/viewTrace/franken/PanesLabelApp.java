@@ -195,6 +195,8 @@ public class PanesLabelApp extends App {
 					ImageIO.write( bi, "png", new File (name + ".png_label") );
 					
 					doors.put( meta, labelAbsFile );
+				
+					a.frameScale = 1;
 					
 					continue;
 				}
@@ -203,6 +205,8 @@ public class PanesLabelApp extends App {
 				
 				if (r.width > 3) // small frame sizes start to look strange 
 					a.frameScale *= 8;
+				
+				
 				
 				p2.addInput( bi, bi, null, meta, a.styleZ, a.frameScale );
 

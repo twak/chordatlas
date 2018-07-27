@@ -50,7 +50,7 @@ public class RoofTexApp extends App {
 	public String texture;
 	public MiniRoof mr;
 	
-	private static Color defaultColor = Colourz.to4( GreebleSkel.BLANK_WALL );
+	private static Color defaultColor = Colourz.to4( GreebleSkel.BLANK_ROOF );
 	
 	public Color color  = defaultColor;
 	
