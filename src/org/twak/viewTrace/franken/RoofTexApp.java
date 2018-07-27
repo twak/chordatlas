@@ -102,7 +102,7 @@ public class RoofTexApp extends App {
 		
 		RoofSuperApp rsa = mr.roofSuperApp;
 		
-		if ( rsa.appMode == AppMode.Net && rsa.textures != null) 
+		if ( rsa.appMode == TextureMode.Net && rsa.textures != null) 
 			out = rsa.textures.get( rt );
 		
 		if (out == null) 
@@ -132,9 +132,9 @@ public class RoofTexApp extends App {
 			RoofTexApp rta = (RoofTexApp)a;
 			MiniRoof mr = rta.mr;
 			
-			if (a.appMode != AppMode.Net) {
+			if (a.appMode != TextureMode.Net) {
 				
-				if (a.appMode == AppMode.Parent) {
+				if (a.appMode == TextureMode.Parent) {
 					rta.texture = mr.roofGreebleApp.greebleTex;
 					rta.textureUVs = TextureUVs.Rectangle;
 					mr.roofSuperApp.textures = null;
@@ -388,15 +388,15 @@ public class RoofTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Net, AppMode.Bitmap, AppMode.Parent};
+		return new Enum[] {TextureMode.Off, TextureMode.Net, TextureMode.Bitmap, TextureMode.Parent};
 	}
 	
 	@Override
 	public JComponent createUI( Runnable update, SelectedApps selectedApps ) {
 		
 		JPanel out = new JPanel( new ListDownLayout() );
-		if ( appMode == AppMode.Net ) {
-		} else if ( appMode == AppMode.Manual ) {
+		if ( appMode == TextureMode.Net ) {
+		} else if ( appMode == TextureMode.Off ) {
 			JButton col = new JButton( "color" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {

@@ -66,7 +66,7 @@ public class VeluxTexApp extends App {
 		
 		for ( App a : batch ) {
 
-			if (a.appMode != AppMode.Net)
+			if (a.appMode != TextureMode.Net)
 				continue;
 			
 			try {

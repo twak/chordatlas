@@ -10,7 +10,7 @@ import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 
 public class DoorTexApp extends PanesTexApp {
 	
@@ -31,7 +31,7 @@ public class DoorTexApp extends PanesTexApp {
 
 		JPanel out = new JPanel(new ListDownLayout() );
 
-		if ( appMode == AppMode.Manual ) {
+		if ( appMode == TextureMode.Off ) {
 			
 			JButton col = new JButton( "colour" );
 

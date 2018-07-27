@@ -95,7 +95,7 @@ public class FacadeLabelApp extends App {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		
-		if ( appMode == AppMode.Manual ) {
+		if ( appMode == TextureMode.Off ) {
 
 			JButton fac = new JButton( "edit facade" );
 			fac.addActionListener( e -> new FacadeDesigner( mf, globalUpdate ) );
@@ -112,7 +112,7 @@ public class FacadeLabelApp extends App {
 			};
 			
 		}
-		else if (appMode == AppMode.Procedural ) {
+		else if (appMode == TextureMode.Procedural ) {
 			
 			if ( ! ( mf.featureGen instanceof CGAMini ) )
 				mf.featureGen = new CGAMini( mf );
@@ -130,7 +130,7 @@ public class FacadeLabelApp extends App {
 			
 			
 
-		} else if ( appMode == AppMode.Net ) {
+		} else if ( appMode == TextureMode.Net ) {
 
 			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
 				public void updated( double value ) {
@@ -189,15 +189,15 @@ public class FacadeLabelApp extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 
-		if ( appMode != AppMode.Net ) {
+		if ( appMode != TextureMode.Net ) {
 			for ( App a : batch ) {
 
 				MiniFacade mf = ( (FacadeLabelApp) a ).mf;
 
-				if ( appMode == AppMode.Manual ) {
+				if ( appMode == TextureMode.Off ) {
 					if ( !( mf.featureGen.getClass() == FeatureGenerator.class ) )
 						mf.featureGen = new FeatureGenerator( mf.featureGen );
-				} else if ( appMode == AppMode.Procedural )
+				} else if ( appMode == TextureMode.Procedural )
 					if ( !( mf.featureGen.getClass() == CGAMini.class ) ) {
 						mf.featureGen = new CGAMini( mf );
 					}
@@ -428,7 +428,7 @@ public class FacadeLabelApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual /* manual */, AppMode.Procedural, AppMode.Net};
+		return new Enum[] {TextureMode.Off /* manual */, TextureMode.Procedural, TextureMode.Net};
 	}
 	
 	@Override

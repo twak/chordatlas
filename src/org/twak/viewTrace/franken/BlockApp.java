@@ -90,7 +90,7 @@ public class BlockApp extends App {
 				private void setGauss( List<App> hashSet ) {
 					for (App a : hashSet) { 
 						a.styleSource = new GaussStyle( a.getClass() );
-						a.appMode = AppMode.Net;
+						a.appMode = TextureMode.Net;
 						setGauss (a.getDown( ).valueList());
 					}
 				}
@@ -116,7 +116,7 @@ public class BlockApp extends App {
 				@Override
 				public void actionPerformed( ActionEvent e ) {
 					styleSource = new JointStyle(null);
-					appMode = AppMode.Net;
+					appMode = TextureMode.Net;
 					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.geometryUpdate ) );
 					sa.showUI();
 				}

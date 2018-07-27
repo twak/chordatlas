@@ -143,12 +143,12 @@ public class FacadeTexApp extends App {
 
 			FacadeTexApp fta = (FacadeTexApp )a;
 			
-			if ( fta.appMode != AppMode.Net ) {
+			if ( fta.appMode != TextureMode.Net ) {
 				
-				if (fta.appMode == AppMode.Manual) 
+				if (fta.appMode == TextureMode.Off) 
 					texture = null;
 				
-				if (fta.appMode == AppMode.Bitmap) {
+				if (fta.appMode == TextureMode.Bitmap) {
 					fta.texture = GreebleSkel.BRICK_JPG;
 					fta.textureUVs = TextureUVs.Rectangle;
 					fta.textureRect = new DRectangle(2,2);
@@ -344,7 +344,7 @@ public class FacadeTexApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Bitmap, AppMode.Net, AppMode.Parent};
+		return new Enum[] {TextureMode.Off, TextureMode.Bitmap, TextureMode.Net, TextureMode.Parent};
 	}
 	
 	@Override
@@ -352,7 +352,7 @@ public class FacadeTexApp extends App {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		if (appMode == AppMode.Manual) {
+		if (appMode == TextureMode.Off) {
 			
 			JButton col = new JButton("main color");
 			

@@ -184,7 +184,7 @@ public class NetExamples extends JComponent {
 						else if (exemplar.name.contains ( "roof") )
 							scale = null;
 						else if ( exemplar.name.contains("door") )
-							scale = 1/256.;// 0.09;
+							scale = 1.;//1/256.;// 0.09;
 						
 						
 						double[] style = styleSource.draw( randy, null );

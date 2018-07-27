@@ -59,7 +59,7 @@ public class PanesLabelApp extends App {
 		this.fr = fr;
 		
 		if (TweedSettings.settings.siteplanInteractiveTextures)
-			appMode = AppMode.Net;
+			appMode = TextureMode.Net;
 		
 		getUp( ).install(this);
 	}
@@ -81,7 +81,7 @@ public class PanesLabelApp extends App {
 			this.textureRect = new DRectangle(t.textureRect);
 		
 		if (TweedSettings.settings.siteplanInteractiveTextures)
-			appMode = AppMode.Net;
+			appMode = TextureMode.Net;
 	}
 	
 	@Override
@@ -108,7 +108,7 @@ public class PanesLabelApp extends App {
 
 		JPanel out = new JPanel(new ListDownLayout());
 
-		if ( appMode == AppMode.Net ) {
+		if ( appMode == TextureMode.Net ) {
 
 			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
 				public void updated( double value ) {
@@ -150,7 +150,7 @@ public class PanesLabelApp extends App {
 				
 				PanesLabelApp a = (PanesLabelApp)a_;
 				
-				if (a_.appMode != AppMode.Net) {
+				if (a_.appMode != TextureMode.Net) {
 					
 					a.texture = null;
 					a.textureRect = null;
@@ -394,6 +394,6 @@ public class PanesLabelApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Manual, AppMode.Net };
+		return new Enum[] { TextureMode.Off, TextureMode.Net };
 	}
 }

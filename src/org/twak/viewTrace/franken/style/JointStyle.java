@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.DoorTexApp;
@@ -363,7 +363,7 @@ public class JointStyle implements StyleSource {
 
 	public void setMode( App appMode ) {
 		NetProperties ns = klass2Net.get(appMode.getClass()); 
-		appMode.appMode = (ns.on || !ns.show) ? AppMode.Net : AppMode.Manual; // ui for block, building, not others
+		appMode.appMode = (ns.on || !ns.show) ? TextureMode.Net : TextureMode.Off; // ui for block, building, not others
 		appMode.styleSource = this;
 	}
 

@@ -78,7 +78,7 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {
 		
-		if ( appMode != AppMode.Net ) {
+		if ( appMode != TextureMode.Net ) {
 			whenDone.run();
 			return;
 		}
@@ -330,6 +330,6 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Net};
+		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 }

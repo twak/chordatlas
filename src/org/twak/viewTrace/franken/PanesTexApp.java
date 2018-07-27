@@ -45,7 +45,7 @@ public class PanesTexApp extends App {
 		this.fr = fr;
 		
 		if (TweedSettings.settings.siteplanInteractiveTextures)
-			appMode = AppMode.Net;
+			appMode = TextureMode.Net;
 		
 		getUp( ).install(this);
 	}
@@ -57,7 +57,7 @@ public class PanesTexApp extends App {
 		this.fr = t.fr;
 		
 		if (TweedSettings.settings.siteplanInteractiveTextures)
-			appMode = AppMode.Net;
+			appMode = TextureMode.Net;
 	}
 	
 	@Override
@@ -65,7 +65,7 @@ public class PanesTexApp extends App {
 
 		JPanel out = new JPanel(new ListDownLayout() );
 
-		if ( appMode == AppMode.Net ) {
+		if ( appMode == TextureMode.Net ) {
 			
 			out.add( new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
 				@Override
@@ -77,7 +77,7 @@ public class PanesTexApp extends App {
 					globalUpdate.run();
 				}
 			} );
-		} else if ( appMode == AppMode.Manual ) {
+		} else if ( appMode == TextureMode.Off ) {
 			JButton col = new JButton( "colour" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
@@ -132,7 +132,7 @@ public class PanesTexApp extends App {
 		
 		for ( App a : batch ) {
 
-			if (a.appMode != AppMode.Net)
+			if (a.appMode != TextureMode.Net)
 				continue;
 			
 			try {
@@ -435,6 +435,6 @@ public class PanesTexApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Manual, AppMode.Net };
+		return new Enum[] { TextureMode.Off, TextureMode.Net };
 	}
 }

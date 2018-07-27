@@ -15,7 +15,7 @@ import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacadePainter;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.FacadeGreebleApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
@@ -30,7 +30,7 @@ public class FacadeDesigner {
 	public FacadeDesigner (MiniFacade mf,Runnable update) {
 
 		FacadeGreebleApp fga = mf.facadeGreebleApp;
-		fga.appMode = AppMode.Manual;
+		fga.appMode = TextureMode.Off;
 		
 		FacadeTexApp ma = mf.facadeTexApp;
 		
@@ -70,7 +70,7 @@ public class FacadeDesigner {
 		
 		FacadeTexApp ma =se.toEdit.facadeTexApp;
 		
-		if ( ma.appMode == AppMode.Manual )
+		if ( ma.appMode == TextureMode.Off )
 			se.toEdit.groundFloorHeight = 2;
 		else {
 			SkelGen.patchWallTag (skel, se, se.toEdit);
@@ -100,7 +100,7 @@ public class FacadeDesigner {
 								forEach( x -> new GreebleSkel( null, x ).
 										showSkeleton( x.skel.output, null, x.mr ) );
 							
-						if ( ma.appMode == AppMode.Net ) // needs prior setSkel to compute visible windows.
+						if ( ma.appMode == TextureMode.Net ) // needs prior setSkel to compute visible windows.
 							sg.updateTexture( sf, new Runnable() {
 								@Override
 								public void run() {

@@ -39,7 +39,7 @@ import org.twak.viewTrace.facades.GreebleSkel.QuadF;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
@@ -791,7 +791,7 @@ public class GreebleGrid {
 						public void instance( DRectangle rect ) {
 							
 							
-							if (pa.appMode == AppMode.Bitmap || pa.appMode == AppMode.Manual) {
+							if (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
 								
 								createWindow( rect, to3d, 
 										mbs.WOOD, mbs.WOOD, mbs.GLASS, 
@@ -842,7 +842,7 @@ public class GreebleGrid {
 							
 //							if (w.panesTexApp != null && w.panesTexApp.color != null)
 //								createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
-							if (pa.appMode == AppMode.Bitmap || pa.appMode == AppMode.Manual) {
+							if (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
 								createDoor( rect, to3d, mbs.WOOD, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
 							} else if (pa. texture == null)
 								createInnie( rect, allUV.normalize( rect ), to3d, 

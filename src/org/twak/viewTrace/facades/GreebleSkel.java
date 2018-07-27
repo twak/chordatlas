@@ -49,7 +49,7 @@ import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
 import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
@@ -374,7 +374,7 @@ public class GreebleSkel {
 					faceColor = greebleGrid.mbs.get( BRICK+mfa.hashCode(), mfa.color, mf );
 				
 				else switch ( mfa.appMode ) {
-					case Manual:
+					case Off:
 						faceColor = greebleGrid.mbs.get( BRICK + mfa.hashCode(), mfa.color, mf );
 						break;
 					case Bitmap:
@@ -392,7 +392,7 @@ public class GreebleSkel {
 				
 				switch ( ra.appMode ) {
 
-				case Manual:
+				case Off:
 					faceColor = greebleGrid.mbs.get( TILE, ra.color, miniroof );
 					break;
 				case Bitmap:
@@ -717,7 +717,7 @@ public class GreebleSkel {
 			case Net:
 				if ( ra.texture != null && ra.textureUVs == TextureUVs.Square )
 					roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
-				else if ( rsa.appMode == AppMode.Net && rsa.textures != null && ra.textureUVs == TextureUVs.Zero_One ) {
+				else if ( rsa.appMode == TextureMode.Net && rsa.textures != null && ra.textureUVs == TextureUVs.Zero_One ) {
 					roofUVs = GreebleHelper.zeroOneRoofUVs( loop, Pointz.to2XZ( end ), Pointz.to2XZ( start ) );
 				}
 				else
@@ -772,7 +772,7 @@ public class GreebleSkel {
 		RoofTexApp a = miniroof.roofTexApp;
 		
 		switch ( a.appMode ) {
-			case Manual: 
+			case Off: 
 			default:
 				mmb = greebleGrid.mbs.get( TILE, roofColor, miniroof );
 				break;

@@ -22,7 +22,7 @@ import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.GreebleHelper;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class SiteplanDesigner {
@@ -36,7 +36,7 @@ public class SiteplanDesigner {
 		for ( HalfEdge he : sf ) {
 			SuperEdge ee = (SuperEdge) he;
 			if ( ee.toEdit != null )
-				 ee.toEdit.facadeTexApp.appMode = AppMode.Manual;
+				 ee.toEdit.facadeTexApp.appMode = TextureMode.Off;
 		}
 
 		SkelGen.siteplan = new Siteplan( sf.skel.plan, false ) {
@@ -127,7 +127,7 @@ public class SiteplanDesigner {
 				
 				if (TweedSettings.settings.siteplanInteractiveTextures) {
 					
-					mfa.appMode = AppMode.Net;
+					mfa.appMode = TextureMode.Net;
 					se.toEdit.height = 5;
 					se.toEdit.featureGen = new CGAMini( se.toEdit );
 					

@@ -30,8 +30,8 @@ public abstract class App /*earance*/ implements Cloneable {
 		Square, Zero_One, Rectangle;
 	}
 	
-	public enum AppMode {
-		Manual, Bitmap, Parent, Net, Procedural;
+	public enum TextureMode {
+		Off, Bitmap, Parent, Net, Procedural;
 
 	}
 	
@@ -40,7 +40,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		child.appMode = this.appMode;
 		
 		switch (child.appMode) {
-		case Manual:
+		case Off:
 		default:
 			child.styleSource = null;
 			child.styleZ = null;
@@ -57,7 +57,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		}
 	}
 	
-	public AppMode appMode = AppMode.Manual;
+	public TextureMode appMode = TextureMode.Off;
 	
 	public double[] styleZ;
 	public StyleSource styleSource;
@@ -234,7 +234,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	public abstract void computeBatch(Runnable whenDone, List<App> batch);
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Net};
+		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 
 }

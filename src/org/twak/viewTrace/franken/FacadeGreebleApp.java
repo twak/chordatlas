@@ -73,7 +73,7 @@ public class FacadeGreebleApp extends App {
 	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		if ( appMode == AppMode.Net ) {
+		if ( appMode == TextureMode.Net ) {
 
 			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
 				public void updated( double value ) {
@@ -136,7 +136,7 @@ public class FacadeGreebleApp extends App {
 
 		for (App a : batch) {
 
-			if ( a.appMode != AppMode.Net ) 
+			if ( a.appMode != TextureMode.Net ) 
 				continue;
 			
 			try {
@@ -405,7 +405,7 @@ public class FacadeGreebleApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Manual, AppMode.Net};
+		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 	
 

@@ -25,7 +25,7 @@ import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
 import com.jme3.math.Vector2f;
@@ -119,7 +119,7 @@ public class HouseTool extends Tool {
 		for (HalfEdge he : hf) {
 			FacadeTexApp mfa =  ((SuperEdge)he).toEdit.facadeTexApp;
 
-			mfa.appMode = AppMode.Manual;//"tex.jpg";
+			mfa.appMode = TextureMode.Off;//"tex.jpg";
 		}
 	}
 	

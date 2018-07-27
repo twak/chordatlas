@@ -27,7 +27,7 @@ import org.twak.utils.ui.AutoEnumCombo;
 import org.twak.utils.ui.AutoEnumCombo.ValueSet;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Rainbow;
-import org.twak.viewTrace.franken.App.AppMode;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.style.ConstantStyle;
 import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle;
@@ -227,8 +227,8 @@ public class SelectedApps extends ArrayList<App>{
 			public void valueSet( Enum num ) {
 				
 				for (App a : SelectedApps.this) {
-					a.appMode = (AppMode) num;
-					if (a.appMode == AppMode.Net && a.styleSource == null)
+					a.appMode = (TextureMode) num;
+					if (a.appMode == TextureMode.Net && a.styleSource == null)
 						a.styleSource = new GaussStyle( a.getClass() );
 				}
 				
@@ -292,7 +292,7 @@ public class SelectedApps extends ArrayList<App>{
 				a.markGeometryDirty();
 	}
 
-	private void buildLayout( AppMode appMode, JPanel out, Runnable update ) {
+	private void buildLayout( TextureMode appMode, JPanel out, Runnable update ) {
 
 		for ( App a : this )
 			a.appMode = appMode;
@@ -374,7 +374,7 @@ public class SelectedApps extends ArrayList<App>{
 		
 		north.add( exemplar.createUI( update, SelectedApps.this ) );
 		
-		if ( exemplar.appMode == AppMode.Net ) {
+		if ( exemplar.appMode == TextureMode.Net ) {
 			
 			options.removeAll();
 			options.setLayout( new BorderLayout() );
