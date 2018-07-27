@@ -341,7 +341,7 @@ public class JointStyle implements StyleSource {
 		high.addActionListener( e -> nets.stream().forEach( n -> n.setHigh() ) );
 		detail.add(high);
 		
-		out.add(new JLabel("level of detail:"));
+		out.add(new JLabel("joint distribtion LOD:"));
 		out.add(detail);
 		
 		JButton but = new JButton( "edit joint" );

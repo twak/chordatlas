@@ -52,11 +52,11 @@ public class FacadeTexApp extends App {
 	public MiniFacade mf;
 	public String texture;
 	
-	private static Color defaultGFColor = new Color (188,156,255);
+	private static Color defaultColor = Colourz.to4( GreebleSkel.BLANK_WALL );
 	
 	public Color 
-		color            =  Colourz.to4 ( GreebleSkel.BLANK_WALL ),
-		groundFloorColor = defaultGFColor;
+		color            = defaultColor,
+		groundFloorColor = defaultColor;
 	
 	public PostProcessState postState = null;
 

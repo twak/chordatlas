@@ -34,8 +34,10 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
+import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -47,7 +49,11 @@ public class RoofTexApp extends App {
 	public String coarse;
 	public String texture;
 	public MiniRoof mr;
-	public Color color  = Color.gray;
+	
+	private static Color defaultColor = Colourz.to4( GreebleSkel.BLANK_WALL );
+	
+	public Color color  = defaultColor;
+	
 	public TextureUVs textureUVs = TextureUVs.Square;
 	public DRectangle textureRect;
 	

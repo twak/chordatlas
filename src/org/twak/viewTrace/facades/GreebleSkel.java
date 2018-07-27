@@ -82,8 +82,8 @@ public class GreebleSkel {
 	private MiniRoof miniroof;
 	
 	public static float[] 
-			BLANK_ROOF = new float[] {0.5f, 0.5f, 0.5f, 1 },
-			BLANK_WALL = new float[] {228/255f, 223/255f, 206/255f, 1.0f };
+			BLANK_ROOF = new float[] {0/255f, 170/255f, 255/255f, 1.0f },
+			BLANK_WALL = new float[] {255/255f, 170/255f, 0/255f, 1.0f };
 	
 	SuperFace sf;
 	
@@ -256,7 +256,7 @@ public class GreebleSkel {
 			
 			
 			if ( greebleGrid != null ) {
-//				edges( output, roofColor );
+				edges( output, roofColor );
 
 				// output per-material objects
 				greebleGrid.attachAll( node, chain, output, new ClickMe() {
