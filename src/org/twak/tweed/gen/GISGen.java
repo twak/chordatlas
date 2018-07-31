@@ -293,6 +293,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 					
 					BlockGen.findWidths( in, gis );
 					
+					if (li != null)
 					for ( Loop loop : in )
 						li.fetchOSProperties( (SuperLoop<?>) loop );
 					

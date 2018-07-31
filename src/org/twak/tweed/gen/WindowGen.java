@@ -75,7 +75,7 @@ public class WindowGen extends Gen implements IDumpObjs {
 		
 		if (fg != null) {
 			
-			for (MegaFeatures mf :  fg.getBlock( block.center ).features  ) {
+			for (MegaFeatures mf :  fg.getBlock( block.center ).getFeatures()  ) {
 				
 				Vector3f along, up, in ;
 				{
@@ -107,12 +107,12 @@ public class WindowGen extends Gen implements IDumpObjs {
 						}
 						
 						
-						if (!mini.featureGen.get(Feature.WINDOW).isEmpty()) {
-
-							Vector3f loc = new Vector3f(mfStart);
-							loc.addLocal(along.mult((float) mini.left)).addLocal(in.mult(offset) );
-							mb.addCube(loc, up, along, in, (float) mini.height, (float) mini.width, 0.1f);
-						}
+//						if (!mini.featureGen.get(Feature.WINDOW).isEmpty()) {
+//
+//							Vector3f loc = new Vector3f(mfStart);
+//							loc.addLocal(along.mult((float) mini.left)).addLocal(in.mult(offset) );
+//							mb.addCube(loc, up, along, in, (float) mini.height, (float) mini.width, 0.1f);
+//						}
 					}
 					
 					Geometry g = new Geometry( this.getClass().getSimpleName() );

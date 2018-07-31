@@ -121,6 +121,9 @@ public class BlockGen extends ObjGen {
 		JButton features = new JButton ("find image features");
 		features.addActionListener( e -> segnetFacade() );
 		
+		JButton windows = new JButton ("show windows");
+		windows.addActionListener( e -> tweed.frame.addGen( new WindowGen( tweed, this ), true ) );
+		
 		JButton viewFeatures = new JButton ("features viewer");
 		viewFeatures.addActionListener( e -> viewFeatures() );
 		
@@ -224,10 +227,10 @@ public class BlockGen extends ObjGen {
 		panel.add(profiles, 0 );
 		panel.add(panos, 1 );
 		panel.add(features, 2 );
+		panel.add( windows );
 		panel.add(new JLabel("other:"), 4 );
 		panel.add( slice );
 		panel.add( viewFeatures );
-//		panel.add( tooD );
 		if (getSolutionFile().exists())
 			panel.add( loadSln );
 		panel.add(new JLabel("metadata:") );
