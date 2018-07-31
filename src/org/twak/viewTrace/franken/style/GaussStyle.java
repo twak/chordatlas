@@ -8,15 +8,12 @@ import java.util.Arrays;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
@@ -28,26 +25,26 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 
 	public double[] mean;
 	double std;
-	NetInfo ni;
 	File meanImage;
+	Class target;
 
-	public GaussStyle( NetInfo ni ) {
-		this.mean = new double[ni.sizeZ];
+	public GaussStyle( Class target ) {
+		this.mean = new double[ NetInfo.get(target).sizeZ];
 		this.std = 0;
-		this.ni = ni;
+		this.target = target;
 	}
 
 	
 	@Override
 	public StyleSource copy() {
-		GaussStyle out = new GaussStyle( ni );
+		GaussStyle out = new GaussStyle( target );
 		out.mean = Arrays.copyOf( mean, mean.length );
 		out.std = std;
 		out.meanImage = meanImage;
 		return out;
 	}
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app ) {
 
 		double[] out = new double[mean.length];
 
@@ -85,7 +82,7 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 		//		go.addActionListener( e -> update.run() );
 		//		out.add( go );
 
-		out.add( new UIVector( mean, this, ni, false, update ) );
+		out.add( new UIVector( mean, this, target, false, update ) );
 
 		return out;
 	}
@@ -108,5 +105,10 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	@Override
 	public void setMeanImage( File f ) {
 		this.meanImage = f;
+	}
+	
+	@Override
+	public void install( App app ) {
+		app.styleSource = new GaussStyle( app.getClass() );
 	}
 }

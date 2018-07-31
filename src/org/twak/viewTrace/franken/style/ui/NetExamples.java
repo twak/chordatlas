@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,11 +25,11 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.twak.tweed.TweedFrame;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.utils.ui.Colourz;
+import org.twak.utils.ui.Rainbow;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.Pix2Pix;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
@@ -38,6 +39,9 @@ public class NetExamples extends JComponent {
 
 	BufferedImage[][] images;
 	int[][] inputIdx;
+	Double[][] imageScales;
+	double[][][] styleVectors;
+	
 	List<Pair<Integer, Integer>> randomOrder = new ArrayList<>();
 	int randomLocation = 0;
 	
@@ -52,7 +56,6 @@ public class NetExamples extends JComponent {
 	final static int BATCH_SIZE = 16;
 	
 	int batchSize = BATCH_SIZE;
-//	final static double scale = 0.5;
 	
 	final static int DRAW_SIZE = 128;
 	
@@ -66,13 +69,23 @@ public class NetExamples extends JComponent {
 	
 	long startTime = 0, endTime = 1000, lastChanged = 0;
 	
-	AppStore ac;
-	
 	static class UniqueInt {
 		
 		int i;
-		public UniqueInt (int i) {
+		Double scale;
+		BufferedImage image;
+		double[] style;
+		
+		public UniqueInt (int i, Double scale, double[] style) {
 			this.i = i;
+			this.scale = scale;
+			this.style = style;
+		}
+
+		public UniqueInt( int i, Double scale, BufferedImage bi ) {
+			this. i = i;
+			this.scale = scale;
+			this.image = bi;
 		}
 
 		@Override
@@ -81,14 +94,15 @@ public class NetExamples extends JComponent {
 		}
 	}
 	
-	public NetExamples ( StyleSource ss, int x, int y, NetInfo exemplar, File exampleFolder, AppStore ac ) {
+	public NetExamples ( StyleSource ss, int x, int y, NetInfo exemplar, File exampleFolder ) {
 		
 		this.styleSource = ss;
 		this.exemplar = exemplar;
-		this.ac = ac;
 		
 		images = new BufferedImage [x][y];
 		inputIdx = new int[x][y];
+		imageScales = new Double[x][y];
+		styleVectors = new double[x][y][];
 		
 		setPreferredSize( new Dimension ( 
 				(int)( x * DRAW_SIZE) ,
@@ -161,32 +175,45 @@ public class NetExamples extends JComponent {
 						
 						int index = randy.nextInt(inputs.size());
 						
-						double[] z = styleSource.draw( randy, null, ac );
-						
-						
 						Double scale = 0.1;
 						
 						if (exemplar.name.contains ("pane") )
-							scale = 0.05 * Math.random() + 0.01;
-						else if (exemplar.name == "roof")
+							scale =  0.01 + 0.05 * Math.random() ;
+						if (exemplar.name.contains ("facade") )
+							scale = 0.05 + Math.random() * 0.2;
+						else if (exemplar.name.contains ( "roof") )
 							scale = null;
+						else if ( exemplar.name.contains("door") )
+							scale = 1.;//1/256.;// 0.09;
 						
+						
+						double[] style = styleSource.draw( randy, null );
 						
 						p2.addInput( inputs.get( index ), inputsE.get(index), null, 
-								new UniqueInt ( index ),
-								styleSource.draw( randy, null, ac ),scale ) ;//scales.get(index) );
+								new UniqueInt ( index, scale, style ),
+								style,scale ) ;//scales.get(index) );
 						
 					}
 					
 					batchSize = BATCH_SIZE;
 					
-					p2.submitSafe( new Job() {
+					p2.submit( new Job() {
 						public void finished(java.util.Map<Object,File> results) {
 							
 							endTime = System.currentTimeMillis();
 							
+							List<UniqueInt> uis = new ArrayList<>();
 							
-							addImages ( startTime, results.entrySet().stream().map( e -> new Pair<Integer, BufferedImage>( ((UniqueInt)e.getKey()).i, Imagez.read( e.getValue() )  ) ).collect( Collectors.toList() ) );
+							for (Map.Entry<Object, File> e : results.entrySet()) {
+								UniqueInt ui = (UniqueInt)e.getKey();
+								ui.image = Imagez.read(e.getValue());
+								uis.add (ui);
+							}
+							
+							addImages ( startTime, uis );
+//							results.entrySet().stream().map( e -> 
+//							new Pair<Integer, BufferedImage>( ((UniqueInt)e.getKey()).i, 
+//									Imagez.read( e.getValue() )  ) ).collect( Collectors.toList() ) );
 						}
 
 					} );
@@ -197,7 +224,9 @@ public class NetExamples extends JComponent {
 		showLoading();
 		
 		MouseAdapter ml = new MouseAdapter() {
+			
 			public void mouseMoved(MouseEvent e) {
+				
 				hx = Mathz.min ( images.length-1, (int)( e.getX() / (DRAW_SIZE ) ) );
 				hy = Mathz.min ( images[0].length-1, (int)( e.getY() / (DRAW_SIZE ) ) );
 				
@@ -206,12 +235,15 @@ public class NetExamples extends JComponent {
 				repaint();
 			};
 			public void mouseExited(MouseEvent e) {
+				
 				hx = hy = -1;
 				repaint();
 			};
 			
 			public void mousePressed(MouseEvent e) {
+				
 				mouseDown = true;
+				UIVector.copiedVector = styleVectors[hx][hy];
 			};
 			
 			public void mouseReleased(MouseEvent e) {
@@ -225,38 +257,38 @@ public class NetExamples extends JComponent {
 
 	private void showLoading() {
 		{
-			List<Pair<Integer, BufferedImage>> warmup = new ArrayList<>();
+			List<UniqueInt> warmup = new ArrayList<>();
 
 			
 			for ( int i = 0; i < 32; i++ ) {
 
 				BufferedImage tmp = new BufferedImage( exemplar.resolution, exemplar.resolution, BufferedImage.TYPE_3BYTE_BGR );
 				Graphics2D g = tmp.createGraphics();
-				int col = (int) ( Math.random() * 100 ) + 50;
-				g.setColor( new Color( col, col, col ) );
+//				int col = Rainbow.getColour( i ).getR (int) ( Math.random() * 100 ) + 50;
+				g.setColor( Rainbow.getColour(i) );
 				g.fillRect( 0, 0, exemplar.resolution, exemplar.resolution );
 				g.dispose();
 
-				warmup.add( new Pair( i % Math.max( 1, inputs.size()), tmp ) );
+				warmup.add( new UniqueInt( i % Math.max( 1, inputs.size()), null, tmp ) );
 			}
 
-//			lastChanged = System.currentTimeMillis() - 5000;
 			addImages( System.currentTimeMillis(), warmup );
 		}
 	}
 	
-	private void addImages( long startTime, List<Pair<Integer, BufferedImage>> values ) {
+	private void addImages( long startTime, List<UniqueInt> uis ) {
 		
-		int interval = Mathz.clamp  ( (int) ((endTime - startTime) / values.size() ), 50, 500);
+		int interval = Mathz.clamp  ( (int) ((endTime - startTime) / uis.size() ), 50, 500);
 		
 		new Thread() {
 			public void run() {
 				
-				for ( Pair<Integer, BufferedImage> e : values ) {
+				for ( UniqueInt ui : uis ) {
 					
 					if (startTime < lastChanged)
 						return;
-					addImage( e.first(), e.second() );
+					
+					addImage( ui );
 					try {
 						Thread.sleep( interval );
 					} catch ( InterruptedException f ) {
@@ -274,22 +306,26 @@ public class NetExamples extends JComponent {
 		lastChanged = System.currentTimeMillis();
 		
 		for (int i = 0; i < images.length; i++)
-			for (int j = 0; j < images[0].length; j++)
+			for (int j = 0; j < images[0].length; j++) {
 				images[i][j] = null;
+				imageScales[i][j] = null;
+			}
 		
 		showLoading();
-		
 		repaint();
 	}
 	
-	private synchronized void addImage (int src, BufferedImage b) {
+	private synchronized void addImage ( UniqueInt ui ) { // int src, BufferedImage b, Double scale) {
 		Pair<Integer, Integer> next = randomOrder.get( (randomLocation ++) % randomOrder.size() );
 		
 		if (next.first() == hx && next.second() == hy)
 			return; // don't updat the thing we're hovering over
 		
-		images[ next.first() ][ next.second() ] = b;
-		inputIdx[ next.first() ][ next.second() ] = src;
+		images[ next.first() ][ next.second() ] = ui.image;
+		inputIdx[ next.first() ][ next.second() ] = ui.i;
+		imageScales[ next.first() ][ next.second() ] = ui.scale;
+		styleVectors[ next.first() ][ next.second() ] = ui.style;
+		
 		repaint();
 	}
 
@@ -299,7 +335,7 @@ public class NetExamples extends JComponent {
 		Graphics2D g = (Graphics2D)g1;
 		
 		g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+		g.setRenderingHint( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC );
 		g.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
 		
 		if (inputs.isEmpty()) {
@@ -327,20 +363,28 @@ public class NetExamples extends JComponent {
 		
 		if (hx >=0 && images[hx][hy] != null) {
 			
-			g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
+			g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
 			int x = hx * DRAW_SIZE - (previewSize/4);
 			int y = hy * DRAW_SIZE - (previewSize/4);
 
 			x = Mathz.clamp( x, 0, getWidth()  - previewSize );
 			y = Mathz.clamp( y, 0, getHeight() - previewSize );
+
 			
-			g.drawRect( x-1, y-1, previewSize+1, previewSize+1 );
-			
-			if ( mouseDown )
+			if ( mouseDown ) {
+				g.setColor( Rainbow.getColour( 2 ) );
 				g.drawImage( inputs.get( inputIdx[hx][hy] ).getSubimage( 0, 0, exemplar.resolution, exemplar.resolution ), 
 						x,y, x+previewSize, y+previewSize, 0,0, exemplar.resolution, exemplar.resolution, null );
-			else
+			}
+			else {
+				g.setColor( Rainbow.getColour( 5 ) );
 				g.drawImage( images[hx][hy], x,y,x+previewSize, y+previewSize, 0,0, exemplar.resolution, exemplar.resolution, null );
+			}
+			
+			if (imageScales[hx][hy] != null) 
+				g.drawString( String.format ( "scale: %.3f" ,imageScales[hx][hy] ), x+5, y + 14 );
+			
+			g.drawRect( x-1, y-1, previewSize+1, previewSize+1 );
 			
 		}
 		

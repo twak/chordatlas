@@ -8,7 +8,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.PaintThing;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -27,12 +26,8 @@ public class MiniViewer {
 
 	private SuperEdge se;
 
-	AppStore ac;
-	
-	public MiniViewer( SuperEdge se, AppStore ac ) {
+	public MiniViewer( SuperEdge se ) {
 
-
-		this.ac = ac;
 		this.se = se;
 		toViz = se.toRegularize;
 		
@@ -69,7 +64,7 @@ public class MiniViewer {
 		if (range == null)
 			range = new double[] {0, se.length() };
 		
-		minis = new Regularizer().go( toViz, range[0], range[1], animation.getValue() / 100., ac );
+		minis = new Regularizer().debug( toViz, range[0], range[1], animation.getValue() / 100. );
 		
 		{
 			int selected = mini.getValue();

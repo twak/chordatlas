@@ -19,6 +19,7 @@ import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.viewTrace.SuperLine;
 
@@ -48,19 +49,28 @@ public class VizSkelGen extends SkelGen {
 		for ( Spatial s : gNode.getChildren() )
 			s.removeFromParent();
 
-		
 		SuperFace sf;
 		
 		if ( mode == Mode.Extrude ) {
+			
 			sf = toHalf( Loopz.to3d( Loopz.removeInnerEdges( Loopz.toXZLoop( blockGen.polies ) ).get( 0 ), 0, 1 ) );
+			block = new HalfMesh2();
+			block.faces.add(sf);
+			sf.buildingApp.parent = this;
 			PlanSkeleton skel = calc( sf );
 			setSkel( skel, sf );
-		} else
+			
+		} else {
+			
+			block = new HalfMesh2();
 			for ( Loop<Point3d> loop : blockGen.polies ) {
 				sf = toHalf( loop );
+				block.faces.add(sf);
+				sf.buildingApp.parent = this;
 				PlanSkeleton skel = calc( sf );
 				setSkel( skel, sf );
 			}
+		}
 		
 		gNode.updateModelBound();
 		gNode.updateGeometricState();

@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 
 import org.twak.camp.Tag;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
@@ -27,7 +26,7 @@ import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
-public abstract class SuperSuper <A> extends App {
+public abstract class SuperSuper <A extends HasSuper> extends App {
 
 	public double scale = 120;
 	
@@ -40,10 +39,10 @@ public abstract class SuperSuper <A> extends App {
 	}
 
 	@Override
-	public abstract App getUp(AppStore ac);
+	public abstract App getUp();
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
 	}
 
@@ -51,17 +50,17 @@ public abstract class SuperSuper <A> extends App {
 	public abstract App copy();
 
 	// add to the todo list; remember to pad coarse by overlap in all directions
-	public abstract void drawCoarse( MultiMap<A, FacState> todo, AppStore ac ) throws IOException;
+	public abstract void drawCoarse( MultiMap<A, FacState> todo ) throws IOException;
 	
-	public abstract void setTexture( FacState<A> state, BufferedImage maps, AppStore ac );
+	public abstract void setTexture( FacState<A> state, BufferedImage maps );
 	
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		out.add ( new AutoDoubleSlider( this, "scale", "scale", 20, 200 ) {
+		out.add ( new AutoDoubleSlider( this, "scale", "patch size (m)", 20, 200 ) {
 			public void updated(double value) {
 				
 				for (App a : apps)
@@ -77,7 +76,12 @@ public abstract class SuperSuper <A> extends App {
 	
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
+		
+		if ( appMode != TextureMode.Net ) {
+			whenDone.run();
+			return;
+		}
 		
 		MultiMap<A, FacState> todo = new MultiMap<>();
 		
@@ -86,18 +90,18 @@ public abstract class SuperSuper <A> extends App {
 			SuperSuper fs = (SuperSuper ) a;
 			
 			try {
-				fs.drawCoarse( todo, ac );
+				fs.drawCoarse( todo );
 				
 			} catch ( Throwable e ) {
 				e.printStackTrace();
 			}
 		}
 		
-		facadeContinue (todo, whenDone, ac );
+		facadeContinue (todo, whenDone );
 	}
 
 	
-	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone, AppStore ac ) {
+	private synchronized void facadeContinue( MultiMap<A, FacState> todo, Runnable whenDone ) {
 
 		if (todo.isEmpty()) {
 			whenDone.run();
@@ -106,12 +110,12 @@ public abstract class SuperSuper <A> extends App {
 
 		Pix2Pix p2 = new Pix2Pix ( NetInfo.get(this) );
 		
-		int count = 0;
-		for (A a : todo.keySet() ) 
+		int count = 0, remaining = 0;
+		for ( A a : todo.keySet() )
 			for (FacState<A> state : todo.get(a)) {
 			try {
 
-				System.out.println("super batch " + state.nextTiles.size());
+				remaining+= state.nextTiles.size();
 				
 				while ( count < MAX_CONCURRENT && !state.nextTiles.isEmpty() ) {
 					
@@ -126,13 +130,14 @@ public abstract class SuperSuper <A> extends App {
 								- tileWidth * ts.nextX ,
 								- tileWidth * ts.nextY ,
 								null );
+						
 						g.dispose();
 						
 						ts.coarse = toProcess;
 						
-						SuperSuper ss = ac.get(this.getClass(), a);
+						SuperSuper ss = a.getSuper();
 						
-						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
+//						System.out.println (" z is " + Arrays.toString( ss.styleZ ) );
 						
 						p2.addInput( toProcess, null, null, ts, ss.styleZ, null );
 					}
@@ -143,6 +148,8 @@ public abstract class SuperSuper <A> extends App {
 				th.printStackTrace();
 			}
 		}
+		
+		System.out.println("super remaining " + remaining);
 			
 		p2.submit ( new Job ( new JobResult() {
 				@Override
@@ -237,12 +244,12 @@ public abstract class SuperSuper <A> extends App {
 										state.bigFine.getWidth() - overlap, state.bigFine.getHeight() - overlap, null );
 							}
 							
-							ac.get(SuperSuper.this.getClass(), mf).setTexture( state, cropped, ac );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
+							mf.getSuper().setTexture( state, cropped );// new BufferedImage[] { cropped, ns.norm, ns.spec} );
 
 						}
 					}
 
-					facadeContinue( nextTime, whenDone, ac );
+					facadeContinue( nextTime, whenDone );
 				}
 
 			} ) );
@@ -323,6 +330,6 @@ public abstract class SuperSuper <A> extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 }

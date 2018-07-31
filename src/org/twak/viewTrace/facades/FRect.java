@@ -3,7 +3,6 @@ package org.twak.viewTrace.facades;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,33 +20,53 @@ import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot.ICanEdit;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 
 public class FRect extends DRectangle implements ICanEdit {
 	
 	// these are variously used around the Regularizer...
 	public MultiMap<Feature, FRect> attached = new MultiMap<>();
-	public Feature f;
+	private Feature f;
 	FRect[] adjacent = new FRect[4];
 	public int id = -1;
 	
 	public MiniFacade mf;
+
+	public PanesLabelApp panesLabelApp;
+	public PanesTexApp panesTexApp;
 	
-	public Cache<Feature, MutableDouble> attachedHeight = new Cach<>( f -> new MutableDouble( 0 ) );
+	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
+	
+	public static class HeightDepth extends MutableDouble {
+		
+		public double depth = -1;
+		
+		public HeightDepth( double height ) {
+			super( height );
+		}
+		
+		public HeightDepth( double height, double depth ) {
+			super( height );
+			this.depth = depth;
+		}
+
+	}
 	
 	AOuter outer;
-	int xi, yi; // grid coords
+	int xi, yi; 
 	int[] gridCoords;
-	
-//	public FRect( FRect o ) {
-//		this (o, false);
-//	}
 	
 	public FRect( FRect o ) {
 		super(o);
 		
-		f = o.f;
+		init( o );
+		initApps();
+	}
+
+
+	private void init( FRect o ) {
 		id = o.id;
 		
 		outer = o.outer;
@@ -58,37 +77,73 @@ public class FRect extends DRectangle implements ICanEdit {
 		gridCoords = o.gridCoords == null ? null : Arrays.copyOf( o.gridCoords, o.gridCoords.length );
 		attached = new MultiMap<>( attached );
 		attachedHeight.cache = new HashMap<>( o.attachedHeight.cache );
-		
-//		if (duplicateApp) {
-//			app =   (PanesLabelApp ) o.app.copy();
-//			app.hasA = this;
-//		}
-//		else
-//			app = o.app;
-		
 		this.mf = o.mf;
+		setFeat( o.getFeat() );
+	}
+	
+
+	public FRect( FRect o, PanesLabelApp pla, PanesTexApp pta, DoorTexApp dta ) {
+		super(o);
+		
+		init( o );
+		
+		this.panesLabelApp = pla;
+		this.panesTexApp = pta;
 	}
 	
 	public FRect(MiniFacade mf) {
 		super();
 		this.mf = mf;
+		initApps();
 	}
 	
 	public FRect( double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
 		this.mf = mf;
+		initApps();
 	}
 
 
 	public FRect( DRectangle r, MiniFacade mf ) {
 		super( r );
 		this.mf = mf;
+		initApps();
 	}
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		this.f = feature;
+		this.setFeat( feature );
 		this.mf = mf;
+		
+		initApps();
+	}
+	
+
+	private void initApps() {
+		
+		if (panesLabelApp == null)
+			panesLabelApp = new PanesLabelApp( this );
+		
+		if (panesTexApp == null || 
+				( this.f == Feature.DOOR && this.panesTexApp.getClass() != DoorTexApp.class ) ||
+				( this.f == Feature.WINDOW && this.panesTexApp.getClass() != PanesTexApp.class ) ||
+				( this.f == Feature.SHOP && this.panesTexApp.getClass() != PanesTexApp.class ) )
+		{
+			if (f == null)
+				panesTexApp = new PanesTexApp( this );
+			else
+				switch ( f ) {
+				case SHOP:
+				case WINDOW:
+					panesTexApp = new PanesTexApp( this );
+					break;
+				case DOOR:
+					panesTexApp = new DoorTexApp( this );
+					break;
+				default:
+					panesTexApp = null;
+				}
+		}
 	}
 
 	public FRect getAdj(Dir d) {
@@ -209,7 +264,6 @@ public class FRect extends DRectangle implements ICanEdit {
 	}
 
 	Bounds dragging = null;
-	
 	Point2d lastPoint = null;
 	
 	@Override
@@ -278,7 +332,19 @@ public class FRect extends DRectangle implements ICanEdit {
 		
 		FRect o = (FRect)obj;
 		
-		return super.equals( o ) && o.f == f;
+		return super.equals( o ) && o.getFeat() == getFeat();
+	}
+
+
+	public Feature getFeat() {
+		return f;
+	}
+
+
+	public Feature setFeat( Feature f ) {
+		this.f = f;
+		initApps();
+		return f;
 	}
 }
 

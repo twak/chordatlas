@@ -190,13 +190,18 @@ public class Grid implements ICanPaint {
 		
 		Map<Griddable, Double[]> rx = findRange(x), ry = findRange( y );
 		
-		
-		rx.keySet().stream().forEach( g ->  out.put (g, new DRectangle( 
+		try {
+			rx.keySet().stream().forEach( g ->  out.put (g, new DRectangle( 
 				rx.get( g )[0],  
 				ry.get( g )[0],  
 				rx.get( g )[1] - rx.get( g )[0],  
 				ry.get( g )[1] - ry.get( g )[0]
 				) ) );
+		}
+		catch (NullPointerException e) {
+			System.err.println("error in " + this.getClass());
+			return out;
+		}
 		
 		return out;
 	}

@@ -1,5 +1,6 @@
-package org.	twak.viewTrace.facades;
+package org.twak.viewTrace.facades;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.FCircle;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.WallTag;
@@ -34,11 +34,14 @@ import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.GreebleSkel.QuadF;
 import org.twak.viewTrace.facades.Grid.Griddable;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Tube.CrossGen;
+import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
+import org.twak.viewTrace.franken.DoorTexApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.PanesLabelApp;
 import org.twak.viewTrace.franken.PanesTexApp;
@@ -100,47 +103,9 @@ public class GreebleGrid {
 			}
 			*/
 			
-			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			Material mat;
 			
-			if (new File( Tweed.DATA +"/" +texture ).exists()) {
-				Texture t = tweed.getAssetManager().loadTexture( texture );
-				t.setWrap( WrapMode.Repeat );
-//				t.setWrap( WrapMode.EdgeClamp );
-				
-				mat.setTexture( "DiffuseMap", t );
-				mat.setColor( "Diffuse", ColorRGBA.White );
-				mat.setBoolean( "UseMaterialColors", true );
-				
-				String ext = Filez.getExtn( texture );
-				
-				String normal   = Filez.stripExtn( texture )+"_norm." + ext,
-						specular = Filez.stripExtn( texture )+"_spec." + ext;
-				
-				if (new File( Tweed.DATA +"/" +normal ).exists()) {
-					Texture n = tweed.getAssetManager().loadTexture( normal );
-					n.setWrap( WrapMode.Repeat );
-					mat.setTexture( "NormalMap", n );
-				}
-				
-			mat.setColor( "Ambient", ColorRGBA.Gray );
-				
-				if (new File( Tweed.DATA +"/" +specular ).exists()) {
-					Texture s = tweed.getAssetManager().loadTexture( specular );
-//					mat.setVector4( "Specular", ColorRGBA.Black.toVector4f() );
-					s.setWrap( WrapMode.Repeat );
-					mat.setFloat( "Shininess", 50 );
-					mat.setTexture( "SpecularMap", s );
-				}
-				mat.setColor( "Specular", ColorRGBA.White );
-//			else
-//				mat.setColor( "Specular", ColorRGBA.Red );
-			}
-			else
-			{
-				System.out.println( this.getClass().getSimpleName() + " can't find "+ tweed.SCRATCH+texture );
-				mat.setColor( "Diffuse", ColorRGBA.Red );
-				mat.setBoolean( "UseMaterialColors", true );
-			}
+			mat = buildTextureMaterial( tweed, texture );
 //			mat.setColor( "Ambient", ColorRGBA.White );
 
 			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
@@ -154,6 +119,47 @@ public class GreebleGrid {
 
 		}
 		return geom;
+	}
+
+	public static Material buildTextureMaterial( Tweed tweed, String texture ) {
+		Material mat;
+		mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+		
+		if ( new File( Tweed.DATA + "/" + texture ).exists() ) {
+			Texture t = tweed.getAssetManager().loadTexture( texture );
+			t.setWrap( WrapMode.Repeat );
+
+			mat.setTexture( "DiffuseMap", t );
+			mat.setColor( "Diffuse", ColorRGBA.White );
+			mat.setBoolean( "UseMaterialColors", true );
+
+			String ext = Filez.getExtn( texture );
+
+			String normal = Filez.stripExtn( texture ) + "_norm." + ext, specular = Filez.stripExtn( texture ) + "_spec." + ext;
+
+			if ( new File( Tweed.DATA + "/" + normal ).exists() ) {
+				Texture n = tweed.getAssetManager().loadTexture( normal );
+				n.setWrap( WrapMode.Repeat );
+				mat.setTexture( "NormalMap", n );
+			}
+
+			mat.setColor( "Ambient", ColorRGBA.Gray );
+
+			if ( new File( Tweed.DATA + "/" + specular ).exists() ) {
+				Texture s = tweed.getAssetManager().loadTexture( specular );
+				s.setWrap( WrapMode.Repeat );
+				mat.setFloat( "Shininess", 50 );
+				mat.setTexture( "SpecularMap", s );
+			}
+			mat.setColor( "Specular", ColorRGBA.White );
+		}
+		else
+		{
+			System.out.println( " can't find "+ tweed.SCRATCH+texture );
+			mat.setColor( "Diffuse", ColorRGBA.Red );
+			mat.setBoolean( "UseMaterialColors", true );
+		}
+		return mat;
 	}
 
 	private Geometry mb2Geom( Output output, List<Face> chain, String name, 
@@ -238,15 +244,15 @@ public class GreebleGrid {
 
 	
 	protected void createDormerWindow( 
-			AppStore appCache,
 			MiniRoof roof,
-			QuadF l, 
+			QuadF l,
 			MeshBuilder window, 
 			MeshBuilder glass, 
-			float sillDepth,
+			float sillDepth, 
 			float sillHeight,
-			float corniceHeight, 
-			double panelWidth, double panelHeight ) {
+			float corniceHeight,
+			double panelWidth, 
+			double panelHeight ) {
 		
 		Vector3d along = new Vector3d(l.corners[3]);
 		along.sub(l.corners[0]);
@@ -311,10 +317,10 @@ public class GreebleGrid {
 			to3d.invert();
 		}
 		
-		FRect w = new FRect ( l.original );
+		FRect w = new FRect ( l.original, l.original.panesLabelApp, l.original.panesTexApp, null );
 		
 		
-		PanesLabelApp wa = appCache.get(PanesLabelApp.class, w);
+		PanesLabelApp wa = w.panesLabelApp;
 		
 		// find roof locations / uv coordinates for roof
 		if (wa != null)
@@ -346,11 +352,11 @@ public class GreebleGrid {
 			WindowGen.createWindow( window, glass, new Window( Jme3z.to ( loc ), Jme3z.to(along), Jme3z.to(up), 
 					l.original.width, l.original.height, depth, panelWidth, panelHeight ) );
 		else if (wa.panes == null) {
-			createInnie( w, null, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+			createInnie( w, null, to3d, window, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 			mbs.getTexture( "texture_"+wa.texture+"_window_"+w.hashCode(), wa.texture, w ).add( w, ZERO_ONE_UVS, to3d, -0.2 );
 		} else {
 			createInnie( w, null, to3d, mbs.GRAY, -depth + outset - 0.5, -depth + outset - 0.5, 
-					new boolean[] {true, true /*right*/, false, true /*left*/, false, false } ); // walls around window
+					new boolean[] {true, true /*right*/, false, true /*left*/, false, false }, false ); // walls around window
 
 			
 			if (wa.coveringRoof != null) {
@@ -365,7 +371,7 @@ public class GreebleGrid {
 					}
 				}.run();
 				
-				RoofTexApp rta = appCache.get(RoofTexApp.class, roof);
+				RoofTexApp rta = roof.roofTexApp;
 				
 				LoopL<Point2d> uvs = wa.coveringRoof.singleton().new Map<Point2d>() {
 					@Override
@@ -385,12 +391,12 @@ public class GreebleGrid {
 			}
 			else {
 				createInnie( w, null, to3d, window, -depth + outset - 0.5, -depth + outset - 0.5, 
-					new boolean[] {false, false, true, false, false, false } ); // roof over window
+					new boolean[] {false, false, true, false, false, false }, false ); // roof over window
 			}
 			
 			createWindowFromPanes (wa.panes, w,w, to3d, 
 					mbs.getTexture( "texture_"+wa.texture+"_window_"+w.hashCode(), wa.texture, w ), 
-					0.1, 0 );
+					0.1, 0, false );
 		}
 	}
 	
@@ -493,11 +499,11 @@ public class GreebleGrid {
 	
 	
 	protected static void createInnie( DRectangle rect, DRectangle uvs, Matrix4d to3d, MeshBuilder mat, 
-			double depth, double atDepth, boolean[] hasBack ) {
+			double depth, double atDepth, boolean[] faces, boolean flipNormals ) {
 		
 		Vector3f[] jpts = findWorldBox( rect, to3d, depth );
 		
-		Vector3f lo = jpts[0],
+		Vector3f 
 		 		 ou = jpts[1], 
 				 al = jpts[2], 
 				 u  = jpts[3],
@@ -506,20 +512,26 @@ public class GreebleGrid {
 		Vector3f depthOffset = ou.mult( (float) atDepth / ou.length() );
 		p = p.add( depthOffset );
 		
-		mat.addInsideRect( p, ou, al, u, -(float)depth, (float)rect.width, (float) rect.height, 
+		float width = (float) rect.width;
+		if (flipNormals) {
+			width = -width;
+			p.addLocal(al.mult( rect.widthF() ));
+		}
+		
+		mat.addInsideRect( p, ou, al, u, -(float)depth, width, (float) rect.height, 
 				uvs == null ? null :
 				new float[][] { 
 			{ (float) uvs.x, (float)uvs.y},
-			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, hasBack  );
+			{ (float) uvs.getMaxX(), (float) uvs.getMaxY() } }, faces  );
 	}
 	
 	public static void createWindowFromPanes( List<DRectangle> panes, DRectangle bounds, DRectangle uvs, Matrix4d to3d, 
-			MatMeshBuilder window, double paneDepth, double frameDepth ) {
+			MatMeshBuilder window, double paneDepth, double frameDepth, boolean skirt ) {
 
 //		Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
 
 		if (panes.size() == 0) {
-			double delta = 0.02; 
+			double delta = 0.1; 
 			panes.add( new DRectangle ( delta / bounds.width, delta / bounds.height, 
 					(bounds.width - delta *2)/ bounds.width, (bounds.height - delta * 2)/ bounds.height ) );
 		}
@@ -531,7 +543,7 @@ public class GreebleGrid {
 				@Override
 				public void instance( DRectangle rect ) {
 					createInnie( rect, 
-							uvs.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT );
+							uvs.normalize( rect ), to3d, window, (paneDepth - frameDepth), -frameDepth, MeshBuilder.ALL_BUT_FRONT, false );
 				}
 			});
 		}
@@ -542,6 +554,11 @@ public class GreebleGrid {
 				window.add( rect, uvs.normalize( rect ), to3d, -frameDepth );
 			}
 		} );
+		
+		// outwards pointing skirt for dormer windwos.
+		if (skirt)
+		createInnie( bounds, uvs.normalize( bounds ), to3d, window, (paneDepth - frameDepth), -frameDepth, 
+				MeshBuilder.NO_FRONT_OR_BACK, true );
 		
 	}
 	
@@ -633,8 +650,8 @@ public class GreebleGrid {
 	}
 	
 	
-	protected void buildGrid( AppStore ac, DRectangle all, Matrix4d to3d, 
-			FeatureGenerator filteredFeatuers, MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
+	protected void buildGrid( DRectangle all, Matrix4d to3d, FeatureGenerator filteredFeatuers, 
+			MiniFacade mf, MatMeshBuilder wallColorMat, WallTag wallTag ) {
 
 		Grid g = new Grid( .010, all.x, all.getMaxX(), all.y, all.getMaxY() );
 
@@ -654,8 +671,8 @@ public class GreebleGrid {
 							
 							createWindow( rect, to3d, 
 									wallColorMat, mbs.WOOD, mbs.GLASS, // wood, glass,
-									wallTag.windowDepth, 
-									(float) wallTag.sillDepth, 
+									0.4, 
+									(float) w.attachedHeight.get(Feature.SILL).depth, 
 									(float) w.attachedHeight.get(Feature.SILL).d, 
 									(float) w.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
 						}
@@ -669,7 +686,7 @@ public class GreebleGrid {
 					balcon.grow (0.2);
 					balcon.height = bHeight;
 					
-					createBalcony( balcon, to3d, mbs.BALCONY, wallTag.balconyDepth );
+					createBalcony( balcon, to3d, mbs.BALCONY, w.attachedHeight.get(Feature.BALCONY).depth );
 				}
 				
 			}
@@ -691,8 +708,8 @@ public class GreebleGrid {
 							MatMeshBuilder glass = mbs.get( mbs.GLASS.name+s.hashCode(), mbs.glass, s );
 							
 							createWindow( rect, to3d, wallColorMat, wood, glass, 
-									wallTag.windowDepth, 
-									(float) wallTag.sillDepth, 
+									0.4, 
+									(float) s.attachedHeight.get(Feature.SILL).depth, 
 									(float) s.attachedHeight.get(Feature.SILL).d, 
 									(float) s.attachedHeight.get(Feature.CORNICE).d,
 									1.5, 2 );
@@ -700,12 +717,19 @@ public class GreebleGrid {
 					} );
 				}
 			}
-			for ( DRectangle d : filteredFeatuers.get( Feature.DOOR ) ) {
+			for ( FRect d : filteredFeatuers.get( Feature.DOOR ) ) {
 				if ( all.contains( d ) )
 					g.insert( d, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", new float[] {0,0,0.3f, 1} ), wallTag.doorDepth );
+							
+							Color c;
+							if (d.panesTexApp != null)
+								c = d.panesTexApp.color;
+							else
+								c = Color.darkGray;
+							
+							createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( c ) ), 0.4 );
 						}
 					} );
 			}
@@ -715,7 +739,7 @@ public class GreebleGrid {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createBalcony( rect, to3d, mbs.BALCONY, wallTag.balconyDepth );
+							createBalcony( rect, to3d, mbs.BALCONY, 0.7 );
 						}
 
 						@Override
@@ -744,49 +768,62 @@ public class GreebleGrid {
 		} );
 	}
 
-	final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
+	public final static DRectangle ZERO_ONE_UVS = new DRectangle( 0, 0, 1, 1 );
 	
-	protected void textureGrid(AppStore ac, DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
+	protected void textureGrid(DRectangle allGeom, DRectangle allUV, Matrix4d to3d, FeatureGenerator filteredFeatures, MiniFacade mf ) {
 
-		FacadeTexApp fa = ac.get(FacadeTexApp.class, mf);
+		FacadeTexApp fa = mf.facadeTexApp;
 		
 		if ( mf != null && fa.texture != null ) {
 			
 			Grid g = new Grid( .010, allGeom.x, allGeom.getMaxX(), allGeom.y, allGeom.getMaxY() );
-			MatMeshBuilder mmb = mbs.getTexture( "texture_"+fa.texture , fa.texture, mf );
+			MatMeshBuilder mmb = mbs.getTexture( "texture_"+fa.texture+"_"+mf.hashCode(), fa.texture, mf );
 
 			for ( FRect w : filteredFeatures.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 
 				
 				if ( allGeom.contains( w ) ) {
 					
-					PanesLabelApp pa = ac.get(PanesLabelApp.class, w);
-				
+					PanesLabelApp pa = w.panesLabelApp;
+					
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (pa == null || pa.texture == null) // no texture info
+							
+							
+							if (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
+								
+								createWindow( rect, to3d, 
+										mbs.WOOD, mbs.WOOD, mbs.GLASS, 
+										0.4, 
+										(float) w.attachedHeight.get(Feature.SILL).depth, 
+										(float) w.attachedHeight.get(Feature.SILL).d, 
+										(float) w.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
+							}
+							else if ( pa.texture == null) // no texture info
 								createInnie( rect, allUV.normalize( rect ), to3d, 
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), 
-												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT );
-							else if (pa.panes == null) { // just coarse facade
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
-								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
+												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT, false );
+							else if ( pa.panes == null ) { // just coarse facade
+								DRectangle uvr = allUV.normalize( rect );
+								createInnie( rect, uvr, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
+//								mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ).add( rect, ZERO_ONE_UVS, to3d, -0.2 );
+								mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), fa.texture, w ).add( rect, uvr, to3d, -0.2 );
 							
 							} else if (pa.textureUVs == TextureUVs.Zero_One){ // labels
 								
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK ); 
+								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false ); 
 								createWindowFromPanes (pa.panes, rect, rect, to3d,
-										mbs.getTexture( "texture_"+pa.texture+"_window_"+w.hashCode(), pa.texture, w ),
-										0.2, 0.17 );
+										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), pa.texture, w ),
+										0.2, 0.17, false );
 							}
-							else { // textures
+							else { // textures and panes
 								
 								DRectangle uvs = allUV.normalize( rect );
-								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK );
+								createInnie( rect, uvs, to3d, mmb, 0.2f, 0, MeshBuilder.NO_FRONT_OR_BACK, false );
 								createWindowFromPanes (pa.panes, rect, allUV, to3d,
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode() , fa.texture, w ),
-										0.2, 0.17 );
+										0.2, 0.17, false );
 							}
 						}
 					} );
@@ -797,15 +834,25 @@ public class GreebleGrid {
 				
 				if ( allGeom.contains( w ) ) {
 					
-					PanesLabelApp pa = ac.get(PanesLabelApp.class, w);
+					PanesLabelApp pa =w.panesLabelApp;
 					
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							if (pa.texture == null)
-								createInnie( rect, allUV.normalize( rect ), to3d, mmb, 0.5f, 0, MeshBuilder.ALL_BUT_FRONT );
+							
+//							if (w.panesTexApp != null && w.panesTexApp.color != null)
+//								createDoor( rect, to3d, wallColorMat, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
+							if (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
+								createDoor( rect, to3d, mbs.WOOD, mbs.get( "wood", Colourz.toF4( w.panesTexApp.color ) ), 0.4 );
+							} else if (pa. texture == null)
+								createInnie( rect, allUV.normalize( rect ), to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ), 0.5f, 0, MeshBuilder.ALL_BUT_FRONT, false );
+							else if (pa.textureUVs == TextureUVs.Zero_One) // labels
+								createInnie( rect, ZERO_ONE_UVS, to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), pa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 							else 
-								createInnie( rect, ZERO_ONE_UVS, to3d, mbs.getTexture( "texture_"+fa.texture, fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT );
+								createInnie( rect, allUV.normalize( rect ), to3d, 
+										mbs.getTexture( "door_"+w.hashCode(), fa.texture, w ) , 0.3f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 				}
@@ -817,17 +864,18 @@ public class GreebleGrid {
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 			}
+			
 			for ( FRect w : filteredFeatures.getRects( Feature.CORNICE ) ) {
 				
 				if ( allGeom.contains( w ) )
 					g.insert( w, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT );
+							createInnie( rect, allUV.normalize( rect ), to3d, mmb, -0.1f, 0, MeshBuilder.ALL_BUT_FRONT, false );
 						}
 					} );
 			}
@@ -837,8 +885,7 @@ public class GreebleGrid {
 					g.insert( b, new Griddable() {
 						@Override
 						public void instance( DRectangle rect ) {
-							PanesTexApp ba = ac.get(PanesTexApp.class, b);
-							createBalcony( rect, to3d, mbs.get( "balcony_"+ba.color, ba.color, mf ) , 0.3 );
+							createBalcony( rect, to3d, mbs.get( "balcony_"+b.panesTexApp.color, b.panesTexApp.color, mf ) , 0.3 );
 						}
 
 						@Override
@@ -910,10 +957,7 @@ public class GreebleGrid {
 		along = new Vector2d(along);
 		along.normalize();
 
-		
-		
 		Vector2d al = new Vector2d (along), up = new Vector2d( -al.y, al.x ); // up the roof
-		
 
 		al.scale (feature.radius / al.length());
 		up.scale (feature.radius / up.length());
@@ -938,7 +982,6 @@ public class GreebleGrid {
 
 		double height = Math.max (0.5, (max - min) * 2 );
 		
-		
 		Vector3f locJ = new Vector3f( (float) a[1].x, (float) ( min ) , (float) a[1].y),
 				upJ    = new Vector3f(0,1,0),
 				alongJ = new Vector3f ( (float) along.x, 0, (float) along.y);
@@ -948,9 +991,6 @@ public class GreebleGrid {
 				(float)height, (float) feature.radius * 2, (float) feature.radius * 2 ,
 				uvs ? new float[][] {{0.4f,0.4f},{0.6f,0.6f}} : null, MeshBuilder.ALL );
 		
-//		mat.addCube( new Point3d(a[1].x, min + height, a[1].y), Mathz.Y_UP, new Vector3d (along.x, 0, along.y) ,
-//				-height, feature.radius * 2, feature.radius * 2 );
-
 		double step = 0.1;// Math.min ( feature.radius / 2, 0.1 );
 		
 		if (feature.radius > 2*step) {
@@ -968,12 +1008,6 @@ public class GreebleGrid {
 		
 		
 			mbs.GRAY.addCube( offset, Mathz.Y_UP, alg, -0.02, sl, sl );
-			
-//			offset.scaleAdd (-sl, upp, offset);
-//			offset.scaleAdd (sl, alg, offset);
-			
-//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -sl, -step );
-//			mat.addCube( offset, Mathz.Y_UP, alg, -step, -step, -sl );
 		}
 	}
 	

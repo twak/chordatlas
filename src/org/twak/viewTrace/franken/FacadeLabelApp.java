@@ -6,32 +6,35 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
-import org.twak.tweed.gen.SuperFace;
-import org.twak.tweed.gen.skel.AppStore;
+import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.FacadeDesigner;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.auto.Auto;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.facades.PostProcessState;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
-import org.twak.viewTrace.franken.style.JointStyle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,12 +44,19 @@ public class FacadeLabelApp extends App {
 	public static final double FLOOR_HEIGHT = 2.5;
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 	
+	public double scale = 1;
+	
 	public MiniFacade mf;
 	public String texture;
+	
+	public boolean 
+			debugLabels = false, 
+			showRawLabels = false;
 	
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;
+		
 	}
 
 	public FacadeLabelApp( FacadeLabelApp o ) {
@@ -57,19 +67,20 @@ public class FacadeLabelApp extends App {
 		this.regScale  = o.regScale;
 		
 		this.texture = o.texture;
+		
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get(BuildingApp.class, mf.sf );
+	public App getUp() {
+		return mf.sf.buildingApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		
 		MultiMap<String, App> out = new MultiMap<>();
 		
-		out.put( "facade texture", ac.get(FacadeTexApp.class, mf ) );
+		out.put( "facade texture", mf.facadeTexApp );
 		
 		return out;
 	}
@@ -80,50 +91,123 @@ public class FacadeLabelApp extends App {
 	}
 
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
-			public void updated(double value) {
+		
+		if ( appMode == TextureMode.Off ) {
+
+			JButton fac = new JButton( "edit facade" );
+			fac.addActionListener( e -> new FacadeDesigner( mf, globalUpdate ) );
+			out.add( fac );
+			
+			AutoDoubleSlider gfh = new AutoDoubleSlider( mf, "groundFloorHeight", "ground floor", 0, 5 ) {
+				public void updated(double value) {
+					FacadeDesigner.close();
+					for (App a : apps) {
+						((FacadeLabelApp)a).mf.groundFloorHeight = value;
+						globalUpdate.run();
+					}
+				};
+			};
+			
+		}
+		else if (appMode == TextureMode.Procedural ) {
+			
+			if ( ! ( mf.featureGen instanceof CGAMini ) )
+				mf.featureGen = new CGAMini( mf );
+			
+			CGAMini cga = (CGAMini) mf.featureGen;
+			
+			out.add( new Auto( cga, true ) {
 				
-				for (App a : apps)
-					((FacadeLabelApp)a).regFrac = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeLabelApp)a).regAlpha = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeLabelApp)a).regScale = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-//		out.add (new AutoCheckbox( ((MiniFacade)this.hasA).app, "dormer", "dormer" ) {
-//			public void updated(boolean selected) {
-//				for (App a : apps)
-//					apps.ac.get(BuildingApp.class, sf)
-//					
-//					((MiniFacade)a.hasA).app.dormer = selected;
-//				globalUpdate.run();
-//			}
-//		} );
+				public void updateOkayCancel() {
+					super.updateOkayCancel();
+					apply();
+					globalUpdate.run();
+				};
+			} .build() ); 
+			
+			
+
+		} else if ( appMode == TextureMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).scale = scale;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+			
+			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regFrac = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regAlpha = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+			
+
+			out.add( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).regScale = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+			
+			out.add (new AutoCheckbox( this, "debugLabels", "debug labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).debugLabels = selected;
+					globalUpdate.run();
+				};
+			});
+			
+			out.add (new AutoCheckbox( this, "showRawLabels", "debug raw labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).showRawLabels = selected;
+					globalUpdate.run();
+				};
+			});
+			
+		}
 		
 		return out;
 	}
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore appCache) {
+	public void computeBatch(Runnable whenDone, List<App> batch) {
 
+		if ( appMode != TextureMode.Net ) {
+			for ( App a : batch ) {
+
+				MiniFacade mf = ( (FacadeLabelApp) a ).mf;
+
+				if ( appMode == TextureMode.Off ) {
+					if ( !( mf.featureGen.getClass() == FeatureGenerator.class ) )
+						mf.featureGen = new FeatureGenerator( mf.featureGen );
+				} else if ( appMode == TextureMode.Procedural )
+					if ( !( mf.featureGen.getClass() == CGAMini.class ) ) {
+						mf.featureGen = new CGAMini( mf );
+					}
+			}
+
+			whenDone.run();
+			return;
+		}
+		
+		
 		NetInfo ni = NetInfo.get(this);
 		
 		Pix2Pix p2 = new Pix2Pix( ni );
@@ -136,12 +220,14 @@ public class FacadeLabelApp extends App {
 		for (App a : batch) {
 
 			MiniFacade amf = ((FacadeLabelApp)a).mf;
-			BuildingApp ba = appCache.get (BuildingApp.class, amf.sf );
+			BuildingApp ba = amf.sf.buildingApp;
 			
-			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers );
+			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers ), facadeOnly = Pix2Pix.findBounds( amf,  false );
 
 			if (mini.area() < 0.1)
 				continue;
+
+			amf.groundFloorHeight = 0;
 			
 			g.setColor( Color.black );
 			g.fillRect( 0, 0, ni.resolution, ni.resolution );
@@ -155,13 +241,17 @@ public class FacadeLabelApp extends App {
 				mask = mask.scale( scale );
 				mask.x = ( ni.resolution - mask.width ) * 0.5;
 				mask.y = 0; 
+				
+				facadeOnly = facadeOnly.scale( scale );
+				facadeOnly.x = 0;
+				facadeOnly.y = 0;
 			}
 
 			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers );
 
-			Meta meta = new Meta( amf, mask, mini );
+			Meta meta = new Meta( amf, mask, facadeOnly, mini );
 
-			p2.addInput( bi, bi, null, meta, appCache.get(FacadeLabelApp.class, amf).styleZ, FLOOR_HEIGHT * scale / 255.  );
+			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, this.scale * FLOOR_HEIGHT * scale / 255.  );
 		}
 
 		g.dispose();
@@ -178,13 +268,51 @@ public class FacadeLabelApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						importLabels( appCache, meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
+						importLabels( meta, new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" ) );
 						
 						dest = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
+						
 						if ( dest != null ) 
-							appCache.get (FacadeLabelApp.class, meta.mf ).texture = dest; // todo: set on FacadeTexApp after cropping for dormers
+							 meta.mf.facadeLabelApp.texture = dest; // todo: set on FacadeTexApp after cropping for dormers
+						
+						if (debugLabels) {
+							
+//							meta.mf.featureGen = new FeatureGenerator();
+							
+							if (showRawLabels) {
+							
+//								String dF = Pix2Pix.importTexture( e.getValue(), -1, null, meta.facadeOnly, null, new BufferedImage[3] );
+								meta.mf.facadeTexApp.texture = dest;
+							}
+							else {
+//								List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+								
+								NetInfo ni = NetInfo.get(FacadeLabelApp.this.getClass());
+								
+								BufferedImage regularized = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
+								Graphics2D gL = regularized.createGraphics();
+								
+								gL.setColor( Color.blue );
+								gL.fillRect( 0, 0, regularized.getWidth(), regularized.getHeight() );
+								
+								Pix2Pix.cmpRects( meta.mf, gL, 
+										new DRectangle(ni.resolution, ni.resolution), meta.mfBounds, Color.green, 
+										meta.mf.featureGen.getRects( Feature.WINDOW ) );
+
+								gL.dispose();
+								
+								String rawLabelFile = "scratch/"+UUID.randomUUID()+".png";
+								
+								ImageIO.write( regularized, "png", new File( Tweed.DATA + "/" + rawLabelFile ) );
+								meta.mf.facadeTexApp.texture = rawLabelFile;
+							}
+							
+							meta.mf.featureGen = new FeatureGenerator();
+						}
 					}
+					
+					System.out.println("done here");
 					
 				} catch ( Throwable e ) {
 					e.printStackTrace();
@@ -200,7 +328,7 @@ public class FacadeLabelApp extends App {
     //{"other": [[196, 255, 0, 255], [0, 62, 0, 255]], 
     //"wall": [[62, 196, 0, 255]], 
     // "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
-	private void importLabels( AppStore ac, Meta m,  File file ) {
+	private void importLabels( Meta m, File file ) {
 		
 		if (file.exists()) {
 			
@@ -212,10 +340,7 @@ public class FacadeLabelApp extends App {
 				root = om.readTree( FileUtils.readFileToString( file ) );
 				JsonNode node = root.get( "window" );
 				
-				if (m.mf.postState == null)
-					m.mf.postState = new PostProcessState();
-				
-				m.mf.postState.generatedWindows.clear();
+				FacadeTexApp fta = mf.facadeTexApp;
 				
 				i:
 				for (int i = 0; i < node.size(); i++) {
@@ -238,52 +363,34 @@ public class FacadeLabelApp extends App {
 							f.x -= gap;
 					}
 					
-//					if (m.mf.postState != null) {
-//						for (Point2d p : f.points()) { 
-//							if ( Loopz.inside( p, m.mf.postState.occluders) )
-//								continue i;
-//							if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.wallFaces) ) || 
-//									 Loopz.inside( p, new LoopL<Point2d> ( (List) m.mf.postState.roofFaces) ) ) )
-//								continue i;
-//						}
-//					}
-					
-					FRect window = m.mf.featureGen.add( Feature.WINDOW, f );
-					
-					PanesLabelApp wla = ac.get( PanesLabelApp.class, window );
-					PanesTexApp pta = ac.get( PanesTexApp.class, window );
-					FacadeTexApp mfa = ac.get ( FacadeTexApp.class, m.mf);
-					
-					if (mfa.styleSource instanceof JointStyle) {
-						
-						JointStyle js = (JointStyle) mfa.styleSource;
-						pta.styleSource = wla.styleSource = js; // fixme: dirty hack
-						pta.styleZ = wla.styleZ = null;
-						js.setMode(wla);
-						js.setMode(pta);
-						
-					} else {
-						
-						FRect nearestOld = closest( window, mfa.oldWindows );
-						if ( nearestOld != null ) {
-							PanesLabelApp opla = ac.get (PanesLabelApp.class, nearestOld );
-							ac.set(PanesLabelApp.class, window, opla );
-							wla.styleZ = Arrays.copyOf ( opla.styleZ, opla.styleZ.length );
-						}
-					}
-					
+					m.mf.featureGen.add( Feature.WINDOW, f );
 				}
 				
 				if (regFrac > 0) {
+					
 					Regularizer reg = new Regularizer();
+					
 					reg.alpha = regAlpha;
 					reg.scale = regScale;
-					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null, ac ).get( 0 ).featureGen;
+					
+					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
 					m.mf.featureGen.setMF(m.mf);
 				}
 				
-
-				m.mf.postState.generatedWindows.addAll( m.mf.featureGen.get( Feature.WINDOW ) );
+				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP )) {
+					
+						FRect nearestOld = closest( window, m.mf.facadeTexApp.oldWindows );
+						if ( nearestOld != null ) {
+							
+							window.panesLabelApp = new PanesLabelApp( nearestOld.panesLabelApp );
+							window.panesLabelApp.fr = window;
+							
+							window.panesTexApp = new PanesTexApp( nearestOld.panesTexApp );
+							window.panesTexApp.fr = window;
+						}
+				}
+				
+				System.out.println("done");
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();
@@ -309,49 +416,37 @@ public class FacadeLabelApp extends App {
 	}
 
 	private static class Meta {
-		DRectangle mask, mfBounds;
+		DRectangle mask, mfBounds, facadeOnly;
 		MiniFacade mf;
 		
-		private Meta( MiniFacade mf, DRectangle mask, DRectangle mfBounds ) {
+		private Meta( MiniFacade mf, DRectangle mask, DRectangle facadeOnly, DRectangle mfBounds ) {
 			this.mask = mask;
+			this.facadeOnly = facadeOnly;
 			this.mf = mf;
 			this.mfBounds = mfBounds;
 		}
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {TextureMode.Off /* manual */, TextureMode.Procedural, TextureMode.Net};
 	}
 	
-	public void finishedBatches( AppStore ac, List<App> list, List<App> all ) {
+	@Override
+	public void finishedBatches( List<App> all ) {
 
-		for (App a : all) 
-			if (! list.contains( a )) {
-				PostProcessState ps = ( (FacadeLabelApp)a).mf.postState;
-				if (ps != null)
-					ps.generatedWindows.clear();
-			}
+		super.finishedBatches( all );
 		
 		for (App a : all) {
-			if (! list.contains( a )) {
-				MiniFacade mf = ( (FacadeLabelApp)a).mf;
-				 PostProcessState ps = mf.postState;
-				 if (ps != null)
-					 for (FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) )
-						 ps.generatedWindows.add( f );
-			}
+			
+			FacadeLabelApp fla = ( (FacadeLabelApp) a );
+			MiniFacade mf = fla.mf;
+			FacadeTexApp fta = mf.facadeTexApp;
+
+			fta.oldWindows = new ArrayList<FRect>( mf.featureGen.getRects( Feature.WINDOW ) );
+			fta.setChimneyTexture( null );
+
+			// compute dormer-roof locations
+			new GreebleSkel( null, mf.sf ).showSkeleton( mf.sf.skel.output, null, mf.sf.mr );
 		}
-		
-		for (App a : list) {
-			MiniFacade mf = ( (FacadeLabelApp)a).mf;
-			FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
-			fta.oldWindows = new ArrayList<FRect> (mf.featureGen.getRects( Feature.WINDOW ));
-			fta.setChimneyTexture( ac, null );
-		}
-		
-		// compute dormer-roof locations
-		list.stream().map( x -> ((FacadeLabelApp)x).mf.sf ).collect(Collectors.toSet() ).stream().
-			forEach( x -> new GreebleSkel( null, ac, x ).
-			showSkeleton( x.skel.output, null, x.mr ) );
 	}
 }

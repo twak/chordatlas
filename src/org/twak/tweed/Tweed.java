@@ -1,5 +1,6 @@
 package org.twak.tweed;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -36,9 +39,9 @@ import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
-import org.twak.tweed.tools.TextureTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Mathz;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 
@@ -70,12 +73,16 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.ColorOverlayFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.shadow.EdgeFilteringMode;
+import com.jme3.shadow.PointLightShadowRenderer;
+import com.jme3.terrain.geomipmap.TerrainLodControl;
+import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.ui.Picture;
 
 public class Tweed extends SimpleApplication {
@@ -103,7 +110,7 @@ public class Tweed extends SimpleApplication {
 //			new AlignTool(this), 
 			new FacadeTool(this),
 //			new PlaneTool(this) 
-			new TextureTool(this),
+//			new TextureTool(this),
 };
 	
 	public Tool tool;
@@ -111,6 +118,8 @@ public class Tweed extends SimpleApplication {
 	private AmbientLight ambient;
 	private DirectionalLight sun;
 	private PointLight point;
+	PointLightShadowRenderer plsr;
+	FilterPostProcessor fpp ;
 	
 	public Node debug;
 	
@@ -124,10 +133,10 @@ public class Tweed extends SimpleApplication {
 		super.reshape( w, h );
 	}
 	
+	
+	
 	public void simpleInitApp() {
 
-//		TweedSettings.load( new File ( Tweed.DATA ) );
-		
 		point = new PointLight();
 		point.setEnabled( true );
 		point.setColor( ColorRGBA.White.mult(4) );
@@ -172,19 +181,9 @@ public class Tweed extends SimpleApplication {
 		cam.setLocation(TweedSettings.settings.cameraLocation);
 		cam.setRotation(TweedSettings.settings.cameraOrientation);
 	    
-	
+		setAmbient( 0 );
 		setFov(0);
 		setCameraSpeed( 0 );
-		
-		if ( TweedSettings.settings.SSAO ) {
-			
-			FilterPostProcessor fpp = new FilterPostProcessor( assetManager );
-			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
-//			fpp.addFilter( new ColorOverlayFilter( ColorRGBA.Magenta ));
-			fpp.addFilter( filter );
-			fpp.addFilter( new FXAAFilter() );
-			viewPort.addProcessor( fpp );
-		}
 		
 		TweedSettings.loadDefault();
 		
@@ -325,7 +324,10 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.fromOrigin = new Matrix4d( TweedSettings.settings.toOrigin );
 		TweedSettings.settings.fromOrigin.invert();
 		
-		frame.addGen ( new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this ), true );
+		GISGen gg = new GISGen( makeWorkspaceRelative( gmlFile ).toString(), TweedSettings.settings.toOrigin, guessCRS, this );
+		
+		
+		frame.addGen ( gg, true );
 	}
 
 	public void setCameraPerspective() {
@@ -379,8 +381,18 @@ public class Tweed extends SimpleApplication {
 	
 	public void setTool( Tool newTool ) {
 		
-		Tool oldTool = tool;
+		{
+			boolean seenBefore = false;
+
+			for ( Tool t : tools )
+				if ( t.getClass() == newTool.getClass() )
+					seenBefore = true;
+
+			if ( !seenBefore )
+				toolBG.clearSelection();
+		}
 		
+		Tool oldTool = tool;
 		enqueue( new Runnable() {
 			@Override
 			public void run() {
@@ -641,17 +653,19 @@ public class Tweed extends SimpleApplication {
 		tool.clear();
 	}
 
+	private ButtonGroup toolBG = new ButtonGroup();
+	
 	public void addUI( JPanel panel ) {
 
 		panel.setLayout( new ListDownLayout() );
-		ButtonGroup bg = new ButtonGroup();
 
 		panel.add( new JLabel("tools:") );
+		
 		
 		for ( Tool t : tools ) {
 
 			JToggleButton tb = new JToggleButton( t.getName() );
-			bg.add( tb );
+			toolBG.add( tb );
 
 			tb.addActionListener( new ActionListener() {
 
@@ -667,7 +681,7 @@ public class Tweed extends SimpleApplication {
 		((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
 
 	}
-
+	
 	public void resetCamera() {
 		cam.setLocation( new Vector3f() );
 		cam.setRotation( new Quaternion() );
@@ -689,13 +703,14 @@ public class Tweed extends SimpleApplication {
 	public void initFrom( String dataDir ) {
 
 		if (JME != null) {
-			
 			assetManager.unregisterLocator( JME, FileLocator.class );
 			deleteScratch();
 		}
 		
 		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
+		
+		deleteScratch();
 		
 		new File (SCRATCH).mkdirs();
 		
@@ -714,6 +729,36 @@ public class Tweed extends SimpleApplication {
 		setAmbient( 0 );
 
 		frame.setGens( TweedSettings.settings.genList );
+
+		if (plsr != null) {
+			rootNode.setShadowMode( ShadowMode.Off );
+			viewPort.removeProcessor( plsr );
+		}
+		
+		if ( TweedSettings.settings.shadows ) {
+			plsr = new PointLightShadowRenderer( assetManager, 512 );
+			plsr.setLight( point );
+			plsr.setShadowZExtend( 50 );
+			plsr.setShadowIntensity( 0.5f );
+			plsr.setEdgeFilteringMode( EdgeFilteringMode.PCF4 );
+			rootNode.setShadowMode( ShadowMode.CastAndReceive );
+			viewPort.addProcessor( plsr );
+		}
+
+		
+		if ( fpp != null ) {
+			viewPort.removeProcessor( fpp );
+		}
+
+		if ( TweedSettings.settings.SSAO ) {
+
+			fpp = new FilterPostProcessor( assetManager );
+			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
+			//			fpp.addFilter( new ColorOverlayFilter( ColorRGBA.Magenta ));
+			fpp.addFilter( filter );
+			fpp.addFilter( new FXAAFilter() );
+			viewPort.addProcessor( fpp );
+		}
 		
 		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
 	}

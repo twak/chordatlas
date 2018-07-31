@@ -7,7 +7,6 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
@@ -35,16 +34,16 @@ public class MultiModal implements StyleSource {
 	
 	public double totalProb;
 	
-	NetInfo exemplar;
+	Class target;
 	
-	public MultiModal(NetInfo ex) {
-		this.exemplar = ex;
+	public MultiModal(Class target) {
+		this.target = target;
 	}
 
 
 	@Override
 	public StyleSource copy() {
-		MultiModal out = new MultiModal( exemplar );
+		MultiModal out = new MultiModal( target );
 		
 		for (Mode m : modes) 
 			out.modes.add(m.copy());
@@ -63,15 +62,15 @@ public class MultiModal implements StyleSource {
 	}
 	
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app ) {
 		
 		double d = random.nextDouble() * totalProb;
 		
 		for (Mode w : modes) 
 			if (d < w.accumProb)
-				return w.ss.draw( random, app, ac );
+				return w.ss.draw( random, app );
 
-		return new double[exemplar.sizeZ];
+		return new double[ NetInfo.index.get(target).sizeZ];
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class MultiModal implements StyleSource {
 		JPanel out = new JPanel();
 		
 		JButton but = new JButton( "edit multimodal" );
-		but.addActionListener( e -> new MultiModalEditor( this, exemplar, update, sa.ac ).openFrame() );
+		but.addActionListener( e -> new MultiModalEditor( this, target, update ).openFrame() );
 		out.add( but );
 		
 		return out;
@@ -88,7 +87,7 @@ public class MultiModal implements StyleSource {
 	public Mode newMode() {
 		
 		Mode out = new Mode();
-		out.ss = new GaussStyle( exemplar );
+		out.ss = new GaussStyle( target );
 		modes.add( out );
 		
 		updateModes();
@@ -98,5 +97,10 @@ public class MultiModal implements StyleSource {
 	
 	public boolean install( SelectedApps next ) {
 		return false;
+	}
+
+	@Override
+	public void install( App app ) {
+		app.styleSource = new MultiModal ( app.getClass() );
 	}
 }

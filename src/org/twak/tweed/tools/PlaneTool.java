@@ -32,16 +32,25 @@ public class PlaneTool extends Tool {
 		this.tweed = tweed;
 	}
 
+	public PlaneTool( Tweed tweed, PlanesGen planesGen ) {
+		super(tweed);
+		this.tweed = tweed;
+		this.pg = planesGen;
+	}
+
 	@Override
 	public void activate( Tweed tweed ) {
 		this.tweed = tweed;
 
-		List<Gen> gens = tweed.frame.gens( PlanesGen.class );
-		if ( gens.isEmpty() ) {
-			pg = new PlanesGen( tweed );
-			tweed.frame.addGen( pg, true );
-		} else
-			pg = (PlanesGen) gens.get( 0 );
+		
+		if ( this.pg == null ) {
+			List<Gen> gens = tweed.frame.gens( PlanesGen.class );
+			if ( gens.isEmpty() ) {
+				pg = new PlanesGen( tweed );
+				tweed.frame.addGen( pg, true );
+			} else
+				pg = (PlanesGen) gens.get( 0 );
+		}
 
 //		createPlane();
 	}

@@ -22,6 +22,8 @@ public class SuperEdge extends HalfEdge {
 	public List<MiniFacade> toRegularize;
 	public MiniFacade toEdit;
 	
+	public SuperEdge() {}
+	
 	public SuperEdge( Point2d s, Point2d e, HalfEdge parent ) {
 		super( s, e, parent );
 

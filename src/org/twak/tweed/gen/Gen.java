@@ -30,7 +30,8 @@ public abstract class Gen {
 	
 	public Gen(String name, Tweed tweed) {
 		this.name = name;
-		init(tweed);
+		if (tweed != null)
+			init(tweed);
 	}
 
 	private void init(Tweed tweed) {

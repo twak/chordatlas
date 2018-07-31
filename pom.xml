@@ -218,6 +218,11 @@
 			<artifactId>jme3-effects</artifactId>
 			<version>${jme3_v}</version>
 		</dependency>
+		<dependency>
+			<groupId>${jme3_g}</groupId>
+			<artifactId>jme3-terrain</artifactId>
+			<version>${jme3_v}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
@@ -239,7 +244,7 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.9</version>
+			<version>1.4.10</version>
 		</dependency>
 
 		<dependency>

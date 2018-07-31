@@ -21,7 +21,6 @@ import org.twak.camp.Tag;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.SuperEdge;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.tweed.gen.skel.MiniRoof;
 import org.twak.tweed.gen.skel.RoofTag;
 import org.twak.utils.Filez;
@@ -45,7 +44,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 
 	MiniRoof mr;
 	
-	public RoofSuperApp( MiniRoof mr ) {
+	public RoofSuperApp( MiniRoof mr) {
 		
 		super();
 		
@@ -67,11 +66,10 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 	}
 
 	@Override
-	public void setTexture( FacState<MiniRoof> state, BufferedImage cropped, AppStore ac ) {
+	public void setTexture( FacState<MiniRoof> state, BufferedImage cropped ) {
 		
 		NormSpecGen ns = new NormSpecGen( cropped, null, null);
 		BufferedImage[] maps = new BufferedImage[] { cropped, ns.norm, ns.spec};
-
 		
 		String fileName = "scratch/" + UUID.randomUUID() +".png";
 
@@ -79,8 +77,6 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			ImageIO.write( maps[0], "png", new File(Tweed.DATA + "/" +fileName ) );
 			ImageIO.write( maps[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) ) );
 			ImageIO.write( maps[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) )  );
-			
-			
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}
@@ -88,7 +84,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if (textures == null)
 			textures = new HashMap<>();
 		
-		textureUVs = TextureUVs.Zero_One;
+	    state.mf.roofTexApp.textureUVs = TextureUVs.Zero_One;
 		textures.put (state.tag, fileName );
 	}
 	
@@ -132,16 +128,11 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
  	}
 	
 	@Override
-	public void drawCoarse( MultiMap<MiniRoof, FacState> todo, AppStore ac ) throws IOException {
+	public void drawCoarse( MultiMap<MiniRoof, FacState> todo ) throws IOException {
 		
-		RoofTexApp rta = ac.get(RoofTexApp.class, mr);
+		RoofTexApp rta = mr.roofTexApp;
 		
 		BufferedImage src = ImageIO.read( Tweed.toWorkspace( rta.coarse ) );
-		
-//		DRectangle imageBounds = textureRect;
-		
-//		src = Imagez.blur( 25, src );
-		
 		
 		NetInfo ni = NetInfo.get( this );
 		
@@ -149,11 +140,7 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		
 		for ( Loop<Point2d> verticalPts : mr.getAllFaces() ) {
 			
-//			count++;
-//			if (count ++  != 1)
-//				continue;
-			
-			TwoRects toPix = new TwoRects( textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
+			TwoRects toPix = new TwoRects( rta.textureRect, new DRectangle(src.getWidth(), src.getHeight()), ni.resolution );
 			
 			Loop<Point2d> pixPts = toPix.tranform( verticalPts );
 			
@@ -179,16 +166,20 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			
 			AffineTransform t = AffineTransform.getTranslateInstance( 0, 0 ); 
 			
+			double[] bounds    = Loopz.minMax2d( Loopz.transform( verticalPts, rot ) ); // bad location, but scale-in-meters.
+			
 			t.preConcatenate( toOrigin );
 			t.preConcatenate( rot );
 			t.preConcatenate( deslope );
 			
-			double[] bounds = Loopz.minMax2d( Loopz.transform( verticalPts, rot ) ); // bad location, but scale-in-meters.
-			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, t ) ); 
+			AffineTransform geom2Big = new AffineTransform( t );
+			
+			double[] pixBounds = Loopz.minMax2d( Loopz.transform( pixPts, geom2Big ) );
+			
 			
 			int 
-			outWidth  =   (int) Math.ceil ( ( (bounds[1] - bounds[0] ) * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
-			outHeight =   (int) Math.ceil ( ( (bounds[3] - bounds[2] ) * scale ) / tileWidth ) * tileWidth;
+				outWidth  =   (int) Math.ceil ( ( (bounds[1] - bounds[0] ) * scale ) / tileWidth ) * tileWidth, // round to exact tile multiples
+				outHeight =   (int) Math.ceil ( ( (bounds[3] - bounds[2] ) * scale ) / tileWidth ) * tileWidth;
 				
 			BufferedImage bigCoarse = new BufferedImage(
 					outWidth  + overlap * 2,
@@ -202,33 +193,35 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 			t.preConcatenate( AffineTransform.getTranslateInstance ( - pixBounds[0], 0 ));
 			t.preConcatenate( AffineTransform.getScaleInstance ( outWidth / (pixBounds[1] - pixBounds[0] ), outHeight / (pixBounds[3] - pixBounds[2] ) ) );
 			t.preConcatenate( AffineTransform.getTranslateInstance ( overlap, outHeight + overlap ) );
-//			t.preConcatenate( AffineTransform.getTranslateInstance ( 256,256 ) );
-
 			
 			g.setTransform( t );
 			
-			g.drawImage (src, 0, 0, null);
-			
+			g.drawImage (src, 0, -256, null);
+
 			
 			if ( true ) { // pad edges
 
 				g.setColor( mean );
 				g.setStroke( new BasicStroke( overlap / 8 ) );
 
-				for ( Loopable<Point2d> lp : pixPts.loopableIterator() ) {
+				for ( Loopable<Point2d> lp : pixPts.loopableIterator() )  // flashing
 					g.drawLine( (int) lp.get().x, (int) lp.get().y, (int) lp.next.get().x, (int) lp.next.get().y );
-				}
 				
-				if (false)
+				g.setColor( Colourz.transparent( mean, 128 ) );
+				
 				for (HalfEdge e : mr.superFace) { // dormers
 					MiniFacade mf = ((SuperEdge)e).toEdit; 
 					for (FRect f : mf.featureGen.getRects( Feature.WINDOW )) {
 						
-						PanesLabelApp pla = ac.get(PanesLabelApp.class, f );
+						PanesLabelApp pla = f.panesLabelApp;
+						
 						if ( pla.coveringRoof != null) {
-							for (Loopable <Point2d> pt : pla.coveringRoof.loopableIterator() ) {
-								g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
-							}
+							
+							int c = 0;
+							
+							for (Loopable <Point2d> pt : toPix.tranform( pla.coveringRoof ).loopableIterator() ) 
+								if (c ++ != 3)
+									g.drawLine( (int) pt.get().x, (int) pt.get().y, (int) pt.getNext().get().x, (int) pt.getNext().get().y );
 						}
 					}
 				}
@@ -249,14 +242,23 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 	private Color meanColor( BufferedImage src, Color def, Loop<Point2d> pixPts ) {
 
 		int[] meanCol = new int[3];
-		int[] tmp = new int[3];
 		int count2 = 0;
-		for ( int i = 0; i < 30; i++ ) {
+		
+		double[] minMax = Loopz.minMax2d( pixPts );
+		
+		DRectangle bounds = new DRectangle( src.getWidth(), src.getHeight() );
+		
+		for ( int i = 0; i < 300; i++ ) {
 
-			int x = (int) ( Math.random() * src.getWidth() ), y = (int) ( Math.random() * src.getHeight() );
-			int rgb = src.getRGB( x, y );
-
-			if ( Loopz.inside( new Point2d( x, y ), pixPts ) ) {
+			int 
+				x = (int) (( Math.random() * (minMax[1] - minMax[0]) ) + minMax[0] ), 
+				y = (int) (( Math.random() * (minMax[3] - minMax[2]) ) + minMax[2] ); 
+			
+			
+			if ( Loopz.inside( new Point2d( x, y ), pixPts ) && bounds.contains(x, y + 256) ) {
+				
+				int rgb = src.getRGB( x,  y + 256 );
+				
 				count2++;
 				int[] rgbs = Colourz.toComp( rgb );
 				for ( int j = 0; j < 3; j++ )
@@ -266,14 +268,14 @@ public class RoofSuperApp extends SuperSuper <MiniRoof> {
 		if ( count2 > 0 ) {
 			for ( int j = 0; j < 3; j++ )
 				meanCol[ j ] /= count2;
-			return Colourz.to3( meanCol );
+			return Colourz.to3( meanCol ).darker();
 		}
 		return def;
 	}
 
 	@Override
-	public App getUp( AppStore ac ) {
-		return ac.get(RoofTexApp.class, mr);
+	public App getUp( ) {
+		return mr.roofTexApp;
 	}
 
 }

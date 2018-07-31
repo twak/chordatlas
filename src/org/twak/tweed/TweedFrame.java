@@ -42,9 +42,9 @@ import javax.swing.border.EmptyBorder;
 import javax.vecmath.Vector3d;
 
 import org.twak.readTrace.MiniTransform;
-import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
+import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
@@ -363,7 +363,7 @@ public class TweedFrame {
 		layers.setLayout( new BorderLayout() );
 		layers.add( new JLabel( "layers:" ), BorderLayout.NORTH );
 
-		JScrollPane listScroll = new JScrollPane( layerList );
+		JScrollPane listScroll = new JScrollPane( layerList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER  );
 		listScroll.getVerticalScrollBar().setUnitIncrement( 50 );
 		listScroll.setPreferredSize( new Dimension( 200, 300 ) );
 		layers.add( listScroll, BorderLayout.CENTER );

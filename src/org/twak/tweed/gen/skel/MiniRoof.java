@@ -27,9 +27,13 @@ import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.HasSuper;
+import org.twak.viewTrace.franken.RoofGreebleApp;
+import org.twak.viewTrace.franken.RoofSuperApp;
+import org.twak.viewTrace.franken.RoofTexApp;
+import org.twak.viewTrace.franken.SuperSuper;
 
-public class MiniRoof {
+public class MiniRoof implements HasSuper {
 
 	public DHash<Loop<Point2d>, Face> origins = new DHash<>();
 	
@@ -41,21 +45,25 @@ public class MiniRoof {
 	public MultiMap<Loop<Point2d>, FCircle> greebles;
 	
 	public SuperFace superFace;
+
+	public RoofGreebleApp roofGreebleApp = new RoofGreebleApp( this );
+	public RoofTexApp roofTexApp = new RoofTexApp(this);
+	public RoofSuperApp roofSuperApp = new RoofSuperApp( this );
 	
 	public MiniRoof( SuperFace superFace ) {
 		this.superFace = superFace;
 	}
 	
-	public void addFeature( AppStore appCache, RoofGreeble f, double radius, Point2d worldXY ) {
+	public void addFeature( RoofGreeble f, double radius, Point2d worldXY ) {
 		
 		for (Loop<Point2d> face : getAllFaces() ) {
 			if (Loopz.inside( worldXY, face )) {
 				
 				FCircle circ = new FCircle (worldXY, Mathz.clamp (radius * 0.6, 0.1, 0.4 ), f );
-
+				circ.veluxTextureApp.parent = roofTexApp;
+				circ.veluxTextureApp.appMode = roofTexApp.appMode;
 				
 				// 1. try moving the feature away from the edge
-//				if (false)
 				for (Loopable<Point2d> pt : face.loopableIterator()) {
 					
 					Line l = new Line (pt.get(), pt.getNext().get()) ;
@@ -78,8 +86,6 @@ public class MiniRoof {
 					circ.radius = Math.min (circ.radius, l.distance( circ.loc, true ));
 				}
 				
-//				circ.radius -= 0.01;
-
 				if (circ.radius < 0.1)
 					return;
 
@@ -88,8 +94,9 @@ public class MiniRoof {
 					SuperEdge se = (SuperEdge)e;
 					
 					for (FRect fr : se.toEdit.featureGen.getRects( Feature.WINDOW ) ) // avoid dormer windows
-						if ( Loopz.inside( circ.loc,  appCache.get(PanesLabelApp.class, fr).coveringRoof ) )
-							return;
+						for (Point2d a : circ.toRect(). points())
+							if ( Loopz.inside( a,  fr.panesLabelApp.coveringRoof ) )
+								return;
 				}
 				
 				greebles.put (face, circ );
@@ -182,5 +189,10 @@ public class MiniRoof {
 			return Collections.emptyList();
 			
 		return greebles.get( origins.teg( f ) );
+	}
+
+	@Override
+	public SuperSuper getSuper() {
+		return roofSuperApp;
 	}
 }

@@ -21,10 +21,12 @@ import javax.vecmath.Vector2d;
 
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.FeatureCache.MegaFeatures;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Cache2;
 import org.twak.utils.DumbCluster1D;
 import org.twak.utils.DumbCluster1D.Cluster;
+import org.twak.utils.DumbCluster1DImpl;
+import org.twak.utils.Mathz;
+import org.twak.utils.Pair;
 import org.twak.utils.collections.Arrayz;
 import org.twak.utils.collections.CountThings;
 import org.twak.utils.collections.MapMapList;
@@ -34,11 +36,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.streams.InAxDouble;
 import org.twak.utils.ui.Colourz;
-import org.twak.utils.DumbCluster1DImpl;
-import org.twak.utils.Mathz;
-import org.twak.utils.Pair;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class Regularizer {
 
@@ -54,42 +52,43 @@ public class Regularizer {
 	
 	public Feature[] toReg  = new Feature[] { Feature.WINDOW, Feature.DOOR, Feature.SHOP, Feature.MOULDING, Feature.GRID };
 	public Feature[] toReg2 = toReg;
+	Feature[] forceNoOverlaps = new Feature[] {Feature.WINDOW, Feature.SHOP, Feature.DOOR };
 	
 	MapMapList<MiniFacade, Integer, FRect> m2i2r = new MapMapList<>(); 
 	
+	boolean earlyReturn = false;
+	
 	double targetWidth = -1;
-	AppStore ac;
 	
 	public Regularizer () {}
 	public Regularizer (double alpha) {
 		this.alpha = alpha;
 	}
 	
-//	public static int miniFacadesUsed = 0, regularised = 0, totalFeature = 0;
 	
 	public static Set<File> seenImages = new HashSet<>();
 	
-	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade, AppStore ac ) {
+	public MiniFacade go (List<MiniFacade> in, double targetS, double targetE, MegaFeatures wantsFacade ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return go (in, 1, wantsFacade, ac).get(0);
+		return go (in, 1, wantsFacade).get(0);
 		
 	}
 	
-	public List<MiniFacade> go (List<MiniFacade> in, double targetS, double targetE, double debugFrac, AppStore ac ) {
+	public List<MiniFacade> debug (List<MiniFacade> in, double targetS, double targetE, double debugFrac ) {
 		
 		this.lt = targetS;
 		this.rt = targetE;
 		
-		return go(in, debugFrac, null, ac);
+		this.earlyReturn = debugFrac < 1;
+		
+		return go(in, debugFrac, null);
 		
 	}
 	
-	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures, AppStore ac ) {
-		
-		this.ac = ac;
+	public List<MiniFacade> go( List<MiniFacade> in, double debugFrac, MegaFeatures megaFeatures ) {
 		
 		for (MiniFacade mf : in) 
 			if (mf.imageFeatures != null)
@@ -104,12 +103,7 @@ public class Regularizer {
 		System.out.println(" adding tween for " + in.size() + " facades");
 		
 		
-		List<MiniFacade> out;
-		
-		if (true)
-			out = newFromWindows( in );
-		else 
-			out = in.stream().map( mf -> new MiniFacade( mf  ) ).collect( Collectors.toList() );
+		List<MiniFacade> out = newFromWindows( in );
 			
 		System.out.println(" included grids for " + out.size() + " facades...");
 
@@ -118,8 +112,7 @@ public class Regularizer {
 			return out;
 		}
 		
-		
-		if (toReg.length > 0)
+		if (out.size() > 1)
 			alignMFs (out);
 		else {
 			lp = in.get( 0 ).left;
@@ -149,12 +142,9 @@ public class Regularizer {
 		
 		for (Feature f : Feature.values())
 			for (MiniFacade mf : out)
-				mf.featureGen.get( f ).stream().forEach( r -> r.f = f );
+				mf.featureGen.get( f ).stream().forEach( r -> r.setFeat( f ) );
 		
 
-//		if (new Object() != new Object())
-//			return out;
-		
 		for (int i = 0; i < 50 * debugFrac; i++) {
 			
 			for (MiniFacade mf : out)
@@ -187,8 +177,8 @@ public class Regularizer {
 				clusterDeltas(allRects, 0.2* scale, alpha, dir );
 			
 			for ( MiniFacade mf : out ) { 
-				
-				if (toReg.length > 0)
+				 
+				if ( Arrayz.contains (toReg, Feature.DOOR) )
 				for (FRect d :  mf.featureGen.get(Feature.DOOR))
 					constrainDoor (mf, d, alpha);
 				
@@ -218,10 +208,10 @@ public class Regularizer {
 		}
 
 		
-//		if (debugFrac < 1) { fixme
-//			out.add(0, new MiniFacade());
-//			return out;
-//		}
+		if (earlyReturn) { 
+			out.add(0, new MiniFacade());
+			return out;
+		}
 		
 		for ( MiniFacade mf : out ) {
 			findOuters( mf );
@@ -281,8 +271,6 @@ public class Regularizer {
 		
 		out.add(0, combine(out));
 		
-		System.out.println("done");
-		
 		return out;
 	}
 
@@ -314,8 +302,8 @@ public class Regularizer {
 						sx,
 						sy, out );
 				
-				win.f = Feature.WINDOW;
-				out.featureGen.put( win.f, win );
+				win.setFeat( Feature.WINDOW );
+				out.featureGen.put( win.getFeat(), win );
 				
 			}
 		
@@ -333,20 +321,20 @@ public class Regularizer {
 		
 		for ( MiniFacade old : in )
 			if ( old != null ) {
-				MiniFacade nmf = new MiniFacade( old );
+				MiniFacade nmf = MiniFacade.newWithApps( old );
 				out.add( nmf );
 
 				if (in.size() < 20)
 				{
-					MiniFacade gridMF = new MiniFacade( nmf );
+					MiniFacade gridMF =   MiniFacade.newWithApps(  nmf );
 
 					gridMF.featureGen.get(Feature.GRID).clear();
 					gridMF.featureGen.get(Feature.WINDOW).clear();
 
 					boolean found = false;
 					for ( FRect f : nmf.featureGen.get( Feature.GRID ) ) {
-						f.f = Feature.WINDOW;
-						gridMF.featureGen.put( f.f, f );
+						f.setFeat( Feature.WINDOW );
+						gridMF.featureGen.put( f.getFeat(), f );
 						found = true;
 					}
 
@@ -394,7 +382,7 @@ public class Regularizer {
 			};
 	
 	private MiniFacade combine( List<MiniFacade> in ) {
-		MiniFacade out = new MiniFacade();
+		MiniFacade out = MiniFacade.newWithApps(in.get(0));
 		
 		out.left = lp;
 		out.width = rp - lp;
@@ -430,7 +418,6 @@ public class Regularizer {
 		Cache2<Outer, Integer, List<FRect>> sillX = new ArrayCache2();
 		Cache2<Outer, Integer, List<FRect>> balX = new ArrayCache2();
 
-		
 		out.groundFloorHeight = in.stream().mapToDouble( mf -> mf.groundFloorHeight ).average().getAsDouble();
 		
 		for (int i = 0; i < ids; i++) {
@@ -481,10 +468,10 @@ public class Regularizer {
 				
 				{
 					FRect t = found.get(0);
-					o.f = t.f;
+					o.setFeat( t.getFeat() );
 					o.id = i;
 					
-					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
+//					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
 //					ac.setFrom ( o.app = t.app;
 					
 					o.attached = t.attached;
@@ -496,7 +483,7 @@ public class Regularizer {
 					o.attachedHeight.get( Feature.BALCONY ).d = averageAttached (o, Feature.BALCONY, found);
 
 					
-					if ( t.f == Feature.WINDOW || t.f == Feature.SHOP ) {
+					if ( t.getFeat() == Feature.WINDOW || t.getFeat() == Feature.SHOP ) {
 						for ( FRect r : found ) {
 							corniceX.get( r.outer, r.yi ).add( o );
 							sillX   .get( r.outer, r.yi ).add( o );
@@ -505,7 +492,7 @@ public class Regularizer {
 					}
 				}
 				
-				out.featureGen.put( o.f, o );
+				out.featureGen.put( o.getFeat(), o );
 			}
 		}
 		
@@ -627,8 +614,6 @@ public class Regularizer {
 		return Math. min ( Math.abs( width - tmp.width ) / width, Math.abs ( height - tmp.height ) / height );
 	}
 
-	Feature[] forceNoOverlaps = new Feature[] {Feature.WINDOW, Feature.SHOP, Feature.DOOR };
-	
 	private void fixOverlaps( MiniFacade out ) {
 		
 		
@@ -649,14 +634,14 @@ public class Regularizer {
 				
 				if (r1.intersects( r2 )) {
 					
-					if (r1.f == r2.f) { // we've already tried and failed to merge same-feature rects in mergeRemoveSmall
+					if (r1.getFeat() == r2.getFeat()) { // we've already tried and failed to merge same-feature rects in mergeRemoveSmall
 						FRect tg = r1.area() < r2.area() ? r1 : r2;
 						togo.add ( tg );
 						toProcess.remove( tg );
 						continue;
 					}
 					
-					FRect infront = r1.f.ordinal() < r2.f.ordinal() ? r1 : r2, 
+					FRect infront = r1.getFeat().ordinal() < r2.getFeat().ordinal() ? r1 : r2, 
 						  behind  = infront == r1 ? r2 : r1;
 				
 					togo.add(behind);
@@ -673,10 +658,10 @@ public class Regularizer {
 			}
 			
 			for (FRect a : toadd)
-				out.featureGen.put( a.f, a );
+				out.featureGen.put( a.getFeat(), a );
 			
 			for (FRect a : togo)
-				out.featureGen.remove( a.f, a );
+				out.featureGen.remove( a.getFeat(), a );
 		}
 	}
 
@@ -1360,7 +1345,7 @@ public class Regularizer {
 			if ( (n.area() + d.area() - ia) / u.area() > 0.7 ) {
 				d.setFrom(u);
 				d.adjacent[j] = null;
-				mf.featureGen.remove( n.f, n );
+				mf.featureGen.remove( n.getFeat(), n );
 			}
 		}
 
@@ -1379,7 +1364,7 @@ public class Regularizer {
 						if ( d.get( min ) < avoid.get( min ) )
 							d.set( max, avoid.get( min ) );
 						else {
-							mf.featureGen.remove( d.f, d );
+							mf.featureGen.remove( d.getFeat(), d );
 							return;
 						}
 					} else if ( d.get( min ) > avoid.get( min ) && d.get( min ) < avoid.get( max ) ) {
@@ -1387,7 +1372,7 @@ public class Regularizer {
 						if ( d.get( max ) > avoid.get( max ) ) {
 							d.set( min, avoid.get( max ) );
 						} else {
-							mf.featureGen.remove( d.f, d );
+							mf.featureGen.remove( d.getFeat(), d );
 							return;
 						}
 					}

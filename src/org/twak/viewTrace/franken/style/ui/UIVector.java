@@ -1,6 +1,8 @@
 package org.twak.viewTrace.franken.style.ui;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -13,14 +15,16 @@ import org.twak.viewTrace.franken.Pix2Pix;
 
 public class UIVector extends JPanel {
 
-	NetInfo netInfo;
+	public static double[] copiedVector;
+	
 	double[] vector;
 	JToggleButton method ;
 	MeanImageProvider imageFile;
+	Class target;
 	
-	public UIVector( double[] vector, MeanImageProvider imageFile, NetInfo netInfo, boolean showManual, Runnable update ) {
-		
-		this.netInfo = netInfo;
+	public UIVector( double[] vector, MeanImageProvider imageFile, Class target, boolean showManual, Runnable update ) {
+
+		this.target = target;
 		this.vector = vector;
 		this.imageFile = imageFile;
 		
@@ -32,7 +36,12 @@ public class UIVector extends JPanel {
 		
 		JPanel options = new JPanel(new ListDownLayout());
 		
-		method.addActionListener( e -> setUI (options, !method.isSelected(), update ) );
+		method.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				setUI (options, !method.isSelected(), update );
+			}
+		} );
 		
 		if (showManual)
 			add (method, BorderLayout.NORTH );
@@ -44,6 +53,7 @@ public class UIVector extends JPanel {
 	
 	public void setUI (JPanel out, boolean byExample, Runnable update) {
 		
+		
 		out.removeAll();
 
 		
@@ -53,7 +63,7 @@ public class UIVector extends JPanel {
 				
 				public BufferedImage process( File f ) {
 					imageFile.setMeanImage( f );
-					return new Pix2Pix(netInfo).encode( f, vector, update );
+					return new Pix2Pix( NetInfo.index.get( target) ).encode( f, vector, update );
 				};
 				
 				@Override

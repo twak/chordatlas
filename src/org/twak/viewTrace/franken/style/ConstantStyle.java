@@ -9,7 +9,6 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.NetInfo;
@@ -20,17 +19,17 @@ import org.twak.viewTrace.franken.style.ui.UIVector.MeanImageProvider;
 public class ConstantStyle implements StyleSource, MeanImageProvider {
 	
 	double[] mean;
-	NetInfo app;
+	Class target;
 	File meanImage;
 	
-	public ConstantStyle(NetInfo app) {
-		this.mean = new double[app.sizeZ];
-		this.app = app;
+	public ConstantStyle(Class target) {
+		NetInfo ni = NetInfo.index.get(target);
+		this.mean = new double[ni.sizeZ];
 	}
 
 	@Override
 	public StyleSource copy() {
-		ConstantStyle out = new ConstantStyle( app );
+		ConstantStyle out = new ConstantStyle( target );
 		out.meanImage = meanImage;
 		out.mean = Arrays.copyOf(mean, mean.length);
 		return out;
@@ -38,7 +37,7 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 
 	
 	@Override
-	public double[] draw( Random random, App app, AppStore ac ) {
+	public double[] draw( Random random, App app ) {
 		return mean;
 	}
 	
@@ -47,7 +46,7 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 
 		JPanel out = new JPanel(new ListDownLayout() );
 		
-		out.add( new UIVector (mean, this, app, true, update ) );
+		out.add( new UIVector (mean, this, target, true, update ) );
 		
 		return out;
 	}
@@ -71,5 +70,10 @@ public class ConstantStyle implements StyleSource, MeanImageProvider {
 	@Override
 	public void setMeanImage( File f ) {
 		this.meanImage = f;
+	}
+
+	@Override
+	public void install( App app ) {
+		app.styleSource = new ConstantStyle( app.getClass() );
 	}
 }

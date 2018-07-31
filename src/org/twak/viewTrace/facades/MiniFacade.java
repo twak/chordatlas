@@ -17,8 +17,14 @@ import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
 import org.twak.utils.geom.DRectangle;
+import org.twak.viewTrace.franken.FacadeGreebleApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.FacadeSuperApp;
+import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.HasSuper;
+import org.twak.viewTrace.franken.SuperSuper;
 
-public class MiniFacade {
+public class MiniFacade implements HasSuper {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;
@@ -52,10 +58,16 @@ public class MiniFacade {
 	
 	double imageXM, scale;
 
-	public PostProcessState postState = null;
 	public Color wallColor;
 
 	public SuperFace sf;
+
+	WinGrid grid;
+	
+	public FacadeLabelApp facadeLabelApp = new FacadeLabelApp( this );
+	public FacadeTexApp facadeTexApp = new FacadeTexApp( this );
+	public FacadeSuperApp facadeSuperApp = new FacadeSuperApp( this );
+	public FacadeGreebleApp facadeGreebleApp = new FacadeGreebleApp( this );
 	
 	static {
 		PaintThing.lookup.put( MiniFacade.class, new MiniFacadePainter() );
@@ -68,26 +80,15 @@ public class MiniFacade {
 		this.height = m.height;
 		this.groundFloorHeight = m.groundFloorHeight;
 		this.left = m.left;
-//		this.color = Arrays.copyOf( m.color, m.color.length );
-//		if (m.groundColor != null)
-//			this.groundColor = Arrays.copyOf( m.groundColor, m.groundColor.length );
 		this.softLeft = m.softLeft;
 		this.softRight = m.softRight;
 		this.imageFeatures = m.imageFeatures;
 		this.imageXM = m.imageXM;
 		this.scale = m.scale;
-		
-//		this.app = m.app;// m.app.copy();
-//		this.appLabel = m.appLabel;
-		
 		this.featureGen = m.featureGen.copy(this);
-		this.postState = m.postState;
-		
-		
-//		Arrays.stream( Feature.values() ).forEach( f -> m.featureGen.get(f).stream().forEach( r -> featureGen.put(f, new FRect(r)) ) ); 
-		
 		this.hMargin = new ArrayList(m.hMargin);
 		this.vMargin = new ArrayList(m.vMargin);
+		this.sf = m.sf;
 		
 		if (m.grid != null)
 			this.grid = new WinGrid ( m.grid ); 
@@ -234,8 +235,6 @@ public class MiniFacade {
 		}
 	}
 	
-	WinGrid grid;
-	
 	private void readWinGrid( double scale, double imageXM, double topM, Map yGrid ) {
 		{
 			
@@ -266,13 +265,13 @@ public class MiniFacade {
 				
 				FRect win = new FRect(this);
 				
-				win.f = Feature.GRID;
+				win.setFeat( Feature.GRID );
 				win.x      = dp.get(1) / scale + imageXM;
 				win.y      = topM - dp.get(2) / scale;
 				win.width  = (dp.get(3) / scale + imageXM) - win.x;
 				win.height = (topM - dp.get(0) / scale) - win.y;
 				
-				featureGen.put( win.f, win );
+				featureGen.put( win.getFeat(), win );
 			}
 		}
 	}
@@ -395,5 +394,29 @@ public class MiniFacade {
 		g.dispose();
 
 		return bi;
+	}
+
+
+	@Override
+	public SuperSuper getSuper() {
+		return facadeSuperApp;
+	}
+
+
+	public static MiniFacade newWithApps( MiniFacade miniFacade ) {
+		MiniFacade out = new MiniFacade(miniFacade);
+		
+		out.facadeGreebleApp = new FacadeGreebleApp( miniFacade.facadeGreebleApp );
+		out.facadeGreebleApp.mf = out;
+		
+		out.facadeLabelApp = new FacadeLabelApp( miniFacade.facadeLabelApp );
+		out.facadeLabelApp.mf = out;
+		
+		out.facadeTexApp = new FacadeTexApp( miniFacade.facadeTexApp );
+		out.facadeTexApp.mf = out;
+		
+		
+		
+		return out;
 	}
 }

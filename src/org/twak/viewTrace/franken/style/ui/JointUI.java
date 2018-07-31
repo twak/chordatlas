@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -23,11 +24,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 
 import org.twak.tweed.TweedFrame;
-import org.twak.tweed.tools.TextureTool;
+import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
 import org.twak.utils.ui.AutoDoubleSlider;
@@ -97,13 +99,13 @@ public class JointUI extends JPanel {
 		Runnable modalUpdate = new Runnable() {
 			@Override
 			public void run() {
-				jd.redraw(sa.ac);
+				jd.redraw();
 //				globalUpdate.run();
 			}
 		};
 		
 		modalPanel.add (modal = new MultiModalEditor( 
-				selectedJoint.appInfo.get( ns.klass ).dist, NetInfo.index.get( ns.klass ), modalUpdate, sa.ac ), 
+				selectedJoint.appInfo.get( ns.klass ).dist, ns.klass, modalUpdate ), 
 				BorderLayout.CENTER );
 		
 		modalPanel.revalidate();
@@ -124,12 +126,15 @@ public class JointUI extends JPanel {
 		
 		setLayout( new BorderLayout() );
 		add (top, BorderLayout.NORTH);
-		add (modalPanel = new JPanel(new BorderLayout()), BorderLayout.CENTER);
+		
+		modalPanel = new JPanel(new BorderLayout() );
+
+		add (modalPanel, BorderLayout.CENTER);
 		
 		JButton close = new JButton( "ok" );
 
 		close.addActionListener( l -> {
-			jd.redraw(sa.ac);
+			jd.redraw();
 			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 //			globalUpdate.run();
 		} );
@@ -147,7 +152,8 @@ public class JointUI extends JPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder( MultiModalEditor.BORDER );
 		
-		JToggleButton select = new JToggleButton ( Stringz.splitCamelCase( ns.klass.getSimpleName() ).replaceAll( " App", "" ) );
+		JToggleButton select = new JToggleButton ( new ImageIcon(  NetInfo.index.get(ns.klass).icon ) );
+		select.setToolTipText(  Stringz.splitCamelCase( ns.klass.getSimpleName() ).replaceAll( " App", "" ) );
 		bg.add( select );
 		
 		select.setSelected( selected );
@@ -176,7 +182,7 @@ public class JointUI extends JPanel {
 		AutoListCombo<Class> lc = new AutoListCombo<Class> ( selectedJoint.appInfo.get( ns.klass ), "bakeWith", "fixZ", options ) {
 			
 			public void fire(Class e) {
-				jd.redraw(sa.ac);
+				jd.redraw();
 			}
 
 			@Override
@@ -185,7 +191,7 @@ public class JointUI extends JPanel {
 			};
 		};
 		
-		panel.setPreferredSize( new Dimension( 180, panel.getPreferredSize().height ) );
+		panel.setPreferredSize( new Dimension( 150, panel.getPreferredSize().height ) );
 		panel.add(lc, BorderLayout.CENTER);
 		
 		return panel;
@@ -317,12 +323,13 @@ public class JointUI extends JPanel {
 					public void heresTheFile( File f ) throws Throwable {
 						BlockApp editing = jd.root;
 						try {
+							
 							jd = (JointStyle) new XStream().fromXML( f );
 							jd.root = editing;
-							jd.redraw(sa.ac);
+							jd.redraw();
 							
 							// current joint ui is invalid
-							TweedFrame.instance.tweed.setTool( new TextureTool( TweedFrame.instance.tweed ) );
+							TweedFrame.instance.tweed.setTool( new SelectTool( TweedFrame.instance.tweed ) );
 							
 							selectedJoint = jd.joints.get( 0 );
 							buildNetSelectUI();

@@ -33,6 +33,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
+import org.twak.tweed.gen.PlanesGen.Plane;
 import org.twak.tweed.gen.VizSkelGen.Mode;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Line;
@@ -100,6 +101,21 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		this.extent = blockGen.getCroppedMesh().findExtent();
 		this.gisBias = new GBias ( Loopz.toGraph( this.gis ), 1 );
 		
+		
+		if (blockGen.extraSweeps != null) 
+			for (Plane p : blockGen.extraSweeps.planes ) {
+				SuperLine sl = new SuperLine( new Point2d(p.a.x,  p.a.z ), new Point2d(p.b.x,  p.b.z ) );
+
+				sl.mega = new MegaFacade();
+				sl.mega.area = sl.length() * 30;
+				sl.mega.origin = new LineAtHeight(0, sl);
+//				sl.mega.origin.
+				
+				sl.mega.oLen = sl.length();
+				sl.mega.pLength = sl.mega.oLen;
+				footprint.add( sl );
+			}
+		
 		new Thread(() -> faces = findMegaFaces( TweedSettings.settings.profileVSampleDist ) ).start();
 	}
 
@@ -114,6 +130,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		Line line;
 		double goodLength;
 
+		
+		public LineAtHeight () {}
 		
 		public LineAtHeight ( int height, Line line ) {
 			this.line = line;
@@ -184,6 +202,8 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		Vector2d normal;
 
 		public double minP = 0, maxP = 1;
+		
+		public MegaFacade() {}
 		
 		public MegaFacade (LineAtHeight origin) {
 			

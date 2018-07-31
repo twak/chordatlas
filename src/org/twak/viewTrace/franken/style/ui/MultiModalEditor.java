@@ -27,8 +27,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
+import org.twak.tweed.Tweed;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 import org.twak.viewTrace.franken.NetInfo;
@@ -40,20 +39,22 @@ public class MultiModalEditor extends JPanel {
 
 	NetExamples egs;
 	private MultiModal mm;
-	NetInfo exemplar;
+	Class target;
 	JFrame frame;
 	JPanel gList;
 	Runnable globalUpdate ;
 	
-	public MultiModalEditor( MultiModal mm, NetInfo exemplar, Runnable globalUpdate, AppStore ac ) {
+	public MultiModalEditor( MultiModal mm, Class target, Runnable globalUpdate ) {
 		
 		this.mm = mm;
-		this.exemplar = exemplar;
+		this.target = target;
 		this.globalUpdate = globalUpdate;
 		
 		setLayout( new BorderLayout() );
-		egs = new NetExamples( mm, 10, 6, exemplar, 
-				new File ( TweedSettings.settings.egNetworkInputs + "/textureatlas/" + exemplar.name), ac );
+		
+		NetInfo ni = NetInfo.index.get(target);
+		
+		egs = new NetExamples( mm, 10, 6, ni, new File ( Tweed.DATA + "/network_inputs/" + ni.name) );
 		
 		JPanel controls = createControls(() -> egs.changed());
 		
@@ -96,13 +97,14 @@ public class MultiModalEditor extends JPanel {
 		
 		gList = new JPanel(new ListDownLayout());
 		
-		gList.setPreferredSize( new Dimension (200, 600) );
+		JPanel out = new JPanel(new BorderLayout());
+		out.setPreferredSize( new Dimension (200, 600) );
 		
 		buildControls(gList, localUpdate);
-		JScrollPane scroll = new JScrollPane( gList );
+//		out.add(gList, BorderLayout.CENTER);
+		JScrollPane scroll = new JScrollPane( gList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		scroll.getVerticalScrollBar().setUnitIncrement( 50 );
 		
-		JPanel out = new JPanel();
-		out.setLayout( new BorderLayout() );
 		out.add (scroll, BorderLayout.CENTER);
 		
 		JPanel northPanel = new JPanel(new BorderLayout());
@@ -146,7 +148,7 @@ public class MultiModalEditor extends JPanel {
 			gList.revalidate();
 		}
 		else {
-			new Pix2Pix( exemplar ).encode( meanImage, w.ss.mean, new Runnable() {
+			new Pix2Pix( NetInfo.get( target ) ).encode( meanImage, w.ss.mean, new Runnable() {
 				@Override
 				public void run() {
 					GaussWrapper c = new GaussWrapper( w, localUpdate );

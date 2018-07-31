@@ -22,6 +22,7 @@ import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.PanMouseAdaptor;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.ui.ColourPicker;
@@ -57,7 +58,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		for ( Feature f : Feature.values() )
 			if (f != Feature.GRID)
 			for ( FRect w : mf.featureGen.get( f ) ) {
-				if ( w.outer == null ) 
+//				if ( w.outer == null ) 
 				{
 					g.setColor( f.color );
 					
@@ -141,15 +142,15 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 
 		
 		g.setStroke( new BasicStroke( 3 ) );
-		if ( mf.postState != null ) {
-			g.setColor( Color.gray );
-			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.wallFaces ) )
-				paintPolygon( l, g, ma );
-			
-			g.setColor( Color.red );
-			for ( Loop<Point2d> l : new ArrayList<Loop<Point2d>>( mf.postState.occluders ) )
-				paintPolygon( l, g, ma );
-		}
+//		if ( mf.postState != null ) {
+//			g.setColor( Color.gray );
+//			for ( Loop<? extends Point2d> l : new ArrayList<Loop<? extends Point2d>>( mf.postState.wallFaces ) )
+//				paintPolygon( l, g, ma );
+//			
+//			g.setColor( Color.red );
+//			for ( Loop<Point2d> l : new ArrayList<Loop<Point2d>>( mf.postState.occluders ) )
+//				paintPolygon( l, g, ma );
+//		}
 		
 	}
 	
@@ -200,15 +201,28 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		
 	}
 	
-	private Point2d flip (Point2d in )
+	private static Point2d flip (Point2d in )
 	{
 		return new Point2d( in.x, - in.y );
 	}
-
-	/****
-	 * I can edit methods
-	 */
 	
+
+	public static LoopL<? extends Point2d> yFlip( List<Loop<? extends Point2d>> f ) {
+		
+		LoopL<Point2d> out = new LoopL<>();
+
+		for (Loop<? extends Point2d> loop : f) {
+			
+			Loop<Point2d> lo = new Loop<>();
+			out.add(lo);
+			
+			for (Point2d p : loop)
+				lo.append (flip (p));
+		}
+		
+		return out;
+	}
+
 	MiniFacade mf;
 	@Override
 	public void setObject( Object o ) {
@@ -288,11 +302,21 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 			@Override
 			public void run() {
 				if (dragging != null)
-					mf.featureGen.remove( dragging.f, dragging );
+					mf.featureGen.remove( dragging.getFeat(), dragging );
 				
 				cl.stateChanged( null );
 			}
 		});
+		
+		
+		if (dragging != null)
+		pop.add("options (in main window)", new Runnable() {
+			
+			@Override
+			public void run() {
+				mf.sf.buildingApp.parent.editFRect(dragging);
+			}
+		} );
 		
 		if (dragging != null)
 		pop.add( "duplicate", new Runnable() {
@@ -307,7 +331,7 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 					FRect rec = new FRect( dragging );
 //					rec.x += 0.5;
 					rec.x += rec.width + 0.3;
-					mf.featureGen.put( rec.f, rec );
+					mf.featureGen.put( rec.getFeat(), rec );
 					cl.stateChanged( null );
 					
 				}
@@ -323,8 +347,8 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 					
 					Point2d pt = flip ( ma.from( e ) );
 					
-					FRect rec = new FRect( pt.x, pt.y, pt.x + 0.5, pt.y + 0.5, mf);
-					rec.f = f;
+					FRect rec = new FRect( pt.x, pt.y, 1, 1, mf);
+					rec.setFeat( f );
 					
 					mf.featureGen.put( f, rec );
 				
@@ -358,4 +382,5 @@ public class MiniFacadePainter implements ICanPaintU, ICanEdit {
 		pop.show();
 		
 	}
+
 }

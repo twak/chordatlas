@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,10 +12,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
 import javax.vecmath.Matrix4d;
 
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.utils.Filez;
 import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Quaternion;
@@ -30,7 +33,7 @@ public class TweedSettings {
 	static File folder; // location of data file
 	
 	public String bikeGanRoot = "/home/twak/code/bikegan";
-	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
+//	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
 	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
@@ -67,6 +70,7 @@ public class TweedSettings {
 	public boolean calculateFootprintNormals = true;
 	public double  snapFootprintVert = 0;
 	public boolean SSAO = true;
+	public boolean shadows = false;
 	
 	public double megaFacadeAreaThreshold = 30; // 23 for regent
 	public double profileHSampleDist = 0.2;
@@ -93,8 +97,9 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
-	public boolean sitePlanInteractiveTextures = true;
+	public boolean siteplanInteractiveTextures = false;
 	public boolean importMiniMeshTextures = false;
+	
 
 	
 	
@@ -115,7 +120,18 @@ public class TweedSettings {
 			if (!def.exists())
 				settings = new TweedSettings();
 			else
-				settings = (TweedSettings) new XStream(new PureJavaReflectionProvider()).fromXML( def );
+			{
+				XStream xs = new XStream(new PureJavaReflectionProvider());
+				xs.ignoreUnknownElements();
+				settings = (TweedSettings) xs.fromXML( def );
+			}
+			
+			
+			File defaultData = new File (folder, "chordatlas_example_inputs_1.zip");
+			if (!defaultData.exists()) {
+				ProgressMonitor pm = new ProgressMonitor( null, "downloading project data", "...", 0, 1 );
+				Filez.unpackArchive( new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data_s3cr3t/"+defaultData.getName() ), folder, pm );
+			}
 			
 			TweedFrame.instance.tweed.initFrom( folder.toString() );
 			

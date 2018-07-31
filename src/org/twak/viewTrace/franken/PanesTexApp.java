@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Cache;
 import org.twak.utils.Filez;
 import org.twak.utils.Imagez;
@@ -29,6 +28,7 @@ import org.twak.utils.ui.ColourPicker;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.EResult;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
@@ -37,16 +37,17 @@ public class PanesTexApp extends App {
 
 	public boolean useCoarseStyle = false;
 	FRect fr;
-	public String texture;
-	public Color color;
+	public Color color = Color.gray;
 	
-	public PanesTexApp(FRect fr) {
+	public PanesTexApp(FRect fr ) {
 		super( );
 		
 		this.fr = fr;
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
-			appMode = AppMode.Net;
+		if (TweedSettings.settings.siteplanInteractiveTextures)
+			appMode = TextureMode.Net;
+		
+		getUp( ).install(this);
 	}
 	
 	public PanesTexApp(PanesTexApp t) {
@@ -54,38 +55,57 @@ public class PanesTexApp extends App {
 
 		this.useCoarseStyle = t.useCoarseStyle;
 		this.fr = t.fr;
-		this.texture = t.texture;
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
-			appMode = AppMode.Net;
+		if (TweedSettings.settings.siteplanInteractiveTextures)
+			appMode = TextureMode.Net;
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
-		
-		JPanel p = new JPanel();
-		
-		p.add (new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
-			@Override
-			public void updated( boolean selected ) {
-				
-				for (App a : apps)
-					((PanesTexApp)a).useCoarseStyle = selected;
-				
-				globalUpdate.run();
-			}
-		});
-		
-		return p;
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+
+		JPanel out = new JPanel(new ListDownLayout() );
+
+		if ( appMode == TextureMode.Net ) {
+			
+			out.add( new AutoCheckbox( this, "useCoarseStyle", "z from facade" ) {
+				@Override
+				public void updated( boolean selected ) {
+
+					for ( App a : apps )
+						( (PanesTexApp) a ).useCoarseStyle = selected;
+
+					globalUpdate.run();
+				}
+			} );
+		} else if ( appMode == TextureMode.Off ) {
+			JButton col = new JButton( "colour" );
+
+			col.addActionListener( e -> new ColourPicker( null, color ) {
+				@Override
+				public void picked( Color color ) {
+
+					for ( App a : apps ) {
+						( (PanesTexApp) a ).color = color;
+						( (PanesTexApp) a ).fr.panesLabelApp.texture = null;
+					}
+
+					globalUpdate.run();
+				}
+			} );
+
+			out.add( col );
+		}
+
+		return out;
 	}
 	
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get(PanesLabelApp.class, fr);
+	public App getUp() {
+		return fr.panesLabelApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
 	}
 
@@ -101,7 +121,8 @@ public class PanesTexApp extends App {
 	}
 
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore ac ) { // first compute latent variables
+	public void computeBatch( Runnable whenDone, List<App> batch ) { // first compute latent variables
+		
 		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
@@ -111,11 +132,14 @@ public class PanesTexApp extends App {
 		
 		for ( App a : batch ) {
 
+			if (a.appMode != TextureMode.Net)
+				continue;
+			
 			try {
 
 				PanesTexApp pta = (PanesTexApp) a;
-				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
-				FacadeTexApp fta = ac.get(FacadeTexApp.class, pla.fr.mf );
+				PanesLabelApp pla = pta.fr.panesLabelApp;
+				FacadeTexApp fta = pla.fr.mf.facadeTexApp;
 				
 				if ( pla.label == null )
 					continue;
@@ -129,7 +153,7 @@ public class PanesTexApp extends App {
 
 				Meta meta = new Meta( pta, ni.sizeZ, mf, r );
 				
-				if ( fta.texture == null || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
+				if ( fta.texture == null || r.getFeat() == Feature.DOOR || !pta.useCoarseStyle || !mfBounds.contains( r ) ) {
 					
 					meta.styleZ = a.styleZ;
 					otherMeta.add( meta );
@@ -188,17 +212,19 @@ public class PanesTexApp extends App {
 				
 				next.addAll( otherMeta );
 
-				computeTextures( whenDone, next, ac );
+				computeTextures( whenDone, next );
 			}
 		} ) );
 				
 	}
 	
-	public void computeTextures( Runnable whenDone, List<Meta> batch, AppStore ac ) {
+	public void computeTextures( Runnable whenDone, List<Meta> batch ) {
 
 		
-		NetInfo ni = NetInfo.get(this); 
-		Pix2Pix p2 = new Pix2Pix( NetInfo.get(this) );
+		NetInfo ni = NetInfo.get(this);
+		
+		Pix2Pix pWindows = new Pix2Pix( ni );
+		Pix2Pix pDoors = new Pix2Pix( "door textures", 256 );
 
 		BufferedImage lBi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D lg =  lBi.createGraphics();
@@ -212,7 +238,7 @@ public class PanesTexApp extends App {
 			try {
 				
 				PanesTexApp pta = (PanesTexApp)meta.pta;
-				PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
+				PanesLabelApp pla = pta.fr.panesLabelApp;
 				
 				if (pla.label == null)
 					continue;
@@ -239,8 +265,7 @@ public class PanesTexApp extends App {
 				
 				meta.imBounds = imBounds;
 				
-				p2.addInput( lBi, eBi, null, meta, meta.styleZ, pla.frameScale );
-
+				(pta.fr.getFeat() == Feature.DOOR ? pDoors : pWindows ).addInput( lBi, eBi, null, meta, meta.styleZ, pla.frameScale );
 
 			} catch ( IOException e1 ) {
 				e1.printStackTrace();
@@ -250,136 +275,147 @@ public class PanesTexApp extends App {
 		lg.dispose();
 		eg.dispose();
 		
-		p2.submit( new Job( new JobResult() {
+		pWindows.submit( new Job( new JobResult() {
 			
 			@Override
-			public void finished( Map<Object, File> results ) {
+			public void finished( Map<Object, File> windowResults ) {
 
-				
-				Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
-
+				pDoors.submit( new Job (new JobResult() {
+					
 					@Override
-					public BufferedImage[] create( MiniFacade mf ) {
+					public void finished( Map<Object, File> doorResults ) {
 						
-						String src;
+						doorResults.putAll( windowResults );
 						
-						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
+						assignTextures (doorResults);
 						
-						if (fta.coarseWithWindows != null)
-							src = fta.coarseWithWindows;
-						else
-							src = fta.coarse;
-						
-						if (src == null)
-							return null;
-						
-						return new BufferedImage[] {
-								Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
-								Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_norm.png" ) ) ) 
-						};
+						whenDone.run();
 					}
-				};
-				
-				try {
-					e:
-					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
-						Meta meta = (Meta) e.getKey();
-						
-						BufferedImage[] maps = new BufferedImage[3];
-						
-						String dest = Pix2Pix.importTexture( e.getValue(), -1, specLookup, 
-								meta.imBounds, null, maps );
-
-						if ( dest != null ) {
-							
-							FRect frect = meta.pta.fr;
-							MiniFacade mf = frect.mf;
-							PanesLabelApp pla = ac.get(PanesLabelApp.class, frect);
-							
-							
-							meta.pta.texture = dest;
-							pla.texture = dest;
-							meta.pta.textureUVs = TextureUVs.Square;
-							pla.textureUVs = TextureUVs.Square;
-							
-							DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
-							
-							d.y = ni.resolution - d.y - d.height;
-							
-							BufferedImage[] toPatch = facadesImages.get(mf);
-							
-//							if (mf.postState != null) 
-//							for (Point2d p : frect.points()) { 
-//								if ( Loopz.inside( p, mf.postState.occluders) )
-//									continue e;
-//								if ( ! ( Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.wallFaces) ) || 
-//										 Loopz.inside( p, new LoopL<Point2d> ( (List) mf.postState.roofFaces) ) ) )
-//									continue e;
-//							}
-							
-							if (toPatch == null)
-								continue;
-							
-//							if (false)
-							for (int i = 0; i < 3; i++ ) {
-								Graphics2D tpg = toPatch[i].createGraphics();
-								tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
-//								tpg.setColor (Color.magenta);
-//								tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
-								tpg.dispose();
-							}
-						}
-							
-					}
-					
-//					if (false)
-					for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
-						
-						if (updated.getValue() == null)
-							continue;
-						
-						String fileName = "scratch/" + UUID.randomUUID() +".png";
-						
-						BufferedImage[] imgs = updated.getValue();
-						
-						ImageIO.write( imgs[0], "png", new File(Tweed.DATA + "/" +fileName ) );
-						ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
-						ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
-						
-						MiniFacade mf = updated.getKey();
-						
-						FacadeTexApp fta = ac.get(FacadeTexApp.class, mf );
-						fta.coarseWithWindows = fta.texture = fileName;
-//						updated.getKey().app.textureUVs = TextureUVs.Rectangle;
-					}
-					
-
-				} catch ( Throwable th ) {
-					th.printStackTrace();
-				} finally {
-					whenDone.run();
-				}
+				}) );
 			}
 		} ) );
 	}
 	
-	@Override
-	public void finishedBatches( List<App> list, List<App> all, AppStore ac ) {
+	private void assignTextures( Map<Object, File> results ) {
 		
-		for (App a : list) {
+		NetInfo ni = NetInfo.get(this);
+		
+		Cache<MiniFacade, BufferedImage[]> facadesImages = new Cache<MiniFacade, BufferedImage[]>() {
+
+			@Override
+			public BufferedImage[] create( MiniFacade mf ) {
+				
+				String src;
+				
+				FacadeTexApp fta = mf.facadeTexApp;
+				
+				if (fta.coarseWithWindows != null)
+					src = fta.coarseWithWindows;
+				else
+					src = fta.coarse;
+				
+				if (src == null)
+					return null;
+				
+				return new BufferedImage[] {
+						Imagez.read( new File ( Tweed.DATA+"/"+ src ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_spec.png" ) ) ), 
+						Imagez.read( new File ( Tweed.DATA+"/"+ Filez.extTo( src, "_norm.png" ) ) ) 
+				};
+			}
+		};
+		
+		try {
+//			e:
+			for ( Map.Entry<Object, File> e : results.entrySet() ) {
+
+				Meta meta = (Meta) e.getKey();
+				
+				BufferedImage[] maps = new BufferedImage[3];
+
+				boolean isDoor = meta.pta.fr.getFeat() == Feature.DOOR;
+				
+				String dest = Pix2Pix.importTexture( e.getValue(),  isDoor ? 100 : -1, isDoor ? null : specLookup, 
+						meta.imBounds, null, maps );
+
+				if ( dest != null ) {
+					
+					FRect frect = meta.pta.fr;
+					PanesLabelApp pla = frect.panesLabelApp;
+					
+					pla.texture = dest;
+					pla.textureUVs = TextureUVs.Square;
+
+					if (frect.mf == null)
+						continue;
+					
+					MiniFacade mf = frect.mf;
+					DRectangle d = new DRectangle(0, 0, ni.resolution, ni.resolution).transform( Pix2Pix.findBounds( mf, false ).normalize( frect ) );
+					
+					d.y = ni.resolution - d.y - d.height;
+					
+					BufferedImage[] toPatch = facadesImages.get(mf);
+					
+					if (toPatch == null)
+						continue;
+					
+//					if (false)
+					for (int i = 0; i < 3; i++ ) {
+						Graphics2D tpg = toPatch[i].createGraphics();
+						tpg.drawImage( maps[i], (int) d.x, (int) d.y, (int) d.width, (int)d.height, null );
+//						tpg.setColor (Color.magenta);
+//						tpg.fillRect( (int) d.x, (int) d.y, (int) d.width, (int)d.height );
+						tpg.dispose();
+					}
+				}
+					
+			}
+			
+//			if (false)
+			for (Map.Entry<MiniFacade, BufferedImage[]> updated : facadesImages.cache.entrySet()) {
+				
+				if (updated.getValue() == null)
+					continue;
+				
+				String fileName = "scratch/" + UUID.randomUUID() +".png";
+				
+				BufferedImage[] imgs = updated.getValue();
+				
+				ImageIO.write( imgs[0], "png", new File(Tweed.DATA + "/" +fileName ) );
+				ImageIO.write( imgs[1], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_spec.png" ) ) );
+				ImageIO.write( imgs[2], "png", new File(Tweed.DATA + "/" + Filez.extTo( fileName, "_norm.png" ) )  );
+				
+				MiniFacade mf = updated.getKey();
+				
+				FacadeTexApp fta = mf.facadeTexApp;
+				fta.coarseWithWindows = fta.texture = fileName;
+			}
+			
+
+		} catch ( Throwable th ) {
+			th.printStackTrace();
+		} 
+		
+	}
+	
+	@Override
+	public void finishedBatches( List<App> all ) {
+		
+		super.finishedBatches( all );
+		
+		for (App a : all) {
 			PanesTexApp pta = (PanesTexApp) a;
-			PanesLabelApp pla = ac.get(PanesLabelApp.class, pta.fr );
+			PanesLabelApp pla = pta.fr.panesLabelApp;
 
 			if ( pla.label == null )
 				continue;
 
-			ac.get(FacadeTexApp.class, pla.fr.mf ).coarseWithWindows = null;
+//			pla.fr.mf.facadeTexApp.coarseWithWindows = null;
 		}
 			
 		
-		super.finishedBatches( list, all, ac );
+		super.finishedBatches( all );
 	}
 	
 
@@ -399,29 +435,6 @@ public class PanesTexApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Off, AppMode.Net };
-	}
-	
-	@Override
-	public JComponent createColorUI( Runnable update, SelectedApps selectedApps ) {
-
-		JPanel out = new JPanel( new ListDownLayout() );
-		JButton col = new JButton( "color" );
-
-		col.addActionListener( e -> new ColourPicker( null, color ) {
-			@Override
-			public void picked( Color color ) {
-
-				for ( App a : selectedApps ) {
-					( (PanesTexApp) a ).color = color;
-					( (PanesTexApp) a ).texture = null;
-				}
-
-				update.run();
-			}
-		} );
-
-		out.add( col );
-		return out;
+		return new Enum[] { TextureMode.Off, TextureMode.Net };
 	}
 }

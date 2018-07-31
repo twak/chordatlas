@@ -3,24 +3,30 @@ package org.twak.viewTrace.franken;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
+import org.twak.utils.ui.AutoDoubleSlider;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.MiniFacade;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 
@@ -33,21 +39,29 @@ public class PanesLabelApp extends App {
 	
 	public boolean regularize = true;
 	public List<DRectangle> panes = null;
-	public double frameWidth = 0.07 /*cm */;
+	public final static double frameWidth = 0.07 /*cm */;
 
 	public Loop<Point2d> coveringRoof;
+	public boolean renderedOnFacade = true;
 	
 	FRect fr;
 	public String texture;
+
+	public TextureUVs textureUVs = TextureUVs.Square;
+	public DRectangle textureRect;
 	
-	public PanesLabelApp(FRect fr) {
+	public double scale = 1;
+	
+	public PanesLabelApp(FRect fr ) {
 		
 		super();
 		
 		this.fr = fr;
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
-			appMode = AppMode.Net;
+		if (TweedSettings.settings.siteplanInteractiveTextures)
+			appMode = TextureMode.Net;
+		
+		getUp( ).install(this);
 	}
 	
 	public PanesLabelApp(PanesLabelApp t) {
@@ -59,25 +73,27 @@ public class PanesLabelApp extends App {
 		this.frameScale = t.frameScale;
 		this.regularize = t.regularize;
 		this.panes = t.panes;
-		this.frameWidth = t.frameScale;
 		this.coveringRoof = t.coveringRoof;
 		
 		this.texture = t.texture;
+		this.textureUVs = t.textureUVs;
+		if (t.textureRect != null)
+			this.textureRect = new DRectangle(t.textureRect);
 		
-		if (TweedSettings.settings.sitePlanInteractiveTextures)
-			appMode = AppMode.Net;
+		if (TweedSettings.settings.siteplanInteractiveTextures)
+			appMode = TextureMode.Net;
 	}
 	
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get( FacadeTexApp.class, fr.mf );
+	public App getUp() {
+		return fr.mf.facadeTexApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		MultiMap<String, App>  out = new MultiMap<>();
 		
-		out.put( "texture", ac.get(PanesTexApp.class, fr ) );
+		out.put( "texture", fr.panesTexApp );
 		
 		return out;
 	}
@@ -88,45 +104,71 @@ public class PanesLabelApp extends App {
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
-		
-		return new AutoCheckbox( this, "regularize", "regularize" ) {
-			@Override
-			public void updated( boolean selected ) {
-				
-				for (App a : apps)
-					((PanesLabelApp)a).regularize = selected;
-				
-				globalUpdate.run();
-			}
-		};
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+
+		JPanel out = new JPanel(new ListDownLayout());
+
+		if ( appMode == TextureMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (PanesLabelApp) a ).scale = scale;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoCheckbox( this, "regularize", "regularize" ) {
+				@Override
+				public void updated( boolean selected ) {
+
+					for ( App a : apps )
+						( (PanesLabelApp) a ).regularize = selected;
+
+					globalUpdate.run();
+				}
+			} );
+		}
+		return out;
 	}
 
 	public final static int pad = 20;
 	
 	@Override
-	public void computeBatch(Runnable whenDone, List<App> batch, AppStore ac) {
-
+	public void computeBatch(Runnable whenDone, List<App> batch) {
+		
 		NetInfo ni = NetInfo.get(this); 
 		Pix2Pix p2 = new Pix2Pix( ni );
 
-		panes = null;
-		
 		BufferedImage bi = new BufferedImage( ni.resolution, ni.resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 		
+		Map<Object, File> doors = new HashMap<>();
 		
 		for ( App a_ : batch ) {
 			try {
 				
 				PanesLabelApp a = (PanesLabelApp)a_;
 				
+				if (a_.appMode != TextureMode.Net) {
+					
+					a.texture = null;
+					a.textureRect = null;
+					a.textureUVs = TextureUVs.Square;
+					a.panes = null;
+					
+					continue;
+				}
+				
+				
+				a.panes = null;
+				
 				FRect r = a.fr;
 				
-				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r ) )
-					continue;
+//				if ( !Pix2Pix.findBounds( a.fr.mf, true ).contains( r.getCenter() ) )
+//					continue;
 				
-				double scale = ( ni.resolution - 2 * pad ) / Math.max( r.width, r.height );
+				double scale = ( ni.resolution - 2 * pad ) / ( (r.width + r.height ) * 0.5 );
 				
 				DRectangle imBounds = new DRectangle(r);
 				
@@ -140,16 +182,33 @@ public class PanesLabelApp extends App {
 				g.setColor( Color.red );
 				g.fillRect ( (int) imBounds.x, (int)imBounds.y, (int)imBounds.width, (int) imBounds.height);
 				
-				Meta meta = new Meta( (PanesLabelApp) a, r, imBounds );
+				imBounds = imBounds.intersect( ni.rect() );
 				
-				PanesLabelApp pla =  (PanesLabelApp)a;
-
-				pla.frameScale = 0.5 * pla.frameWidth * scale / ni.resolution;
+				Meta meta = new Meta( a, r, imBounds );
+				
+				if (a.fr.getFeat() == Feature.DOOR) { // no labels
+					
+					String name = Tweed.SCRATCH + UUID.randomUUID();
+					
+					File labelAbsFile = new File (name + ".png"); 
+					ImageIO.write( bi, "png", labelAbsFile );
+					ImageIO.write( bi, "png", new File (name + ".png_label") );
+					
+					doors.put( meta, labelAbsFile );
+				
+					a.frameScale = 1;
+					
+					continue;
+				}
+				
+				a.frameScale = this.scale * 0.5 * PanesLabelApp.frameWidth * scale / ni.resolution;
 				
 				if (r.width > 3) // small frame sizes start to look strange 
-					pla.frameScale *= 8;
+					a.frameScale *= 8;
 				
-				p2.addInput( bi, bi, null, meta, a.styleZ, pla.frameScale );
+				
+				
+				p2.addInput( bi, bi, null, meta, a.styleZ, a.frameScale );
 
 			} catch ( Throwable e1 ) {
 				e1.printStackTrace();
@@ -164,11 +223,12 @@ public class PanesLabelApp extends App {
 
 				try {
 					
+					results.putAll(doors);
+					
 					for ( Map.Entry<Object, File> e : results.entrySet() ) {
 
 						Meta meta = (Meta)e.getKey();
 						
-//						File labelFile = new File( e.getValue(), meta.name+ ".png" ) ;
 						BufferedImage labels = ImageIO.read( e.getValue() );
 						
 						if (regularize) {
@@ -181,11 +241,8 @@ public class PanesLabelApp extends App {
 						String dest = Pix2Pix.importTexture( e.getValue(), 255, null, meta.mask, null, new BufferedImage[3] );
 						
 						if ( dest != null ) {
-							
-							PanesLabelApp pla = ac.get( PanesLabelApp.class, meta.r );
-							
-							pla.textureUVs = TextureUVs.Zero_One;
-							pla.texture = pla.label = dest;
+							meta.app.textureUVs = TextureUVs.Zero_One;
+							meta.app.texture = meta.app.label = dest;
 						}
 					}
 					
@@ -201,6 +258,7 @@ public class PanesLabelApp extends App {
 
 	protected static void regularize( PanesLabelApp a, BufferedImage labels, DRectangle mask, double d ) {
 		
+		try {
 		 BufferedImage crop = Imagez.clone ( Imagez.cropShared (labels, mask) );
 		
 		 crop = regularize (a, crop, d);
@@ -212,6 +270,10 @@ public class PanesLabelApp extends App {
 		 g.drawImage( crop, (int) mask.x, (int) mask.y, null );
 		 
 		 g.dispose();
+		}
+		catch (RasterFormatException fre) {
+			fre.printStackTrace();
+		}
 	}
 
 	private static BufferedImage regularize( PanesLabelApp a, BufferedImage crop, double threshold ) {
@@ -336,6 +398,6 @@ public class PanesLabelApp extends App {
 	}
 
 	public Enum[] getValidAppModes() {
-		return new Enum[] { AppMode.Off, AppMode.Net };
+		return new Enum[] { TextureMode.Off, TextureMode.Net };
 	}
 }

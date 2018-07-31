@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
@@ -18,7 +19,6 @@ import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
-import org.twak.tweed.gen.skel.AppStore;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
@@ -40,7 +40,7 @@ public class FacadeGreebleApp extends App {
 	
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 
-	MiniFacade mf;
+	public MiniFacade mf;
 	
 	public FacadeGreebleApp( MiniFacade mf ) {
 		super( );
@@ -60,43 +60,47 @@ public class FacadeGreebleApp extends App {
 	}
 
 	@Override
-	public App getUp(AppStore ac) {
-		return ac.get(FacadeGreebleApp.class, mf);
+	public App getUp() {
+		return mf.facadeTexApp;
 	}
 
 	@Override
-	public MultiMap<String, App> getDown(AppStore ac) {
+	public MultiMap<String, App> getDown() {
 		return new MultiMap<>();
 	}
 	
 	@Override
-	public JComponent createNetUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
-		out.add ( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
-			public void updated(double value) {
-				
-				for (App a : apps)
-					((FacadeGreebleApp)a).regFrac = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeGreebleApp)a).regAlpha = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
-		
-		out.add ( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
-			public void updated(double value) {
-				for (App a : apps)
-					((FacadeGreebleApp)a).regScale = value;
-				globalUpdate.run();
-			};
-		}.notWhileDragging() );
+		if ( appMode == TextureMode.Net ) {
+
+			out.add( new AutoDoubleSlider( this, "regFrac", "reg %", 0, 1 ) {
+				public void updated( double value ) {
+
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regFrac = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regAlpha", "reg alpha", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regAlpha = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+			out.add( new AutoDoubleSlider( this, "regScale", "reg scale", 0, 1 ) {
+				public void updated( double value ) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).regScale = value;
+					globalUpdate.run();
+				};
+			}.notWhileDragging() );
+
+		}
 		
 		return out;
 	}
@@ -113,8 +117,9 @@ public class FacadeGreebleApp extends App {
 	}; 
 	
 	@Override
-	public void computeBatch( Runnable whenDone, List<App> batch, AppStore appCache ) {
-
+	public void computeBatch( Runnable whenDone, List<App> batch ) {
+		
+		
 		NetInfo ni = NetInfo.get(this) ;
 		int resolution = ni.resolution;
 		
@@ -130,6 +135,9 @@ public class FacadeGreebleApp extends App {
 
 
 		for (App a : batch) {
+
+			if ( a.appMode != TextureMode.Net ) 
+				continue;
 			
 			try {
 				BufferedImage rgb    = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
@@ -138,7 +146,9 @@ public class FacadeGreebleApp extends App {
 				FacadeGreebleApp fga = (FacadeGreebleApp) a;
 				MiniFacade mf = (MiniFacade) fga.mf;
 
-				if (mf.postState == null)
+				FacadeTexApp fta = mf.facadeTexApp;
+				
+				if (fta.postState == null || fta.coarse == null)
 					continue;
 				
 				mf.featureGen.removeAll( toGenerate );
@@ -164,11 +174,12 @@ public class FacadeGreebleApp extends App {
 					maskLabel.y = 0;
 				}
 
-				BufferedImage src = ImageIO.read( Tweed.toWorkspace( appCache.get( FacadeTexApp.class, mf ).coarse ) );
+				BufferedImage src = ImageIO.read( Tweed.toWorkspace( fta.coarse ) );
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
 				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( mf.postState.generatedWindows ) );
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, renderedWindows );
 
 				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
 
@@ -203,7 +214,7 @@ public class FacadeGreebleApp extends App {
 						
 						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
 						
-						importLabels(meta, boxFile, appCache );
+						importLabels( meta, boxFile );
 					}
 
 				} catch ( Throwable e ) {
@@ -215,7 +226,7 @@ public class FacadeGreebleApp extends App {
 	}
     private final static ObjectMapper om = new ObjectMapper();
 
-	private void importLabels( Meta m, File file, AppStore ac ) {
+	private void importLabels( Meta m, File file ) {
 
 		if ( file.exists() ) {
 
@@ -243,12 +254,12 @@ public class FacadeGreebleApp extends App {
 				
 				for ( Feature f : toGenerate ) {
 
-					JsonNode node = root.get( f.name().toLowerCase().replace ("moulding", "molding") );
+					JsonNode node = root.get( f.name().toLowerCase() );//.replace ("moulding", "molding") );
 
 					if ( node == null )
 						continue;
 
-					List<DRectangle> frects = new ArrayList<>(), balconies = new ArrayList<>();
+					List<DRectangle> frects = new ArrayList<>();
 					
 					for ( int i = 0; i < node.size(); i++ ) {
 
@@ -304,7 +315,7 @@ public class FacadeGreebleApp extends App {
 				
 				{
 					
-				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null, ac ).get( 0 ).featureGen;
+				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
 				m.mf.featureGen.setMF(m.mf);
 				
 				for (FRect f : m.mf.featureGen.get( Feature.MOULDING ) )
@@ -366,7 +377,7 @@ public class FacadeGreebleApp extends App {
 						if ( feat.height > 0 ) {
 							FRect f = m.mf.featureGen.add( ff, feat );
 							if (c != null)
-								ac.get (PanesTexApp.class, f ).color = c;
+								f.panesTexApp.color = c; 
 						}
 					}
 
@@ -394,7 +405,7 @@ public class FacadeGreebleApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {AppMode.Off, AppMode.Net};
+		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 	
 
@@ -423,6 +434,7 @@ public class FacadeGreebleApp extends App {
 			values[1] /= count;
 			values[2] /= count;
 		}
+		else return Color.lightGray;
 		
 		return new Color( (int) ( (values[0] <<16) + (values[1] <<8) + values[2]  ) );
 		
