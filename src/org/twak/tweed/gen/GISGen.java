@@ -31,12 +31,14 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.GenHandlesSelect;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.Line;
+import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
 import org.twak.utils.Parallel;
 import org.twak.utils.Parallel.Complete;
@@ -46,18 +48,35 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.collections.SuperLoop;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.Graph2D;
 import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.ObjRead;
 import org.twak.utils.geom.UnionWalker;
 import org.twak.utils.streams.InaxPoint2dCollector;
+import org.twak.utils.streams.InaxPoint3dCollector;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.Closer;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.GMLReader;
+import org.twak.viewTrace.facades.GreebleSkel;
 
 import com.google.common.io.Files;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.terrain.geomipmap.TerrainLodControl;
+import com.jme3.terrain.geomipmap.TerrainPatch;
+import com.jme3.terrain.geomipmap.TerrainQuad;
+import com.jme3.terrain.heightmap.AbstractHeightMap;
+import com.jme3.terrain.heightmap.ImageBasedHeightMap;
+import com.jme3.texture.Texture;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
@@ -74,8 +93,10 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 	File objFile;
 	String gmlFile;
-	@Deprecated transient Matrix4d toOrigin;
+//	@Deprecated transient Matrix4d toOrigin;
 	String crs;
+	
+	public boolean showTerrain = false;
 	
 	public GISGen() {}
 	
@@ -84,6 +105,41 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		super( "gis(o) " + objFile.getName(), tweed );
 		this.objFile = objFile ;
 		initObj();
+	}
+	
+	@Override
+	public void calculate() {
+		// TODO Auto-generated method stub
+		super.calculate();
+
+		if ( showTerrain ) {
+			// https://wiki.jmonkeyengine.org/jme3/advanced/terrain.html
+			DRectangle bounds = rect();
+			int size = 1 + Mathz.nextPower2( (int) Math.max( bounds.width, bounds.height ) );
+			Texture heightMapImage = tweed.getAssetManager().loadTexture( GreebleSkel.TILE_JPG );
+			AbstractHeightMap heightmap = null;
+			heightmap = new ImageBasedHeightMap( heightMapImage.getImage(), 1f );
+			heightmap.load();
+
+			TerrainQuad terrain = new TQ( "terrain", 65, size, heightmap.getHeightMap() );
+
+			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+			ColorRGBA c = Jme3z.toJme( color );
+			mat.setColor( "Diffuse", c );
+			mat.setColor( "Ambient", c.mult( 0.1f ) );
+			mat.setBoolean( "UseMaterialColors", true );
+
+			//		mat.setBoolean( "UseMaterialColors", true );
+			terrain.setMaterial( mat );
+			Point2d gc = bounds.getCenter();
+			terrain.setLocalTranslation( (float) gc.x, -10f, (float) gc.y );
+			terrain.setLocalScale( 1f, 0.05f, 1f );
+
+			TerrainLodControl control = new TerrainLodControl( terrain, Collections.singletonList( tweed.getCamera() ) );
+			terrain.addControl( control );
+
+			gNode.attachChild( terrain );
+		}
 	}
 	
 	public GISGen( String gmlFile, Matrix4d toOrigin, String crs, Tweed tweed ) {
@@ -397,6 +453,12 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
+		out.add(new AutoCheckbox( this, "showTerrain", "terrain" ) {
+			public void updated(boolean selected) {
+				calculateOnJmeThread();
+			};
+		} );
+		
 		return out;
 	}
 	
@@ -535,5 +597,12 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		double[] mm = footprint.stream().map( e -> Pointz.to2XZ( e )).collect( new InaxPoint2dCollector() );
 		Envelope e = new Envelope( mm[0], mm[1], mm[2], mm[3] );
 		return e;
+	}
+
+	public DRectangle rect() {
+		
+		double[] mm = lots.stream().flatMap( s -> s.stream() ).collect( new InaxPoint3dCollector() );
+		
+		return new DRectangle(mm[0], mm[4], mm[1]-mm[0], mm[5]-mm[4]);
 	}
 }
