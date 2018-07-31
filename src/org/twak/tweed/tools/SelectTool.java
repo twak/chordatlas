@@ -25,6 +25,8 @@ public class SelectTool extends Tool {
 
 			
 			do {
+				if (target == null)
+					return;
 				
 				Object[] directHandler = target.getUserData( ClickMe.class.getSimpleName() );
 

@@ -78,6 +78,7 @@ import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.shadow.EdgeFilteringMode;
@@ -550,17 +551,22 @@ public class Tweed extends SimpleApplication {
 						checkForEnd = false;
 					} else {
 
+							Spatial target = null;
+							Vector3f location;
+							
 						if ( cr != null ) {
-
-							Spatial target = cr.getGeometry();
+							target = cr.getGeometry();
 
 							while ( target.getParent().getUserData( HandleMe.class.getSimpleName() ) != null )
 								target = target.getParent();
 
-							tool.clickedOn( target, cr.getContactPoint(), inputManager.getCursorPosition() );
+							location = cr.getContactPoint();
+						} else {
+							location = point.getPosition();
 						}
-					}
 
+							tool.clickedOn( target, location, inputManager.getCursorPosition() );
+					}
 				}
 			}
 		}
@@ -644,8 +650,22 @@ public class Tweed extends SimpleApplication {
 		
 		rootNode.collideWith(ray, results);
 		
-		if (results.size() > 0) 
-			return results.getClosestCollision();
+		double dist = Double.MAX_VALUE;
+		CollisionResult bestDist = null;
+		
+		
+		for (CollisionResult c : results) {
+			if ( !Jme3z.isLine ( c.getGeometry().getMesh().getMode() ) ) {
+				float d = c.getDistance();
+				if (d < dist) {
+					dist = d;
+					bestDist = c;
+				}
+			}
+		}
+		
+		if (bestDist != null)
+			return bestDist;
 		else
 			return null;
 	}

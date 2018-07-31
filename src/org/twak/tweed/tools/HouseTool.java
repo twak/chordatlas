@@ -2,29 +2,25 @@ package org.twak.tweed.tools;
 
 import java.util.ArrayList;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
-import org.twak.tweed.gen.FeatureCache.MegaFeatures;
+import org.twak.tweed.gen.LineGen3d;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.SkelGen;
-import org.twak.utils.Line;
-import org.twak.utils.Mathz;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.AutoSpinner;
-import org.twak.utils.ui.Colourz;
 import org.twak.utils.ui.ListDownLayout;
-import org.twak.viewTrace.facades.CGAMini;
-import org.twak.viewTrace.facades.FRect;
-import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MiniFacade;
-import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.FacadeTexApp;
 
@@ -43,17 +39,28 @@ public class HouseTool extends Tool {
 	@Override
 	public void clickedOn( Spatial target, Vector3f loc, Vector2f cursorPosition ) {
 
-//		MegaFeatures mf = new MegaFeatures( new Line (0,0, 10,0) );//(Line) new XStream().fromXML( new File( "/home/twak/data/regent/March_30/congo/1/line.xml" ) ));
-//		ImageFeatures imf = new ImageFeatures();// FeatureCache.readFeatures( new File( "/home/twak/data/regent/March_30/congo/1/0" ), mf );
-//		imf.mega = mf;
+		Loop<Point3d> footprint = null;
+		
+		int numX_ = numX, numY_ = numY;
+		
+		if (target != null ) {
+			
+			Object[] val = target.getUserData( LineGen3d.class.getSimpleName() );
+			if (val != null) { 
+				footprint = (Loop<Point3d>)val[0];
+				numX_ = 1;
+				numY_ = 1;
+			}
+		}
+		
 		HalfMesh2.Builder builder = new HalfMesh2.Builder( SuperEdge.class, SuperFace.class );
 		
 		double accumWidth = 0;
 		
 		double spacing = 14;
 		
-		for ( int x = 0; x < numX; x++ ) {
-			for ( int y = 0; y < numY; y++ ) {
+		for ( int x = 0; x < numX_; x++ ) {
+			for ( int y = 0; y < numY_; y++ ) {
 
 				double width = Math.random() * 4 + 6;
 				double depth = Math.random() * 4 + 6;
@@ -66,10 +73,17 @@ public class HouseTool extends Tool {
 
 				//			accumWidth += width + 0.5;
 
-				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
-				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
-				builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 2 ] + loc.z ) );
-				builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 2 ] + loc.z ) );
+				if ( footprint == null ) {
+					builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 3 ] + loc.z ) );
+					builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 3 ] + loc.z ) );
+					builder.newPoint( new Point2d( minMax[ 1 ] + loc.x, minMax[ 2 ] + loc.z ) );
+					builder.newPoint( new Point2d( minMax[ 0 ] + loc.x, minMax[ 2 ] + loc.z ) );
+				}
+				else
+				{
+					for (Point3d pt : footprint) 
+						builder.newPoint( new Point2d( pt.x, pt.z ) );
+				}
 
 				HalfFace f = builder.newFace();
 
@@ -152,6 +166,7 @@ public class HouseTool extends Tool {
 
 		panel.setLayout( new ListDownLayout() );
 		
+		panel.add( new JLabel("click nothing to create grid:"));
 		panel.add( new AutoSpinner( this, "numX", "number of houses deep", 1, 50 ));
 		panel.add( new AutoSpinner( this, "numY", "number pf houses wide", 1, 50 ));
 	}

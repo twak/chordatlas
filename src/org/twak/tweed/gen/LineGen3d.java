@@ -143,7 +143,8 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 					
 					mat.setBoolean( "UseMaterialColors", true );
 					
-					geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { new ClickMe() {
+					geom.setUserData( LineGen3d.class.getSimpleName(), new Object[] {p} );
+					geom.setUserData( ClickMe.class.getSimpleName()  , new Object[] { new ClickMe() {
 						@Override
 						public void clicked( Object data ) {
 							polyClicked( callbackI );
