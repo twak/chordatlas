@@ -95,7 +95,8 @@ public class HouseTool extends Tool {
 
 				p2.add( new Point2d( 0, 0 ) );
 				p2.add( new Point2d( 0, height ) );
-				p2.add( new Point2d( -( 1.5 * Math.random() + 2), height + 5 ) );
+				if (Math.random() > 0.5)
+					p2.add( new Point2d( -( 1.5 * Math.random() + 2), height + 5 ) );
 
 				Prof[] ps = new Prof[] { p1, p2 };
 
