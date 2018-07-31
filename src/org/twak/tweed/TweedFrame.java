@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,6 +31,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
@@ -67,6 +67,7 @@ import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 
 public class TweedFrame {
 
@@ -313,7 +314,7 @@ public class TweedFrame {
 		settings.addActionListener( new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
-				new Auto( TweedSettings.settings, true ).frame();
+				new Auto( TweedSettings.settings, false ).frame();
 			};
 		} );
 		
@@ -385,13 +386,16 @@ public class TweedFrame {
 			addRemoveLayer.add( removeLayer );
 		}
 
-		JPanel options = new JPanel( new BorderLayout() );
+		JScrollPane optionsScroll;
 		{
+			JPanel options = new JPanel( new BorderLayout() );
 			options.add( new JLabel( "options:" ), BorderLayout.NORTH );
 			options.add( genUI, BorderLayout.CENTER );
+			optionsScroll = new JScrollPane( options, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER  );
+			optionsScroll .getVerticalScrollBar().setUnitIncrement( 50 );
 		}
 
-		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, layers, options );
+		JSplitPane pane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, layers, optionsScroll );
 
 		out.add( pane, BorderLayout.CENTER );
 
@@ -491,9 +495,10 @@ public class TweedFrame {
 						public void heresTheFile( File skelGen ) throws Throwable {
 							try {
 								
-//								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										SkelGen sg = (SkelGen) new XStream().fromXML( skelGen );
+										XStream xs = new XStream ();// new PureJavaReflectionProvider());
+//										xs.ignoreUnknownElements();
+										SkelGen sg = (SkelGen) xs.fromXML( skelGen );
 										sg.onLoad( tweed );
 										addGen( sg, true );
 //										break;
@@ -505,6 +510,32 @@ public class TweedFrame {
 							catch (Throwable th ) {
 								th.printStackTrace();
 								JOptionPane.showMessageDialog( frame, "failed to load "+skelGen.getName() );
+							}
+						};
+					};
+				}
+			} );
+			
+			sp.add( "+ skels", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select one of many skels to load", new File( Tweed.JME ), "xml" ) {
+						public void heresTheFile( File skelGen ) throws Throwable {
+							try {
+
+								for ( File f : skelGen.getParentFile().listFiles() ) {
+									try {
+										XStream xs = new XStream();// new PureJavaReflectionProvider());
+										SkelGen sg = (SkelGen) xs.fromXML( f );
+										sg.onLoad( tweed );
+										addGen( sg, true );
+									} catch ( Throwable th ) {
+										th.printStackTrace();
+									}
+								}
+							} catch ( Throwable th ) {
+								th.printStackTrace();
+								JOptionPane.showMessageDialog( frame, "failed to load " + skelGen.getName() );
 							}
 						};
 					};
@@ -705,7 +736,7 @@ public class TweedFrame {
 
 	public static void main( String[] args ) throws Throwable {
 
-		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon128.png" );
+		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon512.png" );
 
 		UIManager.put( "Slider.paintValue", false );
 
@@ -720,13 +751,14 @@ public class TweedFrame {
 	public void somethingChanged() {
 		canvas.repaint();
 	}
-
+	
 	public void setGenUI( JComponent ui ) {
 		genUI.removeAll();
 		if ( ui != null ) {
 			genUI.setLayout( new BorderLayout() );
 			genUI.add( ui, BorderLayout.CENTER );
 		}
+		
 		genUI.revalidate();
 		genUI.doLayout();
 		genUI.repaint();

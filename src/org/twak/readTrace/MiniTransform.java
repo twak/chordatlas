@@ -75,7 +75,7 @@ public class MiniTransform {
 		
 		MiniOptions options =  new MiniOptions(outputDir);
 		
-		new Auto( options, true ) {
+		new Auto( options, false ) {
 			public void apply() {
 				
 				super.apply();
