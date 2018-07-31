@@ -18,9 +18,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.ProgressMonitor;
 import javax.swing.border.LineBorder;
 
+import org.geotools.data.Join;
 import org.twak.tweed.TweedFrame;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.ui.AutoEnumCombo;
@@ -156,14 +158,35 @@ public class SelectedApps extends ArrayList<App>{
 
 		JPanel countPanel = new JPanel(new BorderLayout() );
 		
-		JLabel jl = new JLabel( exemplar.name +" ("+size()+" selected)");
-				jl.setFont(jl.getFont().deriveFont(jl.getFont().getStyle() | Font.BOLD));
+		JLabel jl = new JLabel( exemplar.name +" material ("+size()+")");
+		jl.setFont(jl.getFont().deriveFont(jl.getFont().getStyle() | Font.BOLD));
 
-		countPanel.add( jl, BorderLayout.CENTER );
+		countPanel.add( jl, BorderLayout.SOUTH );
+		
+		JPanel countEast = new JPanel(new GridLayout( 1, 2 ));
+		
+		JToggleButton joint = new JToggleButton ("joint");
+		countEast.add( joint );
+		
+		BlockApp b =  (BlockApp) findRoots().iterator().next();
+		joint.setSelected( b.styleSource instanceof JointStyle );
+		
+		joint.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				
+				if (b.styleSource instanceof JointStyle) 
+					b.setIndp( SelectedApps.this );
+				else
+					b.setJoint( SelectedApps.this );
+			}
+		} );
+		
 		
 		JButton all = new JButton ("all");
 		all.addActionListener( e -> TweedFrame.instance.tweed.frame.setGenUI( findAll( exemplar.getClass() ).createUI() ) );
-		countPanel.add(all, BorderLayout.EAST);
+		countEast.add( all );
+		countPanel.add(countEast, BorderLayout.EAST);
 		
 		top.add( countPanel, BorderLayout.NORTH );
 		
@@ -261,7 +284,7 @@ public class SelectedApps extends ArrayList<App>{
 					};
 				}.start();
 			}
-		}, "texture", exemplar.getValidAppModes() );
+		}, "texture:", exemplar.getValidAppModes() );
 		
 		buildLayout(exemplar.appMode, options, new Runnable() {
 			
@@ -276,7 +299,9 @@ public class SelectedApps extends ArrayList<App>{
 			}
 		});
 		
-		top.add(combo); 
+		if (exemplar.showTextureOptions())
+			top.add(combo);
+		
 		main.add( top, BorderLayout.NORTH );
 		main.add( options, BorderLayout.CENTER );
 

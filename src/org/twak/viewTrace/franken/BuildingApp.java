@@ -85,7 +85,6 @@ public class BuildingApp extends App {
 			};
 		} );
 		
-		
 		return out;
 	}
 	
@@ -106,5 +105,9 @@ public class BuildingApp extends App {
 	public void markGeometryDirty( ) {
 		this.isGeometryDirty = true;
 		super.markGeometryDirty( );
+	}
+	
+	public boolean showTextureOptions() {
+		return false;
 	}
 }

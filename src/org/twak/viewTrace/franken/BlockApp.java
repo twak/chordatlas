@@ -70,6 +70,26 @@ public class BlockApp extends App {
 		
 		whenDone.run();
 	}
+
+	public void setIndp( SelectedApps sa ) {
+		setGauss( Collections.singletonList( this ) );
+		sa.showUI();
+	}
+
+	private void setGauss( List<App> hashSet ) {
+		for (App a : hashSet) { 
+			a.styleSource = new GaussStyle( a.getClass() );
+			a.appMode = TextureMode.Net;
+			setGauss (a.getDown( ).valueList());
+		}
+	}
+
+	public void setJoint( SelectedApps sa ) {
+		styleSource = new JointStyle(null);
+		appMode = TextureMode.Net;
+		styleSource.install( new SelectedApps( (App) this, sa.geometryUpdate ) );
+		sa.showUI();
+	}
 	
 	@Override
 	public JComponent createUI( Runnable globalUpdate, SelectedApps sa ) {
@@ -80,21 +100,7 @@ public class BlockApp extends App {
 		if (styleSource instanceof JointStyle) {
 			JButton g = new JButton("set independent");
 			
-			g.addActionListener( new ActionListener() {
-				@Override
-				public void actionPerformed( ActionEvent e ) {
-					setGauss( Collections.singletonList( BlockApp.this ) );
-					sa.showUI();
-				}
-
-				private void setGauss( List<App> hashSet ) {
-					for (App a : hashSet) { 
-						a.styleSource = new GaussStyle( a.getClass() );
-						a.appMode = TextureMode.Net;
-						setGauss (a.getDown( ).valueList());
-					}
-				}
-			} );
+			g.addActionListener( e -> setIndp( sa ) );
 			
 			out.add(g);
 			
@@ -115,11 +121,9 @@ public class BlockApp extends App {
 				
 				@Override
 				public void actionPerformed( ActionEvent e ) {
-					styleSource = new JointStyle(null);
-					appMode = TextureMode.Net;
-					styleSource.install( new SelectedApps( (App) BlockApp.this, sa.geometryUpdate ) );
-					sa.showUI();
+					setJoint( sa );
 				}
+
 			} );
 			
 			out.add(j);
@@ -138,5 +142,9 @@ public class BlockApp extends App {
 
 	public void setSkirt( DRectangle skirt ) {
 		this.skirt = skirt;
+	}
+	
+	public boolean showTextureOptions() {
+		return false;
 	}
 }

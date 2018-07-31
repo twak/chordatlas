@@ -237,4 +237,8 @@ public abstract class App /*earance*/ implements Cloneable {
 		return new Enum[] {TextureMode.Off, TextureMode.Net};
 	}
 
+	public boolean showTextureOptions() {
+		return true;
+	}
+
 }

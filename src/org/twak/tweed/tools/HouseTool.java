@@ -143,7 +143,7 @@ public class HouseTool extends Tool {
 	
 	@Override
 	public String getName() {
-		return "houses";
+		return "house";
 	}
 	
 

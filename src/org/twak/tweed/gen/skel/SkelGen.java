@@ -713,7 +713,7 @@ public class SkelGen extends Gen implements IDumpObjs {
 		compare.addActionListener( l -> new CompareGens( this, blockGen ) );
 		ui.add( compare );
 		
-		JButton dec = new JButton( "decorate" );
+		JButton dec = new JButton( "material" );
 		dec.addActionListener( l -> textureSelected( null, null, SkelGen.this ) );
 		ui.add( dec );
 		

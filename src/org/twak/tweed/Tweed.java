@@ -2,6 +2,7 @@ package org.twak.tweed;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -658,8 +659,7 @@ public class Tweed extends SimpleApplication {
 	public void addUI( JPanel panel ) {
 
 		panel.setLayout( new ListDownLayout() );
-
-		panel.add( new JLabel("tools:") );
+		panel.add( Fontz.setItalic( new JLabel("tools:")) );
 		
 		
 		for ( Tool t : tools ) {

@@ -402,7 +402,7 @@ public class RoofTexApp extends App {
 		
 		JPanel out = new JPanel( new ListDownLayout() );
 		if ( appMode == TextureMode.Net ) {
-		} else if ( appMode == TextureMode.Off ) {
+		} else if ( appMode == TextureMode.Off || appMode == TextureMode.Bitmap ) {
 			JButton col = new JButton( "color" );
 
 			col.addActionListener( e -> new ColourPicker( null, color ) {
