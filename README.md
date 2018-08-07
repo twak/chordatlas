@@ -1,6 +1,6 @@
 # chordatlas: BigSUR implementation
 
-chordatlas is an urban data fusion research platform from UCL, in particular it contains an implementation of [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/). this [video](https://youtu.be/FMCp-D9rEgI?t=6m28s) shows the system in use.
+chordatlas is an urban data fusion research platform, in particular it contains implementations of 3 papers presented at Siggraph: [FrankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [BigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [Procedural Extrusions](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
@@ -11,8 +11,10 @@ if you have problems using this system, I would love to [know](https://github.co
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar chordatlas-0.0.1-SNAPSHOT.jar`
-1. if you want to run the optimisation step, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). you will also need a 8gb nvidia card.
+1. if you want to run the BigSUR optimisation, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
+1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+1. if you want to run frankenGAN, install and run [bikeGAN](https://github.com/twak/bikegan). Set the bikegan location in chordatlas' setting menu. tested on an 8gb nvidia card. todo: dockerize bikegan.
+
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
 code is alpha / academic-grade: use at your own risk. hints:
@@ -61,9 +63,19 @@ to build:
 
 ## cite
 
-If you use this project, please cite:
+If you use this project, please cite the appropriate paper(s). Citations help us get more funding to continue these projects:
+
 ```
-@article{Kelly:SIGA:2017,
+@misc{frankenGAN,
+Author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
+Title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
+Year = {2018},
+Eprint = {arXiv:1806.07179},
+}
+```
+
+```
+@article{bigsur,
   title   = {BigSUR: Large-scale Structured Urban Reconstruction},
   author  = {Tom Kelly and John Femiani and Peter Wonka and Niloy J. Mitra},
   year    = {2017},
@@ -76,5 +88,29 @@ If you use this project, please cite:
   numpages = {16},
   url = {https://doi.org/10.1145/3130800.3130823},
   doi = {10.1145/3130800.3130823}
+}
+```
+
+```
+@article{frankengan,
+ author = {Kelly, Tom and Wonka, Peter},
+ title = {Interactive Architectural Modeling with Procedural Extrusions},
+ journal = {ACM Trans. Graph.},
+ issue_date = {April 2011},
+ volume = {30},
+ number = {2},
+ month = apr,
+ year = {2011},
+ issn = {0730-0301},
+ pages = {14:1--14:15},
+ articleno = {14},
+ numpages = {15},
+ url = {http://doi.acm.org/10.1145/1944846.1944854},
+ doi = {10.1145/1944846.1944854},
+ acmid = {1944854},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Procedural modeling, roof modeling, urban modeling},
+} 
 }
 ```
