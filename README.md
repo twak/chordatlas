@@ -67,10 +67,10 @@ If you use this project, please cite the appropriate paper(s). Citations help us
 
 ```
 @misc{frankenGAN,
-Author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
-Title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
-Year = {2018},
-Eprint = {arXiv:1806.07179},
+  Author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
+  Title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
+  Year = {2018},
+  Eprint = {arXiv:1806.07179},
 }
 ```
 
