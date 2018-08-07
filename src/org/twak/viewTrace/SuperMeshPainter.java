@@ -54,7 +54,7 @@ public class SuperMeshPainter implements ICanPaintU {
 
 				Color c;
 				
-				if (false) {
+				if (true) {
 					int h = (int) Mathz.clamp( ( (SuperFace) f ).height * 5, 0, 255 );
 					
 					if ( ( (SuperFace) f ).height == -Double.MAX_VALUE)

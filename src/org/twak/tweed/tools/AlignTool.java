@@ -76,6 +76,9 @@ public class AlignTool extends Tool {
 	@Override
 	public void clickedOn( Spatial target, Vector3f loc, Vector2f cursorPosition )  {
 		
+		if (target == null)
+			return;
+		
 		if (System.currentTimeMillis() - lastClick > 500) {
 			
 			System.out.println( target + " " +loc );

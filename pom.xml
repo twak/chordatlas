@@ -141,6 +141,7 @@
 			<artifactId>vecmath</artifactId>
 			<version>1.5.2</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-xml</artifactId>
@@ -177,11 +178,11 @@
 			<version>${geotools.version}</version>
 		</dependency>
 
-		<dependency>
+		<!--  dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-epsg-extension</artifactId>
 			<version>${geotools.version}</version>
-		</dependency>
+		</dependency -->
 
 		<dependency>
 			<groupId>redis.clients</groupId>

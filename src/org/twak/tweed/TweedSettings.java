@@ -28,6 +28,7 @@ import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider
 public class TweedSettings {
 
 	
+	
 	public static TweedSettings settings = new TweedSettings();
 	public static RecentFiles recentFiles;
 	static File folder; // location of data file
@@ -71,6 +72,8 @@ public class TweedSettings {
 	public double  snapFootprintVert = 0;
 	public boolean SSAO = true;
 	public boolean shadows = false;
+	
+	public double blockMeshPadding = 5;
 	
 	public double megaFacadeAreaThreshold = 30; // 23 for regent
 	public double profileHSampleDist = 0.2;

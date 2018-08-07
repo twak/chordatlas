@@ -1042,7 +1042,7 @@ public class GurobiSkelSolver {
 		print ("nearby profile terms " + countNearbyProfiles);
 		print ("total half edges " + edges.size() );
 		print ("total faces " + faceInfo.size() );
-		if ( profFit.get( edges.get(0)  ) != null)
+		if ( !edges.isEmpty() && profFit.get( edges.get(0)  ) != null)
 			print ("total profiles " + profFit.get( edges.get(0)  ).length );
 		print( "total edge length " + totalEdgeLength );
 		

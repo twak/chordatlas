@@ -323,6 +323,9 @@ public class Prof extends ArrayList<Point2d> {
 					if ( bt.betterThan( end.y, max ) ) { // trim to max
 						toAdd = new LinearForm3D( UP, new Vector3d( 0, max, 0 ) ).collide( next.points()[ startOrEnd ], next.dir(), next.length() );
 
+						if (toAdd == null)
+							continue;
+						
 						if ( toAdd.getClass() != Point3d.class && bt.betterThan( max, toAdd.y ) ) // intersection failed
 							toAdd = new Point3d( end.x, max, end.z );
 						else

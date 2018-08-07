@@ -1,15 +1,12 @@
 package org.twak.tweed;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.vecmath.Matrix4d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -28,6 +24,9 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.twak.siteplan.jme.Jme3z;
@@ -41,8 +40,8 @@ import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.PlaneTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
+import org.twak.utils.Cache;
 import org.twak.utils.Mathz;
-import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.WindowManager;
 
@@ -78,13 +77,10 @@ import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.shadow.PointLightShadowRenderer;
-import com.jme3.terrain.geomipmap.TerrainLodControl;
-import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.ui.Picture;
 
 public class Tweed extends SimpleApplication {
@@ -317,8 +313,8 @@ public class Tweed extends SimpleApplication {
 		TweedSettings.settings.gmlCoordSystem = guessCRS;
 		
 		System.out.println( "Assuming CRS " + guessCRS + " for all of " + gmlFile.getName() );
-		
-		MathTransform transform = CRS.findMathTransform( CRS.decode( guessCRS ), DefaultGeocentricCRS.CARTESIAN, true );
+
+		MathTransform transform = CRS.findMathTransform( kludgeCMS.get( guessCRS ), DefaultGeocentricCRS.CARTESIAN, true );
 		
 		System.out.println( "Using CRS --> World space offset of " + lastOffset[0] + ", " + lastOffset[1] );
 		
@@ -331,7 +327,50 @@ public class Tweed extends SimpleApplication {
 		
 		frame.addGen ( gg, true );
 	}
+	
+	
+	public static Cache<String, CoordinateReferenceSystem> kludgeCMS = new Cache<String, CoordinateReferenceSystem>() {
 
+		@Override
+		public CoordinateReferenceSystem create( String crs ) {
+
+			try {
+				return CRS.decode( crs );
+			} catch ( NoSuchAuthorityCodeException e ) {
+
+				
+				// look up in https://epsg.io/, and add below...? (why doesn't geotools have this?)
+			if (crs.equals( "EPSG:6312" ))
+				try {
+					return CRS.parseWKT("PROJCS[\"unnamed\",\n" + 
+					"    GEOGCS[\"WGS 84\",\n" + 
+					"        DATUM[\"unknown\",\n" + 
+					"            SPHEROID[\"WGS84\",6378137,298.257223563],\n" + 
+					"            TOWGS84[8.846,-4.394,-1.122,-0.00237,-0.146528,0.130428,0.783926]],\n" + 
+					"        PRIMEM[\"Greenwich\",0],\n" + 
+					"        UNIT[\"degree\",0.0174532925199433]],\n" + 
+					"    PROJECTION[\"Transverse_Mercator\"],\n" + 
+					"    PARAMETER[\"latitude_of_origin\",0],\n" + 
+					"    PARAMETER[\"central_meridian\",33],\n" + 
+					"    PARAMETER[\"scale_factor\",0.99995],\n" + 
+					"    PARAMETER[\"false_easting\",200000],\n" + 
+					"    PARAMETER[\"false_northing\",-3500000],\n" + 
+					"    UNIT[\"Meter\",1],\n" + 
+					"    AUTHORITY[\"epsg\",\"6312\"]]");
+				} catch ( FactoryException e1 ) {
+					e1.printStackTrace();
+					}
+
+			} catch ( Throwable th ) {
+				th.printStackTrace();
+			}
+
+			JOptionPane.showMessageDialog( TweedFrame.instance.frame, "failed to find CRS " + crs, "coordinate system error", JOptionPane.ERROR_MESSAGE );
+			return null;
+		}
+
+	};
+	
 	public void setCameraPerspective() {
 		
 		if (cam == null)
@@ -817,9 +856,8 @@ public class Tweed extends SimpleApplication {
 		
 		double[] trans = new double[] { to3.x, 0, to3.z };
 		
-		try {
-		// two part transform to align heights - geoid for 4326 is different to 27700
-		
+		if ( TweedSettings.settings.gmlCoordSystem != null)	try {
+			
 		if ( TweedSettings.settings.gmlCoordSystem.equals( "EPSG:2062" ) ) { // oviedo :(
 			System.out.println( "******* dirty hack in place for CS" );
 
@@ -828,6 +866,7 @@ public class Tweed extends SimpleApplication {
 			trans[ 0 ] -= 3;
 		}
 		
+		// two part transform to align heights - geoid for 4326 is different to 27700
 		{
 			Point3d tmp = new Point3d( trans );
 			TweedSettings.settings.fromOrigin.transform( tmp );
@@ -836,13 +875,16 @@ public class Tweed extends SimpleApplication {
 		
 			
 		MathTransform cartesian2Country = CRS.findMathTransform( 
-				DefaultGeocentricCRS.CARTESIAN, 
-				CRS.decode( TweedSettings.settings.gmlCoordSystem ), 
+				DefaultGeocentricCRS.CARTESIAN,
+				kludgeCMS.get( TweedSettings.settings.gmlCoordSystem ),
 				true );
 		
 		cartesian2Country.transform( trans, 0, trans, 0, 1 );
 		
 		if ( TweedSettings.settings.gmlCoordSystem.equals( "EPSG:3042" ) ) { /* madrid?! */
+			
+			// do this to fix?: http://docs.geotools.org/latest/userguide/library/referencing/order.html
+			
 			double tmp = trans[ 0 ];
 			trans[ 0 ] = trans[ 1 ];
 			trans[ 1 ] = tmp;
@@ -851,7 +893,7 @@ public class Tweed extends SimpleApplication {
 		MathTransform country2latlong;
 		
 			country2latlong = CRS.findMathTransform( 
-					CRS.decode( TweedSettings.settings.gmlCoordSystem ),
+					kludgeCMS.get( TweedSettings.settings.gmlCoordSystem  ),
 					CRS.decode( Tweed.LAT_LONG ), 
 					true );
 		

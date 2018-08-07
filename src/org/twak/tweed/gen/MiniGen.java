@@ -40,9 +40,11 @@ import org.twak.utils.Filez;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopz;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjDump.Face;
+import org.twak.utils.streams.InaxPoint2dCollector;
 import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.asset.ModelKey;
@@ -372,7 +374,10 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 									}
 
 									List<Point3d> fVerts = new ArrayList<>(3), fNorms = new ArrayList<>(3);
-									List<Point2d> fUVs = new ArrayList<>(2);
+									
+									List<Point2d> fUVs = null;
+									if (fUVs != null)
+										fUVs = new ArrayList<>(2);
 									
 									for ( int i = 0; i < f.vtIndexes.size(); i++ ) {
 
@@ -391,7 +396,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 										
 										fVerts.add( vts );
 										fNorms.add( ns );
-										fUVs.add (new Point2d( or.orderUV.get( f.uvIndexes.get( i ) ) ));
+										if (fUVs != null)
+											fUVs.add (new Point2d( or.orderUV.get( f.uvIndexes.get( i ) ) ));
 									}
 
 									obj.addFace( fVerts, fNorms, fUVs );
@@ -452,18 +458,18 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 		Matrix4d m = new Matrix4d();
 		m.mul( Jme3z.fromMatrix ( trans.offset ), mini );
 		
-		for (Point2d p : Arrays.stream( cubeCorners ).map( c -> { 
-				Point3d tmp = new Point3d();
-				m.transform( c, tmp );
-				return new Point2d(tmp.x, tmp.z);
-			}).collect( Collectors.toList() ) ) { 
+		double[] miniBounds = Arrays.stream( cubeCorners ).map( c -> { 
+			Point3d tmp = new Point3d();
+			m.transform( c, tmp );
+			return new Point2d(tmp.x, tmp.z);
+		}).collect( new InaxPoint2dCollector() );
 		
-				for (double[] bound : bounds) {
-					 if ( 
-							 bound[0] < p.x && bound[1] > p.x &&
-							 bound[2] < p.y && bound[3] > p.y )
-						 return true;
-				}
+		DRectangle miniRect = new DRectangle( miniBounds[0], miniBounds[2], miniBounds[1]-miniBounds[0], miniBounds[3]-miniBounds[2] );
+		
+		for (double[] bound : bounds) {
+			DRectangle plotRect = new DRectangle( bound[0], bound[2], bound[1]-bound[0], bound[3]-bound[2] );
+			if (plotRect.intersects( miniRect ))
+				return true;
 		}
 		
 		return false;

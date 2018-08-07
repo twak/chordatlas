@@ -31,6 +31,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.GenHandlesSelect;
 import org.twak.tweed.Tweed;
@@ -196,17 +197,15 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		Closer<Point3d> closer = new Closer<>();
 	
 		LoopL<Point3d> polies = null;
-		try {
+		
+		CoordinateReferenceSystem crss = Tweed.kludgeCMS.get( crs );
+		
+		if (crss == null)
+			return;
+		
 			polies = GMLReader.readGML3d( Tweed.toWorkspace( new File( gmlFile ) ), 
 					DefaultGeocentricCRS.CARTESIAN,
-					CRS.decode( crs ) );
-		} catch ( NoSuchAuthorityCodeException e ) {
-			e.printStackTrace();
-			return;
-		} catch ( FactoryException e ) {
-			e.printStackTrace();
-			return;
-		}
+					crss );
 		
 //		Optional<Gen> hg = tweed.frame.gens( LotInfoGen.class ).stream().findAny();
 //		
@@ -462,14 +461,13 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		return out;
 	}
 	
-	public static final double EXPAND_MESH = 5;
 	private void importMesh( int index ) {
 		
 		LoopL<Point3d> polies = blocks.get( index );
 
 		List<Vector2D> verts = polies.stream().flatMap( ll -> ll.streamAble() ).map( x -> {
 			Line3d l = new Line3d( x.get(), x.getNext().get() );
-			l.move( perp( l.dir(), EXPAND_MESH ) );
+			l.move( perp( l.dir(), TweedSettings.settings.blockMeshPadding ) );
 			return new Vector2D( l.start.x, l.start.z );
 		} ).collect( Collectors.toList() );
 

@@ -74,7 +74,7 @@ public class MiniTransform {
 	public static void convertToMini( File oneOfManyObj, File outputDir, Runnable onDone ) {
 		
 		MiniOptions options =  new MiniOptions(outputDir);
-		
+				
 		new Auto( options, false ) {
 			public void apply() {
 				
