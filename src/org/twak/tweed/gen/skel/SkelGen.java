@@ -93,6 +93,15 @@ public class SkelGen extends Gen implements IDumpObjs {
 	public BlockApp blockApp = new BlockApp(this);
 
 	
+	private Object readResolve() {
+		
+		if (blockApp == null)
+			blockApp = new BlockApp( this );
+		
+		return this;
+	}
+
+	
 	static {
 		PlanSkeleton.TAGS = new String[][] { { "org.twak.tweed.gen.skel.WallTag", "wall" }, { "org.twak.tweed.gen.skel.RoofTag", "roof" }, };
 	}

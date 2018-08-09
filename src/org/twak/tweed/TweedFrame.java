@@ -525,6 +525,7 @@ public class TweedFrame {
 								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
 										XStream xs = new XStream();// new PureJavaReflectionProvider());
+										xs.ignoreUnknownElements();
 										SkelGen sg = (SkelGen) xs.fromXML( f );
 										sg.onLoad( tweed );
 										addGen( sg, true );

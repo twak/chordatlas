@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +76,18 @@ public class MiniFacade implements HasSuper {
 		PaintThing.editLookup.put( MiniFacade.class, MiniFacadePainter.class );
 	}
 	
+	private Object readResolve() {
+		if ( facadeLabelApp == null )
+			facadeLabelApp = new FacadeLabelApp( this );
+		if ( facadeTexApp == null )
+			facadeTexApp = new FacadeTexApp( this );
+		if ( facadeSuperApp == null )
+			facadeSuperApp = new FacadeSuperApp( this );
+		if ( facadeGreebleApp == null )
+			facadeGreebleApp = new FacadeGreebleApp( this );
+		return this;
+	}
+	  
 	public MiniFacade( MiniFacade m ) {
 		
 		this.width = m.width;

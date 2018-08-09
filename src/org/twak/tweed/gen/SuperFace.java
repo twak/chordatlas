@@ -29,6 +29,12 @@ public class SuperFace extends HalfFace {
 //	public BuildingApp app = new BuildingApp(this);
 	public PlanSkeleton skel;
 	
+	private Object readResolve() {
+		if (buildingApp == null)
+			buildingApp = new BuildingApp( this );
+		return this;
+	}
+	
 	public SuperFace() {
 		super(null);
 	}

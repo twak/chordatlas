@@ -68,10 +68,11 @@ public abstract class App /*earance*/ implements Cloneable {
 	// contains latent variables for children (who are created during tree evluation). 
 	public transient Map<Class<? extends App>, double[]> bakeWith = new HashMap<>();
 	
-	  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		    in.defaultReadObject();
-		    this.bakeWith = new HashMap<>();
-	  }	
+	private void readObject( ObjectInputStream in ) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		this.bakeWith = new HashMap<>();
+	}
+
 	public App( App a ) {
 		this.appMode = a.appMode;
 		if (a.styleZ != null )
