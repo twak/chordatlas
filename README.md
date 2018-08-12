@@ -1,4 +1,4 @@
-# chordatlas: urban data fusion for graphicsists.
+# chordatlas: an urban data fusion platform
 
 chordatlas is an urban data fusion research platform, in particular it contains implementations of 3 papers: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
