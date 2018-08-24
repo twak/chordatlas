@@ -11,14 +11,21 @@ if you have problems using this system, I would love to [know](https://github.co
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (the 10g says to use a 10Gb heap)
-1. if you want to run the BigSUR optimisation, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
-1. if you want to run frankenGAN texturing pipeline with nvidia-docker (needs 3gb gpu memory), run the following to start [bikegan](https://github.com/twak/bikegan) in the current directoy:
-`nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
-and in chordatlas' settings menu, set the bikegan root to the current directory.
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
-code is alpha / academic-grade: use at your own risk. hints:
+code is alpha / academic-grade: use at your own risk. 
+
+things get a bit more complicated for the bigsur optimisation and machine learning:
+1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
+1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+
+and for the frankengan texturing GANs:
+1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+1. run the following to start [bikegan](https://github.com/twak/bikegan) in the current directoy:
+`nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
+1.in chordatlas' settings menu, set the bikegan root to the current directory.
+
+general hints:
 
 1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
 1. use left mouse drag + WASD keys to navigate the 3D view
