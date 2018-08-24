@@ -23,7 +23,7 @@ code is alpha / academic-grade: use at your own risk. other hints:
 1. you can edit the visiblity of different layers with the layer-list check boxes
 
 things get a bit more complicated for the bigsur optimisation and window detection:
-1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
+1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path before you start chordatlas.
 1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
 
 similarly for the frankenGAN texturing pipeline:
