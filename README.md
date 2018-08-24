@@ -13,7 +13,8 @@ if you have problems using this system, I would love to [know](https://github.co
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (the 10g says to use a 10Gb heap)
 1. if you want to run the BigSUR optimisation, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
 1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
-1. if you want to run frankenGAN, install and run [bikeGAN](https://github.com/twak/bikegan). Set the bikegan location in chordatlas' setting menu. tested on an 8gb nvidia card. todo: dockerize bikegan.
+1. if you want to run frankenGAN texturing pipeline with nvidia-docker (needs 3gb gpu memory), run the following in the root directoy (the directory containing this file):
+`nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
 
 
 it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
