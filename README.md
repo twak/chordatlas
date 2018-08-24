@@ -1,6 +1,6 @@
 # chordatlas: an urban data fusion platform
 
-chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 papers that have/will be presented at Siggraph: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
+chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 papers that have/will be presented at various Siggraphs: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
@@ -11,20 +11,26 @@ if you have problems using this system, I would love to [know](https://github.co
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (the 10g says to use a 10Gb heap)
-1. if you want to run the BigSUR optimisation, install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
-1. if you want to run frankenGAN, install and run [bikeGAN](https://github.com/twak/bikegan). Set the bikegan location in chordatlas' setting menu. tested on an 8gb nvidia card. todo: dockerize bikegan.
 
+code is alpha / academic-grade: use at your own risk. other hints:
 
-it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
-code is alpha / academic-grade: use at your own risk. hints:
-
+1. it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
 1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
 1. use left mouse drag + WASD keys to navigate the 3D view
 2. arrow keys change brightness and camera speed, page up and page down control fov
 1. right mouse button selects things in the 3D view
 1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the scratch folder) are deleted when you quit.
 1. you can edit the visiblity of different layers with the layer-list check boxes
+
+things get a bit more complicated for the bigsur optimisation and window detection:
+1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path before you start chordatlas.
+1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+
+similarly for the frankenGAN texturing pipeline:
+1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card
+1. run the following to start [bikegan](https://github.com/twak/bikegan) in the current directoy:
+`nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
+1. in chordatlas' `file -> settings` menu, set the bikegan root to the current directory
 
 ## data
 
