@@ -636,14 +636,14 @@ public class Tweed extends SimpleApplication {
 
 				ImageIO.write( bi, "jpg", new File( JME + BG_LOC + hack + ".jpg" ) );
 				background.setMaterial( null );
-				getAssetManager().deleteFromCache( new AssetKey<>( BG_LOC ) );
+				getAssetManager().deleteFromCache( new AssetKey<>( BG_LOC ) ); //?! doesn't work
 
 				Material mat = new Material( getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
 				mat.setTexture( "ColorMap", getAssetManager().loadTexture( BG_LOC + hack + ".jpg" ) );
-				//					mat.setColor("Color", ColorRGBA.Red); 
+//									mat.setColor("Color", ColorRGBA.Red); 
 				background.setMaterial( mat );
 
-				//					background.setImage(assetManager, BG_LOC, false);
+//									background.setImage(assetManager, BG_LOC + hack + ".jpg" , false);
 				background.updateGeometricState();
 
 				gainFocus();
@@ -668,9 +668,9 @@ public class Tweed extends SimpleApplication {
 
 			ViewPort pv = renderManager.createPreView( bgKey, cam );
 			pv.setClearFlags( true, true, true );
-			pv.attachScene( background );
 
-			viewPort.setClearFlags( true, true, true );
+			viewPort.setClearFlags( false, true, true);
+			pv.attachScene( background );
 
 			background.updateGeometricState();
 		}

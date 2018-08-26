@@ -183,7 +183,7 @@ public class Pix2Pix {
 			
 		} while ( System.currentTimeMillis() - startTime < 6000 );
 		
-		System.out.println( "timeout trying to get result "+ job.name );
+		System.out.println( "timeout trying to get bikeGAN result "+ job.name +". \nis bikeGAN running? \nhas bikeGAN root been set correctly in the settings menu?" );
 	}
 
 	private void finished( Job job, File outDir ) {

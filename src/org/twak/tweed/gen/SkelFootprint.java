@@ -133,7 +133,9 @@ public class SkelFootprint {
 			}
 		} else {
 
-			SS = buildFootprint( footprint, m, null, skelGen.blockGen );
+			SS = buildFootprint( footprint, m, 
+					TweedSettings.settings.useGreedyProfiles ? null :  tweed.features,
+							skelGen.blockGen );
 
 			dbgCountProfileEdges( SS );
 

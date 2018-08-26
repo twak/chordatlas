@@ -170,8 +170,8 @@ public class GurobiSkelSolver {
 //				se.debug =  edgeInfo.get(se).edgeNoProfile.get( GRB.DoubleAttr.X ) > 0.5;
 //			}
 			
-			for (HalfFace f : mesh.faces)
-				((SuperFace)f).classification = index (faceInfo.get(f).color);
+			for (HalfFace f : mesh.faces) 
+					((SuperFace)f).classification = index (faceInfo.get(f).color);
 			
 			if (minis != null)
 			for ( MegaFeatures mf : minis.keySet() ) {
@@ -304,9 +304,13 @@ public class GurobiSkelSolver {
 		if (vars == null)
 			return -1;
 		
-		for (int i = 0; i < vars.length; i++)
-			if (vars[i].get( GRB.DoubleAttr.X ) > 0.5 )
-				return i;
+		for ( int i = 0; i < vars.length; i++ )
+			try {
+				if ( vars[ i ].get( GRB.DoubleAttr.X ) > 0.5 )
+					return i;
+			} catch ( GRBException e ) {
+			}
+		
 		return -1;
 	}
 	

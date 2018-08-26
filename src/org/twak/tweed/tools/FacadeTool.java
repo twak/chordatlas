@@ -111,7 +111,7 @@ public class FacadeTool extends SelectTool {
 
 //	private static String FACADE_FOLDER = ;
 
-	public static final float pixelsPerMeter = 80f;
+	public static final float pixelsPerMeter = 40f;
 	
 	private void renderFacades( String blockName, FacadeFinder ff, AtomicInteger count, BufferedWriter description, PanoGen feedback ) {
 

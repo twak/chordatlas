@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.vecmath.Point3d;
@@ -332,11 +333,14 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		
 		ui.setLayout( new ListDownLayout() );
 		
-		if (folder != null && folder.exists())
-		if (new File ( Tweed.toWorkspace( folder ), TO_DOWNLOAD).exists()) {
-			JButton download = new JButton("download");
-			download.addActionListener( e -> downloadPanos() );
-			ui.add( download );
+		if ( folder != null ) {
+			File absFolder = new File( Tweed.toWorkspace( folder ), TO_DOWNLOAD );
+
+			if ( absFolder.exists() ) {
+				JButton download = new JButton( "download" );
+				download.addActionListener( e -> downloadPanos() );
+				ui.add( download );
+			}
 		}
 		
 		JButton align = new JButton("facade tool");
@@ -439,6 +443,13 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				if (TweedSettings.settings.SSAO) {
+					JOptionPane.showMessageDialog( tweed.frame.frame, "Disable SSAO (in the settings menu), then restart." );
+					return;
+				}
+				
+				
 				tweed.enqueue(new Runnable() {
 					@Override
 					public void run() {

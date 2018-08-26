@@ -93,7 +93,7 @@ public class WindowGen extends Gen implements IDumpObjs {
 					
 					MeshBuilder mb = new MeshBuilder();
 					
-					float offset = (float) Math.random() * 5;
+					float offset = 0;//(float) (Math.random() * 5 - 2.5);
 					
 					for (MiniFacade mini : im.miniFacades) {
 						for (DRectangle r : mini.featureGen.get(Feature.WINDOW)) {
