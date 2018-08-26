@@ -1,6 +1,6 @@
-# chordatlas: an urban data fusion platform
+# chordatlas: data-driven urban procedural modeling
 
-chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 papers that have/will be presented at various Siggraphs: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
+chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
