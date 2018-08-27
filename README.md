@@ -1,6 +1,6 @@
 # chordatlas: data-driven urban procedural modeling
 
-chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankenGAN](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
+chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
@@ -25,17 +25,18 @@ code is alpha / academic-grade: use at your own risk. other hints:
 things get a bit more complicated for the bigsur optimisation and window detection:
 1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path before you start chordatlas.
 1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+1. follow the bigsur data instructions below.
 
-similarly for the frankenGAN texturing pipeline:
+similarly for the frankengan texturing pipeline:
 1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
 1. create two folders in the a temporary directory: `input` and `output`; set the temp directory to be the current directory.
 1. run the following to start [bikegan](https://github.com/twak/bikegan) in the temporary directory:
 `nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
 1. in chordatlas' `file -> settings` menu, set the bikegan root to the temp directory
 1. use the house tool to create a house; select the new house.
-1. click `material`, then `joint`, then `redraw distribution` to texture the house with frankenGAN.
+1. click `material`, then `joint`, then `redraw distribution` to texture the house with frankengan.
 
-## data
+## bigsur data
 
 several datasets are available [here](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/data/). we don't have a license to distrubte the original data used in the paper, so the GIS data has been replaced by openstreetmap, and streetview photos have been udpated.
 1. unzip the data
@@ -75,7 +76,7 @@ to build:
 If you use this project, please cite the appropriate paper(s). Citations help us get more funding to continue these projects:
 
 ```
-@misc{frankenGAN,
+@misc{frankengan,
   Author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
   Title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
   Year = {2018},
