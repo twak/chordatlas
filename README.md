@@ -27,10 +27,13 @@ things get a bit more complicated for the bigsur optimisation and window detecti
 1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
 
 similarly for the frankenGAN texturing pipeline:
-1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card
-1. run the following to start [bikegan](https://github.com/twak/bikegan) in the current directoy:
+1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
+1. create two folders in the a temporary directory: `input` and `output`; set the temp directory to be the current directory.
+1. run the following to start [bikegan](https://github.com/twak/bikegan) in the temporary directory:
 `nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
-1. in chordatlas' `file -> settings` menu, set the bikegan root to the current directory
+1. in chordatlas' `file -> settings` menu, set the bikegan root to the temp directory
+1. use the house tool to create a house; select the new house.
+1. click `material`, then `joint`, then `redraw distribution` to texture the house with frankenGAN.
 
 ## data
 
