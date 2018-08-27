@@ -161,12 +161,8 @@ public class Pix2Pix {
 		} while ( go.exists() && System.currentTimeMillis() - startTime < 1e4 );
 
 		startTime = System.currentTimeMillis();
-
-		if (go.exists()) {
-			System.out.println( "failed to get a result "+ go.getAbsolutePath() );
-			return;
-		}
-			
+	
+		if (!go.exists()) 
 		do {
 
 			try {
@@ -183,7 +179,7 @@ public class Pix2Pix {
 			
 		} while ( System.currentTimeMillis() - startTime < 6000 );
 		
-		System.out.println( "timeout trying to get bikeGAN result "+ job.name +". \nis bikeGAN running? \nhas bikeGAN root been set correctly in the settings menu?" );
+		System.out.println( "timeout trying to get bikeGAN result "+ job.name +". \nis bikeGAN running? \nhas bikeGAN root been set correctly in the settings menu? (" + TweedSettings.settings.bikeGanRoot );
 	}
 
 	private void finished( Job job, File outDir ) {

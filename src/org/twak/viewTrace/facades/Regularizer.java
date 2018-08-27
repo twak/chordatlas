@@ -387,6 +387,7 @@ public class Regularizer {
 		out.left = lp;
 		out.width = rp - lp;
 		out.imageFeatures = in.get( 0 ).imageFeatures;
+		out.featureGen.clear();
 		
 //		if (toReg.length == 0)
 		out.height = Double.MAX_VALUE;
@@ -478,7 +479,7 @@ public class Regularizer {
 					
 //					o.outer = t.outer;
 					
-					o.attachedHeight.get( Feature.SILL ).d    = averageAttached (o, Feature.SILL, found);
+					o.attachedHeight.get( Feature.SILL )   .d = averageAttached (o, Feature.SILL, found);
 					o.attachedHeight.get( Feature.CORNICE ).d = averageAttached (o, Feature.CORNICE, found);
 					o.attachedHeight.get( Feature.BALCONY ).d = averageAttached (o, Feature.BALCONY, found);
 
@@ -890,7 +891,7 @@ public class Regularizer {
 			}
 		}
 		
-		System.out.println("atatched " + count +" / " + total +" cornicesesese");
+		System.out.println("attached " + count +" / " + total +" window decorations");
 	}
 
 	private FRect nearest( List<FRect> windows, FRect sill, double maxDist ) {
@@ -1332,17 +1333,23 @@ public class Regularizer {
 	private void constrainMoulding( MiniFacade mf, FRect d, double alpha ) {
 		
 
+		if (! mf.featureGen.contains( d.getFeat(), d ))
+			return; // removed earlier
+		
+//		if (false)
 		for ( int j = 0; j < d.adjacent.length; j++ ) {
 			
 			FRect n = d.adjacent[j];
-			if (n == null)
+			
+			if (n == null || !mf.featureGen.contains( n.getFeat(), n ))
 				continue;
 			
 			DRectangle u = d.union( n ), i = d.intersect( n );
 			
 			double ia = i == null ? 0 : i.area();
 			
-			if ( (n.area() + d.area() - ia) / u.area() > 0.7 ) {
+			if ( (n.area() + d.area() - ia) / u.area() > 0.7 ) 
+			{
 				d.setFrom(u);
 				d.adjacent[j] = null;
 				mf.featureGen.remove( n.getFeat(), n );

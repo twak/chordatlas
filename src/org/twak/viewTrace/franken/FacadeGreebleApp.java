@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
@@ -31,6 +34,8 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -252,6 +257,12 @@ public class FacadeGreebleApp extends App {
 						m.mf.featureGen.map.remove( f, r );
 				}
 				
+				
+//				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+//				String svgNS = "http://www.w3.org/2000/svg";
+//				Document document = domImpl.createDocument( svgNS, "svg", null );
+//				SVGGraphics2D svg = new SVGGraphics2D( document );
+				
 				for ( Feature f : toGenerate ) {
 
 					JsonNode node = root.get( f.name().toLowerCase() );//.replace ("moulding", "molding") );
@@ -271,6 +282,13 @@ public class FacadeGreebleApp extends App {
 						
 						fr = m.mfBounds.transform( m.mask.normalize( fr ) );
 						frects.add( fr );
+						
+//						svg.setColor( f.color );
+//						svg.drawRect( (int) (fr.x * 100),
+//								(int) (fr.y * 100),
+//								(int) (fr.width * 100),
+//								(int) (fr.height * 100 ) );
+						
 					}
 
 					if ( f != Feature.SHOP && f != Feature.DOOR )
@@ -301,6 +319,9 @@ public class FacadeGreebleApp extends App {
 							}
 						}
 				}
+				
+//				svg.stream( new FileWriter( "/home/twak/Desktop/dump2.svg" ), true );
+
 
 				Regularizer r = new Regularizer();
 
@@ -318,8 +339,8 @@ public class FacadeGreebleApp extends App {
 				m.mf.featureGen = r.go( Collections.singletonList( m.mf ), 1, null ).get( 0 ).featureGen;
 				m.mf.featureGen.setMF(m.mf);
 				
-				for (FRect f : m.mf.featureGen.get( Feature.MOULDING ) )
-					System.out.println(" >> after reg > "+ f);
+//				for (FRect f : m.mf.featureGen.get( Feature.MOULDING ) )
+//					System.out.println(" >> after reg > "+ f);
 
 				for ( FRect win : m.mf.featureGen.getRects( Feature.SHOP, Feature.WINDOW, Feature.DOOR ) ) {
 

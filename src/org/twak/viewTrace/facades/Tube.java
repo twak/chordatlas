@@ -88,7 +88,7 @@ public class Tube {
 			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( c ) ) * llen * uvScale, 0 ) );
 			uvs.append ( new Point2d (l.findPPram( Pointz.to2XZ( d ) ) * llen * uvScale, -height * uvScale ) );
 
-			out.add ( face.singleton(), uvs.singleton(), true );
+			out.add ( face.singleton(), out.hasUVs() ? uvs.singleton() : null, true );
 		}
 		
 		cap( out, after ,  along, profilePts, uvScale, true  );
@@ -120,7 +120,7 @@ public class Tube {
 		
 		for (Map.Entry<LinearForm3D, List<Point3d>> e : faces.map.entrySet()) {
 			LoopL<Point3d> pts = new Loop<Point3d> ( e.getValue() ).singleton();
-			out.add ( pts, GreebleHelper.uvs( pts, uvScale ), reverse );
+			out.add ( pts, out.hasUVs() ? GreebleHelper.uvs( pts, uvScale ) : null, reverse );
 		}
 	}
 

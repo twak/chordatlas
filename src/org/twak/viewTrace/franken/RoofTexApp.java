@@ -7,6 +7,8 @@ import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +22,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.twak.camp.Output.Face;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.SuperEdge;
@@ -42,6 +46,8 @@ import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 
 public class RoofTexApp extends App {
@@ -131,6 +137,16 @@ public class RoofTexApp extends App {
 		BufferedImage empty = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
 		Graphics2D gE = (Graphics2D) empty.getGraphics();
 
+//		DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+//		// Create an instance of org.w3c.dom.Document.
+//		String svgNS = "http://www.w3.org/2000/svg";
+//		Document document = domImpl.createDocument( svgNS, "svg", null );
+//		// Create an instance of the SVG Generator.
+//		SVGGraphics2D svg = new SVGGraphics2D( document );
+//		// Ask the test to render into the SVG Graphics2D implementation.
+
+		
+		
 		DRectangle drawTo = new DRectangle( 0, 0, resolution, resolution );
 		
 		for (App a : batch) {
@@ -152,6 +168,22 @@ public class RoofTexApp extends App {
 			
 			DRectangle bounds = draw (gL, drawTo, mr, false);
 			drawEmpty (gE, drawTo, mr, bounds);
+//			draw (svg, drawTo, mr, false);
+			
+			// debug
+//			try {
+//				ImageIO.write( label , "png", new File( Tweed.DATA + "/scratch/" + ( UUID.randomUUID() + ".png" ) ) );
+//				
+//				try {
+//					svg.stream( new FileWriter( "/home/twak/Desktop/dump.svg" ), true );
+//				} catch ( Throwable e ) {
+//					e.printStackTrace();
+//				}
+//
+//				
+//			} catch ( IOException e ) {
+//				e.printStackTrace();
+//			}
 			
 			p2.addInput( label, empty, null, mr, mr.roofTexApp.styleZ, null );
 		}

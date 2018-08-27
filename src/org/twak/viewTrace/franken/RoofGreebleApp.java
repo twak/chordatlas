@@ -70,7 +70,7 @@ public class RoofGreebleApp extends App {
 		
 		for (App a : batch) {
 			
-			if ( appMode != TextureMode.Net ) {
+			if ( a.appMode != TextureMode.Net ) {
 //				for (FCircle fc : ((RoofGreebleApp)a).mr.greebles.valueList() )
 //					fc.
 				continue;

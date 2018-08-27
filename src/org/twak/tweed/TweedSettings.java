@@ -33,7 +33,7 @@ public class TweedSettings {
 	public static RecentFiles recentFiles;
 	static File folder; // location of data file
 	
-	public String bikeGanRoot = new File (".").getAbsolutePath();//"/home/twak/code/bikegan";
+	public String bikeGanRoot = new File (System.getProperty("user.home")+"/code/bikegan").getAbsolutePath();//"/home/twak/code/bikegan";
 //	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
 	
 	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
