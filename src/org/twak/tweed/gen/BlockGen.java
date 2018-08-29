@@ -17,6 +17,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -467,7 +468,9 @@ public class BlockGen extends ObjGen {
 		FacadeFinder.facadeMode = FacadeMode.PER_CAMERA;
 		
 		try {
-			new FacadeTool(tweed).renderFacade( polies, null, new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )), null );
+			FacadeTool ff = new FacadeTool(tweed);
+			ff.singleFolder = false;
+			ff.renderFacade( polies, new AtomicInteger( 0 ), new BufferedWriter(new FileWriter( Tweed.SCRATCH +"/params.txt" )), null );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

@@ -236,7 +236,8 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 			
 			MathTransform latLong2Country = CRS.findMathTransform( 
 					CRS.decode( sourceCRS ), 
-					CRS.decode( TweedSettings.settings.gmlCoordSystem ), true );
+					Tweed.kludgeCMS.get(TweedSettings.settings.gmlCoordSystem),
+					true );
 			
 			
 			latLong2Country.transform( trans, 0, trans, 0, 1 );
@@ -249,7 +250,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 				trans[1] = tmp;
 			}
 			
-			MathTransform country2Cartesian = CRS.findMathTransform( CRS.decode( TweedSettings.settings.gmlCoordSystem ),  DefaultGeocentricCRS.CARTESIAN, true );
+			MathTransform country2Cartesian = CRS.findMathTransform( Tweed.kludgeCMS.get( TweedSettings.settings.gmlCoordSystem ),  DefaultGeocentricCRS.CARTESIAN, true );
 			country2Cartesian.transform( trans, 0, trans, 0, 1 );
 			country2Cartesian.transform( north, 0, north, 0, 1 );
 

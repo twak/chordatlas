@@ -1323,11 +1323,6 @@ public class Regularizer {
 		
 		if (d.height < 2.3 )
 			set(d, Bounds.HEIGHT, 2.3, 5 * alpha);
-		
-//		if (d.height > 2.5)
-//			set(d, Bounds.YMAX, 2.5, 0.5 * alpha);
-		
-//		if (d.width < )
 	}
 	
 	private void constrainMoulding( MiniFacade mf, FRect d, double alpha ) {
