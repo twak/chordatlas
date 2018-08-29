@@ -56,7 +56,11 @@ public class GenListItem extends JPanel {
 		visible = new JCheckBox();
 		
 		int d = visible.getPreferredSize().height;
-		color.setPreferredSize( new Dimension ( d,d ) ) ;
+		
+		Dimension cd = new Dimension ( d,d );
+		color.setPreferredSize( cd ) ;
+		color.setMaximumSize( cd ) ;
+		setMaximumSize( new Dimension (100, d) );
 		
 		add(color);
 		color.setBackground(gen.color);
