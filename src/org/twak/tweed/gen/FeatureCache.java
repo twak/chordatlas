@@ -71,7 +71,7 @@ public class FeatureCache {
 			if ( loadedRectified == null )
 				try {
 					loadedRectified = ImageIO.read( fixAbsPath(rectified) );
-				} catch ( IOException e ) {
+				} catch ( Exception e ) {
 					e.printStackTrace();
 					loadedRectified = new BufferedImage( 1, 1, BufferedImage.TYPE_3BYTE_BGR );
 				}
