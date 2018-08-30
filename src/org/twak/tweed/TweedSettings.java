@@ -130,10 +130,18 @@ public class TweedSettings {
 			}
 			
 			
-			File defaultData = new File (folder, "chordatlas_example_inputs_1.zip");
-			if (!defaultData.exists()) {
-				ProgressMonitor pm = new ProgressMonitor( null, "downloading project data", "...", 0, 1 );
-				Filez.unpackArchive( new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data/"+defaultData.getName() ), folder, pm );
+			File defaultData = new File( folder, "chordatlas_example_inputs_1.zip" );
+			URL url = new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data/" + defaultData.getName() );
+			try {
+				if ( !defaultData.exists() ) {
+					ProgressMonitor pm = new ProgressMonitor( null, "downloading project data", "...", 0, 1 );
+					Filez.unpackArchive( url, folder, pm );
+				}
+			} catch ( Throwable th ) {
+
+				System.out.println( "failed to download project data: check net connection?" );
+				System.out.println( "manual download instructions here: https://github.com/twak/chordatlas/issues/8#issuecomment-417321551" );
+				th.printStackTrace();
 			}
 			
 			TweedFrame.instance.tweed.initFrom( folder.toString() );
