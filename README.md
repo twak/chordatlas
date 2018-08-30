@@ -19,7 +19,7 @@ code is alpha / academic-grade: use at your own risk. other hints:
 1. use left mouse drag + WASD keys to navigate the 3D view
 2. arrow keys change brightness and camera speed, page up and page down control fov
 1. right mouse button selects things in the 3D view
-1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the scratch folder) are deleted when you quit.
+1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the `scratch` folder) are deleted when you quit.
 1. you can edit the visiblity of different layers with the layer-list check boxes
 
 things get a bit more complicated for the bigsur optimisation and window detection:
