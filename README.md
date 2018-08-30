@@ -1,6 +1,6 @@
 # chordatlas: data-driven urban procedural modeling
 
-chordatlas is an urban procedural modeling and data fusion research platform, in particular it contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
+chordatlas is an urban procedural modeling and data fusion research platform. [video](https://youtu.be/Jz8q09r-RFg). It contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
@@ -19,7 +19,7 @@ code is alpha / academic-grade: use at your own risk. other hints:
 1. use left mouse drag + WASD keys to navigate the 3D view
 2. arrow keys change brightness and camera speed, page up and page down control fov
 1. right mouse button selects things in the 3D view
-1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the scratch folder) are deleted when you quit.
+1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the `scratch` folder) are deleted when you quit.
 1. you can edit the visiblity of different layers with the layer-list check boxes
 
 things get a bit more complicated for the bigsur optimisation and window detection:
