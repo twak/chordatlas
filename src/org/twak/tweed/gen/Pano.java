@@ -3,6 +3,7 @@ package org.twak.tweed.gen;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import javax.vecmath.Vector3d;
 
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.Tweed;
+import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Streamz;
 import org.twak.utils.geom.LinearForm3D;
@@ -121,24 +123,45 @@ public class Pano {
 	}
 
 	private void convert( String f, int i ) {
+		
+		
 		File downSampled = new File (  Tweed.SCRATCH, f );
 		if ( !downSampled.exists() ) {
+			
+			String absFileS = Tweed.DATA + File.separator + "panos" + File.separator + orig.getPath(),
+					absFileO =  Tweed.SCRATCH + f ;
 			try {
 
 				System.out.println( "downscaling " + orig.getPath() + " to " + i + "x" + i );
 				
-				ProcessBuilder pb = new ProcessBuilder( "convert", Tweed.DATA + File.separator + "panos" + File.separator + orig.getPath(), "-resize", 
-						i + "x" + i /*+"!" square images */, Tweed.SCRATCH + f  );
+				ProcessBuilder pb = new ProcessBuilder( "convert", absFileS, "-resize", 
+						i + "x" + i /*+"!" square images */, absFileO );
 				
 				Process p = pb.start();
 				
 				Streamz.inheritIO(p.getInputStream(), System.out);
 				Streamz.inheritIO(p.getErrorStream(), System.err);
 				
-				System.out.println( "result " + p.waitFor() );
+				int r = p.waitFor();
+				
+				if (r != 0)
+					throw new Error("do imageIO pls!");
+				System.out.println( "result " + r );
 				
 			} catch ( Throwable e ) {
+				
+				System.err.println("failed to resize image with imageMagick, trying java" );
 				e.printStackTrace();
+				
+				try {
+					BufferedImage bi = ImageIO.read(new File (absFileS));
+					ImageIO.write( Imagez.scaleSquare(bi, i), "jpg", new FileOutputStream(absFileO) );
+				}
+				catch (Throwable th) {
+					System.err.println("failed to convert with ImageIO too!");
+					th.printStackTrace();
+				}
+				
 			}
 		}
 	}

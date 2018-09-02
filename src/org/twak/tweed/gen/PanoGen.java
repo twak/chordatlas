@@ -2,7 +2,6 @@ package org.twak.tweed.gen;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -333,6 +333,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		ui.removeAll();
 		
 		ui.setLayout( new ListDownLayout() );
+		ui.add(new JLabel(panos.size() +" panoramas"));
 		
 		if ( folder != null ) {
 			File absFolder = new File( Tweed.toWorkspace( folder ), TO_DOWNLOAD );
