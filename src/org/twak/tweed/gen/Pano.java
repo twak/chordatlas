@@ -124,7 +124,6 @@ public class Pano {
 
 	private void convert( String f, int i ) {
 		
-		
 		File downSampled = new File (  Tweed.SCRATCH, f );
 		if ( !downSampled.exists() ) {
 			
@@ -146,6 +145,7 @@ public class Pano {
 				
 				if (r != 0)
 					throw new Error("do imageIO pls!");
+				
 				System.out.println( "result " + r );
 				
 			} catch ( Throwable e ) {
@@ -161,7 +161,6 @@ public class Pano {
 					System.err.println("failed to convert with ImageIO too!");
 					th.printStackTrace();
 				}
-				
 			}
 		}
 	}
