@@ -76,7 +76,7 @@ to build:
 If you use this project, please cite the appropriate paper(s). Citations help us get more funding to continue these projects:
 
 ```
-@article{KellyGuerreroEtAl_FrankenGAN_SigAsia2018,
+@article{frankengan,
   author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
   title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
   year = {2018},
