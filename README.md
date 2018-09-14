@@ -13,7 +13,7 @@ if you have problems using this system, I would love to [know](https://github.co
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (code is academic grade: use at your own risk. the 10g says to use a 10Gb heap)
 1. read the [user interface instructions](https://github.com/twak/chordatlas/wiki/interface).
 
-There are additional requirements and instructions for [bigSUR](https://github.com/twak/chordatlas/wiki/BigSUR-details) and [frankenGAN](https://github.com/twak/chordatlas/wiki/frankenGAN-details).
+There are additional requirements and instructions for [bigSUR](https://github.com/twak/chordatlas/wiki/bigSUR-details) and [frankenGAN](https://github.com/twak/chordatlas/wiki/frankenGAN-details).
 
 more adventourous hackers may be interested in compiling their [own datasets](https://github.com/twak/chordatlas/wiki/datasets) or [building the system](https://github.com/twak/chordatlas/wiki/build-instructions).
 
