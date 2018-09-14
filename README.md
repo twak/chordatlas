@@ -102,7 +102,7 @@ If you use this project, please cite the appropriate paper(s). Citations help us
 ```
 @article{procex,
  title = {Interactive Architectural Modeling with Procedural Extrusions},
- author = {Kelly, Tom and Wonka, Peter},
+ author = {Tom Kelly and Peter Wonka},
  year = {2011},
  journal = {{ACM} Transactions on Graphics},
  volume = {30},
