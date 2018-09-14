@@ -12,6 +12,8 @@ if you have problems using this system, I would love to [know](https://github.co
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (the 10g says to use a 10Gb heap)
 
+There are additional requirements and instructions for [bigSUR](https://github.com/twak/chordatlas/wiki/BigSUR-details) and [frankenGAN](https://github.com/twak/chordatlas/wiki/frankenGAN-details).
+
 code is alpha / academic-grade: use at your own risk. other hints:
 
 1. it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
@@ -21,34 +23,6 @@ code is alpha / academic-grade: use at your own risk. other hints:
 1. right mouse button selects things in the 3D view
 1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the `scratch` folder) are deleted when you quit.
 1. you can edit the visiblity of different layers with the layer-list check boxes
-
-things get a bit more complicated for the bigsur optimisation and window detection:
-1. install and license [gurobi optimiser 7.5](http://www.gurobi.com/downloads/gurobi-optimizer). ensure gurobi is on your library path before you start chordatlas.
-1. if you want to detect features (doors, windows...), install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
-1. follow the bigsur data instructions below.
-
-similarly for the frankengan texturing pipeline:
-1. install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). tested on an 8gb nvidia card.
-1. run the following to start [bikegan](https://github.com/twak/bikegan) in a temporary directory:
-`nvidia-docker run -v $(pwd)/input:/home/user/bikegan/input -v $(pwd)/output:/home/user/bikegan/output -it --rm twak/bikegan`
-1. in chordatlas' `file -> settings` menu, set the bikegan root to the temporary directory
-1. use the house tool to create a house (right click somewhere); use the select tool to select the new house.
-1. click `material`, then `joint`, then `redraw distribution` to texture the house with frankengan
-
-## bigsur data
-
-several datasets are available [here](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/data/). we don't have a license to distrubte the original data used in the paper, so the GIS data has been replaced by openstreetmap, and streetview photos have been udpated.
-1. unzip the data
-1. start chordatlas
-1. select: `file`, `open...`, then select the tweed.xml in the root of the unzipped data
-1. select the layer `panos`, then click `download` to fetch the panoramas from google. watch the command line for progress. this will take up a bunch of disk space (5mb per image).
-1. (the mesh and gis data may cover different areas. you can select the `minimesh` layer and select `load all` to show all the mesh data; and "hide all" to hide it.)
-1. find a block surrounded by panorama with mesh data; use the select tool, and right click on it to create a block mesh layer.
-1. select `block` in the layer-list, and click `render panoramas` to create the 2d street-side images
-1. select `block` in the layer-list, and click `find image features` to detect windows etc... with a CNN. this is slow, with limited feedback on the commandline.
-1. select `block` in the layer-list, and click `find profiles`. wait for the profiles to become visible in 3d.
-1. select the `profiles` layer and click `optimize` to run the optimization, and create the resulting mesh. cancelling the optimization in the pop-up will create the mesh using the current best-solution (if any).
-1. the `file -> export obj` menu option will export all visible polygons
 
 the adventurous hacker might try to compile their own datasets: 
 
