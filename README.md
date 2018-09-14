@@ -16,7 +16,7 @@ code is alpha / academic-grade: use at your own risk. other hints:
 
 1. it will write a file `.tweed_config` into your home directory; this is the only state it creates outside of the data folders.
 1. look at the command line for feedback (some operations like finding profiles or features are slow, and don't have progress bars)
-1. use left mouse drag + `W``A``S``D` keys to navigate the 3D view
+1. use left mouse drag + `W` `A` `S` `D` keys to navigate the 3D view
 2. arrow keys change brightness and camera speed, page up and page down control fov
 1. right mouse button selects things in the 3D view
 1. intermediate results (meshes, rendered images, and detected features) are written to the project's data diretory. some of these (in the `scratch` folder) are deleted when you quit.
