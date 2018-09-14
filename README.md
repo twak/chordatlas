@@ -77,13 +77,12 @@ If you use this project, please cite the appropriate paper(s). Citations help us
 
 ```
 @article{frankengan,
-  author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
   title = {FrankenGAN: Guided Detail Synthesis for Building Mass-Models Using Style-Synchonized GANs},
+  author = {Tom Kelly and Paul Guerrero and Anthony Steed and Peter Wonka and Niloy J. Mitra},
   year = {2018},
-  journal = {ACM Trans. Graph.},
+  journal = {{ACM} Transactions on Graphics},
   volume = {37},
   number = {6},
-  pages = {1:1--1:14},
   doi = {10.1145/3272127.3275065},
 }
 ```
@@ -96,34 +95,18 @@ If you use this project, please cite the appropriate paper(s). Citations help us
   journal = {{ACM} Transactions on Graphics},
   volume = {36},
   number = {6},
-  month = November,
-  year = {2017},
-  articleno = {204},
-  numpages = {16},
-  url = {https://doi.org/10.1145/3130800.3130823},
   doi = {10.1145/3130800.3130823}
 }
 ```
 
 ```
 @article{procex,
- author = {Kelly, Tom and Wonka, Peter},
  title = {Interactive Architectural Modeling with Procedural Extrusions},
- journal = {ACM Trans. Graph.},
- issue_date = {April 2011},
+ author = {Kelly, Tom and Wonka, Peter},
+ year = {2011},
+ journal = {{ACM} Transactions on Graphics},
  volume = {30},
  number = {2},
- month = apr,
- year = {2011},
- issn = {0730-0301},
- pages = {14:1--14:15},
- articleno = {14},
- numpages = {15},
- url = {http://doi.acm.org/10.1145/1944846.1944854},
  doi = {10.1145/1944846.1944854},
- acmid = {1944854},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {Procedural modeling, roof modeling, urban modeling},
 }
 ```
