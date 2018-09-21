@@ -15,7 +15,7 @@ if you have problems using this system, I would love to [know](https://github.co
 
 there are additional requirements and instructions for [bigSUR](https://github.com/twak/chordatlas/wiki/bigSUR-details) (creates clean meshes from noisy meshes, streetview info, and maps) and [frankenGAN](https://github.com/twak/chordatlas/wiki/frankenGAN-details) (textures the meshes, generates feature locations).
 
-more adventourous hackers may be interested in compiling their [own datasets](https://github.com/twak/chordatlas/wiki/datasets) or [building the system](https://github.com/twak/chordatlas/wiki/build-instructions).
+more adventurous hackers may be interested in compiling their [own datasets](https://github.com/twak/chordatlas/wiki/datasets) or [building the system](https://github.com/twak/chordatlas/wiki/build-instructions).
 
 ## cite
 
