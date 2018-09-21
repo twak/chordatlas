@@ -6,7 +6,7 @@ chordatlas is an urban procedural modeling and data fusion research platform. [v
 
 ## run
 
-the system is developed on ubuntu, but most of the non-machine learning instructions should work on any platform. 
+the system is developed on ubuntu, but most of the non-machine learning systems should work on any platform. 
 
 1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
