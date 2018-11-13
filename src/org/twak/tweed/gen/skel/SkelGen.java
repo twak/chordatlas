@@ -726,6 +726,10 @@ public class SkelGen extends Gen implements IDumpObjs {
 		dec.addActionListener( l -> textureSelected( null, null, SkelGen.this ) );
 		ui.add( dec );
 		
+		JButton siteplan = new JButton( "edit plan/profile" );
+		siteplan.addActionListener( e -> new SiteplanDesigner(  (SuperFace) block.faces.get( 0 ), this ) );
+		ui.add(siteplan);
+		
 		JButton comptue = new JButton( "refresh geometry" );
 		comptue.addActionListener( new ActionListener() {
 			

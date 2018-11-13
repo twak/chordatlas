@@ -257,11 +257,8 @@ public class Pix2Pix {
 	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, 
 			DRectangle crop, RescaleOp rgbRescale, BufferedImage[] output ) throws IOException {
 		
-//		String name = f.get
-
 		new File( Tweed.SCRATCH ).mkdirs();
 
-//		File texture = new File( f, name + ".png" );
 		String dest = "missing";
 		
 		if ( texture.exists() && texture.length() > 0 ) {
@@ -279,7 +276,7 @@ public class Pix2Pix {
 
 				ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + "_nocrop.png" ) ) );
 				
-				rgb = scaleToFill ( rgb, crop );//   .getSubimage( (int) crop.x, (int) crop.y, (int) crop.width, (int) crop.height );
+				rgb = scaleToFill ( rgb, crop );
 				labels = scaleToFill ( labels, crop );
 			}
 			
