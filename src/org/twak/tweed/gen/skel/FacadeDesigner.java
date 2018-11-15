@@ -101,19 +101,21 @@ public class FacadeDesigner {
 										showSkeleton( x.skel.output, null, x.mr ) );
 							
 						if ( ma.appMode == TextureMode.Net ) // needs prior setSkel to compute visible windows.
-							sg.updateTexture( sf, new Runnable() {
-								@Override
-								public void run() {
-									sg.tweed.enqueue( new Runnable() {
-										@Override
-										public void run() {
-											sg.setSkel( skel, sf );
-											sg.tweed.getRootNode().updateGeometricState();
-										}
-									} );
-
-								}
-							} );
+							sg.computeMaterials( sf.buildingApp );
+						
+//						( sf.buildingApp, new Runnable() {
+//								@Override
+//								public void run() {
+//									sg.tweed.enqueue( new Runnable() {
+//										@Override
+//										public void run() {
+//											sg.setSkel( skel, sf );
+//											sg.tweed.getRootNode().updateGeometricState();
+//										}
+//									} );
+//
+//								}
+//							} );
 					}
 				} );
 			}

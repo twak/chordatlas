@@ -78,19 +78,22 @@ public class SiteplanDesigner {
 						sg.setSkel( (PlanSkeleton) threadKey, sf );
 
 						if ( TweedSettings.settings.siteplanInteractiveTextures )
-							sg.updateTexture( sf, new Runnable() {
-								public void run() {
+							sg.computeMaterials( sf.buildingApp );
 
-									sg.tweed.enqueue( new Runnable() {
-
-										@Override
-										public void run() {
-											sg.setSkel( (PlanSkeleton) threadKey, sf );
-										}
-									} );
-
-								};
-							} );
+							
+//							sg.updateTexture( sf.buildingApp, new Runnable() {
+//								public void run() {
+//
+//									sg.tweed.enqueue( new Runnable() {
+//
+//										@Override
+//										public void run() {
+//											sg.setSkel( (PlanSkeleton) threadKey, sf );
+//										}
+//									} );
+//
+//								};
+//							} );
 					}
 				} );
 			}

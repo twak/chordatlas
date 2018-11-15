@@ -20,6 +20,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
 import javax.vecmath.Point2d;
 
 import org.twak.camp.Output;
@@ -381,7 +382,10 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
 		Set<MiniFacade> mfs = new HashSet<>();
 
-		for ( HalfFace f : block )
+		for ( HalfFace f : block ) {
+			
+			SuperFace sf = (SuperFace) f;
+			
 			for ( HalfEdge e : f ) {
 				SuperEdge se = ( (SuperEdge) e );
 				if ( !mfs.add( se.toEdit ) ) {
@@ -389,7 +393,38 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 					ensureMF( (SuperFace) f, se );
 				}
 			}
-
+			
+			// necessary?
+//			if (sf.mr == null)
+//				sf.mr  = new MiniRoof( sf );
+		}
+		
+		// is this worth it?
+//		if (false)
+//		SwingUtilities.invokeLater( new Runnable () {
+//			public void run() {
+//		
+//		new SelectedApps( blockApp, new Runnable() {
+//			@Override
+//			public void run() {
+//				tweed.enqueue( new Runnable() {
+//					@Override
+//					public void run() {
+//						setSkel( null, null );
+//					}
+//				} );
+//			}
+//
+//			@Override
+//			public String toString() {
+//				return "SkelGen.onLoad";
+//			}
+//
+//		} ).computeTextures(null);
+//		
+//			};
+//		} );
+		
 		this.geometry = new Cach<>( sf -> new Rendered() );
 
 		SkelFootprint.findOcclusions( block );
@@ -472,13 +507,13 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 			}
 		}
 	}
-
-	public void updateTexture( SuperFace sf, Runnable update ) {
+	
+	public void updateTexture( App app, Runnable update ) {
 		new Thread( new Runnable() {
 
 			@Override
 			public void run() {
-				new SelectedApps( sf.buildingApp, update ).computeTextures( null );
+				new SelectedApps( app, update ).computeTextures( null );
 			}
 
 			@Override
@@ -488,6 +523,26 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		} ).start();
 	}
 
+	public void computeMaterials(App app) {
+		
+		updateTexture( app, new Runnable() {
+			@Override
+			public void run() {
+				tweed.enqueue( new Runnable() {
+					@Override
+					public void run() {
+						
+						setSkel( null, null );
+						tweed.getRootNode().updateGeometricState();
+					}
+				} );
+
+			}
+		} );
+	}
+
+
+	
 	/**
 	 * When someone clicks on geometry with userdata GreebleSkel.Appearance of a
 	 * class, what do we show in the UI?
@@ -688,6 +743,10 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		JButton siteplan = new JButton( "edit plan/profile" );
 		siteplan.addActionListener( e -> new SiteplanDesigner( (SuperFace) block.faces.get( 0 ), this ) );
 		ui.add( siteplan );
+		
+		JButton compMat = new JButton( "compute materials" );
+		compMat.addActionListener( e -> computeMaterials( blockApp ) );
+		ui.add( compMat );
 		
 		if (TweedFrame.instance.getGensOf( SkelGen.class ).size() > 1) {
 			JButton merge = new JButton( "merge all "+name+"es" );

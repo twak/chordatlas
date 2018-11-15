@@ -1048,7 +1048,6 @@ public class SkelFootprint {
 
 							Line e2l = e2.line();
 							
-							
 							double dist = el1.distance( e2l ); 
 									
 							if (  e2l.absAngle( el1 ) > Math.PI * 0.7 &&  ( 
