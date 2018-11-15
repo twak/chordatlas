@@ -68,6 +68,8 @@ public class FacadeTexApp extends App {
 	
 	public final static int CHIMNEY_PAD = 20;
 	
+	private FacadeTexApp() {}
+	
 	public FacadeTexApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;

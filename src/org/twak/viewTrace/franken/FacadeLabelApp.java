@@ -53,6 +53,8 @@ public class FacadeLabelApp extends App {
 			debugLabels = false, 
 			showRawLabels = false;
 	
+	private FacadeLabelApp() {}
+	
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;
@@ -340,9 +342,6 @@ public class FacadeLabelApp extends App {
 				root = om.readTree( FileUtils.readFileToString( file ) );
 				JsonNode node = root.get( "window" );
 				
-				FacadeTexApp fta = mf.facadeTexApp;
-				
-				i:
 				for (int i = 0; i < node.size(); i++) {
 					
 					JsonNode rect = node.get( i );

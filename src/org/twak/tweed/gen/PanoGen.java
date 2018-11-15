@@ -536,4 +536,13 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	public void dumpObj(ObjDump dump) {
 		Jme3z.dump( dump, gNode, 0 );
 	}
+	
+	
+	@Override
+	public void onLoad( Tweed tweed ) {
+		super.onLoad( tweed );
+		panos = new ArrayList();
+		planes = new ArrayList();
+		ui = new JPanel();
+	}
 }

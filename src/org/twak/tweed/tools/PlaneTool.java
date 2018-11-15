@@ -44,7 +44,7 @@ public class PlaneTool extends Tool {
 
 		
 		if ( this.pg == null ) {
-			List<Gen> gens = tweed.frame.gens( PlanesGen.class );
+			List<Gen> gens = tweed.frame.getGensOf( PlanesGen.class );
 			if ( gens.isEmpty() ) {
 				pg = new PlanesGen( tweed );
 				tweed.frame.addGen( pg, true );

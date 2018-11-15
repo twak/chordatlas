@@ -157,6 +157,13 @@ public class GISGen  extends LineGen3d implements ICanSave {
 	
 	public void onLoad( Tweed tweed ) {
 		super.onLoad( tweed );
+		
+		lines = new ArrayList<>();
+		blocks = new HashMap<>();
+		lots = new ArrayList<>();
+		lot2block = new HashMap<>();
+		lastMesh = new HashMap<>();
+		
 		if (objFile != null) // fixme: subclass pls
 			initObj();
 		else if (gmlFile != null)
@@ -169,6 +176,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		LoopL<Point3d> fromOBJ = new LoopL<>();
 		Closer<Point3d> closer = new Closer<>();
+		lines = new ArrayList<>();
 		
 		for (int[] face : gObj.faces) {
 			
@@ -504,7 +512,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		boolean found = false;
 		
-		for ( Gen gen : tweed.frame.gens( MiniGen.class ) ) { // minigen == optimised obj
+		for ( Gen gen : tweed.frame.getGensOf( MiniGen.class ) ) { // minigen == optimised obj
 			
 			( (MiniGen) gen ).clip( hull, croppedFile );
 
@@ -514,7 +522,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		if (!found) 
 			
-			for ( Gen gen : tweed.frame.gens( MeshGen.class ) ) { // obj == just import whole obj
+			for ( Gen gen : tweed.frame.getGensOf( MeshGen.class ) ) { // obj == just import whole obj
 			
 				ObjGen objg = (ObjGen) gen;
 				

@@ -124,8 +124,9 @@ public class TweedSettings {
 				settings = new TweedSettings();
 			else
 			{
-				XStream xs = new XStream(new PureJavaReflectionProvider());
+				XStream xs = new XStream();//new PureJavaReflectionProvider());
 				xs.ignoreUnknownElements();
+				
 				settings = (TweedSettings) xs.fromXML( def );
 			}
 			

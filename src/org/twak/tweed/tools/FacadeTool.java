@@ -92,7 +92,7 @@ public class FacadeTool extends SelectTool {
 
 		Map<Point2d, Pano> panos = new HashMap<>();
 
-		for ( Gen gen : tweed.frame.gens( PanoGen.class ) )
+		for ( Gen gen : tweed.frame.getGensOf( PanoGen.class ) )
 			for ( Pano pg : ( (PanoGen) gen ).getPanos() ) {
 				Point2d pt = new Point2d( pg.location.x, pg.location.z );
 
