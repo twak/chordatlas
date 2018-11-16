@@ -55,10 +55,6 @@ public class BuildingApp extends App {
 		
 		MultiMap<String, App> down = new MultiMap<>();
 		
-		System.out.println( superFace );
-		System.out.println( superFace.mr );
-		System.out.println( superFace.mr.roofGreebleApp );
-		
 		down.put( "roof",  superFace.mr.roofGreebleApp ); 
 		
 		for (HalfEdge e : superFace) 

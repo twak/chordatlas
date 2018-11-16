@@ -393,37 +393,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 					ensureMF( (SuperFace) f, se );
 				}
 			}
-			
-			// necessary?
-//			if (sf.mr == null)
-//				sf.mr  = new MiniRoof( sf );
 		}
-		
-		// is this worth it?
-//		if (false)
-//		SwingUtilities.invokeLater( new Runnable () {
-//			public void run() {
-//		
-//		new SelectedApps( blockApp, new Runnable() {
-//			@Override
-//			public void run() {
-//				tweed.enqueue( new Runnable() {
-//					@Override
-//					public void run() {
-//						setSkel( null, null );
-//					}
-//				} );
-//			}
-//
-//			@Override
-//			public String toString() {
-//				return "SkelGen.onLoad";
-//			}
-//
-//		} ).computeTextures(null);
-//		
-//			};
-//		} );
 		
 		this.geometry = new Cach<>( sf -> new Rendered() );
 
@@ -523,7 +493,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		} ).start();
 	}
 
-	public void computeMaterials(App app) {
+	public void updateTextureThenGeom(App app) {
 		
 		updateTexture( app, new Runnable() {
 			@Override
@@ -745,7 +715,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		ui.add( siteplan );
 		
 		JButton compMat = new JButton( "compute materials" );
-		compMat.addActionListener( e -> computeMaterials( blockApp ) );
+		compMat.addActionListener( e -> updateTextureThenGeom( blockApp ) );
 		ui.add( compMat );
 		
 		if (TweedFrame.instance.getGensOf( SkelGen.class ).size() > 1) {

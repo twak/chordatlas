@@ -6,8 +6,10 @@ import java.util.List;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point2d;
 
+import org.geotools.util.WeakHashSet;
 import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
+import org.twak.camp.Output.SharedEdge;
 import org.twak.camp.Skeleton;
 import org.twak.camp.ui.Bar;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
@@ -65,11 +67,16 @@ public class SiteplanDesigner {
 							if ( wt != null ) {
 
 								SETag set = (SETag) GreebleHelper.getTag( f.plan, SETag.class );
-
 								if ( set != null ) // created by siteplan --> set correct face
 									wt.miniFacade.facadeTexApp.parent = (SuperFace) set.se.face;
-							}
+								
+								if (f.parent == null) {
 
+									SharedEdge se = f.definingSE.iterator().next();
+									wt.occlusionID.end.set (se.start.x, se.start.y);
+									wt.occlusionID.start.set (se.end.x, se.end.y);
+								}
+							}
 						}
 
 						sf.skel.output.addNonSkeletonSharedEdges( new RoofTag( Colourz.toF4( sf.mr.roofTexApp.color ) ) );
@@ -78,22 +85,7 @@ public class SiteplanDesigner {
 						sg.setSkel( (PlanSkeleton) threadKey, sf );
 
 						if ( TweedSettings.settings.siteplanInteractiveTextures )
-							sg.computeMaterials( sf.buildingApp );
-
-							
-//							sg.updateTexture( sf.buildingApp, new Runnable() {
-//								public void run() {
-//
-//									sg.tweed.enqueue( new Runnable() {
-//
-//										@Override
-//										public void run() {
-//											sg.setSkel( (PlanSkeleton) threadKey, sf );
-//										}
-//									} );
-//
-//								};
-//							} );
+							sg.updateTextureThenGeom( sf.buildingApp );
 					}
 				} );
 			}
