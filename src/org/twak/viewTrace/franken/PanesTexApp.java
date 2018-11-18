@@ -44,7 +44,7 @@ public class PanesTexApp extends App {
 		
 		this.fr = fr;
 		
-		if (TweedSettings.settings.siteplanInteractiveTextures)
+		if (TweedSettings.settings.experimentalInteractiveTextures)
 			appMode = TextureMode.Net;
 		
 		getUp( ).install(this);
@@ -56,7 +56,7 @@ public class PanesTexApp extends App {
 		this.useCoarseStyle = t.useCoarseStyle;
 		this.fr = t.fr;
 		
-		if (TweedSettings.settings.siteplanInteractiveTextures)
+		if (TweedSettings.settings.experimentalInteractiveTextures)
 			appMode = TextureMode.Net;
 	}
 	

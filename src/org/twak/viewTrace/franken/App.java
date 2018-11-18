@@ -35,6 +35,7 @@ public abstract class App /*earance*/ implements Cloneable {
 
 	}
 	
+	
 	public void install( App child ) {
 		
 		child.appMode = this.appMode;
@@ -46,6 +47,9 @@ public abstract class App /*earance*/ implements Cloneable {
 			child.styleZ = null;
 			break;
 		case Net:
+			
+//			child.styleZ = new double[child.getNetInfo().sizeZ];
+					
 			if (styleSource instanceof JointStyle)
 				child.styleSource = styleSource;
 			else
@@ -64,14 +68,8 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	String name;
 	
-	
 	// contains latent variables for children (who are created during tree evluation). 
 	public transient Map<Class<? extends App>, double[]> bakeWith = new HashMap<>();
-	
-	private void readObject( ObjectInputStream in ) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		this.bakeWith = new HashMap<>();
-	}
 
 	public App( App a ) {
 		this.appMode = a.appMode;
@@ -110,7 +108,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	
 	public static synchronized void computeWithChildren( int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
 
-		ProgressMonitor pm = TweedSettings.settings.siteplanInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
+		ProgressMonitor pm = TweedSettings.settings.experimentalInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
 
 		long startTime = System.currentTimeMillis();
 

@@ -100,11 +100,12 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
-	public boolean siteplanInteractiveTextures = false;
 	public boolean importMiniMeshTextures = false;
-	
 
-	
+	// hacks to show frankengan textures changes in real time
+	public boolean experimentalInteractiveTextures = false;
+	// hacks to save a SkelGen to disk
+	public boolean experimentalSaveSkel = false;
 	
 	public TweedSettings() {
 	}
@@ -128,6 +129,10 @@ public class TweedSettings {
 				xs.ignoreUnknownElements();
 				
 				settings = (TweedSettings) xs.fromXML( def );
+				
+				if (System.getProperty("user.name").equals("twak")) {
+					settings.experimentalSaveSkel = true;
+				}
 			}
 			
 			
@@ -160,7 +165,9 @@ public class TweedSettings {
 		
 		if (folder != null) {
 			
-			settings.genList = TweedFrame.instance.genList.stream().filter( g -> g instanceof ICanSave ).collect( Collectors.toList() );
+			settings.genList = TweedFrame.instance.genList.stream().
+					filter( g -> (g instanceof ICanSave) && ((ICanSave)g).canISave() ).
+					collect( Collectors.toList() );
 			
 			FileOutputStream fos = null;
 			

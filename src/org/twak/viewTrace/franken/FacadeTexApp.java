@@ -165,7 +165,7 @@ public class FacadeTexApp extends App {
 			
 			MiniFacade mf = fta.mf;
 			
-			if (!TweedSettings.settings.siteplanInteractiveTextures && mf.featureGen instanceof CGAMini) {
+			if (!TweedSettings.settings.experimentalInteractiveTextures && mf.featureGen instanceof CGAMini) {
 				mf.featureGen = new FeatureGenerator( mf, mf.featureGen );
 			}
 

@@ -35,7 +35,7 @@ public class SiteplanDesigner {
 		sg.closeSitePlan();
 		Plot.closeLast();
 
-		if ( !TweedSettings.settings.siteplanInteractiveTextures )
+		if ( !TweedSettings.settings.experimentalInteractiveTextures )
 			for ( HalfEdge he : sf ) {
 				SuperEdge ee = (SuperEdge) he;
 				if ( ee.toEdit != null )
@@ -84,7 +84,7 @@ public class SiteplanDesigner {
 
 						sg.setSkel( (PlanSkeleton) threadKey, sf );
 
-						if ( TweedSettings.settings.siteplanInteractiveTextures )
+						if ( TweedSettings.settings.experimentalInteractiveTextures )
 							sg.updateTextureThenGeom( sf.buildingApp );
 					}
 				} );
@@ -115,7 +115,7 @@ public class SiteplanDesigner {
 				if ( oldTag != null )
 					mfa.parent = oldTag.sf;
 
-				if ( TweedSettings.settings.siteplanInteractiveTextures ) {
+				if ( TweedSettings.settings.experimentalInteractiveTextures ) {
 
 					mfa.appMode = TextureMode.Net;
 					se.toEdit.height = 5;

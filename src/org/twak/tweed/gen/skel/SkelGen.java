@@ -714,9 +714,11 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		siteplan.addActionListener( e -> new SiteplanDesigner( (SuperFace) block.faces.get( 0 ), this ) );
 		ui.add( siteplan );
 		
-		JButton compMat = new JButton( "compute materials" );
-		compMat.addActionListener( e -> updateTextureThenGeom( blockApp ) );
-		ui.add( compMat );
+		if ( TweedSettings.settings.experimentalSaveSkel ) {
+			JButton compMat = new JButton( "compute materials" );
+			compMat.addActionListener( e -> updateTextureThenGeom( blockApp ) );
+			ui.add( compMat );
+		}
 		
 		if (TweedFrame.instance.getGensOf( SkelGen.class ).size() > 1) {
 			JButton merge = new JButton( "merge all "+name+"es" );
@@ -802,14 +804,19 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		
 		SkelGen newSkel = new SkelGen( tweed );
 		newSkel.block = new HalfMesh2();
-		newSkel.blockApp.skelGen = this;
+		newSkel.blockApp.skelGen = newSkel;
 		
+		// todo: this is messy reparenting to new block
 		for (Gen g : TweedFrame.instance.getGensOf( SkelGen.class )) {
 			
 				for ( HalfFace hf : ( (SkelGen) g ).block.faces ) {
+					
 					newSkel.block.faces.add( hf );
-					((SuperFace)hf).skel = null;
-					((SuperFace)hf).buildingApp.parent = newSkel;
+					
+					SuperFace sf = (SuperFace) hf;
+					
+					sf.skel = null;
+					sf.buildingApp.parent = newSkel;
 				}
 				
 				TweedFrame.instance.removeGen( g );
@@ -887,5 +894,10 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 						.points.streamE().flatMap( bar -> bar.tags.stream() ).filter( tag -> tag instanceof WallTag ).map( tag -> (WallTag) tag ).forEach( t -> t.miniFacade = mf );
 			}
 		}
+	}
+	
+	@Override
+	public boolean canISave() {
+		return TweedSettings.settings.experimentalSaveSkel;
 	}
 }

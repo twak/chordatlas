@@ -1,5 +1,6 @@
 package org.twak.viewTrace.franken;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -38,6 +39,11 @@ public class BuildingApp extends App {
 		super (buildingApp);
 		this.parent = buildingApp.parent;
 		this.superFace = buildingApp.superFace;
+	}
+	
+	private Object readResolve()  {
+		this.bakeWith = new HashMap<>();
+		return this;
 	}
 
 	@Override
