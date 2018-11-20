@@ -307,6 +307,7 @@ public class RoofTexApp extends App {
 		
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		
+		
 		g.setColor( Color.cyan );
 		for (Polygon p : boundary) {
 			g.fill( p );
@@ -329,7 +330,7 @@ public class RoofTexApp extends App {
 		g.setColor( Color.magenta );
 		for (Polygon p : pitches)
 			g.draw( p );
-		
+
 		if ( !greebles ) {
 			g.setStroke( new BasicStroke( 5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
 			g.setColor( Color.gray );
@@ -341,7 +342,7 @@ public class RoofTexApp extends App {
 		}
 		
 		g.setStroke( new BasicStroke( 2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
-		
+
 		for (Face f : mr.origins.ab.values()) 
 			for (FCircle greeble : mr.getGreebles( f ) ) {
 				
@@ -372,7 +373,6 @@ public class RoofTexApp extends App {
 				
 			}
 		
-		
 		g.setStroke( new BasicStroke( 3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND) );
 		for (HalfEdge e : mr.superFace) {
 			MiniFacade mf = ((SuperEdge)e).toEdit; 
@@ -398,9 +398,6 @@ public class RoofTexApp extends App {
 						
 						g.drawLine( (int)a.x, (int)a.y, (int)b.x, (int)b.y );
 					}
-					
-//					g.setColor( Color.magenta );
-//					g.draw( dormer );
 				}
 			}
 		}

@@ -323,7 +323,7 @@ public class GreebleGrid {
 		PanesLabelApp wa = w.panesLabelApp;
 		
 		// find roof locations / uv coordinates for roof
-		if (wa != null)
+		if (wa != null )
 		{
 			wa.coveringRoof = new Loop<Point2d>();
 

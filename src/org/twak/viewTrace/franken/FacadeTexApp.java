@@ -144,6 +144,11 @@ public class FacadeTexApp extends App {
 //		List<MiniFacade> mfb = batch.stream().map( x -> ((FacadeTexApp)x).ha ).collect( Collectors.toList() );
 
 		for (App a : batch) {
+			FacadeTexApp fta = (FacadeTexApp )a;
+			fta.setChimneyTexture( null );
+		}
+		
+		for (App a : batch) {
 
 			FacadeTexApp fta = (FacadeTexApp )a;
 			

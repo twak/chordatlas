@@ -23,7 +23,7 @@ public class SuperFace extends HalfFace {
 	public double height = 4;
 	public int classification;
 	
-	public transient MiniRoof mr = new MiniRoof(this);
+	public MiniRoof mr = new MiniRoof(this);
 	public BuildingApp buildingApp = new BuildingApp(this);
 	
 //	public BuildingApp app = new BuildingApp(this);

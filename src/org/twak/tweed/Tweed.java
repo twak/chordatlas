@@ -766,6 +766,8 @@ public class Tweed extends SimpleApplication {
 			deleteScratch();
 		}
 		
+		frame.setGenUI( new JPanel() );
+		
 		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
 		

@@ -640,14 +640,14 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		return Math.abs( Mathz.PI2 + new Line( b.start, b.end ).aTan2() ) > 0.2;
 	}
 
-	private static Profile toProfile( Prof prof ) {
+	public static Profile toProfile( Prof prof ) {
 
 		Prof out = moveToX0( prof );
 
 		return new Profile( out.stream().map( x -> new Point2d( -x.x, -x.y ) ).collect( Collectors.toList() ) );
 	}
 
-	private Prof toProf( Profile profile ) {
+	public static Prof toProf( Profile profile ) {
 
 		List<Point2d> pts = profile.points.get( 0 ).stream().map( b -> new Point2d( -b.end.x, -b.end.y ) ).collect( Collectors.toList() );
 
@@ -718,12 +718,12 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 			JButton compMat = new JButton( "compute materials" );
 			compMat.addActionListener( e -> updateTextureThenGeom( blockApp ) );
 			ui.add( compMat );
-		}
 		
 		if (TweedFrame.instance.getGensOf( SkelGen.class ).size() > 1) {
 			JButton merge = new JButton( "merge all "+name+"es" );
 			merge.addActionListener( e -> mergeAllSkelGens() );
 			ui.add( merge );
+		}
 		}
 
 		JButton comptue = new JButton( "refresh geometry" );

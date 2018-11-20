@@ -70,8 +70,14 @@ public class SiteplanDesigner {
 								if ( set != null ) // created by siteplan --> set correct face
 									wt.miniFacade.facadeTexApp.parent = (SuperFace) set.se.face;
 								
+								
 								if (f.parent == null) {
+									// update profile to halfmesh
+									Bar bar = sf.skel.columnProperties.get( f.edge ).defBar;
+									Profile profile =sf.skel.plan.profiles.get( bar );
+									wt.occlusionID.prof = SkelGen.toProf( profile );
 
+									// update vertex locations in halfmesh
 									SharedEdge se = f.definingSE.iterator().next();
 									wt.occlusionID.end.set (se.start.x, se.start.y);
 									wt.occlusionID.start.set (se.end.x, se.end.y);

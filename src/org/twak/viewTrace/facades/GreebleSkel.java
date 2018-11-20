@@ -218,6 +218,9 @@ public class GreebleSkel {
 					.forEach ( q -> processedFeatures.add(q) );
 			}
 
+			for ( QuadF q1 : processedFeatures ) 
+				q1.original.panesLabelApp.coveringRoof = new Loop<>();
+			
 			if ( tweed != null ) {
 				Set<QuadF> allFeatures = new LinkedHashSet<>();
 				allFeatures.addAll( processedFeatures );
@@ -227,6 +230,7 @@ public class GreebleSkel {
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) {
+					
 					if (q1.original.getFeat() == Feature.WINDOW || q1.original.getFeat() == Feature.SHOP) {
 						q1.original.panesLabelApp.renderedOnFacade = true;
 					}
@@ -242,6 +246,8 @@ public class GreebleSkel {
 					if ( ( w.original.getFeat() == Feature.WINDOW || w.original.getFeat() == Feature.SHOP ) && w.foundAll() ) {
 						
 						w.original.panesLabelApp.renderedOnFacade = true;
+						
+						w.original.panesLabelApp.coveringRoof = new Loop<Point2d>();
 						
 						if (greebleGrid != null)
 							greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 

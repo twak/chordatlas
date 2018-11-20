@@ -125,9 +125,9 @@ public class FRect extends DRectangle implements ICanEdit {
 			panesLabelApp = new PanesLabelApp( this );
 		
 		if (panesTexApp == null || 
-				( this.f == Feature.DOOR && this.panesTexApp.getClass() != DoorTexApp.class ) ||
+				( this.f == Feature.DOOR   && this.panesTexApp.getClass() != DoorTexApp.class ) ||
 				( this.f == Feature.WINDOW && this.panesTexApp.getClass() != PanesTexApp.class ) ||
-				( this.f == Feature.SHOP && this.panesTexApp.getClass() != PanesTexApp.class ) )
+				( this.f == Feature.SHOP   && this.panesTexApp.getClass() != PanesTexApp.class ) )
 		{
 			if (f == null)
 				panesTexApp = new PanesTexApp( this );

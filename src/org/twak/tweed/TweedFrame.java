@@ -355,6 +355,12 @@ public class TweedFrame {
 				}; 
 			};
 		} );
+		
+		JMenuItem exit = new JMenuItem( "quit", KeyEvent.VK_Q );
+		exit.addActionListener( e -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
+		exit.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_Q, ActionEvent.CTRL_MASK ) );
+		menu.add(exit);
+
 
 		layerList = new JPanel( new ListDownLayout() );
 

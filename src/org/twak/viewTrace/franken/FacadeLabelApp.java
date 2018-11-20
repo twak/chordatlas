@@ -442,8 +442,7 @@ public class FacadeLabelApp extends App {
 			FacadeTexApp fta = mf.facadeTexApp;
 
 			fta.oldWindows = new ArrayList<FRect>( mf.featureGen.getRects( Feature.WINDOW ) );
-			fta.setChimneyTexture( null );
-
+			
 			// compute dormer-roof locations
 			new GreebleSkel( null, mf.sf ).showSkeleton( mf.sf.skel.output, null, mf.sf.mr );
 		}
