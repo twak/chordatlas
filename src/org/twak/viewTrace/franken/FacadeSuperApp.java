@@ -127,11 +127,11 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		}
 		
 		List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
-		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, renderedWindows );
+		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, renderedWindows, getNetInfo().resolution );
 		
 		for (Feature f : mf.featureGen.keySet())
 			if (f != Feature.WINDOW)
-				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f) );
+				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f), getNetInfo().resolution );
 		
 		g.dispose();
 		

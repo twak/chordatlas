@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,13 +17,12 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.io.FileUtils;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.AutoCheckbox;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.CMPLabel;
@@ -34,8 +32,6 @@ import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.Pix2Pix.Job;
 import org.twak.viewTrace.franken.Pix2Pix.JobResult;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +41,10 @@ public class FacadeGreebleApp extends App {
 	
 	public double regFrac = 0.1, regAlpha = 0.3, regScale = 0.4;
 
+	public boolean 
+			debugLabels = false, 
+			showRawLabels = false;
+	
 	public MiniFacade mf;
 	
 	public FacadeGreebleApp( MiniFacade mf ) {
@@ -104,7 +104,22 @@ public class FacadeGreebleApp extends App {
 					globalUpdate.run();
 				};
 			}.notWhileDragging() );
-
+			
+			out.add (new AutoCheckbox( this, "debugLabels", "debug labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).debugLabels = selected;
+					globalUpdate.run();
+				};
+			});
+			
+			out.add (new AutoCheckbox( this, "showRawLabels", "debug raw labels" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeGreebleApp) a ).showRawLabels = selected;
+					globalUpdate.run();
+				};
+			});
 		}
 		
 		return out;
@@ -183,8 +198,8 @@ public class FacadeGreebleApp extends App {
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
 				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
-				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, renderedWindows );
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW, Feature.DOOR, Feature.SHOP ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, renderedWindows, resolution );
 
 				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
 
@@ -213,13 +228,13 @@ public class FacadeGreebleApp extends App {
 
 						Meta meta = (Meta)e.getKey();
 						
-						Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
+						String imported = Pix2Pix.importTexture( e.getValue(), -1, null, meta.mask, null, new BufferedImage[3] );
 
 						File boxFile = new File (e.getValue().getParentFile(), e.getValue().getName()+"_boxes" );
 						
 						Files.copy( boxFile, new File( Tweed.SCRATCH + "/" + UUID.randomUUID() + "_boxes.txt" ) );
 						
-						importLabels( meta, boxFile );
+						importLabels( meta, boxFile, imported );
 					}
 
 				} catch ( Throwable e ) {
@@ -231,7 +246,7 @@ public class FacadeGreebleApp extends App {
 	}
     private final static ObjectMapper om = new ObjectMapper();
 
-	private void importLabels( Meta m, File file ) {
+	private void importLabels( Meta m, File file, String importedLocation ) {
 
 		if ( file.exists() ) {
 
@@ -333,6 +348,7 @@ public class FacadeGreebleApp extends App {
 
 //				new Plot (m.mf);
 				
+			
 				
 				{
 					
@@ -403,6 +419,34 @@ public class FacadeGreebleApp extends App {
 					}
 
 				}
+				}
+
+				if ( debugLabels ) {
+
+					String rawLabelFile = "scratch/" + UUID.randomUUID()  + "_raw.png";
+
+					if ( showRawLabels ) {
+						NetInfo ni = NetInfo.get( FacadeGreebleApp.this.getClass() );
+
+						BufferedImage regularized = new BufferedImage( ni.resolution * 4, ni.resolution * 4, BufferedImage.TYPE_3BYTE_BGR );
+						Graphics2D gL = regularized.createGraphics();
+
+						gL.setColor( Color.blue );
+						gL.fillRect( 0, 0, regularized.getWidth(), regularized.getHeight() );
+
+						for ( Feature f : Feature.values() )
+							Pix2Pix.cmpRects( m.mf, gL, new DRectangle( regularized.getWidth(), regularized.getHeight() ),
+									m.mfBounds, f.cmpCol, m.mf.featureGen.getRects( f ), regularized.getHeight() );
+
+						gL.dispose();
+
+						ImageIO.write( regularized, "png", new File( Tweed.DATA + "/" + rawLabelFile ) );
+					} else {
+						rawLabelFile = importedLocation;
+					}
+
+					m.mf.facadeTexApp.texture = rawLabelFile;
+
 				}
 
 			} catch ( IOException e ) {

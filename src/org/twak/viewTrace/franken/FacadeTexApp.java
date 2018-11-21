@@ -206,8 +206,8 @@ public class FacadeTexApp extends App {
 			
 			if ( fta.postState == null ) {
 				
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ) );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Facade.rgb, Collections.singletonList( new FRect( mini, mf ) ), 256 );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, mf.featureGen.getRects( Feature.WINDOW ), getNetInfo().resolution );
 				
 			} else {
 				
@@ -246,7 +246,7 @@ public class FacadeTexApp extends App {
 					}
 
 				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
-				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( renderedWindows ) );
+				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( renderedWindows ), 256 );
 			}
 
 			Meta meta = new Meta( mf, maskLabel );
@@ -256,17 +256,21 @@ public class FacadeTexApp extends App {
 			p2.addInput( labels, empty, null, meta, mfa.styleZ,  mf.facadeLabelApp.scale * FacadeLabelApp.FLOOR_HEIGHT * scale / 255.  );
 			
 			if ( mfa.getChimneyTexture() == null) {
+				
+				BufferedImage chimneyBi = new BufferedImage( resolution, resolution, BufferedImage.TYPE_3BYTE_BGR );
+				Graphics2D cL = chimneyBi.createGraphics();
+				
 				Meta m2 = new Meta (mf, null);
 
-				gL.setColor( CMPLabel.Background.rgb );
-				gL.fillRect( 0, 0, resolution, resolution );
+				cL.setColor( CMPLabel.Background.rgb );
+				cL.fillRect( 0, 0, resolution, resolution );
 				
-				gL.setColor( CMPLabel.Facade.rgb );
-				gL.fillRect( CHIMNEY_PAD, CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD );
+				cL.setColor( CMPLabel.Facade.rgb );
+				cL.fillRect( CHIMNEY_PAD, CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD, resolution - 2*CHIMNEY_PAD );
 				
-				
-				p2.addInput( labels, empty, null, m2, mfa.styleZ,  0.3 );
+				p2.addInput( chimneyBi, chimneyBi, null, m2, mfa.styleZ,  0.3 );
 				mfa.setChimneyTexture( "in progress" );
+				cL.dispose();
 			}
 		}
 		
@@ -312,6 +316,7 @@ public class FacadeTexApp extends App {
 								
 							} else {
 
+								
 								fta.textureUVs = TextureUVs.Square;
 								fta.coarse = fta.texture = dest;
 								fta.coarseWithWindows = null;

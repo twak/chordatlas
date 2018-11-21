@@ -715,7 +715,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		ui.add( siteplan );
 		
 		if ( TweedSettings.settings.experimentalSaveSkel ) {
-			JButton compMat = new JButton( "compute materials" );
+			JButton compMat = new JButton( "refresh materials" );
 			compMat.addActionListener( e -> updateTextureThenGeom( blockApp ) );
 			ui.add( compMat );
 		

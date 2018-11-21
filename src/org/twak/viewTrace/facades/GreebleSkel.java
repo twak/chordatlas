@@ -237,7 +237,7 @@ public class GreebleSkel {
 				}
 			}
 			
-			if ( ( wt != null && sf.buildingApp.createDormers ) ||  
+			if ( ( wt != null && sf.buildingApp.createDormers && !wt.miniFacade.facadeLabelApp.disableDormers ) ||  
 					TweedSettings.settings.createDormers ) {
 				
 				Iterator<QuadF> quit = processedFeatures.iterator();

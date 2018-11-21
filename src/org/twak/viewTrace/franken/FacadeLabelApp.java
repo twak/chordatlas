@@ -53,6 +53,8 @@ public class FacadeLabelApp extends App {
 			debugLabels = false, 
 			showRawLabels = false;
 	
+	public boolean disableDormers = false;
+	
 	private FacadeLabelApp() {}
 	
 	public FacadeLabelApp( MiniFacade mf ) {
@@ -183,6 +185,14 @@ public class FacadeLabelApp extends App {
 				};
 			});
 			
+			out.add (new AutoCheckbox( this, "disableDormers", "debug disable dormers" ) {
+				public void updated(boolean selected) {
+					for ( App a : apps )
+						( (FacadeLabelApp) a ).disableDormers = selected;
+					globalUpdate.run();
+				};
+			});
+			
 		}
 		
 		return out;
@@ -221,10 +231,13 @@ public class FacadeLabelApp extends App {
 
 		for (App a : batch) {
 
-			MiniFacade amf = ((FacadeLabelApp)a).mf;
+			FacadeLabelApp fla = ((FacadeLabelApp)a);
+			MiniFacade amf = fla.mf;
 			BuildingApp ba = amf.sf.buildingApp;
 			
-			DRectangle mini = Pix2Pix.findBounds( amf,  ba.createDormers ), facadeOnly = Pix2Pix.findBounds( amf,  false );
+			boolean dormers =  ba.createDormers && !fla.disableDormers;
+			
+			DRectangle mini = Pix2Pix.findBounds( amf, dormers), facadeOnly = Pix2Pix.findBounds( amf,  false );
 
 			if (mini.area() < 0.1)
 				continue;
@@ -249,11 +262,11 @@ public class FacadeLabelApp extends App {
 				facadeOnly.y = 0;
 			}
 
-			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, ba.createDormers );
+			Pix2Pix.drawFacadeBoundary( g, amf, mini, mask, dormers );
 
 			Meta meta = new Meta( amf, mask, facadeOnly, mini );
 
-			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, this.scale * FLOOR_HEIGHT * scale / 255.  );
+			p2.addInput( bi, bi, null, meta, amf.facadeLabelApp.styleZ, fla.scale * FLOOR_HEIGHT * scale / 255.  );
 		}
 
 		g.dispose();
@@ -300,7 +313,7 @@ public class FacadeLabelApp extends App {
 								
 								Pix2Pix.cmpRects( meta.mf, gL, 
 										new DRectangle(ni.resolution, ni.resolution), meta.mfBounds, Color.green, 
-										meta.mf.featureGen.getRects( Feature.WINDOW ) );
+										meta.mf.featureGen.getRects( Feature.WINDOW ), getNetInfo().resolution );
 
 								gL.dispose();
 								
@@ -365,14 +378,14 @@ public class FacadeLabelApp extends App {
 					m.mf.featureGen.add( Feature.WINDOW, f );
 				}
 				
-				if (regFrac > 0) {
+				if ( m.mf.facadeLabelApp.regFrac > 0) {
 					
 					Regularizer reg = new Regularizer();
 					
-					reg.alpha = regAlpha;
-					reg.scale = regScale;
+					reg.alpha = m.mf.facadeLabelApp.regAlpha;
+					reg.scale = m.mf.facadeLabelApp.regScale;
 					
-					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), regFrac, null ).get( 0 ).featureGen;
+					m.mf.featureGen = reg.go(Collections.singletonList( m.mf ), m.mf.facadeLabelApp.regFrac, null ).get( 0 ).featureGen;
 					m.mf.featureGen.setMF(m.mf);
 				}
 				
