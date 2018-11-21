@@ -98,10 +98,11 @@ public class SiteplanDesigner {
 
 			public void addedBar( Bar bar ) {
 
+				
 				SETag oldTag = (SETag) bar.tags.iterator().next();
 
 				bar.tags.clear();
-				SuperEdge se = new SuperEdge( bar.start, bar.end, null );
+				SuperEdge se = new SuperEdge( bar.end,  bar.start, null );
 
 				SETag tag = new SETag( se, sf );
 				tag.color = Rainbow.random();
@@ -132,7 +133,8 @@ public class SiteplanDesigner {
 				}
 
 				plan.addLoop( profile.points.get( 0 ), plan.root, profile );
-
+				
+				
 				plan.profiles.put( bar, profile );
 			};
 		};
