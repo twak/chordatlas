@@ -70,7 +70,6 @@ public class RoofGreebleApp extends App {
 		
 		for (App a : batch) {
 			
-			
 			MiniRoof mr = ((RoofGreebleApp) a ).mr;
 			mr.clearGreebles();
 			

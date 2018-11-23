@@ -59,7 +59,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
 		
 		try {
-			for ( FRect f : mf.featureGen.get( Feature.WINDOW ) ) {
+			for ( FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.DOOR ) ) {
 
 				DRectangle d = new DRectangle( 0, 0, maps[ 0 ].getWidth(), maps[ 0 ].getHeight() ).
 						transform( mfBounds.normalize( f ) );

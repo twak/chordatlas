@@ -80,6 +80,8 @@ public class PanesLabelApp extends App {
 		if (t.textureRect != null)
 			this.textureRect = new DRectangle(t.textureRect);
 		
+		this.scale = t.scale;
+		
 		if (TweedSettings.settings.experimentalInteractiveTextures)
 			appMode = TextureMode.Net;
 	}

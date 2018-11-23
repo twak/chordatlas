@@ -389,7 +389,7 @@ public class FacadeLabelApp extends App {
 					m.mf.featureGen.setMF(m.mf);
 				}
 				
-				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP )) {
+				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR )) {
 					
 						FRect nearestOld = closest( window, m.mf.facadeTexApp.oldWindows );
 						if ( nearestOld != null ) {
@@ -401,8 +401,6 @@ public class FacadeLabelApp extends App {
 							window.panesTexApp.fr = window;
 						}
 				}
-				
-				System.out.println("done");
 				
 			} catch ( IOException e ) {
 				e.printStackTrace();

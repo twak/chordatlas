@@ -37,6 +37,8 @@ import org.twak.utils.geom.DRectangle.Bounds;
 import org.twak.utils.streams.InAxDouble;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.App;
+import org.twak.viewTrace.franken.PanesLabelApp;
 
 public class Regularizer {
 
@@ -450,22 +452,24 @@ public class Regularizer {
 				}
 			}
 			
-//			System.out.println(yay +"/" + nay +" " + i);
-			
-			if (yay >= nay)
+			if ( yay >= nay )
 			{ // if we believe it exists add it as average of observed sizes
 				
-				FRect o;
+				FRect o, styleSource;
 				
 				if ( dimensionSpread( found ) > 1.4 ) { // scattered -> union (typically shop windows)  
-					o = new FRect( found.get( 0 ) );
+					o = new FRect( styleSource = found.get( 0 ) );
 
 					for ( FRect n : found )
 						o.setFrom( o.union( n ) );
 					
 				} else { // about same size: average position: windows on a grid
+					styleSource = found.get( 0 );
 					o = new FRect( average( found.toArray( new FRect[found.size()] ) ), out );
 				}
+
+				copyStyle ( o.panesLabelApp, styleSource.panesLabelApp); 
+				copyStyle ( o.panesTexApp, styleSource.panesTexApp); 
 				
 				{
 					FRect t = found.get(0);
@@ -534,6 +538,14 @@ public class Regularizer {
 		return out;
 	}
 
+	private void copyStyle( App dest, App src ) {
+		if (src == null || dest == null)
+			return;
+		
+		dest.styleSource = src.styleSource;
+		dest.styleZ = src.styleZ;
+	}
+	
 	private Double horizontalEmpty( MiniFacade mf, double doorHeight ) {
 		
 		Double out = null;

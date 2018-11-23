@@ -401,6 +401,8 @@ public class SelectedApps extends ArrayList<App>{
 		
 		if ( exemplar.appMode == TextureMode.Net ) {
 			
+			exemplar.styleSource = exemplar.styleSource.copy(); // unlink from any any previous multiples
+			
 			options.removeAll();
 			options.setLayout( new BorderLayout() );
 			options.add( exemplar.styleSource.getUI( update, SelectedApps.this ), BorderLayout.CENTER );

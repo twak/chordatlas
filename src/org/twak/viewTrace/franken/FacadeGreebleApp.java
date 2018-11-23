@@ -132,7 +132,6 @@ public class FacadeGreebleApp extends App {
 			Feature.DOOR,
 			Feature.SHOP,
 			Feature.SILL,
-			Feature.DOOR,
 			Feature.MOULDING,
 	}; 
 	

@@ -132,14 +132,15 @@ public class PanesTexApp extends App {
 		
 		for ( App a : batch ) {
 
+			PanesTexApp pta = (PanesTexApp) a;
+			PanesLabelApp pla = pta.fr.panesLabelApp;
+			FacadeTexApp fta = pla.fr.mf.facadeTexApp;
+			
 			if (a.appMode != TextureMode.Net)
 				continue;
 			
 			try {
 
-				PanesTexApp pta = (PanesTexApp) a;
-				PanesLabelApp pla = pta.fr.panesLabelApp;
-				FacadeTexApp fta = pla.fr.mf.facadeTexApp;
 				
 				if ( pla.label == null )
 					continue;
