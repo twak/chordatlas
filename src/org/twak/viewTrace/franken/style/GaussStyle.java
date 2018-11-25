@@ -107,4 +107,12 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	public void install( App app ) {
 		app.styleSource = new GaussStyle( app.getClass() );
 	}
+	
+	@Override
+	public String toString() {
+		String out = "Gauss [";
+		for (double d : mean)
+			out += ", "+d;
+		return out +"]";
+	}
 }

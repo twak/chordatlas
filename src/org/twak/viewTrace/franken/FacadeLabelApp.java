@@ -345,10 +345,14 @@ public class FacadeLabelApp extends App {
     // "window": [[128, 192, 239, 255], [65, 114, 239, 255], [67, 113, 196, 217], [133, 191, 194, 217], [132, 185, 144, 161], [67, 107, 144, 161], [175, 183, 104, 118], [131, 171, 103, 120], [68, 105, 101, 119]]}
 	private void importLabels( Meta m, File file ) {
 		
+		FeatureGenerator oldMF = m.mf.featureGen;
+		
 		if (file.exists()) {
 			
 			JsonNode root;
 			try {
+				
+				
 				
 				m.mf.featureGen = new FeatureGenerator( m.mf );
 				
@@ -391,13 +395,14 @@ public class FacadeLabelApp extends App {
 				
 				for (FRect window : m.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR )) {
 					
-						FRect nearestOld = closest( window, m.mf.facadeTexApp.oldWindows );
+						FRect nearestOld = closest( window, oldMF.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) );
 						if ( nearestOld != null ) {
 							
 							window.panesLabelApp = new PanesLabelApp( nearestOld.panesLabelApp );
 							window.panesLabelApp.fr = window;
 							
-							window.panesTexApp = new PanesTexApp( nearestOld.panesTexApp );
+
+							window.panesTexApp = (PanesTexApp) nearestOld.panesTexApp.copy();
 							window.panesTexApp.fr = window;
 						}
 				}
@@ -408,9 +413,9 @@ public class FacadeLabelApp extends App {
 		}
 	}
 
-	private FRect closest( FRect window, ArrayList<FRect> oldWindows ) {
+	private FRect closest( FRect window, List<FRect> oldWindows ) {
 		
-		double bestDist = Double.MAX_VALUE;
+		double bestDist = 1.2;
 		FRect bestWin = null;
 		if (oldWindows != null)
 		for ( FRect r : oldWindows ) {

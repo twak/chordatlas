@@ -56,4 +56,7 @@ public class DoorTexApp extends PanesTexApp {
 		return out;
 	}
 	
+	public App copy() {
+		return new DoorTexApp( this );
+	}
 }

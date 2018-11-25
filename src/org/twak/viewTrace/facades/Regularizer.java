@@ -39,6 +39,7 @@ import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 
 public class Regularizer {
 
@@ -455,31 +456,34 @@ public class Regularizer {
 			if ( yay >= nay )
 			{ // if we believe it exists add it as average of observed sizes
 				
-				FRect o, styleSource;
+				FRect o, styleSource = found.get( 0 );
 				
 				if ( dimensionSpread( found ) > 1.4 ) { // scattered -> union (typically shop windows)  
-					o = new FRect( styleSource = found.get( 0 ) );
+					o = new FRect(found.get( 0 ) );
 
 					for ( FRect n : found )
 						o.setFrom( o.union( n ) );
 					
 				} else { // about same size: average position: windows on a grid
-					styleSource = found.get( 0 );
 					o = new FRect( average( found.toArray( new FRect[found.size()] ) ), out );
 				}
 
-				copyStyle ( o.panesLabelApp, styleSource.panesLabelApp); 
-				copyStyle ( o.panesTexApp, styleSource.panesTexApp); 
+				
+				o.panesLabelApp = (PanesLabelApp) styleSource.panesLabelApp.copy();
+				o.panesLabelApp.fr = o;
+				o.panesTexApp = (PanesTexApp) styleSource.panesTexApp.copy();
+				o.panesTexApp.fr = o;
+//				copyStyle ( o.panesLabelApp, styleSource.panesLabelApp); 
+//				copyStyle ( o.panesTexApp, styleSource.panesTexApp); 
 				
 				{
-					FRect t = found.get(0);
-					o.setFeat( t.getFeat() );
+					o.setFeat( styleSource.getFeat() );
 					o.id = i;
 					
 //					ac.set( PanesLabelApp.class, o, ac.get(PanesLabelApp.class, t ) );
 //					ac.setFrom ( o.app = t.app;
 					
-					o.attached = t.attached;
+					o.attached = styleSource.attached;
 					
 //					o.outer = t.outer;
 					
@@ -488,7 +492,7 @@ public class Regularizer {
 					o.attachedHeight.get( Feature.BALCONY ).d = averageAttached (o, Feature.BALCONY, found);
 
 					
-					if ( t.getFeat() == Feature.WINDOW || t.getFeat() == Feature.SHOP ) {
+					if ( styleSource.getFeat() == Feature.WINDOW || styleSource.getFeat() == Feature.SHOP ) {
 						for ( FRect r : found ) {
 							corniceX.get( r.outer, r.yi ).add( o );
 							sillX   .get( r.outer, r.yi ).add( o );

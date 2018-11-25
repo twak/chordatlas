@@ -802,7 +802,8 @@ public class GreebleGrid {
 										(float) w.attachedHeight.get(Feature.SILL).d, 
 										(float) w.attachedHeight.get(Feature.CORNICE).d, 0.6, 0.9 );
 							}
-							else if ( pa.texture == null) // no texture info
+							else 
+								if ( pa.texture == null) // no texture info
 								createInnie( rect, uvr, to3d, 
 										mbs.getTexture( "texture_"+fa.texture+"_window_"+w.hashCode(), 
 												fa.texture, w ), 0.2f, 0, MeshBuilder.ALL_BUT_FRONT, false );

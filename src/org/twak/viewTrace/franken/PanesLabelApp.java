@@ -44,7 +44,7 @@ public class PanesLabelApp extends App {
 	public Loop<Point2d> coveringRoof;
 	public boolean renderedOnFacade = true;
 	
-	FRect fr;
+	public FRect fr;
 	public String texture;
 
 	public TextureUVs textureUVs = TextureUVs.Square;

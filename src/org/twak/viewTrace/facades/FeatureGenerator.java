@@ -7,6 +7,8 @@ import java.util.Map;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.franken.PanesLabelApp;
+import org.twak.viewTrace.franken.PanesTexApp;
 
 public class FeatureGenerator extends MultiMap<Feature, FRect> {
 
@@ -39,8 +41,15 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 	}
 
 	public FRect add( Feature feat, DRectangle rect ) {
-		FRect f = new FRect( rect, mf );
-		f.setFeat( feat );
+		
+		FRect f;
+		if (rect instanceof FRect)
+			f = (FRect) rect;
+		else {
+			f = new FRect( rect, mf );
+			f.setFeat( feat );
+		}
+		
 		put( feat, f );
 		return f;
 	}
@@ -66,7 +75,8 @@ public class FeatureGenerator extends MultiMap<Feature, FRect> {
 			for (FRect e : ee.getValue()) {
 				FRect fr = new FRect( e );
 				
-				
+				fr.panesLabelApp = (PanesLabelApp) e.panesLabelApp.copy();
+				fr.panesTexApp   = (PanesTexApp  ) e.panesTexApp.copy();
 				
 				out.put( ee.getKey(), fr );
 			}

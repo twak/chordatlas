@@ -36,7 +36,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class PanesTexApp extends App {
 
 	public boolean useCoarseStyle = false;
-	FRect fr;
+	public FRect fr;
 	public Color color = Color.gray;
 	
 	public PanesTexApp(FRect fr ) {

@@ -170,6 +170,12 @@ public class FacadeGreebleApp extends App {
 				if (fta.postState == null || fta.coarse == null)
 					continue;
 				
+				for ( Feature f : new Feature[] { Feature.SHOP, Feature.DOOR } ) 
+					for ( FRect r : mf.featureGen.getRects( f ) ) {
+						mf.featureGen.map.remove( f, r );
+						mf.featureGen.add( Feature.WINDOW, r );
+					}
+				
 				mf.featureGen.removeAll( toGenerate );
 
 				gR.setColor( CMPLabel.Background.rgb );
@@ -197,7 +203,7 @@ public class FacadeGreebleApp extends App {
 				gR.drawImage( src, (int) maskLabel.x, (int) maskLabel.y, (int) maskLabel.width, (int) maskLabel.height, null );
 
 				Pix2Pix.drawFacadeBoundary( gL, mf, mini, maskLabel, false );
-				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW, Feature.DOOR, Feature.SHOP ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, renderedWindows, resolution );
 
 				Pix2Pix.drawFacadeBoundary( gE, mf, mini, maskLabel, false );
@@ -256,20 +262,20 @@ public class FacadeGreebleApp extends App {
 
 				root = om.readTree(FileUtils.readFileToString( file ) );
 
-				for (Feature f : toGenerate) { // map all back to windows
-					
-					List<FRect> rects = m.mf.featureGen.getRects( f );
-					
-					if (f == Feature.SHOP || f == Feature.DOOR)
-					{
-						for (FRect r : rects) {
-							m.mf.featureGen.map.remove( f, r );
-							m.mf.featureGen.add( Feature.WINDOW, r );
-						}
-					}
-					else for (FRect r : rects) 
-						m.mf.featureGen.map.remove( f, r );
-				}
+//				for (Feature f : toGenerate) { // map all back to windows
+//					
+//					List<FRect> rects = m.mf.featureGen.getRects( f );
+//					
+//					if (f == Feature.SHOP || f == Feature.DOOR)
+//					{
+//						for (FRect r : rects) {
+//							m.mf.featureGen.map.remove( f, r );
+//							m.mf.featureGen.add( Feature.WINDOW, r );
+//						}
+//					}
+//					else for (FRect r : rects) 
+//						m.mf.featureGen.map.remove( f, r );
+//				}
 				
 				
 //				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
@@ -307,26 +313,25 @@ public class FacadeGreebleApp extends App {
 
 					if ( f != Feature.SHOP && f != Feature.DOOR )
 
-						for ( DRectangle r : frects ) {
+						for ( DRectangle r : frects )
 							m.mf.featureGen.add( f, r );
-						}
-					else
-
-					if ( f == Feature.SHOP || f == Feature.DOOR )
+					else //if ( f == Feature.SHOP || f == Feature.DOOR )
 						for ( DRectangle r : frects ) {
 
 							Iterator<FRect> fit = m.mf.featureGen.get( Feature.WINDOW ).iterator();
 
 							while ( fit.hasNext() ) {
-								
+
 								FRect w = fit.next();
 								if ( w.intersects( r ) )
 									if ( Math.abs( w.area() - r.area() ) < w.area() / 2 ) {
 										// don't change the size
-										r = new FRect( w );
-										
-										m.mf.featureGen.add( f, r );
-										
+										FRect fr = new FRect( w );
+										fr.panesLabelApp = w.panesLabelApp;
+										fr.panesTexApp = w.panesTexApp;
+
+										m.mf.featureGen.add( f, fr );
+
 										fit.remove();
 										break;
 									}

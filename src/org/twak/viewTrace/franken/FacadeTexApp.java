@@ -244,7 +244,7 @@ public class FacadeTexApp extends App {
 						gE.draw( poly );
 					}
 
-				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
+				List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
 				Pix2Pix.cmpRects( mf, gL, maskLabel, mini, CMPLabel.Window.rgb, new ArrayList<>( renderedWindows ), 256 );
 			}
 
@@ -320,7 +320,7 @@ public class FacadeTexApp extends App {
 								fta.coarse = fta.texture = dest;
 								fta.coarseWithWindows = null;
 
-								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW ) ) {
+								for ( FRect r : meta.mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP ) ) {
 									PanesLabelApp pla = r.panesLabelApp;
 									pla.texture = null;
 									pla.panes = new ArrayList<>();
