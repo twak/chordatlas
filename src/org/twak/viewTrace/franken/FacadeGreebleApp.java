@@ -451,6 +451,7 @@ public class FacadeGreebleApp extends App {
 
 					m.mf.facadeTexApp.texture = rawLabelFile;
 
+//					m.mf.featureGen.clear();
 				}
 
 			} catch ( IOException e ) {

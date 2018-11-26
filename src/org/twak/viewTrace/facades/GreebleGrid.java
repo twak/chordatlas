@@ -793,7 +793,7 @@ public class GreebleGrid {
 							
 							DRectangle uvr = allUV.normalize( rect );
 							
-							if (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
+							if ( pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
 								
 								createWindow( rect, to3d, 
 										mbs.WOOD, mbs.WOOD, mbs.GLASS, 
