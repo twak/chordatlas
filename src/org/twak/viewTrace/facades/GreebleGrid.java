@@ -19,6 +19,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.siteplan.jme.MeshBuilder;
 import org.twak.tweed.ClickMe;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.TweedSettings;
 import org.twak.tweed.gen.Pointz;
 import org.twak.tweed.gen.WindowGen;
 import org.twak.tweed.gen.WindowGen.Window;
@@ -793,7 +794,7 @@ public class GreebleGrid {
 							
 							DRectangle uvr = allUV.normalize( rect );
 							
-							if ( pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) {
+							if ( (pa.appMode == TextureMode.Bitmap || pa.appMode == TextureMode.Off) && !TweedSettings.settings.experimentalInteractiveTextures) {
 								
 								createWindow( rect, to3d, 
 										mbs.WOOD, mbs.WOOD, mbs.GLASS, 

@@ -115,6 +115,7 @@ public class SiteplanDesigner {
 				defpts.add( new Point2d( 5, -12 ) );
 
 				Profile profile = new Profile( defpts );
+				sg.ensureMF( sf, se );
 				sg.tagWalls( sf, profile, se, bar.start, bar.end );
 
 				FacadeTexApp mfa = se.toEdit.facadeTexApp;
@@ -125,8 +126,8 @@ public class SiteplanDesigner {
 				if ( TweedSettings.settings.experimentalInteractiveTextures ) {
 
 					mfa.appMode = TextureMode.Net;
-					se.toEdit.height = 5;
-					se.toEdit.featureGen = new CGAMini( se.toEdit );
+//					se.toEdit.height = 5;
+//					se.toEdit.featureGen = new CGAMini( se.toEdit );
 
 					if ( oldTag != null )
 						oldTag.sf.insert( se ); //!

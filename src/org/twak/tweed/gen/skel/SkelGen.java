@@ -74,6 +74,7 @@ import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.math.Quaternion;
@@ -865,7 +866,19 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 			sf.mr = new MiniRoof( sf );
 
 		if ( se.toEdit == null ) {
+			
 			se.toEdit = new MiniFacade();
+			
+			if (TweedSettings.settings.experimentalInteractiveTextures)
+			e:
+			for (HalfEdge e : sf) {
+				SuperEdge se2 = (SuperEdge)e;
+				if (se2.toEdit != null && se.toEdit.facadeLabelApp != null) {
+					se.toEdit = MiniFacade.newWithApps( se2.toEdit );
+					break e;
+				}
+			}
+			
 			se.toEdit.left = 0;
 			se.toEdit.width = se.length();
 		}
