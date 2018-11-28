@@ -305,11 +305,11 @@ public class NetExamples extends JComponent {
 		
 		lastChanged = System.currentTimeMillis();
 		
-		for (int i = 0; i < images.length; i++)
-			for (int j = 0; j < images[0].length; j++) {
-				images[i][j] = null;
-				imageScales[i][j] = null;
-			}
+//		for (int i = 0; i < images.length; i++)
+//			for (int j = 0; j < images[0].length; j++) {
+//				images[i][j] = null;
+//				imageScales[i][j] = null;
+//			}
 		
 		showLoading();
 		repaint();

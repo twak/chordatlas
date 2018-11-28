@@ -310,12 +310,13 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		try {
 			List<String> lines = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
 			
-			new Mosaic( 
+			Mosaic m = new Mosaic( 
 //					panos.stream().map( p -> p.name ).collect( Collectors.toList() ),
 					lines,
 					Tweed.toWorkspace( folder ) );
 			
-			indexFile.renameTo( new File (Tweed.toWorkspace( folder ), DOWNLOADED ) );
+			if (m.success != null && m.success)
+				indexFile.renameTo( new File (Tweed.toWorkspace( folder ), DOWNLOADED ) );
 			
 			calculateOnJmeThread();
 			

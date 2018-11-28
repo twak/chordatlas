@@ -7,18 +7,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.twak.utils.Parallel;
-import org.twak.utils.Parallel.WorkFactory;
 
 
 public class Mosaic {
@@ -62,7 +63,16 @@ public class Mosaic {
 		ongoing = new Parallel.ListWF<String>( lines );
 		
 		new Parallel<String, Integer>( ongoing, s -> tile( s, result ), s ->
-			System.out.println( "complete " + s.stream().mapToInt( x -> x ).sum() ), true, 16 );
+			complete (s), true, 16 );
+	}
+
+	public Boolean success = null;
+	
+	private void complete( Set<Integer> s ) {
+		
+		success = !ongoing.shouldAbort();
+		
+		System.out.println( "completed " + s.size() );
 	}
 
 	Pattern p = Pattern.compile( "[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_[^_]*_(.*)" );
@@ -91,6 +101,11 @@ public class Mosaic {
 					try {
 						url = new URL( "http://cbk0.google.com/cbk?output=tile&panoid=" + panoid + "&zoom=5&x=" + x + "&y=" + y );
 						g.drawImage( ImageIO.read( url ), x * 512, y * 512, null );
+					}
+					catch (IIOException th) { // invalid id?!
+						th.printStackTrace();
+						failed = true;
+						break x;
 					} catch ( Throwable th ) {
 						th.printStackTrace();
 						ongoing.abort();
