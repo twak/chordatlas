@@ -10,7 +10,7 @@ procEx ([video](https://youtu.be/K0yUXjM_YKE)) is a mathetmatical model of class
 
 the system is developed on ubuntu, but most of the non-machine learning systems should work on any platform. 
 
-1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+1. install [java 11+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (code is academic grade: use at your own risk. the 10g says to use a 10Gb heap)
 1. read the [user interface instructions](https://github.com/twak/chordatlas/wiki/interface).
