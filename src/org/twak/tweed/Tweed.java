@@ -825,12 +825,16 @@ public class Tweed extends SimpleApplication {
 	}
 
 	public static void deleteScratch() {
-		if (Tweed.SCRATCH.contains ("scratch"))
-			try {
-				FileUtils.deleteDirectory( new File (Tweed.SCRATCH) );
-			} catch ( IOException e ) {
-				e.printStackTrace();
-			}
+		try {
+			if ( Tweed.SCRATCH.contains( "scratch" ) )
+				try {
+					FileUtils.deleteDirectory( new File( Tweed.SCRATCH ) );
+				} catch ( IOException e ) {
+					e.printStackTrace();
+				}
+		} catch ( Throwable th ) {
+			th.printStackTrace();
+		}
 	}
 
 	public File makeWorkspaceRelative( File f ) {

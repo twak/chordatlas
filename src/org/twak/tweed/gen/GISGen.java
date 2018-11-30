@@ -153,6 +153,12 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		initGML();
 	}
 	
+	public GISGen(Tweed tweed) {
+		super ("gis(d)", tweed);
+		this.crs = "WGS84";
+		initDefault();
+	}
+	
 	@Override
 	
 	public void onLoad( Tweed tweed ) {
@@ -168,6 +174,36 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			initObj();
 		else if (gmlFile != null)
 			initGML();
+	}
+	
+	public void initDefault() {
+		
+		LoopL<Point3d> fromOBJ = new LoopL<>();
+		Closer<Point3d> closer = new Closer<>();
+		lines = new ArrayList<>();
+		
+			
+			Loop<Point3d> loop = fromOBJ.newLoop();
+			
+			List<Point3d> points = new ArrayList<>();
+
+			double[][] verts = new double[][] {{-10, -10}, {-10, 10}, {10, 10}, {10, -10} };
+			
+			for (int i = 0; i < verts.length; i++) {
+				
+				double[] cur = verts[i], next = verts[ ( i+1 ) % verts.length ];
+				
+				Point3d p = new Point3d ( cur[0], 0, cur[1] ), 
+						n = new Point3d ( next[0], 0, next[1]);
+				
+				loop.append( p );
+				points.add( p );
+				
+				lines.add( new Line3d( p, n ) );
+			}
+			closer.add( points.toArray( new Point3d[points.size()]) );
+		
+		createBlocks( closer, fromOBJ );
 	}
 	
 	public void initObj() {
