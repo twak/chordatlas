@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
@@ -27,10 +26,7 @@ import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.GenHandlesSelect;
@@ -38,6 +34,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.SelectTool;
+import org.twak.utils.Jz;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -65,15 +62,9 @@ import org.twak.viewTrace.GMLReader;
 import org.twak.viewTrace.facades.GreebleSkel;
 
 import com.google.common.io.Files;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
-import com.jme3.terrain.geomipmap.TerrainPatch;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
 import com.jme3.terrain.heightmap.ImageBasedHeightMap;
@@ -598,8 +589,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			tweed.frame.setSelected( bg );
 			
 		} else
-			JOptionPane.showMessageDialog( tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
-		
+			Jz.showOptionPane(  tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
 	}
 
 	public static Vector3d perp( Vector3d v, double scale ) {

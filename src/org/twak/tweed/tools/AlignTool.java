@@ -18,6 +18,7 @@ import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MiniGen;
+import org.twak.utils.Jz;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Rainbow;
 
@@ -129,7 +130,8 @@ public class AlignTool extends Tool {
 	private void doAlign() {
 		
 		if (alignMarkers[0] == null || alignMarkers[1] == null || otherMarkers[0] == null || otherMarkers[1] == null) {
-			JOptionPane.showMessageDialog( null, "click meshes to create align markers" );
+			
+			Jz.showOptionPane(null, "click meshes to create align markers");
 			return;
 		}
 		
