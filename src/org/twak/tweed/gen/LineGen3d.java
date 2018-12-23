@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
 
 import org.twak.siteplan.jme.Jme3z;
@@ -147,7 +148,7 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 					geom.setUserData( ClickMe.class.getSimpleName()  , new Object[] { new ClickMe() {
 						@Override
 						public void clicked( Object data ) {
-							polyClicked( callbackI );
+							SwingUtilities.invokeLater( () -> polyClicked( callbackI ) );
 						}
 					} } );
 					
