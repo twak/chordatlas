@@ -1037,6 +1037,8 @@ public class SkelFootprint {
 			for ( HalfEdge e1 : hf.edges() ) 
 				((SuperEdge)e1).occlusions.clear();
 		
+		int count = 0;
+		
 		for ( HalfFace hf : mesh.faces )
 			for ( HalfEdge e1 : hf.edges() ) {
 
@@ -1048,17 +1050,26 @@ public class SkelFootprint {
 
 							Line e2l = e2.line();
 							
-							
 							double dist = el1.distance( e2l ); 
-									
+								
+							if (hf2 != hf && dist < 3) {
+								System.out.println( " dist is "+dist +" angle is " + e2l.absAngle( el1 )  );
+								System.out.println( "    " + el1 );
+								System.out.println( "    " + e2l );
+							}
+							
 							if (  e2l.absAngle( el1 ) > Math.PI * 0.7 &&  ( 
 									( dist < 0.1 && !el1.isOnLeft(  e2l.fromPPram( 0.5 ) )) || 
 									dist < 0.001 ) )
-								
+							{
 								( (SuperEdge) e1 ).occlusions.add( (SuperEdge) e2 );
+								count ++;
+							}
 						}
 				}
 			}
+		
+		System.out.println( "found "+count+" occlusions" );
 	}
 
 	

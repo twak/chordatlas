@@ -59,7 +59,7 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		DRectangle mfBounds = Pix2Pix.findBounds( mf, false );
 		
 		try {
-			for ( FRect f : mf.featureGen.get( Feature.WINDOW ) ) {
+			for ( FRect f : mf.featureGen.getRects( Feature.WINDOW, Feature.SHOP, Feature.DOOR ) ) {
 
 				DRectangle d = new DRectangle( 0, 0, maps[ 0 ].getWidth(), maps[ 0 ].getHeight() ).
 						transform( mfBounds.normalize( f ) );
@@ -127,11 +127,11 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		}
 		
 		List<FRect> renderedWindows = mf.featureGen.getRects( Feature.WINDOW ).stream().filter( r -> r.panesLabelApp.renderedOnFacade ).collect( Collectors.toList() );
-		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, renderedWindows );
+		Pix2Pix.cmpRects( mf, g, bounds,  cropRect, CMPLabel.Window.rgb, renderedWindows, getNetInfo().resolution );
 		
 		for (Feature f : mf.featureGen.keySet())
 			if (f != Feature.WINDOW)
-				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f) );
+				Pix2Pix.cmpRects( mf, g, bounds,  cropRect, f.color, mf.featureGen.get(f), getNetInfo().resolution );
 		
 		g.dispose();
 		

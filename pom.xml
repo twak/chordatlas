@@ -9,7 +9,7 @@
 		<plugins>
 
 
-			<!-- fix geotools issue in /META-INF/services/org.opengis.referencing.crs.CRSAuthorityFactory -->
+			<!-- fix geotools issue in /META-INF/services/org.opengis.referencing.crs.CRSAuthorityFactory  ...  see bottom of here http://docs.geotools.org/stable/userguide/faq.html-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -247,6 +247,7 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>local_gurobi</groupId>

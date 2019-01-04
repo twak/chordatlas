@@ -360,6 +360,12 @@ public class TweedFrame {
 				}; 
 			};
 		} );
+		
+		JMenuItem exit = new JMenuItem( "quit", KeyEvent.VK_Q );
+		exit.addActionListener( e -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)) );
+		exit.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_Q, ActionEvent.CTRL_MASK ) );
+		menu.add(exit);
+
 
 		layerList = new JPanel( new ListDownLayout() );
 
@@ -770,13 +776,13 @@ public class TweedFrame {
 
 	}
 
-	public List<Gen> gens( Class<? extends Gen> klass ) {
+	public List<Gen> getGensOf( Class<? extends Gen> klass ) {
 		return genList.stream().filter( g -> g.getClass() == klass ).collect( Collectors.toList() );
 	}
 
 	public <E extends Gen> E  getGenOf( Class<E> klass ) {
 		
-		List<Gen> gens = gens(klass);
+		List<Gen> gens = getGensOf(klass);
 		if (gens.isEmpty())
 			return null;
 		return (E) gens.get(0);

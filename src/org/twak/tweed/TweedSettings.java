@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.vecmath.Matrix4d;
 
+import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
 import org.twak.utils.Filez;
@@ -36,8 +39,12 @@ public class TweedSettings {
 	public String bikeGanRoot = new File (System.getProperty("user.home")+"/code/bikegan").getAbsolutePath();//"/home/twak/code/bikegan";
 //	public String egNetworkInputs = "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/";
 	
-	public Vector3f cameraLocation = new Vector3f(575.0763f, 159.23715f, -580.0377f);
-	public Quaternion cameraOrientation = new Quaternion(0.029748844f, 0.9702514f, -0.16988836f, 0.16989778f);
+
+	
+	
+	
+	public Vector3f cameraLocation = new Vector3f(11.813771f, 14.268296f, -12.68762f);
+	public Quaternion cameraOrientation = new Quaternion(0.30117843f, -0.38118604f, 0.13289168f, 0.8639031f);
 	@Auto.Ignore
 	public int cameraSpeed = 0;
 
@@ -100,11 +107,12 @@ public class TweedSettings {
 	public boolean LOD = true;
 	public boolean createDormers = true;
 	public double superResolutionBlend = 0.4;
-	public boolean siteplanInteractiveTextures = false;
 	public boolean importMiniMeshTextures = false;
-	
 
-	
+	// hacks to show frankengan textures changes in real time
+	public boolean experimentalInteractiveTextures = false;
+	// hacks to save a SkelGen to disk
+	public boolean experimentalSaveSkel = false;
 	
 	public TweedSettings() {
 	}
@@ -124,9 +132,14 @@ public class TweedSettings {
 				settings = new TweedSettings();
 			else
 			{
-				XStream xs = new XStream(new PureJavaReflectionProvider());
+				XStream xs = new XStream();//new PureJavaReflectionProvider());
 				xs.ignoreUnknownElements();
+				
 				settings = (TweedSettings) xs.fromXML( def );
+				
+				if (System.getProperty("user.name").equals("twak")) {
+					settings.experimentalSaveSkel = true;
+				}
 			}
 			
 			
@@ -159,7 +172,9 @@ public class TweedSettings {
 		
 		if (folder != null) {
 			
-			settings.genList = TweedFrame.instance.genList.stream().filter( g -> g instanceof ICanSave ).collect( Collectors.toList() );
+			settings.genList = TweedFrame.instance.genList.stream().
+					filter( g -> (g instanceof ICanSave) && ((ICanSave)g).canISave() ).
+					collect( Collectors.toList() );
 			
 			FileOutputStream fos = null;
 			
@@ -230,12 +245,22 @@ public class TweedSettings {
 		
 		if (!recentFiles.f.isEmpty()) {
 			File last = recentFiles.f.get( 0 );
-			if (last.exists())
+			if (last.exists()) {
 				load( last );
+				return;
+			}
 			else {
 				JOptionPane.showMessageDialog( null, "Can't find last project: \"" + last.getName()+"\"" );
 				recentFiles.f.remove( 0 );
 			}
+		}
+		
+		try {
+			Path tempDirWithPrefix = Files.createTempDirectory("tweed_temporary_");
+			TweedFrame.instance.tweed.initFrom( tempDirWithPrefix.toString() );
+			TweedFrame.instance.addGen( new GISGen(TweedFrame.instance.tweed), true );
+		} catch ( IOException e ) {
+			e.printStackTrace();
 		}
 	}
 

@@ -58,7 +58,7 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	public JPanel getUI( Runnable update, SelectedApps sa ) {
 
 		JPanel out = new JPanel( new ListDownLayout() );
-
+		
 		JPanel line = new JPanel( new BorderLayout() );
 
 		line.add( new JLabel( "σ:" ), BorderLayout.WEST );
@@ -77,10 +77,6 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 				}
 			}
 		} );
-
-		//		JButton go = new JButton("resample");
-		//		go.addActionListener( e -> update.run() );
-		//		out.add( go );
 
 		out.add( new UIVector( mean, this, target, false, update ) );
 
@@ -110,5 +106,13 @@ public class GaussStyle implements StyleSource, MeanImageProvider {
 	@Override
 	public void install( App app ) {
 		app.styleSource = new GaussStyle( app.getClass() );
+	}
+	
+	@Override
+	public String toString() {
+		String out = "Gauss [";
+		for (double d : mean)
+			out += ", "+d;
+		return out +"]";
 	}
 }

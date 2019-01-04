@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
@@ -27,10 +26,7 @@ import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeocentricCRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.GenHandlesSelect;
@@ -38,6 +34,7 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.SelectTool;
+import org.twak.utils.Jz;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
 import org.twak.utils.Pair;
@@ -65,15 +62,9 @@ import org.twak.viewTrace.GMLReader;
 import org.twak.viewTrace.facades.GreebleSkel;
 
 import com.google.common.io.Files;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
-import com.jme3.terrain.geomipmap.TerrainPatch;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
 import com.jme3.terrain.heightmap.ImageBasedHeightMap;
@@ -153,14 +144,57 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		initGML();
 	}
 	
+	public GISGen(Tweed tweed) {
+		super ("gis(d)", tweed);
+		this.crs = "WGS84";
+		initDefault();
+	}
+	
 	@Override
 	
 	public void onLoad( Tweed tweed ) {
 		super.onLoad( tweed );
+		
+		lines = new ArrayList<>();
+		blocks = new HashMap<>();
+		lots = new ArrayList<>();
+		lot2block = new HashMap<>();
+		lastMesh = new HashMap<>();
+		
 		if (objFile != null) // fixme: subclass pls
 			initObj();
 		else if (gmlFile != null)
 			initGML();
+	}
+	
+	public void initDefault() {
+		
+		LoopL<Point3d> fromOBJ = new LoopL<>();
+		Closer<Point3d> closer = new Closer<>();
+		lines = new ArrayList<>();
+		
+			
+			Loop<Point3d> loop = fromOBJ.newLoop();
+			
+			List<Point3d> points = new ArrayList<>();
+
+			double[][] verts = new double[][] {{-10, -10}, {-10, 10}, {10, 10}, {10, -10} };
+			
+			for (int i = 0; i < verts.length; i++) {
+				
+				double[] cur = verts[i], next = verts[ ( i+1 ) % verts.length ];
+				
+				Point3d p = new Point3d ( cur[0], 0, cur[1] ), 
+						n = new Point3d ( next[0], 0, next[1]);
+				
+				loop.append( p );
+				points.add( p );
+				
+				lines.add( new Line3d( p, n ) );
+			}
+			closer.add( points.toArray( new Point3d[points.size()]) );
+		
+		createBlocks( closer, fromOBJ );
 	}
 	
 	public void initObj() {
@@ -169,6 +203,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		LoopL<Point3d> fromOBJ = new LoopL<>();
 		Closer<Point3d> closer = new Closer<>();
+		lines = new ArrayList<>();
 		
 		for (int[] face : gObj.faces) {
 			
@@ -504,7 +539,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		boolean found = false;
 		
-		for ( Gen gen : tweed.frame.gens( MiniGen.class ) ) { // minigen == optimised obj
+		for ( Gen gen : tweed.frame.getGensOf( MiniGen.class ) ) { // minigen == optimised obj
 			
 			( (MiniGen) gen ).clip( hull, croppedFile );
 
@@ -514,7 +549,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		if (!found) 
 			
-			for ( Gen gen : tweed.frame.gens( MeshGen.class ) ) { // obj == just import whole obj
+			for ( Gen gen : tweed.frame.getGensOf( MeshGen.class ) ) { // obj == just import whole obj
 			
 				ObjGen objg = (ObjGen) gen;
 				
@@ -554,8 +589,7 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			tweed.frame.setSelected( bg );
 			
 		} else
-			JOptionPane.showMessageDialog( tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
-		
+			Jz.showOptionPane(  tweed.frame(), "Failed to find mesh from minimesh or gml layers" );
 	}
 
 	public static Vector3d perp( Vector3d v, double scale ) {

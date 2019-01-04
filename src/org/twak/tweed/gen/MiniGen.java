@@ -80,6 +80,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	@Override
 	public void onLoad( Tweed tweed ) {
 		super.onLoad( tweed );
+		bounds = new ArrayList();
 		init();
 	}
 	
@@ -449,6 +450,8 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			new Point3d(0,255,255),
 			new Point3d(255,255,255),
 	} ;
+	
+	
 	
 	private boolean inBounds( Matrix4d mini, List<double[]> bounds ) {
 		

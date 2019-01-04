@@ -70,14 +70,12 @@ public class RoofGreebleApp extends App {
 		
 		for (App a : batch) {
 			
-			if ( a.appMode != TextureMode.Net ) {
-//				for (FCircle fc : ((RoofGreebleApp)a).mr.greebles.valueList() )
-//					fc.
-				continue;
-			}
-			
 			MiniRoof mr = ((RoofGreebleApp) a ).mr;
 			mr.clearGreebles();
+			
+			if ( a.appMode != TextureMode.Net ) 
+				continue;
+			
 			toProcess.add(mr);
 		}
 		

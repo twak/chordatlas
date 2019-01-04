@@ -23,7 +23,7 @@ public class BlockApp extends App {
 
 	public static final int SKIRT_RES = 2048;
 
-	SkelGen skelGen;
+	public SkelGen skelGen;
 
 	public boolean doSkirt = false;
 	private DRectangle skirt;

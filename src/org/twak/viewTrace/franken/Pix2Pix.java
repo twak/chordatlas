@@ -7,6 +7,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
@@ -257,12 +258,11 @@ public class Pix2Pix {
 	public static String importTexture( File texture, int specular, Map<Color, Color> specLookup, 
 			DRectangle crop, RescaleOp rgbRescale, BufferedImage[] output ) throws IOException {
 		
-//		String name = f.get
-
 		new File( Tweed.SCRATCH ).mkdirs();
 
-//		File texture = new File( f, name + ".png" );
+		
 		String dest = "missing";
+		File labelFile = new File( texture.getParentFile(), texture.getName() + "_label" );
 		
 		if ( texture.exists() && texture.length() > 0 ) {
 			
@@ -273,13 +273,13 @@ public class Pix2Pix {
 			if (rgbRescale != null)
 				rgb = rgbRescale.filter( rgb, null );
 			
-			BufferedImage labels = ImageIO.read( new File( texture.getParentFile(), texture.getName() + "_label" ) ); 
+			BufferedImage labels = ImageIO.read( labelFile ); 
 
 			if (crop != null) {
 
 				ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + "_nocrop.png" ) ) );
 				
-				rgb = scaleToFill ( rgb, crop );//   .getSubimage( (int) crop.x, (int) crop.y, (int) crop.width, (int) crop.height );
+				rgb = scaleToFill ( rgb, crop );
 				labels = scaleToFill ( labels, crop );
 			}
 			
@@ -300,11 +300,12 @@ public class Pix2Pix {
 			ImageIO.write( rgb    , "png", new File( Tweed.DATA + "/" + ( dest + ".png" ) ) );
 			ImageIO.write( ns.norm, "png", new File( Tweed.DATA + "/" + ( dest + "_norm.png" ) ) );
 			ImageIO.write( ns.spec, "png", new File( Tweed.DATA + "/" + ( dest + "_spec.png" ) ) );
-			ImageIO.write ( labels, "png", new File( Tweed.DATA + "/" + ( dest + "_lab.png" ) ) );
+			ImageIO.write( labels , "png", new File( Tweed.DATA + "/" + ( dest + "_lab.png" ) ) );
 			
-			
-			texture.delete();
 		}
+		
+		texture.delete();
+		labelFile.delete();
 		
 		return dest + ".png";
 	}
@@ -355,7 +356,7 @@ public class Pix2Pix {
 		FacadeTexApp fta = mf.facadeTexApp;
 		
 		if ( fta.postState == null ) {
-			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ) );
+			Pix2Pix.cmpRects( mf, g, mask, mini, Color.blue, Collections.singletonList( new FRect( mini, mf ) ), 256 );
 		} else {
 			g.setColor( Color.blue );
 			
@@ -410,7 +411,7 @@ public class Pix2Pix {
 	}
 	
 
-	public static void cmpRects( MiniFacade mf, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects ) {
+	public static void cmpRects( MiniFacade mf, Graphics2D g, DRectangle bounds, DRectangle mini, Color col, List<FRect> rects, int heightForYFlip ) {
 
 		FacadeTexApp fta = mf.facadeTexApp;
 
@@ -431,7 +432,7 @@ public class Pix2Pix {
 				
 				DRectangle w = bounds.transform( mini.normalize( r ) );
 
-				w.y = 256 - w.y - w.height;
+				w.y = heightForYFlip - w.y - w.height;
 
 				g.fillRect( (int) w.x, (int) w.y, (int) w.width, (int) w.height );
 			}

@@ -1,6 +1,8 @@
 # chordatlas: data-driven urban procedural modeling
 
-chordatlas is an urban procedural modeling and data fusion research platform. [video](https://youtu.be/Jz8q09r-RFg). It contains implementations of 3 projects that have/will be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigSUR](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procEx](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html).
+chordatlas is an urban procedural modeling and data fusion research platform. [UI video](https://youtu.be/Jz8q09r-RFg). It contains implementations of 3 projects that have be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigsur](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procex](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html). 
+
+procex ([video](https://youtu.be/K0yUXjM_YKE)) is a mathetmatical model of classical buildings, bigsur ([london video](https://youtu.be/HW7WR7ZywJc)) fits these to real world data, and frankengan ([madrid video](https://www.youtube.com/watch?v=78N-wfCiCuc)) textures them.
 
 ![interface pic which melts your eyes](https://raw.githubusercontent.com/twak/chordatlas/22b4513bb2e1ac8c9bc1034c4b187025346f5d1a/wiki/pic.jpg)
 
@@ -8,12 +10,12 @@ chordatlas is an urban procedural modeling and data fusion research platform. [v
 
 the system is developed on ubuntu, but most of the non-machine learning systems should work on any platform. 
 
-1. install [java 1.8+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+1. install [java 11+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (code is academic grade: use at your own risk. the 10g says to use a 10Gb heap)
 1. read the [user interface instructions](https://github.com/twak/chordatlas/wiki/interface).
 
-if you have problems using this system, I would love to [know](https://github.com/twak/chordatlas/issues) so I can fix them! there are additional requirements and instructions for [bigSUR](https://github.com/twak/chordatlas/wiki/bigSUR-details) (creates clean meshes from noisy meshes, streetview info, and maps) and [frankenGAN](https://github.com/twak/chordatlas/wiki/frankenGAN-details) (textures the meshes, generates feature locations).
+if you have problems using this system, I would love to [know](https://github.com/twak/chordatlas/issues) so I can fix them! there are additional requirements and instructions for [bigsur](https://github.com/twak/chordatlas/wiki/bigSUR-details) (creates clean meshes from noisy meshes, streetview info, and maps) and [frankengan](https://github.com/twak/chordatlas/wiki/frankenGAN-details) (textures the meshes, generates feature locations).
 
 more adventurous hackers may be interested in compiling their [own datasets](https://github.com/twak/chordatlas/wiki/datasets) or [building the system](https://github.com/twak/chordatlas/wiki/build-instructions).
 

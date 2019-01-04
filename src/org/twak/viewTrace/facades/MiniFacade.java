@@ -36,16 +36,21 @@ public class MiniFacade implements HasSuper {
 	
 	public enum Feature {
 		
-		BALCONY (new Color (170,0,255)), CORNICE (Color.blue), 
+		BALCONY (new Color (170,0,255), new Color (170,255,85) ),
+		CORNICE (Color.blue, new Color (0,255, 255)), 
 //		DOOR (new Color (170,255,0)), WINDOW ( new Color (0,255,170) ), // BigSUR paper colors
-		DOOR (Color.blue), WINDOW ( Color.green ), // classification colors
-		SHOP (new Color (255,0,170)), SILL (new Color (255,170,0)),  MOULDING ( new Color (0,255,170) ),
-		GRID (Color.black);
+		DOOR (Color.blue, new Color (0,170, 255)),
+		WINDOW ( Color.green, new Color ( 0, 85, 255 ) ), // classification colors
+		SHOP (new Color (255,0,170), new Color (170,0,0)),
+		SILL (new Color (255,170,0), new Color (85, 255, 170)),
+		MOULDING ( new Color (0,255,170), new Color (255, 85, 0) ),
+		GRID (Color.black, Color.black);
 		
-		public Color color;
+		public Color color, cmpCol;
 		
-		private Feature (Color c) {
+		private Feature (Color c, Color cmp) {
 			this.color = c;
+			this.cmpCol = cmp;
 		}
 	}
 	

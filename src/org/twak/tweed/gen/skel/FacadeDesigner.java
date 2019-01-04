@@ -1,13 +1,17 @@
 package org.twak.tweed.gen.skel;
 
 import java.awt.Color;
+import java.util.Collections;
 import java.util.stream.Collectors;
+
+import javax.vecmath.Point2d;
 
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener.Changed;
+import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.CGAMini;
@@ -54,6 +58,9 @@ public class FacadeDesigner {
 		if (fta.postState != null) {
 			PaintThing.debug( Color.lightGray, 1f, MiniFacadePainter.yFlip ( fta.postState.roofFaces ) );
 			PaintThing.debug( Color.gray, 1f, MiniFacadePainter.yFlip ( fta.postState.wallFaces ) );
+			
+			for (Loop<Point2d> loop : fta.postState.occluders)
+			PaintThing.debug( Color.black, 1f, MiniFacadePainter.yFlip ( Collections.singletonList( loop ) ) );
 		}
 		
 		PaintThing.setBounds( bounds );
@@ -101,19 +108,7 @@ public class FacadeDesigner {
 										showSkeleton( x.skel.output, null, x.mr ) );
 							
 						if ( ma.appMode == TextureMode.Net ) // needs prior setSkel to compute visible windows.
-							sg.updateTexture( sf, new Runnable() {
-								@Override
-								public void run() {
-									sg.tweed.enqueue( new Runnable() {
-										@Override
-										public void run() {
-											sg.setSkel( skel, sf );
-											sg.tweed.getRootNode().updateGeometricState();
-										}
-									} );
-
-								}
-							} );
+							sg.updateTextureThenGeom( sf.buildingApp );
 					}
 				} );
 			}

@@ -184,7 +184,7 @@ public class BlockGen extends ObjGen {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append( "name:" +nameCoords()+"\nlot info:\n" );
-		Optional<Gen> hg = tweed.frame.gens( LotInfoGen.class ).stream().findAny();
+		Optional<Gen> hg = tweed.frame.getGensOf( LotInfoGen.class ).stream().findAny();
 		
 		if ( hg.isPresent() )
 			for ( Loop<Point3d> loop : polies )

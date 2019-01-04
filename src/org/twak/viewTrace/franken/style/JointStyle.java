@@ -263,7 +263,7 @@ public class JointStyle implements StyleSource {
 			App a = findParentOfClass (app, bw);
 			app.styleZ = a.bakeWith.get(app.getClass());
 			if (app.styleZ == null)
-				throw new Error();
+				return; // initalisation: no parent yet
 		}
 		else
 			app.styleZ = ai.dist.draw( random, app );

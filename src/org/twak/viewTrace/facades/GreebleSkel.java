@@ -218,6 +218,9 @@ public class GreebleSkel {
 					.forEach ( q -> processedFeatures.add(q) );
 			}
 
+			for ( QuadF q1 : processedFeatures ) 
+				q1.original.panesLabelApp.coveringRoof = new Loop<>();
+			
 			if ( tweed != null ) {
 				Set<QuadF> allFeatures = new LinkedHashSet<>();
 				allFeatures.addAll( processedFeatures );
@@ -226,22 +229,29 @@ public class GreebleSkel {
 					face( f, mf2, processedFeatures, megafacade );
 
 				allFeatures.removeAll( processedFeatures );
-				for ( QuadF q1 : allFeatures ) {
-					if (q1.original.getFeat() == Feature.WINDOW || q1.original.getFeat() == Feature.SHOP) {
+				for ( QuadF q1 : allFeatures ) { 
+					
+					if (q1.foundAll())
+					if (q1.original.getFeat() == Feature.WINDOW || q1.original.getFeat() == Feature.SHOP || q1.original.getFeat() == Feature.DOOR) {
 						q1.original.panesLabelApp.renderedOnFacade = true;
 					}
 				}
 			}
 			
-			if ( ( wt != null && sf.buildingApp.createDormers ) ||  
+			if ( ( wt != null && sf.buildingApp.createDormers && !wt.miniFacade.facadeLabelApp.disableDormers ) ||  
 					TweedSettings.settings.createDormers ) {
 				
 				Iterator<QuadF> quit = processedFeatures.iterator();
 				while ( quit.hasNext() ) {
 					QuadF w = quit.next();
-					if ( ( w.original.getFeat() == Feature.WINDOW || w.original.getFeat() == Feature.SHOP ) && w.foundAll() ) {
+					
+					if (w.original.getFeat() == Feature.DOOR && w.foundAll())
+						w.original.panesLabelApp.renderedOnFacade = true;
+					else if ( ( w.original.getFeat() == Feature.WINDOW || w.original.getFeat() == Feature.SHOP ) && w.foundAll() ) {
 						
 						w.original.panesLabelApp.renderedOnFacade = true;
+						
+						w.original.panesLabelApp.coveringRoof = new Loop<Point2d>();
 						
 						if (greebleGrid != null)
 							greebleGrid.createDormerWindow( miniroof, w, greebleGrid.mbs.WOOD, greebleGrid.mbs.GLASS, 
@@ -256,7 +266,7 @@ public class GreebleSkel {
 			
 			
 			if ( greebleGrid != null ) {
-				edges( output, roofColor );
+//				edges( output, roofColor );
 
 				// output per-material objects
 				greebleGrid.attachAll( node, chain, output, new ClickMe() {

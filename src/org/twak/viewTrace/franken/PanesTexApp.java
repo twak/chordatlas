@@ -36,7 +36,7 @@ import org.twak.viewTrace.franken.Pix2Pix.JobResult;
 public class PanesTexApp extends App {
 
 	public boolean useCoarseStyle = false;
-	FRect fr;
+	public FRect fr;
 	public Color color = Color.gray;
 	
 	public PanesTexApp(FRect fr ) {
@@ -44,7 +44,7 @@ public class PanesTexApp extends App {
 		
 		this.fr = fr;
 		
-		if (TweedSettings.settings.siteplanInteractiveTextures)
+		if (TweedSettings.settings.experimentalInteractiveTextures)
 			appMode = TextureMode.Net;
 		
 		getUp( ).install(this);
@@ -56,7 +56,7 @@ public class PanesTexApp extends App {
 		this.useCoarseStyle = t.useCoarseStyle;
 		this.fr = t.fr;
 		
-		if (TweedSettings.settings.siteplanInteractiveTextures)
+		if (TweedSettings.settings.experimentalInteractiveTextures)
 			appMode = TextureMode.Net;
 	}
 	
@@ -132,14 +132,15 @@ public class PanesTexApp extends App {
 		
 		for ( App a : batch ) {
 
+			PanesTexApp pta = (PanesTexApp) a;
+			PanesLabelApp pla = pta.fr.panesLabelApp;
+			FacadeTexApp fta = pla.fr.mf.facadeTexApp;
+			
 			if (a.appMode != TextureMode.Net)
 				continue;
 			
 			try {
 
-				PanesTexApp pta = (PanesTexApp) a;
-				PanesLabelApp pla = pta.fr.panesLabelApp;
-				FacadeTexApp fta = pla.fr.mf.facadeTexApp;
 				
 				if ( pla.label == null )
 					continue;

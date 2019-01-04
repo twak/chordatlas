@@ -5,17 +5,21 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.apache.commons.io.FileUtils;
 import org.twak.camp.Tag;
+import org.twak.tweed.TweedFrame;
 import org.twak.tweed.TweedSettings;
 import org.twak.utils.Imagez;
 import org.twak.utils.Mathz;
@@ -131,6 +135,8 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 								- tileWidth * ts.nextY ,
 								null );
 						
+//						ImageIO.write( toProcess, "png", new FileOutputStream( new File (TweedFrame.instance.tweed.SCRATCH +"/" +UUID.randomUUID() +".png") ) ); // dump all net inputs!
+						
 						g.dispose();
 						
 						ts.coarse = toProcess;
@@ -165,6 +171,8 @@ public abstract class SuperSuper <A extends HasSuper> extends App {
 						try {
 							
 							File texture = e.getValue();
+							
+//							FileUtils.copyFile( texture, new File (TweedFrame.instance.tweed.SCRATCH +"/" +UUID.randomUUID() +".png") ); // dump all net outputs
 							
 							if ( texture.exists() && texture.length() > 0 ) {
 
