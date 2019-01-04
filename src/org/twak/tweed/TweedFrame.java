@@ -123,8 +123,13 @@ public class TweedFrame {
 
 		frame.addWindowListener( new WindowAdapter() {
 			public void windowClosing( WindowEvent e ) {
-				TweedSettings.save(true);
-				Tweed.deleteScratch();
+				try {
+					TweedSettings.save(true);
+					Tweed.deleteScratch();
+				}
+				catch (Throwable th) {
+					th.printStackTrace();
+				}
 			};
 		} );
 
