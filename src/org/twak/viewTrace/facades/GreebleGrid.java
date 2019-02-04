@@ -58,7 +58,7 @@ import com.jme3.texture.Texture.WrapMode;
 
 public class GreebleGrid {
 
-	MMeshBuilderCache mbs;
+	public MMeshBuilderCache mbs;
 	
 	private Tweed tweed;
 

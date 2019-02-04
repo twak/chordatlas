@@ -10,6 +10,7 @@ import javax.vecmath.Point3d;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.LineGen3d;
+import org.twak.tweed.gen.MMGSkelGen;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
@@ -126,7 +127,7 @@ public class HouseTool extends Tool {
 		}
 
 		HalfMesh2 mesh = builder.done();
-		SkelGen sg = new SkelGen( mesh, tweed, null );
+		SkelGen sg = new MMGSkelGen( mesh, tweed, null );
 		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
 		

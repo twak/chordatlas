@@ -74,7 +74,7 @@ public class GreebleSkel {
 	
 	OnClick onClick;
 	
-	GreebleGrid greebleGrid;
+	protected GreebleGrid greebleGrid;
 	
 //	boolean isTextured = false;
 //	DRectangle roofBounds;

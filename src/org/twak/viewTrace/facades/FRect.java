@@ -112,8 +112,8 @@ public class FRect extends DRectangle implements ICanEdit {
 
 	public FRect( Feature feature, double x, double y, double w, double h, MiniFacade mf ) {
 		super (x,y,w,h);
-		this.setFeat( feature );
 		this.mf = mf;
+		this.setFeat( feature );
 		
 		initApps();
 	}
