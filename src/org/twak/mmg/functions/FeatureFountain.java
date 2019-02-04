@@ -49,6 +49,7 @@ public class FeatureFountain extends Function {
 		for ( DRectangle r : mini.featureGen.get( f ) ) 
 			rects.add( new OBB(r.x, r.y, r.width, r.height, 0) );
 		
+		parent.result = rects;
 		parent.curriedArguments.add( rects );
 
 		return out;

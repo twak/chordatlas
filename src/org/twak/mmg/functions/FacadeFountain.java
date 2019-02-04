@@ -49,6 +49,7 @@ public class FacadeFountain extends Function {
 
 		Node segNode = new Node( this );
 		out.add( segNode );
+		segNode.result = result;
 		
 		segNode.curriedArguments.add(result);
 		
@@ -56,6 +57,7 @@ public class FacadeFountain extends Function {
 	}
 
 	@Override
+	@Deprecated
 	public Object evaluate( List<Object> params, List<Object> curry, Node node, MMG mmg ) {
 		return node.curriedArguments.get(0);
 	}
