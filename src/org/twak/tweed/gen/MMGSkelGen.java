@@ -12,7 +12,11 @@ import org.twak.viewTrace.facades.GreebleSkel;
 
 public class MMGSkelGen extends SkelGen {
 
-	MOgram mogram = null;
+	public MOgram mogram = null;
+	
+	public MMGSkelGen() {
+		super();
+	}
 	
 	public MMGSkelGen( HalfMesh2 mesh, Tweed tweed, BlockGen blockGen ) {
 		super(mesh,tweed, blockGen);

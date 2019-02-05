@@ -3,6 +3,7 @@ package org.twak.mmg.media;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.swing.UIManager;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -14,23 +15,29 @@ import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
-import org.twak.mmg.Walk;
+import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.FacadeFountain;
 import org.twak.mmg.functions.FeatureFountain;
+import org.twak.mmg.functions.FixedEdge;
 import org.twak.mmg.functions.FixedLabel;
-import org.twak.mmg.functions.LabellingListWrapper;
+import org.twak.mmg.functions.FixedOBB;
+import org.twak.mmg.prim.Edge;
 import org.twak.mmg.prim.Label;
+import org.twak.mmg.prim.OBB;
 import org.twak.mmg.prim.Path;
 import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.prim.ScreenSpace;
-import org.twak.mmg.steps.Static;
+import org.twak.mmg.ui.MOgramEditor;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.MMGSkelGen;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.WallTag;
+import org.twak.utils.Cache;
 import org.twak.utils.CloneSerializable;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.FRect;
@@ -151,24 +158,24 @@ public class MMGGreeble extends GreebleSkel {
 				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
 				);
 
-		for (String s : new String[] { 
-			GreebleHelper.FLOOR_EDGE,
-			GreebleHelper. ROOF_EDGE,
-			GreebleHelper. WALL_EDGE } ) {
+		Cache<String, MO> getLabel = new Cache<String, MO>() {
+
+			@Override
+			public MO create( String i ) {
+				FixedLabel fl = new FixedLabel( new Label( i ) );
+				MO flm = new MO(fl);
+				mogram.add(flm);
+				return flm;
+			}
+		};
 		
-			FixedLabel fl = new FixedLabel( new Label( s ) );
-			MO flm = new MO(fl);
-			mogram.add(flm);
+		for (Loopable<LPoint2d> lp : boundary.loopableIterator()) {
 			
-			FacadeFountain ff = new FacadeFountain( boundary, s );
-			MO ffm = new MO (ff);
+			FixedEdge fe= new FixedEdge( new Edge (lp.get(), lp.getNext().get()) );
+			MO ffm = new MO (fe);
 			mogram.add (ffm);
+			AddLabel.label (mogram, ffm, getLabel.get( lp.get().label ) );
 			
-//			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
-//			MO lwM = new MO(lw);
-//			lwM.scrubWalks();
-//			mogram.add(lwM);
-//			staticWalk( ffm, lw.toString(), lwM,0 );
 		}
 
 		MiniFacade templateMF = new MiniFacade();
@@ -184,25 +191,17 @@ public class MMGGreeble extends GreebleSkel {
 			MO flm = new MO(fl);
 			mogram.add(flm);
 			
-			FeatureFountain ff = new FeatureFountain( f, templateMF );
-			MO ffM = new MO(ff);
-			mogram.add(ffM);
+			for (FRect r : templateMF.featureGen.get( f )) {
+			
+				FixedOBB wf = new FixedOBB(new OBB(r.x, r.y, r.width, r.height, 0));
+				MO wfm = new MO( wf );
+				mogram.add( wfm  );
 
-//			LabellingListWrapper lw = new LabellingListWrapper( fl.label );
-//			MO lwM = new MO(lw);
-//			lwM.scrubWalks();
-//			mogram.add(lwM);
-//			staticWalk( ffM, lw.toString(), lwM,0 ); 
+				AddLabel.label( mogram, flm, wfm );
+			}
 		}
 		
 		return mogram;
-	}
-
-
-	private static void staticWalk( MO from, String name, MO to, int index ) {
-		Walk w = new Walk(name + "_i:"+index);
-		w.add(new Static(from));
-		to.setWalk(index, w);
 	}
 
 	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
@@ -235,5 +234,16 @@ public class MMGGreeble extends GreebleSkel {
 			lp.append( lp.getFirst() );
 		
 		return out;
+	}
+	
+	public static void main( String[] args ) {
+		try {
+			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+		} catch ( Throwable ex ) {
+			ex.printStackTrace();
+		}
+		MMGSkelGen sg = new MMGSkelGen();
+		sg.mogram = MMGGreeble.createTemplateMOgram();
+		new MOgramEditor( sg.mogram ).setVisible( true );
 	}
 }

@@ -22,7 +22,7 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 
-public class FeatureFountain extends Function {
+public class FeatureFountain extends Function implements FollowOnMO {
 
 	public MiniFacade mini;
 	public Feature f;
@@ -66,6 +66,11 @@ public class FeatureFountain extends Function {
 	@Override
 	public String getDescription() {
 		return getClass().getSimpleName();
+	}
+
+	@Override
+	public Function createNextMO() {
+		return new ListWrapper();
 	}
 
 }
