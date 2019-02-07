@@ -11,6 +11,7 @@ import org.twak.mmg.Command;
 import org.twak.mmg.Function;
 import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
+import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.LineSegment;
@@ -37,7 +38,7 @@ public class FacadeFountain extends Function {
 	}
 
 	@Override
-	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo ) {
+	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
 
 		List<Node> out = new ArrayList<>();
 

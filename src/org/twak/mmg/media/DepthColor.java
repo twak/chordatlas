@@ -15,9 +15,9 @@ import org.twak.utils.ui.ColourPicker;
 
 public class DepthColor extends RenderData {
 	
-	boolean visible;
-	Color color;
-	double depth;
+	public boolean visible;
+	public Color color;
+	public double depth;
 	
     @Override
     public JComponent getUI(MOgram mogram) {

@@ -4,7 +4,10 @@ import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.BoundOBB;
 import org.twak.mmg.functions.DivideOBB;
 import org.twak.mmg.functions.DividePointOBB;
+import org.twak.mmg.functions.EdgeRandomPoint;
+import org.twak.mmg.functions.EdgesToFace;
 import org.twak.mmg.functions.Erase;
+import org.twak.mmg.functions.FixedEdge;
 import org.twak.mmg.functions.FixedLinearForm;
 import org.twak.mmg.functions.FixedNum;
 import org.twak.mmg.functions.FixedOBB;
@@ -14,8 +17,10 @@ import org.twak.mmg.functions.FourLinearOBB;
 import org.twak.mmg.functions.LabelToFace;
 import org.twak.mmg.functions.LiftTwoPt1Path;
 import org.twak.mmg.functions.LiftTwoPt1TwoPoint;
+import org.twak.mmg.functions.OBBExportEdge;
 import org.twak.mmg.functions.OBBExportLinearForm;
 import org.twak.mmg.functions.OBBExportSegments;
+import org.twak.mmg.functions.OffsetFace;
 import org.twak.mmg.functions.OffsetLinear;
 import org.twak.mmg.functions.OffsetOBB;
 import org.twak.mmg.functions.OffsetPointPath;
@@ -29,6 +34,7 @@ import org.twak.mmg.functions.PointLinearLinear;
 import org.twak.mmg.functions.PointOffset;
 import org.twak.mmg.functions.PointOpposite;
 import org.twak.mmg.functions.PointRandomLinear;
+import org.twak.mmg.functions.ProjectPointEdge;
 import org.twak.mmg.functions.ProjectPointLinear;
 import org.twak.mmg.functions.ProjectPointLinearOffset;
 import org.twak.mmg.functions.ProjectPointPath;
@@ -42,8 +48,10 @@ import org.twak.mmg.functions.SplitPathAbs;
 import org.twak.mmg.functions.ThreeLinearOffsetLinear;
 import org.twak.mmg.functions.ThreePointOBB;
 import org.twak.mmg.functions.TweenLinear;
+import org.twak.mmg.functions.TwoEdgePoint;
 import org.twak.mmg.functions.TwoLinearPoint;
 import org.twak.mmg.functions.TwoPointCirclePath;
+import org.twak.mmg.functions.TwoPointEdge;
 import org.twak.mmg.functions.TwoPointLinear;
 import org.twak.mmg.functions.TwoPointSegment;
 
@@ -64,16 +72,16 @@ public class Facade2d extends Medium {
                     TwoLinearPoint.class, ProjectPointLinear.class,
                     ThreeLinearOffsetLinear.class, TweenLinear.class,
                     
-                    FixedOBB.class, ThreePointOBB.class, FourLinearOBB.class, OBBExportLinearForm.class, OBBExportSegments.class, DivideOBB.class, RepeatOBB.class, FixedNum.class,
+                    FixedOBB.class, ThreePointOBB.class, FourLinearOBB.class, OBBExportLinearForm.class, OBBExportEdge.class, 
+                    DivideOBB.class, RepeatOBB.class, FixedNum.class,
                     OffsetOBB.class, DividePointOBB.class, RepeatPointOBB.class, BoundOBB.class,
                     
-                    TwoPointSegment.class, SegmentRandomPoint.class, FixedSegmentPath.class,
-                    ProjectPointPath.class, OffsetPointPath.class, SplitPathAbs.class, PathSection.class, PathTranslate.class,
-                    SegmentOBBDistance.class,
-                    PathExportPoints.class,
+                    TwoPointEdge.class, EdgeRandomPoint.class, FixedEdge.class,
+                    ProjectPointEdge.class, TwoEdgePoint.class, EdgesToFace.class,
                     
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
-                    TwoPointCirclePath.class, PointCircle.class,
+                    
+                    OffsetFace.class,
                     
                     Erase.class,
                     AddLabel.class,

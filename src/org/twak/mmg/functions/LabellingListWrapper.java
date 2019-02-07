@@ -7,6 +7,7 @@ import java.util.List;
 import org.twak.mmg.Command;
 import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
+import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 
 public class LabellingListWrapper extends ListWrapper {
@@ -21,7 +22,7 @@ public class LabellingListWrapper extends ListWrapper {
 	}
 
 	@Override
-	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo ) {
+	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
 
 		List<Node> out = new ArrayList();
 

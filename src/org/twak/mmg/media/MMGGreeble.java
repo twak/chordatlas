@@ -11,19 +11,19 @@ import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
 import org.twak.mmg.Command;
+import org.twak.mmg.Function;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.FacadeFountain;
+import org.twak.mmg.functions.FeatureFaceFountain;
 import org.twak.mmg.functions.FeatureFountain;
 import org.twak.mmg.functions.FixedEdge;
 import org.twak.mmg.functions.FixedLabel;
-import org.twak.mmg.functions.FixedOBB;
 import org.twak.mmg.prim.Edge;
 import org.twak.mmg.prim.Label;
-import org.twak.mmg.prim.OBB;
 import org.twak.mmg.prim.Path;
 import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.prim.ScreenSpace;
@@ -48,6 +48,7 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MatMeshBuilder;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+
 
 public class MMGGreeble extends GreebleSkel {
 
@@ -183,7 +184,7 @@ public class MMGGreeble extends GreebleSkel {
 		for (int i = 0; i < 3; i++)
 			templateMF.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, i * 1.7 + 1, -4., 1.5, 1., templateMF ) );
 		
-		templateMF.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.5, templateMF ) );
+		templateMF.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.4, templateMF ) );
 		
 		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
 			
@@ -191,14 +192,18 @@ public class MMGGreeble extends GreebleSkel {
 			MO flm = new MO(fl);
 			mogram.add(flm);
 			
-			for (FRect r : templateMF.featureGen.get( f )) {
+			Function fff = new FeatureFaceFountain ( templateMF.featureGen.get( f ), f.toString() );
+			MO wfm = new MO( fff );
+			mogram.add( wfm  );
 			
-				FixedOBB wf = new FixedOBB(new OBB(r.x, r.y, r.width, r.height, 0));
-				MO wfm = new MO( wf );
-				mogram.add( wfm  );
-
-				AddLabel.label( mogram, flm, wfm );
-			}
+//			for (FRect r : templateMF.featureGen.get( f )) {
+//				
+//				FixedOBB wf = new FixedOBB(new OBB(r.x, r.y, r.width, r.height, 0));
+//				MO wfm = new MO( wf );
+//				mogram.add( wfm  );
+//
+//				AddLabel.label( mogram, flm, wfm );
+//			}
 		}
 		
 		return mogram;

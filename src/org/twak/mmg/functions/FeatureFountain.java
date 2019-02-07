@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import javax.vecmath.Point2d;
+
 import org.twak.mmg.Command;
 import org.twak.mmg.FollowOnMO;
 import org.twak.mmg.Function;
@@ -38,16 +40,22 @@ public class FeatureFountain extends Function implements FollowOnMO {
 	}
 
 	@Override
-	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo ) {
+	public List<Node> createSN( InputSet inputSet, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
 		List<Node> out = new ArrayList<>();
 
 		Node parent = new Node( this );
 		out.add( parent );
 
-		List<OBB> rects = new ArrayList<>();
+		List<Object> rects = new ArrayList<>();
 		
-		for ( DRectangle r : mini.featureGen.get( f ) ) 
-			rects.add( new OBB(r.x, r.y, r.width, r.height, 0) );
+		for ( DRectangle r : mini.featureGen.get( f ) ) {
+			
+			for (Point2d p : r.points()) {
+				rects.add( new Point2d(p) );
+			}
+			
+//			rects.add( new OBB(r.x, r.y, r.width, r.height, 0) );
+		}
 		
 		parent.result = rects;
 		parent.curriedArguments.add( rects );
