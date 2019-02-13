@@ -27,7 +27,7 @@ public class FacadeFountain extends Function {
 	String feature;
 
 	public FacadeFountain() {
-		color = fixed;
+		color = result;
 	}
 
 	public FacadeFountain( Loop<LPoint2d> face, String feature ) {
