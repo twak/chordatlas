@@ -143,22 +143,13 @@ public class MMGGreeble extends GreebleSkel {
 		mmg( to2d, to3d, flat, forFace );
 	}
 
-	
-	public static MOgram createTemplateMOgram() {
+	public static MOgram createMOgram(MiniFacade mf) {
 		
 		MOgram mogram = new MOgram();
 		mogram.medium = new Facade2d();
 		
 		ScreenSpace.lastPosition = 0;
 		
-		Loop<LPoint2d> boundary = new Loop<>(
-				new LPoint2d( 0, 0     , GreebleHelper.FLOOR_EDGE ),
-				new LPoint2d( 7, 0     , GreebleHelper.WALL_EDGE  ),
-				new LPoint2d( 7, -5    , GreebleHelper.ROOF_EDGE  ),
-				new LPoint2d( 3.5, -10 , GreebleHelper.ROOF_EDGE  ),
-				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
-				);
-
 		Cache<String, MO> getLabel = new Cache<String, MO>() {
 
 			@Override
@@ -169,30 +160,33 @@ public class MMGGreeble extends GreebleSkel {
 				return flm;
 			}
 		};
-		
-		for (Loopable<LPoint2d> lp : boundary.loopableIterator()) {
-			
-			FixedEdge fe= new FixedEdge( new Edge (lp.get(), lp.getNext().get()) );
-			MO ffm = new MO (fe);
-			mogram.add (ffm);
-			AddLabel.label (mogram, ffm, getLabel.get( lp.get().label ) );
-			
-		}
 
-		MiniFacade templateMF = new MiniFacade();
+		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces )
+			for ( Loopable<? extends Point2d> lp : loop.loopableIterator() ) {
 
-		for (int i = 0; i < 3; i++)
-			templateMF.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, i * 1.7 + 1, -4., 1.5, 1., templateMF ) );
-		
-		templateMF.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.4, templateMF ) );
+				FixedEdge fe = new FixedEdge( new Edge( lp.get(), lp.getNext().get() ) );
+
+				String label;
+
+				if ( fe.edge.start.y == 0 && fe.edge.end.y == 0 )
+					label = GreebleHelper.FLOOR_EDGE;
+				else if ( Math.abs( fe.edge.start.x - fe.edge.end.x ) > 0.5 )
+					label = GreebleHelper.WALL_EDGE;
+				else
+					label = GreebleHelper.ROOF_EDGE;
+
+				MO ffm = new MO( fe );
+				mogram.add( ffm );
+				AddLabel.label( mogram, ffm, getLabel.get( label ) );
+			}
 		
 		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
 			
-			FixedLabel fl = new FixedLabel( new Label ( f.name().toLowerCase()) );
-			MO flm = new MO(fl);
-			mogram.add(flm);
+//			FixedLabel fl = new FixedLabel( new Label ( f.name().toLowerCase()) );
+//			MO flm = new MO(fl);
+//			mogram.add(flm);
 			
-			Function fff = new FeatureFaceFountain ( templateMF.featureGen.get( f ), f.toString() );
+			Function fff = new FeatureFaceFountain ( mf.featureGen.get( f ), f.toString() );
 			MO wfm = new MO( fff );
 			mogram.add( wfm  );
 			
@@ -207,6 +201,33 @@ public class MMGGreeble extends GreebleSkel {
 		}
 		
 		return mogram;
+	}
+
+	
+	public static MiniFacade createTemplateMF() {
+		
+		MiniFacade  out = new MiniFacade();
+		
+		Loop<LPoint2d> boundary = new Loop<>(
+				new LPoint2d( 0, 0     , GreebleHelper.FLOOR_EDGE ),
+				new LPoint2d( 7, 0     , GreebleHelper.WALL_EDGE  ),
+				new LPoint2d( 7, -5    , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( 3.5, -10 , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
+				);
+
+		out.facadeTexApp.resetPostProcessState();
+		
+		out.facadeTexApp.postState.wallFaces.add( boundary );
+
+		for (int i = 0; i < 3; i++)
+			out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, i * 1.7 + 1, -4., 1.5, 1., out ) );
+		
+		out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, 4, -2., 1.5, 1., out ) );
+		
+		out.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.4, out ) );
+		
+		return out;
 	}
 
 	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
@@ -248,7 +269,7 @@ public class MMGGreeble extends GreebleSkel {
 			ex.printStackTrace();
 		}
 		MMGSkelGen sg = new MMGSkelGen();
-		sg.mogram = MMGGreeble.createTemplateMOgram();
+		sg.mogram = createMOgram( createTemplateMF() );
 		new MOgramEditor( sg.mogram ).setVisible( true );
 	}
 }

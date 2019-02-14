@@ -2,6 +2,7 @@ package org.twak.mmg.media;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.functions.AddLabel;
 import org.twak.mmg.functions.BoundOBB;
+import org.twak.mmg.functions.CloneFace;
 import org.twak.mmg.functions.DivideOBB;
 import org.twak.mmg.functions.DividePointOBB;
 import org.twak.mmg.functions.EdgeRandomPoint;
@@ -81,7 +82,7 @@ public class Facade2d extends Medium {
                     
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
                     
-                    OffsetFace.class,
+                    OffsetFace.class, CloneFace.class,
                     
                     Erase.class,
                     AddLabel.class,

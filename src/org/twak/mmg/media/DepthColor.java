@@ -7,11 +7,13 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.twak.mmg.MOgram;
 import org.twak.utils.ui.AutoDoubleSlider;
 import org.twak.utils.ui.ColourPicker;
+import org.twak.utils.ui.ListDownLayout;
 
 public class DepthColor extends RenderData {
 	
@@ -21,6 +23,8 @@ public class DepthColor extends RenderData {
 	
     @Override
     public JComponent getUI(MOgram mogram) {
+    	
+    	JPanel out = new JPanel(new ListDownLayout());
     	
     	JCheckBox visCheck = new JCheckBox("render to sketch");
     	visCheck.setSelected(visible);
@@ -32,7 +36,6 @@ public class DepthColor extends RenderData {
     	});
     	
 		visCheck.setPreferredSize(new Dimension( (int) visCheck.getPreferredSize().getWidth(), 30));
-		JPanel out = new JPanel(new FlowLayout());
 		out.add(visCheck);
 		
 		JButton c = new JButton("color");
@@ -45,8 +48,8 @@ public class DepthColor extends RenderData {
 				
 			}
 		} );
-		out.add( c );
 		
+		out.add( c );
 		out.add( new AutoDoubleSlider( this, "depth", "depth", -1, 1, () -> mogram.somethingChanged() ) );
 		
     	return out;
