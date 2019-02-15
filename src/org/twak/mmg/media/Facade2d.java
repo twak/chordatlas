@@ -9,6 +9,7 @@ import org.twak.mmg.functions.EdgeRandomPoint;
 import org.twak.mmg.functions.EdgesToFace;
 import org.twak.mmg.functions.Erase;
 import org.twak.mmg.functions.FixedEdge;
+import org.twak.mmg.functions.FixedLabel;
 import org.twak.mmg.functions.FixedLinearForm;
 import org.twak.mmg.functions.FixedNum;
 import org.twak.mmg.functions.FixedOBB;
@@ -79,6 +80,8 @@ public class Facade2d extends Medium {
                     
                     TwoPointEdge.class, EdgeRandomPoint.class, FixedEdge.class,
                     ProjectPointEdge.class, TwoEdgePoint.class, EdgesToFace.class,
+                    
+                    FixedLabel.class,
                     
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
                     

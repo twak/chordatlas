@@ -1,6 +1,8 @@
 package org.twak.mmg.media;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.UIManager;
@@ -39,7 +41,6 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.LinearForm3D;
-import org.twak.utils.ui.Colourz;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
@@ -201,6 +202,7 @@ public class MMGGreeble extends GreebleSkel {
 		}
 		
 		return mogram;
+//		return new MOgram();
 	}
 
 	
@@ -243,12 +245,17 @@ public class MMGGreeble extends GreebleSkel {
 		MMG mmg = new MMG();
 		m2.evaluate( mmg );
 		
+		Map<Loop<Point2d>, DepthColor> geometry = new HashMap<>();
+		
 		for (Node n : m2.evaluate( new MMG() ).findNodes()) 
-			if ( n.context.mo.renderData != null) {
+			if ( n.context.mo.renderData != null && n.result instanceof org.twak.mmg.prim.Face) {
 				DepthColor dc = (DepthColor)n.context.mo.renderData;
-				greebleGrid.mbs.get( n.name, Colourz.toF4( dc.color ) ).add( toLoop( (Path) n.result ), to3d );
+				if (dc.visible) {
+					geometry.put( ((org.twak.mmg.prim.Face)n.result).getPoints().get( 0 ), dc );
+				}
 			}
 		
+		new DepthGraph(greebleGrid.mbs, to3d, geometry);
 	}
 
 	private LoopL<Point2d> toLoop( Path result ) {

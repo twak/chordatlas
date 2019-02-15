@@ -17,7 +17,7 @@ import org.twak.utils.ui.ListDownLayout;
 
 public class DepthColor extends RenderData {
 	
-	public boolean visible;
+	public boolean visible = false;
 	public Color color;
 	public double depth;
 	
