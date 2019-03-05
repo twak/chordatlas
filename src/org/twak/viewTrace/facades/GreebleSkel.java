@@ -265,6 +265,8 @@ public class GreebleSkel {
 			}
 			
 			
+			addFloor ( greebleGrid.mbs, sf);
+			
 			if ( greebleGrid != null ) {
 //				edges( output, roofColor );
 
@@ -290,6 +292,19 @@ public class GreebleSkel {
 		}
 	}
 
+	private void addFloor( MMeshBuilderCache mbs, SuperFace sf2 ) {
+		
+		MatMeshBuilder faceColor = greebleGrid.mbs.get( BRICK + sf2.hashCode(), Colourz.to4( GreebleSkel.BLANK_WALL ), sf2 );
+		
+		Loop <Point2d> pts = sf2.toLoop();
+		
+		Matrix4d mat = new Matrix4d();
+		mat.setIdentity();
+		
+		faceColor.add( pts.singleton(), mat );
+		
+	}
+
 	private LoopL<Point2d> projectTo( Line megafacade, double mfl, LinearForm3D lf, Face f ) {
 		
 		if (f == null)
@@ -305,8 +320,6 @@ public class GreebleSkel {
 				} }
 			.run();
 	}
-
-	
 
 	public interface OnClick {
 		void selected( Output output, Node node, SuperEdge superEdge, Object ha );

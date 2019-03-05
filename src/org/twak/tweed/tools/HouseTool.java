@@ -253,7 +253,11 @@ public class HouseTool extends Tool {
 		
 		for (int i = 0; i < 50000; i++) {
 		
-			System.out.println( ">>>> "+i );
+			System.out.println( " >>>>> "+ i );
+			
+			File f = new File("/home/twak/Desktop/tiny_buildings/"+i+".obj");
+			if (!f.exists() || f.length() == 0)
+				{
 			
 			SkelGen res = clickedOn2( null, new Vector3f(), new Vector2f() );
 
@@ -263,7 +267,15 @@ public class HouseTool extends Tool {
 			dump.REMOVE_DUPE_TEXTURES = true;
 			res.dumpObj( dump );
 			
-			dump.dump( new File("/home/twak/Desktop/tiny_buildings/"+i+".obj"), new File ( Tweed.DATA ) );
+			
+			dump.dump( f, new File ( Tweed.DATA ) );
+			
+			if (f.length() == 0)
+				i--;
+			
+			tweed.frame.removeGen( res );
+				}
+			
 		}
 		
 			}
