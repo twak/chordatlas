@@ -13,19 +13,11 @@ import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
 import org.twak.mmg.Command;
-import org.twak.mmg.Function;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
-import org.twak.mmg.functions.AddLabel;
-import org.twak.mmg.functions.FacadeFountain;
-import org.twak.mmg.functions.FeatureFaceFountain;
-import org.twak.mmg.functions.FeatureFountain;
-import org.twak.mmg.functions.FixedEdge;
-import org.twak.mmg.functions.FixedLabel;
-import org.twak.mmg.prim.Edge;
-import org.twak.mmg.prim.Label;
+import org.twak.mmg.functions.*;
 import org.twak.mmg.prim.Path;
 import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.prim.ScreenSpace;
@@ -34,12 +26,10 @@ import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.MMGSkelGen;
 import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.WallTag;
-import org.twak.utils.Cache;
 import org.twak.utils.CloneSerializable;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
-import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -148,48 +138,18 @@ public class MMGGreeble extends GreebleSkel {
 		
 		MOgram mogram = new MOgram();
 		mogram.medium = new Facade2d();
-		
-		ScreenSpace.lastPosition = 0;
-		
-		Cache<String, MO> getLabel = new Cache<String, MO>() {
 
-			@Override
-			public MO create( String i ) {
-				FixedLabel fl = new FixedLabel( new Label( i ) );
-				MO flm = new MO(fl);
-				mogram.add(flm);
-				return flm;
-			}
-		};
+		mogram.add( new MO ( new MiniFacadeImport(mf) ) );
 
-		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces )
-			for ( Loopable<? extends Point2d> lp : loop.loopableIterator() ) {
-
-				FixedEdge fe = new FixedEdge( new Edge( lp.get(), lp.getNext().get() ) );
-
-				String label;
-
-				if ( fe.edge.start.y == 0 && fe.edge.end.y == 0 )
-					label = GreebleHelper.FLOOR_EDGE;
-				else if ( Math.abs( fe.edge.start.x - fe.edge.end.x ) > 0.5 )
-					label = GreebleHelper.WALL_EDGE;
-				else
-					label = GreebleHelper.ROOF_EDGE;
-
-				MO ffm = new MO( fe );
-				mogram.add( ffm );
-				AddLabel.label( mogram, ffm, getLabel.get( label ) );
-			}
-		
 		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
 			
 //			FixedLabel fl = new FixedLabel( new Label ( f.name().toLowerCase()) );
 //			MO flm = new MO(fl);
 //			mogram.add(flm);
 			
-			Function fff = new FeatureFaceFountain ( mf.featureGen.get( f ), f.toString() );
-			MO wfm = new MO( fff );
-			mogram.add( wfm  );
+//			Function fff = new FeatureFaceFountain ( mf.featureGen.get( f ), f.toString() );
+//			MO wfm = new MO( fff );
+//			mogram.add( wfm  );
 			
 //			for (FRect r : templateMF.featureGen.get( f )) {
 //				
@@ -237,10 +197,8 @@ public class MMGGreeble extends GreebleSkel {
 		MOgram m2 = (MOgram) CloneSerializable.xClone( mogram );
 		
 		for ( Command c : m2)
-			if ( c.function.getClass() == FacadeFountain.class )
-				( (FacadeFountain) c.function ).face = flat;
-			else if ( c.function.getClass() == FeatureFountain.class )
-				( (FeatureFountain) c.function ).mini = forFace;
+			if ( c.function.getClass() == MiniFacadeImport.class )
+				( (MiniFacadeImport) c.function ).mf = forFace;
 
 		MMG mmg = new MMG();
 		m2.evaluate( mmg );
