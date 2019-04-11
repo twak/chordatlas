@@ -30,23 +30,24 @@ public class MiniFacadeImport extends Function {
 		this.mf = mf;
 	}
 
-	private Cache<String, >
-	"⇧ " + name.toLowerCase() ),
-	bot = labelCache.get( "⇩ " + name.toLowerCase() ),
-	sid = labelCache.get( "⇦⇨ "
-
-	static String doorTop = "door"
-	static Set<String> labelNames = new HashSet<>();
-	static{
-
-		for (String s : new String[] {"win", "door"})
-		{
-			labelNames.add("⇧ "+s );
-			labelNames.add("⇦ ⇨ "+s );
-			labelNames.add("⇩ "+s );
-		}
-
-	}
+//
+//	private static Cache<String, Lable>
+//	"⇧ " + name.toLowerCase() ),
+//	bot = labelCache.get( "⇩ " + name.toLowerCase() ),
+//	sid = labelCache.get( "⇦⇨ "
+//
+//	static String doorTop = "door"
+//	static Set<String> labelNames = new HashSet<>();
+//	static{
+//
+//		for (String s : new String[] {"win", "door"})
+//		{
+//			labelNames.add("⇧ "+s );
+//			labelNames.add("⇦ ⇨ "+s );
+//			labelNames.add("⇩ "+s );
+//		}
+//
+//	}
 
 	@Override
 	public List<Node> createSN( InputSet is, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
