@@ -57,7 +57,6 @@ public class GreebleHelper {
 		
 		LoopL<LPoint3d> out = new LoopL<>();
 
-		
 		for (Loop<SharedEdge> loop : f.edges) {
 			
 			Loop<LPoint3d> lout = new Loop<>();

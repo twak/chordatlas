@@ -20,6 +20,7 @@ import javax.vecmath.Matrix4d;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.tweed.gen.skel.ObjSkelGen;
 import org.twak.utils.Filez;
 import org.twak.utils.ui.auto.Auto;
 
@@ -259,6 +260,7 @@ public class TweedSettings {
 			Path tempDirWithPrefix = Files.createTempDirectory("tweed_temporary_");
 			TweedFrame.instance.tweed.initFrom( tempDirWithPrefix.toString() );
 			TweedFrame.instance.addGen( new GISGen(TweedFrame.instance.tweed), true );
+//			TweedFrame.instance.addGen( new ObjSkelGen(TweedFrame.instance.tweed, "from obj", new File ("/home/twak/Desktop/scratch/test.obj")), true );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}

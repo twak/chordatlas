@@ -39,4 +39,8 @@ public class Pointz {
 		return new Vector3d( p2.x, y, p2.y );
 	}
 
+	public static Point3d swapYZ( Tuple3d x ) {
+		return new Point3d( x.x, x.z, x.y );
+	}
+
 }

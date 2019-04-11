@@ -302,7 +302,6 @@ public class GreebleSkel {
 		mat.setIdentity();
 		
 		faceColor.add( pts.singleton(), mat );
-		
 	}
 
 	private LoopL<Point2d> projectTo( Line megafacade, double mfl, LinearForm3D lf, Face f ) {
@@ -647,7 +646,7 @@ public class GreebleSkel {
 		boolean isGroundFloor = wallTag != null && 
 				facadeRect != null && 
 				mf != null && 
-				f.definingCorners.iterator().next().z < 1;
+				(f.definingCorners.isEmpty() || f.definingCorners.iterator().next().z < 1 );
 		
 		if (wallTag != null && facadeRect != null && mf != null && 
 			isGroundFloor && mf.groundFloorHeight > 0 &&
@@ -735,7 +734,7 @@ public class GreebleSkel {
 		
 		switch ( ra.appMode ) {
 			default:
-				roofUVs = null;
+				roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 				break;
 			case Net:
 				if ( ra.texture != null && ra.textureUVs == TextureUVs.Square )
