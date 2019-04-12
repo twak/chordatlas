@@ -183,6 +183,7 @@ public class TweedSettings {
 			settings.cameraLocation = TweedFrame.instance.tweed.oldCameraLoc;
 			
 			try {
+				folder.mkdirs();
 				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
 				new XStream(new PureJavaReflectionProvider()).toXML( TweedSettings.settings, fos );
 			} catch ( Throwable e ) {
@@ -232,8 +233,7 @@ public class TweedSettings {
 		if (recentFiles == null) {
 			try {
 				recentFiles = (RecentFiles) new XStream().fromXML( RECENT_FILE_LOCATION );
-			}
-			catch (Throwable th) {
+			}                  catch (Throwable th) {
 				System.out.println( "couldn't load recent project list" );
 				recentFiles = new RecentFiles();
 			}
@@ -260,7 +260,6 @@ public class TweedSettings {
 			Path tempDirWithPrefix = Files.createTempDirectory("tweed_temporary_");
 			TweedFrame.instance.tweed.initFrom( tempDirWithPrefix.toString() );
 			TweedFrame.instance.addGen( new GISGen(TweedFrame.instance.tweed), true );
-//			TweedFrame.instance.addGen( new ObjSkelGen(TweedFrame.instance.tweed, "from obj", new File ("/home/twak/Desktop/scratch/test.obj")), true );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
