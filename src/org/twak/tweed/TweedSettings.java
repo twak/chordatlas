@@ -20,6 +20,7 @@ import javax.vecmath.Matrix4d;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
+import org.twak.tweed.gen.skel.ObjSkelGen;
 import org.twak.utils.Filez;
 import org.twak.utils.ui.auto.Auto;
 
@@ -182,6 +183,7 @@ public class TweedSettings {
 			settings.cameraLocation = TweedFrame.instance.tweed.oldCameraLoc;
 			
 			try {
+				folder.mkdirs();
 				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
 				new XStream(new PureJavaReflectionProvider()).toXML( TweedSettings.settings, fos );
 			} catch ( Throwable e ) {
@@ -231,8 +233,7 @@ public class TweedSettings {
 		if (recentFiles == null) {
 			try {
 				recentFiles = (RecentFiles) new XStream().fromXML( RECENT_FILE_LOCATION );
-			}
-			catch (Throwable th) {
+			}                  catch (Throwable th) {
 				System.out.println( "couldn't load recent project list" );
 				recentFiles = new RecentFiles();
 			}
