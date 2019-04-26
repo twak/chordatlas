@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.vecmath.Matrix4d;
@@ -22,6 +23,7 @@ import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
 import org.twak.tweed.gen.skel.ObjSkelGen;
 import org.twak.utils.Filez;
+import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Quaternion;
@@ -33,6 +35,7 @@ public class TweedSettings {
 
 	
 	
+	private static final String TWEED_XML = "tweed.xml";
 	public static TweedSettings settings = new TweedSettings();
 	public static RecentFiles recentFiles;
 	static File folder; // location of data file
@@ -127,10 +130,11 @@ public class TweedSettings {
 		
 		try {
 			
-			File def = new File( folder, "tweed.xml" );
+			File def = new File( folder, TWEED_XML );
 			
-			if (!def.exists())
+			if (!def.exists()) {
 				settings = new TweedSettings();
+			}
 			else
 			{
 				XStream xs = new XStream();//new PureJavaReflectionProvider());
@@ -145,10 +149,10 @@ public class TweedSettings {
 			
 			
 			File defaultData = new File( folder, "chordatlas_example_inputs_1.zip" );
-			URL url = new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data/" + defaultData.getName() );
 			try {
 				if ( !defaultData.exists() ) {
 					ProgressMonitor pm = new ProgressMonitor( null, "downloading project data", "...", 0, 1 );
+					URL url = new URL( "http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/data/" + defaultData.getName() );
 					Filez.unpackArchive( url, folder, pm );
 				}
 			} catch ( Throwable th ) {
@@ -184,7 +188,7 @@ public class TweedSettings {
 			
 			try {
 				folder.mkdirs();
-				fos = new FileOutputStream( new File( folder, "tweed.xml" +(backup ? "_backup" : "") ) );
+				fos = new FileOutputStream( new File( folder, TWEED_XML +(backup ? "_backup" : "") ) );
 				new XStream(new PureJavaReflectionProvider()).toXML( TweedSettings.settings, fos );
 			} catch ( Throwable e ) {
 				e.printStackTrace();
@@ -255,14 +259,39 @@ public class TweedSettings {
 				recentFiles.f.remove( 0 );
 			}
 		}
+
+		boolean good;
 		
-		try {
-			Path tempDirWithPrefix = Files.createTempDirectory("tweed_temporary_");
-			TweedFrame.instance.tweed.initFrom( tempDirWithPrefix.toString() );
-			TweedFrame.instance.addGen( new GISGen(TweedFrame.instance.tweed), true );
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				good = true;
+				
+				JOptionPane.showMessageDialog( TweedFrame.instance.frame, "no recent project found; please select project folder", "welcome to chordatlas", JOptionPane.INFORMATION_MESSAGE );
+
+				JFileChooser chooser = new JFileChooser();
+				chooser.setCurrentDirectory( new java.io.File( "." ) );
+				chooser.setDialogTitle( "select project folder" );
+				chooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+				chooser.setAcceptAllFileFilterUsed( false );
+
+				if ( chooser.showOpenDialog( TweedFrame.instance.frame ) == JFileChooser.APPROVE_OPTION ) {
+					
+					File def = new File (chooser.getSelectedFile(), TWEED_XML );
+	
+					load(def);
+					if (!def.exists()) { // new
+						TweedFrame.instance.addGen( new GISGen( TweedFrame.instance.tweed ), true );
+						save( false );
+					}
+				} else {
+					good = false;
+				}
+				
+			} catch ( Throwable e ) {
+				e.printStackTrace();
+				good = false;
+			}
+		} while ( !good );
 	}
 
 	public void resetTrans() {

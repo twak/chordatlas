@@ -149,7 +149,12 @@ public class GreebleSkel {
 				Line megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y );
 				double mfl = megafacade.length();
 				Vector2d dir =megafacade.dir();
+				
+				if (dir.length() == 0)
+					continue;
+					
 				LinearForm3D lf = new LinearForm3D( new Vector3d(-dir.y, dir.x, 0), e.start );
+				
 				
 				for (Face f : chain) 
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
@@ -227,7 +232,11 @@ public class GreebleSkel {
 				allFeatures.addAll( processedFeatures );
 			
 				for ( Face f : chain )
-					face( f, mf2, processedFeatures, megafacade );
+					try {
+						face( f, mf2, processedFeatures, megafacade );
+					} catch ( Throwable th ) {
+						th.printStackTrace();
+					}
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) { 
