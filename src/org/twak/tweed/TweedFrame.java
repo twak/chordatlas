@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -50,6 +51,7 @@ import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
 import org.twak.tweed.gen.skel.SkelGen;
+import org.twak.utils.Filez;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -63,6 +65,7 @@ import org.twak.utils.ui.WindowManager;
 import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.SuperMeshPainter;
 
+import com.google.common.io.Files;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
@@ -448,9 +451,12 @@ public class TweedFrame {
 						public void heresTheFile( File obj ) throws Throwable {
 							//						removeMeshSources();
 
-							String f = tweed.makeWorkspaceRelative( obj ).toString();
-							addGen( new MeshGen( f, tweed ), true );
-						};
+							obj = queryImport (obj);
+							if ( obj != null ) {
+								String f = tweed.makeWorkspaceRelative( obj ).toString();
+								addGen( new MeshGen( f, tweed ), true );
+							}
+						}
 					};
 				}
 			} );
@@ -788,4 +794,29 @@ public class TweedFrame {
 		return (E) gens.get(0);
 	}
 
+	private File queryImport( File obj_ ) {
+		
+		File obj = obj_;
+		File c = obj.getParentFile();
+		boolean okay = false;
+		
+		while (c!= null) {
+			if (c.equals( new File ( Tweed.DATA )) )
+				okay = true;
+				c = c.getParentFile();
+		}
+		
+		if (okay)
+			return obj;
+		
+		if (JOptionPane.showConfirmDialog( frame, obj.getName() +" is outside project; import?", "import", JOptionPane.OK_CANCEL_OPTION ) == JOptionPane.OK_OPTION) {
+			try {
+				Files.copy( obj, obj = Filez.makeUnique( new File (Tweed.DATA, obj.getName() ) ) );
+				return obj;
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 }

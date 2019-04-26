@@ -165,6 +165,8 @@ public class GISGen  extends LineGen3d implements ICanSave {
 			initObj();
 		else if (gmlFile != null)
 			initGML();
+		else
+			initDefault();
 	}
 	
 	public void initDefault() {
