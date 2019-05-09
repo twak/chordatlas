@@ -170,6 +170,10 @@ public class JointStyle implements StyleSource {
 		rollJoint();
 	}
 
+	public void setSuper() {
+		nets.stream().forEach( n -> n.setHigh() );
+	}
+
 	public boolean install( SelectedApps root ) {
 		
 		nets.stream().forEach( n -> n.setMedium() );

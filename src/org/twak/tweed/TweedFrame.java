@@ -49,6 +49,7 @@ import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
+import org.twak.tweed.gen.ObjGenList;
 import org.twak.tweed.gen.PanoGen;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Filez;
@@ -96,6 +97,7 @@ public class TweedFrame {
 		Dimension d3Dim = new Dimension( 1024, 640 );
 
 		AppSettings settings = new AppSettings( true );
+		settings.setAudioRenderer(null);
 
 		settings.setWidth( d3Dim.width );
 		settings.setHeight( d3Dim.height );
@@ -444,6 +446,22 @@ public class TweedFrame {
 		SimplePopup2 sp = new SimplePopup2( evt );
 
 		if ( hasGIS() ) {
+			sp.add( "+ mesh (obj, multiple)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( frame, false, "Select one of .obj mesh file", new File( Tweed.JME ), "obj" ) {
+						public void heresTheFile( File objFile ) throws Throwable {
+							objFile = queryImport (objFile);
+							if ( objFile != null ) {
+								String f = tweed.makeWorkspaceRelative( objFile.getParentFile() ).toString();
+								System.out.println("added folder of " + f);
+								addGen( new ObjGenList( f, tweed ), true );
+							}
+						}
+					};
+				}
+			} );
+
 			sp.add( "+ mesh (obj)", new Runnable() {
 				@Override
 				public void run() {

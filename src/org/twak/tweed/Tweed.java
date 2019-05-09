@@ -758,6 +758,7 @@ public class Tweed extends SimpleApplication {
 
 	public static String DATA; // we read the datafiles from here
 	public static String SCRATCH; // we read the datafiles from here
+	public static String BACKUP; // we save backups to here
 	public static String JME; // root of asset resource-tree for jMonkey
 	
 	public void initFrom( String dataDir ) {
@@ -771,10 +772,12 @@ public class Tweed extends SimpleApplication {
 		
 		DATA = dataDir;
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
+		BACKUP = DATA + File.separator + "backup" + File.separator;
 		
 		deleteScratch();
 		
 		new File (SCRATCH).mkdirs();
+		new File (BACKUP).mkdirs();
 		
 		JME = DATA + File.separator;
 
