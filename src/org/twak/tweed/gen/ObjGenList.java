@@ -4,9 +4,14 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -48,22 +53,32 @@ public class ObjGenList extends ObjGen {
 
 	public List<String> fileNameList = new ArrayList<String>();
 	public List<ObjGen> objGenList = new ArrayList<ObjGen>();
-	
+
+	static final String TO_GENERATE = "todo.list";
+
 	public ObjGenList() {}
-	public ObjGenList(String root, Tweed tweed) {
-		super("list " + new File(root).getName(), tweed);
-		this.root = root;
 
-		String[] fileList = Tweed.toWorkspace( root ).list();
- 
-        for (String file : fileList) {
-        	String filename = root + File.separator + file;
-            ObjGen obj = new ObjGen(filename, tweed);
-            objGenList.add(obj);
-            fileNameList.add(filename);
+	public ObjGenList(File folder, Tweed tweed) {
+		super("list " + folder.getName(), tweed);
+		this.root = folder.getName();
 
-            System.out.println("adding obj file: " + filename);
-        }
+		File indexFile =  new File ( Tweed.toWorkspace( folder ), TO_GENERATE);
+
+		try {
+			List<String> fileList = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
+
+			for (String file : fileList) {
+				String filename = root + File.separator + file;
+				ObjGen obj = new ObjGen(filename, tweed);
+				objGenList.add(obj);
+				fileNameList.add(filename);
+
+				System.out.println("adding obj file: " + filename);
+			}
+
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -101,16 +101,30 @@ public class SelectedApps extends ArrayList<App>{
 		return out;
 	}
 	
-	// made some changes so that multiple SelectedApps can run
-	// computeTexturesNewThread() and not interfere with each other.
-
-	static Boolean computing = false;
-
-	public void computeTexturesNewThread() {
+	static boolean goAgain = true;
+	static boolean computing = false; 
+	
+	private void computeTexturesNewThread() {
+		
+		if (computing) {
+			goAgain = true;
+			return;
+		}
+		
+		goAgain = false;
+		computing = true;
+		
 		new Thread () {
 			@Override
 			public void run() {
+				try {
 				computeTextures( null );
+				}
+				finally {
+					computing = false;
+					if (goAgain)
+						computeTexturesNewThread();
+				}
 			}
 			
 			@Override
@@ -122,21 +136,12 @@ public class SelectedApps extends ArrayList<App>{
 	}
 	
 	public void computeTextures( ProgressMonitor m ) {
-		synchronized(computing) {
-			computing = true;
-
-			MultiMap<Integer, App> todo = new MultiMap<>();
-			int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
-			todo.putAll( i , this );
-
-			System.out.println("computing textures for " + get(0));
-
-			App.computeWithChildren( i, todo, geometryUpdate );
-
-			System.out.println("exit compute textures for " + get(0));
-
-			computing = false;
-		}
+		
+		MultiMap<Integer, App> todo = new MultiMap<>();
+		int i = NetInfo.evaluationOrder.indexOf( get(0).getClass() );
+		todo.putAll( i , this );
+		
+		App.computeWithChildren( i, todo, geometryUpdate );
 	}
 	
 	public void showUI() {

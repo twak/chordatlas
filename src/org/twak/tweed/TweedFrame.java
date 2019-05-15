@@ -449,14 +449,11 @@ public class TweedFrame {
 			sp.add( "+ mesh (obj, multiple)", new Runnable() {
 				@Override
 				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of .obj mesh file", new File( Tweed.JME ), "obj" ) {
-						public void heresTheFile( File objFile ) throws Throwable {
-							objFile = queryImport (objFile);
-							if ( objFile != null ) {
-								String f = tweed.makeWorkspaceRelative( objFile.getParentFile() ).toString();
-								System.out.println("added folder of " + f);
-								addGen( new ObjGenList( f, tweed ), true );
-							}
+					new SimpleFileChooser( frame, false, "Select todo.list", new File( Tweed.JME ), "list" ) {
+						public void heresTheFile( File oneOfMany ) throws Throwable {
+							File folder = tweed.makeWorkspaceRelative( oneOfMany.getParentFile() );
+							System.out.println("added folder of " + folder.getName());
+							addGen( new ObjGenList( folder, tweed ), true );
 						}
 					};
 				}
