@@ -96,7 +96,8 @@ public class TweedFrame {
 		Dimension d3Dim = new Dimension( 1024, 640 );
 
 		AppSettings settings = new AppSettings( true );
-
+		settings.setAudioRenderer(null);
+		
 		settings.setWidth( d3Dim.width );
 		settings.setHeight( d3Dim.height );
 		settings.setSamples( 4 );
