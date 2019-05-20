@@ -1,6 +1,21 @@
 package org.twak.mmg.functions;
 
-import org.twak.mmg.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Point2d;
+
+import org.twak.mmg.Command;
+import org.twak.mmg.Function;
+import org.twak.mmg.InputSet;
+import org.twak.mmg.MMG;
+import org.twak.mmg.MO;
+import org.twak.mmg.MOgram;
+import org.twak.mmg.Node;
+import org.twak.mmg.Refs;
 import org.twak.mmg.prim.Edge;
 import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.ScreenSpace;
@@ -14,40 +29,56 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.twak.viewTrace.facades.MiniFacade.Feature;
 
 public class MiniFacadeImport extends Function {
 
+	private static final String TOP_RECT = "⇧ ", BOTTOM_RECT = "⇩ ", SIDES_RECT = "⇦⇨ ";
 	public MiniFacade mf;
-
-	public MiniFacadeImport( MiniFacade mf ) {
+	private Map<String, MO> fixedLabels;
+	
+	public MiniFacadeImport( MiniFacade mf, Map<String, MO> fixedLabels ) {
 		color = fixed;
+		
 		this.mf = mf;
+		this.fixedLabels = fixedLabels;
 	}
 
-//
-//	private static Cache<String, Lable>
-//	"⇧ " + name.toLowerCase() ),
-//	bot = labelCache.get( "⇩ " + name.toLowerCase() ),
-//	sid = labelCache.get( "⇦⇨ "
-//
-//	static String doorTop = "door"
-//	static Set<String> labelNames = new HashSet<>();
-//	static{
-//
-//		for (String s : new String[] {"win", "door"})
-//		{
-//			labelNames.add("⇧ "+s );
-//			labelNames.add("⇦ ⇨ "+s );
-//			labelNames.add("⇩ "+s );
-//		}
-//
-//	}
+	/**
+	 * We have a set of MOs every facade uses that are identified via unique MOs
+	 */
+	public static Map<String, MO> createLabels() {
+
+		Map<String, MO> out = new LinkedHashMap<>();
+
+		for ( String s : new String[] { GreebleHelper.FLOOR_EDGE, GreebleHelper.WALL_EDGE, GreebleHelper.ROOF_EDGE } ) {
+			FixedLabel fl = new FixedLabel( s );
+			out.put( s, new MO( fl ) );
+		}
+
+		for ( Feature f : new Feature[] { Feature.DOOR, Feature.WINDOW } ) {
+			for ( String s : new String[] { TOP_RECT, BOTTOM_RECT, SIDES_RECT } ) {
+				String name = s + f.name().toLowerCase();
+				FixedLabel fl = new FixedLabel( name );
+				out.put( name, new MO( fl ) );
+			}
+		}
+
+		return out;
+	}
+	
+	public Node getLabel( String s, MMG mmg ) {
+		
+		try {
+			return mmg.getNodes( fixedLabels.get( s ) ).get( 0 );
+		}
+		catch ( NullPointerException e ) {
+			System.err.println( "not all node names declared in fixedlabels :(" );
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 	@Override
 	public List<Node> createSN( InputSet is, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
@@ -58,38 +89,34 @@ public class MiniFacadeImport extends Function {
 		Node root = new Node( this, null );
 		out.add( root );
 
-		Cache<String, Node> labelCache = new Cach<String, Node>(s -> {
-			Label l = new Label (s);
-			Node n = new Node (this, l);
-			out.add(n);
-//			Nodez.connect( root, "labels", n, Refs.Structure.Sequential );
-			return n;
-		} );
 
 
 		for ( MiniFacade.Feature f : mf.featureGen.keySet() )
-			createRectangles( mo, out, f.name().toLowerCase(), mf.featureGen.get( f ), labelCache, root );
+			createRectangles( mo, out, f.name().toLowerCase(), mf.featureGen.get( f ), root, mmg );
 
-		createWall( mo, out, labelCache, root );
+		createWall( mo, out, root, mmg );
 
 		return out;
 	}
 
-	private void createWall( Command mo, List<Node> out, Cache<String, Node> labelCache, Node root ) {
+	private void createWall( Command mo, List<Node> out, Node root, MMG mmg ) {
 
-		Node pointRoot = new Node( this, null );
-		Nodez.connect( root, "points", pointRoot, Refs.Structure.Singleton );
 
-		Cache<Point2d, Node> nodeCache = new Cache<Point2d, Node>() {
-			@Override public Node create( Point2d point2d ) {
-				Node n = new Node( MiniFacadeImport.this, point2d);
-				out.add(n);
-				Nodez.connect( pointRoot, "points", n, Refs.Structure.Loop );
-				return n;
-			}
-		};
-
-		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces )
+		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces ) {
+			
+			Node pointRoot = new Node( this, null );
+			out.add( pointRoot );
+			Nodez.connect( root, "wall_faces", pointRoot, Refs.Structure.Unordered );
+			
+			Cache<Point2d, Node> nodeCache = new Cache<Point2d, Node>() {
+				@Override public Node create( Point2d point2d ) {
+					Node n = new Node( MiniFacadeImport.this, point2d);
+					out.add(n);
+					Nodez.connect( pointRoot, "points", n, Refs.Structure.Loop );
+					return n;
+				}
+			};
+			
 			for ( Loopable<? extends Point2d> lp : loop.loopableIterator() ) {
 
 				Edge e = new Edge( lp.get(), lp.getNext().get() );
@@ -107,22 +134,20 @@ public class MiniFacadeImport extends Function {
 				else
 					label = GreebleHelper.ROOF_EDGE;
 
-				FixedLabel.label( labelCache.get( label ), en );
+				FixedLabel.label( getLabel( label, mmg ), en );
 			}
+		}
 
 	}
+	
+	
+	
 	private void createRectangles( Command mo, List<Node> out, String name, List<FRect> rects,
-			Cache<String, Node> labelCache, Node root ) {
+			Node root, MMG mmg ) {
 
-		Node 	top = labelCache.get( "⇧ " + name.toLowerCase() ),
-				bot = labelCache.get( "⇩ " + name.toLowerCase() ),
-				sid = labelCache.get( "⇦⇨ " + name.toLowerCase() );
-
-
-		for ( Node n : new Node[] { top, bot, sid } ) {
-			out.add( n );
-			Nodez.connect( root, "labels", n, Refs.Structure.Sequential );
-		}
+		Node 	top = getLabel( TOP_RECT    + name.toLowerCase(), mmg ),
+				bot = getLabel( BOTTOM_RECT + name.toLowerCase(), mmg ),
+				sid = getLabel( SIDES_RECT  + name.toLowerCase(), mmg );
 
 		for ( DRectangle r : rects ) {
 

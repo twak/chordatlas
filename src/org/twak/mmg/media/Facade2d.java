@@ -5,6 +5,7 @@ import org.twak.mmg.functions.BoundOBB;
 import org.twak.mmg.functions.CloneFace;
 import org.twak.mmg.functions.DivideOBB;
 import org.twak.mmg.functions.DividePointOBB;
+import org.twak.mmg.functions.DrawEdge;
 import org.twak.mmg.functions.EdgeRandomPoint;
 import org.twak.mmg.functions.EdgesToFace;
 import org.twak.mmg.functions.Erase;
@@ -78,7 +79,7 @@ public class Facade2d extends Medium {
                     DivideOBB.class, RepeatOBB.class, FixedNum.class,
                     OffsetOBB.class, DividePointOBB.class, RepeatPointOBB.class, BoundOBB.class,
                     
-                    TwoPointEdge.class, EdgeRandomPoint.class, FixedEdge.class,
+                    DrawEdge.class, TwoPointEdge.class, EdgeRandomPoint.class, FixedEdge.class,
                     ProjectPointEdge.class, TwoEdgePoint.class, EdgesToFace.class,
                     
                     FixedLabel.class,

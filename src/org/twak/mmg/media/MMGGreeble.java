@@ -139,30 +139,13 @@ public class MMGGreeble extends GreebleSkel {
 		MOgram mogram = new MOgram();
 		mogram.medium = new Facade2d();
 
-		mogram.add( new MO ( new MiniFacadeImport(mf) ) );
-
-		for (Feature f : new Feature[] {Feature.WINDOW, Feature.DOOR }) {
-			
-//			FixedLabel fl = new FixedLabel( new Label ( f.name().toLowerCase()) );
-//			MO flm = new MO(fl);
-//			mogram.add(flm);
-			
-//			Function fff = new FeatureFaceFountain ( mf.featureGen.get( f ), f.toString() );
-//			MO wfm = new MO( fff );
-//			mogram.add( wfm  );
-			
-//			for (FRect r : templateMF.featureGen.get( f )) {
-//				
-//				FixedOBB wf = new FixedOBB(new OBB(r.x, r.y, r.width, r.height, 0));
-//				MO wfm = new MO( wf );
-//				mogram.add( wfm  );
-//
-//				AddLabel.label( mogram, flm, wfm );
-//			}
-		}
+		Map<String,MO> labels = MiniFacadeImport.createLabels();
 		
+		mogram.addAll( labels.values() );
+		
+		mogram.add( new MO ( new MiniFacadeImport(mf, labels) ) );
+
 		return mogram;
-//		return new MOgram();
 	}
 
 	
@@ -233,6 +216,9 @@ public class MMGGreeble extends GreebleSkel {
 		} catch ( Throwable ex ) {
 			ex.printStackTrace();
 		}
+		
+		Medium.mediums = new Medium[] { new OneD(), new Facade2d() } ;
+		
 		MMGSkelGen sg = new MMGSkelGen();
 		sg.mogram = createMOgram( createTemplateMF() );
 		new MOgramEditor( sg.mogram ).setVisible( true );
