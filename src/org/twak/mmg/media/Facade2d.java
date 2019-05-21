@@ -79,7 +79,8 @@ public class Facade2d extends Medium {
                     DivideOBB.class, RepeatOBB.class, FixedNum.class,
                     OffsetOBB.class, DividePointOBB.class, RepeatPointOBB.class, BoundOBB.class,
                     
-                    DrawEdge.class, TwoPointEdge.class, EdgeRandomPoint.class, FixedEdge.class,
+                    DrawEdge.class, TwoPointEdge.class, EdgeRandomPoint.class, 
+                    //FixedEdge.class,
                     ProjectPointEdge.class, TwoEdgePoint.class, EdgesToFace.class,
                     
                     FixedLabel.class,
