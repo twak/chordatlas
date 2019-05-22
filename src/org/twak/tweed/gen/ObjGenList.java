@@ -43,6 +43,7 @@ import com.jme3.scene.Spatial;
 public class ObjGenList extends ObjGen {
 
 	protected String root;
+	public File indexFile;
 
 	boolean renderLines = false;
 	float transparency = 1;
@@ -54,20 +55,20 @@ public class ObjGenList extends ObjGen {
 	public List<String> fileNameList = new ArrayList<String>();
 	public List<ObjGen> objGenList = new ArrayList<ObjGen>();
 
-	static final String TO_GENERATE = "todo.list";
-
 	public ObjGenList() {}
 
-	public ObjGenList(File folder, Tweed tweed) {
+	public ObjGenList(File indexFile, File folder, Tweed tweed) {
 		super("list " + folder.getName(), tweed);
 		this.root = folder.getName();
-
-		File indexFile =  new File ( Tweed.toWorkspace( folder ), TO_GENERATE);
+		this.indexFile = indexFile;
 
 		try {
 			List<String> fileList = Files.lines( indexFile.toPath() ).collect( Collectors.toList() );
 
 			for (String file : fileList) {
+				// if there's a new line in our todo.list, this forms a file with String ""
+				if (file.length() == 0) continue;
+
 				String filename = root + File.separator + file;
 				ObjGen obj = new ObjGen(filename, tweed);
 				objGenList.add(obj);
@@ -104,7 +105,7 @@ public class ObjGenList extends ObjGen {
 	}
 
 	private void toSkeleton() {
-		tweed.frame.addGen( new ObjSkelGenList( tweed, "objskel list: "+name, root ), true );
+		tweed.frame.addGen( new ObjSkelGenList( tweed, "objskel list: "+name, root , indexFile), true );
 		setVisible( false );
 	}
 

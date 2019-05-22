@@ -446,14 +446,14 @@ public class TweedFrame {
 		SimplePopup2 sp = new SimplePopup2( evt );
 
 		if ( hasGIS() ) {
-			sp.add( "+ mesh (obj, multiple)", new Runnable() {
+			sp.add( "+ mesh (obj, group)", new Runnable() {
 				@Override
 				public void run() {
 					new SimpleFileChooser( frame, false, "Select todo.list", new File( Tweed.JME ), "list" ) {
-						public void heresTheFile( File oneOfMany ) throws Throwable {
-							File folder = tweed.makeWorkspaceRelative( oneOfMany.getParentFile() );
+						public void heresTheFile( File todoFile ) throws Throwable {
+							File folder = tweed.makeWorkspaceRelative( todoFile.getParentFile() );
 							System.out.println("added folder of " + folder.getName());
-							addGen( new ObjGenList( folder, tweed ), true );
+							addGen( new ObjGenList( todoFile, folder, tweed ), true );
 						}
 					};
 				}

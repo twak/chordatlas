@@ -84,13 +84,16 @@ public class BlockApp extends App {
 		}
 	}
 
-	public JointStyle setAndGetJoint( SelectedApps sa ) {
-		JointStyle js = new JointStyle(null);
+	public void setJoint( SelectedApps sa, JointStyle js, boolean superRes) {
 		styleSource = js;
 		appMode = TextureMode.Net;
 		styleSource.install( new SelectedApps( (App) this, sa.geometryUpdate ) );
 		sa.showUI();
-		return js;
+
+		if (superRes) {
+			js.setSuper();
+		}
+		js.redraw();
 	}
 
 	public void setJoint( SelectedApps sa ) {
