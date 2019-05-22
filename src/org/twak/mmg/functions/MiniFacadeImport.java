@@ -1,11 +1,12 @@
 package org.twak.mmg.functions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import org.twak.mmg.Command;
@@ -16,16 +17,17 @@ import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.Refs;
+import org.twak.mmg.media.MMGGreeble;
 import org.twak.mmg.prim.Edge;
-import org.twak.mmg.prim.Label;
 import org.twak.mmg.prim.ScreenSpace;
-import org.twak.utils.Cach;
+import org.twak.mmg.ui.Cowput;
 import org.twak.utils.Cache;
 import org.twak.utils.Pair;
 import org.twak.utils.collections.ConsecutivePairs;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.Loopable;
 import org.twak.utils.geom.DRectangle;
+import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
@@ -195,5 +197,21 @@ public class MiniFacadeImport extends Function {
 
 		}
 	}
+	
+	private void randomMF(MOgram mogram) {
+		mf = MMGGreeble.createTemplateMF( Math.random() * 5 + 5, Math.random() * 5 + 3 );
+		mogram.somethingChanged();
+	}
+	
+	public void showOptions( JPanel panel, MOgram mogram ) {
+	
+		panel.setLayout( new ListDownLayout() );
+		JButton rr = new JButton("randomize");
+		panel.add( rr );
+		rr.addActionListener( e -> randomMF(mogram) );
+		
+	}
+
+	
 
 }

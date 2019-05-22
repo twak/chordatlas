@@ -30,7 +30,7 @@ public class MMGSkelGen extends SkelGen {
 	public MOgram ensureMOGram( SuperFace sf ) {
 
 		if (mogram == null)
-			mogram = MMGGreeble.createMOgram( MMGGreeble.createTemplateMF() );
+			mogram = MMGGreeble.createMOgram( MMGGreeble.createTemplateMF( 5, 10) );
 
 		((Facade2d) mogram.medium).setRenderListener ( new RenderListener() {
 			

@@ -2,6 +2,7 @@ package org.twak.mmg.media;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,7 +31,9 @@ import org.twak.utils.CloneSerializable;
 import org.twak.utils.Line;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
+import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm3D;
+import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
@@ -39,6 +42,8 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.MatMeshBuilder;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+
+import smile.math.Math;
 
 
 public class MMGGreeble extends GreebleSkel {
@@ -149,28 +154,65 @@ public class MMGGreeble extends GreebleSkel {
 	}
 
 	
-	public static MiniFacade createTemplateMF() {
+	public static MiniFacade createTemplateMF(double w, double h ) {
 		
 		MiniFacade  out = new MiniFacade();
 		
 		Loop<LPoint2d> boundary = new Loop<>(
 				new LPoint2d( 0, 0     , GreebleHelper.FLOOR_EDGE ),
-				new LPoint2d( 7, 0     , GreebleHelper.WALL_EDGE  ),
-				new LPoint2d( 7, -5    , GreebleHelper.ROOF_EDGE  ),
-				new LPoint2d( 3.5, -10 , GreebleHelper.ROOF_EDGE  ),
-				new LPoint2d( 0, -5    , GreebleHelper.WALL_EDGE  )
+				new LPoint2d( w, 0     , GreebleHelper.WALL_EDGE  ),
+				new LPoint2d( w, -h    , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( w/2, -h - Math.random()*4 , GreebleHelper.ROOF_EDGE  ),
+				new LPoint2d( 0, -h    , GreebleHelper.WALL_EDGE  )
 				);
 
 		out.facadeTexApp.resetPostProcessState();
-		
 		out.facadeTexApp.postState.wallFaces.add( boundary );
 
-		for (int i = 0; i < 3; i++)
-			out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, i * 1.7 + 1, -4., 1.5, 1., out ) );
+		List<DRectangle> floors = new DRectangle(1,-h,w-2,h).splitY( r -> CGAMini.splitFloors( r, 2, 2, 2 ) );
+
 		
-		out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, 4, -2., 1.5, 1., out ) );
+		for (int fi = 0; fi < floors.size(); fi++ ) {
+			
+			DRectangle floor = floors.get( fi );
+			List<DRectangle> fPanels = floor.splitX( r -> CGAMini.stripe( r, 1.5, 0.8 ) );
+
+			for ( int p = 0; p < fPanels.size(); p++ ) {
+				if ( p % 2 == 0 ) {
+					DRectangle dr = fPanels.get( p );
+					
+
+					if (fi == floors.size()-1 && p == 0) {
+						
+						dr.height = Math.min( 2, dr.height );
+						dr.y = -dr.height - 0.1;
+						
+						out.featureGen.add( Feature.DOOR, dr );
+					}
+					else {
+						List<DRectangle> winPanel = dr.splitY( r -> CGAMini.split3Y( r, 0.2, dr.height - 0.2 - 0.8 ) );
+					if ( winPanel.size() == 3 ) {
+						{
+							DRectangle window = winPanel.get( 1 );
+							out.featureGen.add( Feature.WINDOW, window );
+						}
+					}
+					}
+				}
+			}
+		}
 		
-		out.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.4, out ) );
+//		out.featureGen = new CGAMini( out );
+//		out.featureGen.update();
+		
+		
+		
+//		for (int x = 0; x < 3; x++)
+//			out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, x * 1.7 + 1, -4., 1.5, 1., out ) );
+//		
+//		out.featureGen.put( Feature.WINDOW, new FRect( Feature.WINDOW, 4, -2., 1.5, 1., out ) );
+//		
+//		out.featureGen.put( Feature.DOOR, new FRect( Feature.DOOR, 1, -2.5, 1.5, 2.4, out ) );
 		
 		return out;
 	}
@@ -220,7 +262,7 @@ public class MMGGreeble extends GreebleSkel {
 		Medium.mediums = new Medium[] { new OneD(), new Facade2d() } ;
 		
 		MMGSkelGen sg = new MMGSkelGen();
-		sg.mogram = createMOgram( createTemplateMF() );
+		sg.mogram = createMOgram( createTemplateMF( 6, 5 ) );
 		new MOgramEditor( sg.mogram ).setVisible( true );
 	}
 }

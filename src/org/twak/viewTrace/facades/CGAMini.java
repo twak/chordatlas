@@ -84,7 +84,7 @@ public class CGAMini extends FeatureGenerator {
 	}
 	
 	
-	private static List<Double> split3Y (RectDir r, double first, double last) {
+	public static List<Double> split3Y (RectDir r, double first, double last) {
 		
 		double wight =  r.dirX ? r.rect.width : r.rect.height;
 		
@@ -103,7 +103,7 @@ public class CGAMini extends FeatureGenerator {
 		return out;
 	}
 	
-	private static List<Double> splitFloors (RectDir r, double ground, double middle, double top) {
+	public static List<Double> splitFloors (RectDir r, double ground, double middle, double top) {
 		
 		double wight = r.dirX ? r.rect.width : r.rect.height;
 		
@@ -141,7 +141,7 @@ public class CGAMini extends FeatureGenerator {
 		return out;
 	}
 
-	private static List<Double> stripe( RectDir r, double win, double gap_ ) {
+	public static List<Double> stripe( RectDir r, double win, double gap_ ) {
 		
 		double weight =  r.dirX ? r.rect.width : r.rect.height;
 		List<Double> out = new ArrayList<>();
