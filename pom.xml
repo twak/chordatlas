@@ -74,8 +74,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<fork>true</fork>
-					<executable>/Users/leekkww/Documents/School/MEng/chordatlas/jdk-11.0.2.jdk/Contents/Home/bin/javac</executable>
 				</configuration>
 			</plugin>
 
@@ -198,6 +196,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
 		</dependency>
 
 
