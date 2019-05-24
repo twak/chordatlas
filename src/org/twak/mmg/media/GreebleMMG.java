@@ -1,10 +1,7 @@
 package org.twak.mmg.media;
 
-import java.awt.Color;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.UIManager;
@@ -20,12 +17,9 @@ import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.functions.MiniFacadeImport;
-import org.twak.mmg.prim.Path;
-import org.twak.mmg.prim.Path.Segment;
 import org.twak.mmg.ui.MOgramEditor;
-import org.twak.utils.CloneSerializable;
 import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.LoopL;
+import org.twak.utils.collections.Loopz;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.viewTrace.facades.CGAMini;
@@ -43,49 +37,40 @@ public class GreebleMMG {
 
 	public static void greeble2DPolygon( MOgram mogram, MMeshBuilderCache mbs, Face f, Loop<LPoint3d> ll, Matrix4d to2dXY, Vector3d along, Point3d bottomS, Point3d start, Point3d end, Loop<LPoint2d> flat, Matrix4d to3d, Matrix4d to2d, LinearForm3D facePlane ) {
 
+		if (mogram == null) {
+			mbs.WOOD.add( flat.singleton(), to3d );
+			return;
+		}
+		
+		MiniFacade mf = new MiniFacade();
+		mf.facadeTexApp.resetPostProcessState();
+		
+		mf.facadeTexApp.postState.wallFaces.add( flat );
+		
+		for ( Command c : mogram)
+			if ( c.function.getClass() == MiniFacadeImport.class )
+				( (MiniFacadeImport) c.function ).mf = mf;
 		
 		
-		mbs.WOOD.add( flat.singleton(), to3d );
+		for (Node n : mogram.evaluate( new MMG() ).findNodes()) 
+			if ( n.context.mo.renderData != null && n.result instanceof org.twak.mmg.prim.Face && !n.erased ) {
+				DepthColor dc = (DepthColor)n.context.mo.renderData;
+				if (dc.visible) 
+					createSurfacesWithDepth( dc, ((org.twak.mmg.prim.Face)n.result).getPoints().get( 0 ), mbs, to3d );
+			}
 		
-//		mbs.get( UUID.randomUUID().toString(), Color.gray, null ).add( ll.singleton(), null, true );
 	}
 
 
-//	private void mmg( Matrix4d to2d, Matrix4d to3d, Loop<LPoint2d> flat, MiniFacade forFace ) {
-//
-//		MOgram m2 = (MOgram) CloneSerializable.xClone( mogram );
-//		
-//		for ( Command c : m2)
-//			if ( c.function.getClass() == MiniFacadeImport.class )
-//				( (MiniFacadeImport) c.function ).mf = forFace;
-//
-//		MMG mmg = new MMG();
-//		m2.evaluate( mmg );
-//		
-//		Map<Loop<Point2d>, DepthColor> geometry = new HashMap<>();
-//		
-//		for (Node n : m2.evaluate( new MMG() ).findNodes()) 
-//			if ( n.context.mo.renderData != null && n.result instanceof org.twak.mmg.prim.Face) {
-//				DepthColor dc = (DepthColor)n.context.mo.renderData;
-//				if (dc.visible) {
-//					geometry.put( ((org.twak.mmg.prim.Face)n.result).getPoints().get( 0 ), dc );
-//				}
-//			}
-//		
-//		new DepthGraph(greebleGrid.mbs, to3d, geometry);
-//	}
-//
-//	private LoopL<Point2d> toLoop( Path result ) {
-//		
-//		LoopL<Point2d> out = new LoopL<>();
-//		Loop<Point2d> lp = out.loop();
-//		
-//		for (Segment s: result.segments) 
-//			lp.append( lp.getFirst() );
-//		
-//		return out;
-//	}
-	
+	private static void createSurfacesWithDepth( DepthColor dc, Loop<Point2d> geometry, MMeshBuilderCache mbs, Matrix4d to3d ) {
+		
+		if (geometry == null)
+			return;
+		
+		Loop <Point3d> p3 = Loopz.transform( Loopz.to3d( geometry, dc.depth, 1 ), to3d );
+		
+		mbs.get( UUID.randomUUID().toString(), dc.color, null ).add( p3.singleton(), null, false );
+	}
 	
 	public static MOgram createMOgram(MiniFacade mf) {
 		

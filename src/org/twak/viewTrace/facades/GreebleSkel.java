@@ -1,6 +1,5 @@
 package org.twak.viewTrace.facades;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,6 +22,7 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
+import org.twak.mmg.media.GreebleMMG;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.PlanSkeleton.ColumnProperties;
 import org.twak.tweed.ClickMe;
@@ -38,7 +38,6 @@ import org.twak.tweed.gen.skel.SETag;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
-import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -47,7 +46,6 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Colourz;
-import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
@@ -591,18 +589,13 @@ public class GreebleSkel {
 		Matrix4d to2d = new Matrix4d( to3d ); // now in jme space
 		to2d.invert();
 		
-		FeatureGenerator toRecess = new FeatureGenerator( (MiniFacade) null );
-		
-//		if (mf != null) {
-//			toRecess = new FeatureGenerator();
-//			toRecess.mf = mf;
-//			toRecess.add new FeatureGenerator( toRecess );
-//		}
 		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
 		
-		if (! ( mf.featureGen instanceof MMGFeatureGen) )
+		if (! ( mf.featureGen instanceof MMGFeatureGen) ) {
+			FeatureGenerator toRecess = new FeatureGenerator( (MiniFacade) null );
 			greeble2DPolygon( f, ll, mf, wallTag, features, faceMaterial, to2dXY, fta, along, bottomS, start, end, flat, to3d, to2d, toRecess, facePlane );
+		}
 		else  {
 			features.clear(); // let greeble generate all windows
 			GreebleMMG.greeble2DPolygon( ((MMGFeatureGen)mf.featureGen).mogram , greebleGrid.mbs, f, ll, to2dXY, along, bottomS, start, end, flat, to3d, to2d, facePlane );

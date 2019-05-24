@@ -18,7 +18,7 @@ import org.twak.utils.ui.ListDownLayout;
 public class DepthColor extends RenderData {
 	
 	public boolean visible = false;
-	public Color color;
+	public Color color = Color.gray;
 	public double depth;
 	
     @Override

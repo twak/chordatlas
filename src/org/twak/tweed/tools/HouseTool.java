@@ -10,10 +10,10 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.twak.tweed.IDumpObjs;
+import org.twak.mmg.MOgram;
+import org.twak.mmg.media.GreebleMMG;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
-import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.LineGen3d;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
@@ -21,11 +21,12 @@ import org.twak.tweed.gen.SuperFace;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.geom.HalfMesh2;
-import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
+import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.AutoSpinner;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.viewTrace.facades.MMGFeatureGen;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.FacadeLabelApp;
@@ -210,10 +211,20 @@ public class HouseTool extends Tool {
 		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
 		
+		MOgram mogram = GreebleMMG.createMOgram( null );
 		for ( HalfFace hf : mesh )
 			for ( HalfEdge he : hf ) {
-				FacadeLabelApp mfa = ( (SuperEdge) he ).toEdit.facadeLabelApp;
+				
+				
+				SuperEdge se = (SuperEdge)he;
+				
+				FacadeLabelApp mfa = se.toEdit.facadeLabelApp;
+				
+				se.toEdit = new MiniFacade();
+				se.toEdit.featureGen = new MMGFeatureGen( mogram );
+				
 				mfa.appMode = TextureMode.MMG;
+				mfa.mogram = mogram;
 			}
 		
 		return sg;

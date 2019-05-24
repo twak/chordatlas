@@ -132,7 +132,10 @@ public class FacadeLabelApp extends App {
 					if (mogram == null)
 						mogram = GreebleMMG.createMOgram(mf);
 					
-					new MOgramEditor( mogram ).setVisible( true );		
+					MOgramEditor me = new MOgramEditor( mogram );
+					MOgramEditor.quitOnLastClosed = false;
+					me.setVisible( true );		
+					
 				}
 			} );
 			out.add( edit );
