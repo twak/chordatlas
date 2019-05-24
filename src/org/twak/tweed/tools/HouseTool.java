@@ -10,7 +10,6 @@ import javax.vecmath.Point3d;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.FeatureCache.ImageFeatures;
 import org.twak.tweed.gen.LineGen3d;
-import org.twak.tweed.gen.MMGSkelGen;
 import org.twak.tweed.gen.Prof;
 import org.twak.tweed.gen.SuperEdge;
 import org.twak.tweed.gen.SuperFace;
@@ -23,7 +22,7 @@ import org.twak.utils.ui.AutoSpinner;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.franken.App.TextureMode;
-import org.twak.viewTrace.franken.FacadeTexApp;
+import org.twak.viewTrace.franken.FacadeLabelApp;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -127,16 +126,15 @@ public class HouseTool extends Tool {
 		}
 
 		HalfMesh2 mesh = builder.done();
-		SkelGen sg = new MMGSkelGen( mesh, tweed, null );
+		SkelGen sg = new SkelGen( mesh, tweed, null );
 		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
 		
-		for (HalfFace hf : mesh)
-		for (HalfEdge he : hf) {
-			FacadeTexApp mfa =  ((SuperEdge)he).toEdit.facadeTexApp;
-
-			mfa.appMode = TextureMode.Off;//"tex.jpg";
-		}
+		for ( HalfFace hf : mesh )
+			for ( HalfEdge he : hf ) {
+				FacadeLabelApp mfa = ( (SuperEdge) he ).toEdit.facadeLabelApp;
+				mfa.appMode = TextureMode.MMG;
+			}
 	}
 	
 	private MiniFacade newMini(ImageFeatures imf, double length) {

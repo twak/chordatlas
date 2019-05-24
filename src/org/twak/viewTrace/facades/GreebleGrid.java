@@ -70,12 +70,18 @@ public class GreebleGrid {
 	
 	public void attachAll( Node node, List<Face> chain, Output output, ClickMe clickMe ) {
 		for ( String mName : mbs.cache.keySet() )
-			for (float[] mCol : mbs.cache.get( mName ).keySet() )		
-				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe, mbs.get( mName, mCol ) ) );
+			for (float[] mCol : mbs.cache.get( mName ).keySet() )	{
+				MatMeshBuilder o = mbs.get( mName, mCol );	
+				if (!o.verts.isEmpty())
+					node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe, o  ) );
+			}
 		
 		for (String mName : mbs.textures.cache.keySet())
-			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
-				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, texture ) ) );
+			for (String texture : mbs.textures.cache.get( mName ).keySet() ) { 
+				MatMeshBuilder o = mbs.getTexture( mName, texture );
+				if (!o.verts.isEmpty())
+					node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, o ) );
+			}
 		
 		// texture atlas.dump
 	}

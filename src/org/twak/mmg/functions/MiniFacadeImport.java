@@ -17,7 +17,7 @@ import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.Refs;
-import org.twak.mmg.media.MMGGreeble;
+import org.twak.mmg.media.GreebleMMG;
 import org.twak.mmg.prim.Edge;
 import org.twak.mmg.prim.ScreenSpace;
 import org.twak.mmg.ui.Cowput;
@@ -199,7 +199,7 @@ public class MiniFacadeImport extends Function {
 	}
 	
 	private void randomMF(MOgram mogram) {
-		mf = MMGGreeble.createTemplateMF( Math.random() * 5 + 5, Math.random() * 5 + 3 );
+		mf = GreebleMMG.createTemplateMF( Math.random() * 5 + 5, Math.random() * 5 + 3 );
 		mogram.somethingChanged();
 	}
 	
@@ -209,7 +209,6 @@ public class MiniFacadeImport extends Function {
 		JButton rr = new JButton("randomize");
 		panel.add( rr );
 		rr.addActionListener( e -> randomMF(mogram) );
-		
 	}
 
 	

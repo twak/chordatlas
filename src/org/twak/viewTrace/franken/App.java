@@ -31,7 +31,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	}
 	
 	public enum TextureMode {
-		Off, Bitmap, Parent, Net, Procedural;
+		Off, Bitmap, Parent, Net, Procedural, MMG;
 
 	}
 	

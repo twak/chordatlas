@@ -2,6 +2,8 @@ package org.twak.viewTrace.franken;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -18,6 +19,9 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
+import org.twak.mmg.MOgram;
+import org.twak.mmg.media.GreebleMMG;
+import org.twak.mmg.ui.MOgramEditor;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.skel.FacadeDesigner;
 import org.twak.utils.collections.MultiMap;
@@ -30,6 +34,7 @@ import org.twak.viewTrace.facades.CGAMini;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.FeatureGenerator;
 import org.twak.viewTrace.facades.GreebleSkel;
+import org.twak.viewTrace.facades.MMGFeatureGen;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
 import org.twak.viewTrace.facades.Regularizer;
@@ -47,7 +52,8 @@ public class FacadeLabelApp extends App {
 	public double scale = 1;
 	
 	public MiniFacade mf;
-	public String texture;
+	public String     texture;
+	public MOgram     mogram;
 	
 	public boolean 
 			debugLabels = false, 
@@ -116,6 +122,22 @@ public class FacadeLabelApp extends App {
 			};
 			
 		}
+		else if (appMode == TextureMode.MMG ) {
+			
+			JButton edit = new JButton("edit mogram");
+			edit.addActionListener( new ActionListener() {
+				
+				@Override
+				public void actionPerformed( ActionEvent e ) {
+					if (mogram == null)
+						mogram = GreebleMMG.createMOgram(mf);
+					
+					new MOgramEditor( mogram ).setVisible( true );		
+				}
+			} );
+			out.add( edit );
+			
+		}
 		else if (appMode == TextureMode.Procedural ) {
 			
 			if ( ! ( mf.featureGen instanceof CGAMini ) )
@@ -132,8 +154,6 @@ public class FacadeLabelApp extends App {
 				};
 			} .build() ); 
 			
-			
-
 		} else if ( appMode == TextureMode.Net ) {
 
 			out.add( new AutoDoubleSlider( this, "scale", "scale", 0.01, 3 ) {
@@ -209,10 +229,12 @@ public class FacadeLabelApp extends App {
 				if ( appMode == TextureMode.Off ) {
 					if ( !( mf.featureGen.getClass() == FeatureGenerator.class ) )
 						mf.featureGen = new FeatureGenerator( mf.featureGen );
-				} else if ( appMode == TextureMode.Procedural )
-					if ( !( mf.featureGen.getClass() == CGAMini.class ) ) {
+				} else if ( appMode == TextureMode.Procedural ) {
+					if ( !( mf.featureGen.getClass() == CGAMini.class ) )
 						mf.featureGen = new CGAMini( mf );
-					}
+				} else if ( appMode == TextureMode.MMG ) {
+					mf.featureGen = new MMGFeatureGen( mogram );
+				}
 			}
 
 			whenDone.run();
@@ -443,7 +465,7 @@ public class FacadeLabelApp extends App {
 	}
 	
 	public Enum[] getValidAppModes() {
-		return new Enum[] {TextureMode.Off /* manual */, TextureMode.Procedural, TextureMode.Net};
+		return new Enum[] {TextureMode.Off /* manual */, TextureMode.Procedural, TextureMode.Net, TextureMode.MMG };
 	}
 	
 	@Override

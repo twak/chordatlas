@@ -22,6 +22,7 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
+import org.twak.mmg.media.GreebleMMG;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.PlanSkeleton.ColumnProperties;
 import org.twak.tweed.ClickMe;
@@ -74,7 +75,7 @@ public class GreebleSkel {
 	
 	OnClick onClick;
 	
-	protected GreebleGrid greebleGrid;
+	GreebleGrid greebleGrid;
 	
 //	boolean isTextured = false;
 //	DRectangle roofBounds;
@@ -225,8 +226,9 @@ public class GreebleSkel {
 				Set<QuadF> allFeatures = new LinkedHashSet<>();
 				allFeatures.addAll( processedFeatures );
 			
-				for ( Face f : chain )
+				for ( Face f : chain ) {
 					face( f, mf2, processedFeatures, megafacade );
+				}
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) { 
@@ -573,7 +575,6 @@ public class GreebleSkel {
 		
 		FeatureGenerator toRecess = new FeatureGenerator( (MiniFacade) null );
 		
-		
 //		if (mf != null) {
 //			toRecess = new FeatureGenerator();
 //			toRecess.mf = mf;
@@ -582,6 +583,15 @@ public class GreebleSkel {
 		
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
 		
+		if (! ( mf.featureGen instanceof MMGFeatureGen) )
+			greeble2DPolygon( f, ll, mf, wallTag, features, faceMaterial, to2dXY, fta, along, bottomS, start, end, flat, to3d, to2d, toRecess, facePlane );
+		else  {
+			features.clear(); // let greeble generate all windows
+			GreebleMMG.greeble2DPolygon( ((MMGFeatureGen)mf.featureGen).mogram , greebleGrid.mbs, f, ll, to2dXY, along, bottomS, start, end, flat, to3d, to2d, facePlane );
+		}
+	}
+
+	private void greeble2DPolygon( Face f, Loop<LPoint3d> ll, MiniFacade mf, WallTag wallTag, Set<QuadF> features, MatMeshBuilder faceMaterial, Matrix4d to2dXY, FacadeTexApp fta, Vector3d along, Point3d bottomS, Point3d start, Point3d end, Loop<LPoint2d> flat, Matrix4d to3d, Matrix4d to2d, FeatureGenerator toRecess, LinearForm3D facePlane ) {
 		LoopL<Point2d> sides = null;
 		DRectangle facadeRect = null;
 		

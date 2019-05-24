@@ -166,6 +166,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		for ( Spatial s : gNode.getChildren() )
 			s.removeFromParent();
 
+		
 		Node pNode = new Node();
 
 		if ( block != null ) {
@@ -450,7 +451,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 					}
 				};
 
-				GreebleSkel greeble = newGreebleSkel( tweed, sf );
+				GreebleSkel greeble = new GreebleSkel( tweed, sf );
 				greeble.occluderLookup = lastOccluders;
 
 				house = greeble.showSkeleton( sf.skel.output, onclick, sf.mr );
@@ -466,10 +467,6 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 				tweed.gainFocus();
 			}
 		}
-	}
-
-	protected GreebleSkel newGreebleSkel( Tweed tweed, SuperFace sf ) {
-		return new GreebleSkel(tweed, sf);
 	}
 
 	void removeGeometryFor( SuperFace sf ) {

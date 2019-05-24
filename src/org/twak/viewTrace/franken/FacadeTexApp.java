@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -22,13 +20,9 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import org.twak.mmg.MOgram;
-import org.twak.mmg.ui.MOgramEditor;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.TweedSettings;
-import org.twak.tweed.gen.MMGSkelGen;
 import org.twak.tweed.gen.SuperFace;
-import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.Imagez;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.MultiMap;
@@ -407,26 +401,6 @@ public class FacadeTexApp extends App {
 			out.add( gc );
 			
 		}
-		
-		SkelGen sg = ( (BlockApp) apps.exemplar.getUp().getUp().getUp() ).skelGen;
-		if (apps.size() == 1 && sg instanceof MMGSkelGen) {
-
-			JButton mmg = new JButton("mmg");
-			mmg.addActionListener( new ActionListener() {
-				
-				@Override
-				public void actionPerformed( ActionEvent e ) {
-					
-					MOgram mg = ((MMGSkelGen ) sg).ensureMOGram (mf.sf);
-					
-					MOgramEditor.quitOnLastClosed = false;
-					new MOgramEditor( mg ).setVisible( true );
-				}
-			} );
-			
-			out.add( mmg );
-		}
-		
 		
 		return out;
 	}
