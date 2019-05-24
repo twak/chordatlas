@@ -94,6 +94,7 @@ public class RoofTexApp extends App {
 		
 		out.put( "super", mr.roofSuperApp );
 		
+		if (mr.greebles != null)
 		out.putAll( "velux", mr.greebles.valueList().stream().filter( g -> g.f == RoofGreeble.Velux ).
 				map( g -> g.veluxTextureApp ).collect(Collectors.toList()) );
 		

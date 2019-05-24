@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.concurrent.Callable;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -16,6 +17,7 @@ import javax.swing.event.ChangeListener;
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
 import org.twak.tweed.Tweed;
+import org.twak.tweed.gen.skel.ObjSkelGen;
 import org.twak.tweed.handles.HandleMe;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
@@ -161,12 +163,20 @@ public class ObjGen extends Gen implements IDumpObjs {
 			}
 		});
 
+		JButton toSkel = new JButton("convert to skeleton");
+		toSkel.addActionListener( e -> toSkeleton() );
+		
 		out.add(renderLines);
 		out.add(renderTransparent);
+		out.add( toSkel );
 
 		return out;
 	}
 
+	private void toSkeleton() {
+		tweed.frame.addGen( new ObjSkelGen( tweed, "s:"+name, filename ), true );
+		setVisible( false );
+	}
 	@Override
 	public void dumpObj( ObjDump dump ) {
 		dump.setCurrentMaterial( Color.pink, 0.5);

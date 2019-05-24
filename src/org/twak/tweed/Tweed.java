@@ -259,9 +259,10 @@ public class Tweed extends SimpleApplication {
 		}, TOGGLE_ORTHO );
 		
 	}
-	
-	private final static Pattern SRS_EX    = Pattern.compile( ".*srsName=\\\"([^\\\"]*).*" ),
-								 OFFSET_EX = Pattern.compile(".*<gml:X>([\\-0-9\\\\.]*)</gml:X><gml:Y>([\\-0-9\\\\.]*).*");
+
+	private final static Pattern 
+			 SRS_EX    = Pattern.compile( ".*srsName=\\\"([^\\\"]*).*" ),
+			 OFFSET_EX = Pattern.compile(".*<gml:X>([\\-0-9\\\\.]*)</gml:X><gml:Y>([\\-0-9\\\\.]*).*");
 	
 	public void addGML( File gmlFile, String guessCRS) throws Exception {
 		
@@ -768,7 +769,7 @@ public class Tweed extends SimpleApplication {
 		
 		frame.setGenUI( new JPanel() );
 		
-		DATA = dataDir; //    =   System.getProperty("user.home")+"/data/regent"
+		DATA = dataDir;
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
 		
 		deleteScratch();

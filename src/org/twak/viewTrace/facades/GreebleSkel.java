@@ -1,5 +1,6 @@
 package org.twak.viewTrace.facades;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,7 +23,6 @@ import org.twak.camp.Output;
 import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
-import org.twak.mmg.media.GreebleMMG;
 import org.twak.siteplan.campskeleton.PlanSkeleton;
 import org.twak.siteplan.campskeleton.PlanSkeleton.ColumnProperties;
 import org.twak.tweed.ClickMe;
@@ -38,6 +38,7 @@ import org.twak.tweed.gen.skel.SETag;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.Line;
 import org.twak.utils.Mathz;
+import org.twak.utils.PaintThing;
 import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopable;
@@ -46,13 +47,12 @@ import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Colourz;
+import org.twak.utils.ui.Plot;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint3d;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
-import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.App.TextureMode;
 import org.twak.viewTrace.franken.App.TextureUVs;
-import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.RoofSuperApp;
 import org.twak.viewTrace.franken.RoofTexApp;
@@ -149,7 +149,12 @@ public class GreebleSkel {
 				Line megafacade = new Line ( e.end.x, e.end.y, e.start.x, e.start.y );
 				double mfl = megafacade.length();
 				Vector2d dir =megafacade.dir();
+				
+				if (dir.length() == 0)
+					continue;
+					
 				LinearForm3D lf = new LinearForm3D( new Vector3d(-dir.y, dir.x, 0), e.start );
+				
 				
 				for (Face f : chain) 
 						for (Loop<Point2d> face : projectTo( megafacade, mfl, lf, f ) )
@@ -226,9 +231,12 @@ public class GreebleSkel {
 				Set<QuadF> allFeatures = new LinkedHashSet<>();
 				allFeatures.addAll( processedFeatures );
 			
-				for ( Face f : chain ) {
-					face( f, mf2, processedFeatures, megafacade );
-				}
+				for ( Face f : chain )
+					try {
+						face( f, mf2, processedFeatures, megafacade );
+					} catch ( Throwable th ) {
+						th.printStackTrace();
+					}
 
 				allFeatures.removeAll( processedFeatures );
 				for ( QuadF q1 : allFeatures ) { 
@@ -266,8 +274,8 @@ public class GreebleSkel {
 				}
 			}
 			
-			
 			if ( greebleGrid != null ) {
+				addFloor ( greebleGrid.mbs, sf);
 //				edges( output, roofColor );
 
 				// output per-material objects
@@ -292,6 +300,18 @@ public class GreebleSkel {
 		}
 	}
 
+	private void addFloor( MMeshBuilderCache mbs, SuperFace sf2 ) {
+		
+		MatMeshBuilder faceColor = greebleGrid.mbs.get( BRICK + sf2.hashCode(), Colourz.to4( GreebleSkel.BLANK_WALL ), sf2 );
+		
+		Loop <Point2d> pts = sf2.toLoop();
+		
+		Matrix4d mat = new Matrix4d();
+		mat.setIdentity();
+		
+		faceColor.add( pts.singleton(), mat );
+	}
+
 	private LoopL<Point2d> projectTo( Line megafacade, double mfl, LinearForm3D lf, Face f ) {
 		
 		if (f == null)
@@ -307,8 +327,6 @@ public class GreebleSkel {
 				} }
 			.run();
 	}
-
-	
 
 	public interface OnClick {
 		void selected( Output output, Node node, SuperEdge superEdge, Object ha );
@@ -602,11 +620,6 @@ public class GreebleSkel {
 			if (mf != null) {
 			if ( sides != null )
 				facadeRect = GreebleHelper.findRect( sides.remove( 0 ) );
-
-//			if (isBottom) {
-//				mf.postState.outerFacadeRect = GreebleHelper.findRect(flat);
-//				mf.featureGen.update(); // computes window positions
-//			}
 			}
 		}
 		
@@ -635,16 +648,13 @@ public class GreebleSkel {
 				uvs = null;
 		}
 			
-
-		// find window locations in 3 space
-		
 		List<DRectangle> floors = new ArrayList();
 		List<MatMeshBuilder> materials = new ArrayList();
 		
 		boolean isGroundFloor = wallTag != null && 
 				facadeRect != null && 
 				mf != null && 
-				f.definingCorners.iterator().next().z < 1;
+				(f.definingCorners.isEmpty() || f.definingCorners.iterator().next().z < 1 );
 		
 		if (wallTag != null && facadeRect != null && mf != null && 
 			isGroundFloor && mf.groundFloorHeight > 0 &&
@@ -665,6 +675,7 @@ public class GreebleSkel {
 			
 			materials.add( gfm );
 			materials.add( faceMaterial );
+			
 		} else {
 			
 				floors.add( facadeRect );
@@ -732,7 +743,7 @@ public class GreebleSkel {
 		
 		switch ( ra.appMode ) {
 			default:
-				roofUVs = null;
+				roofUVs = GreebleHelper.roofPitchUVs( loop, Pointz.to2XZ( start ), Pointz.to2XZ( end ), TILE_UV_SCALE );
 				break;
 			case Net:
 				if ( ra.texture != null && ra.textureUVs == TextureUVs.Square )

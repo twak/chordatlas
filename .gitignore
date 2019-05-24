@@ -6,3 +6,5 @@
 /.settings/
 /chordatlas-0.0.1-SNAPSHOT.jar
 /dependency-reduced-pom.xml
+/OpenAL64.dll
+/lwjgl64.dll

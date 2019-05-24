@@ -117,7 +117,7 @@ public class MiniTransform {
 
 		double volume = ( bounds[ 1 ] - bounds[ 0 ] ) * ( bounds[ 3 ] - bounds[ 2 ] ) * ( bounds[ 5 ] - bounds[ 4 ] );
 
-		double edgeLength = Math.pow( volume / ( count / targetCount ), 0.3333 );
+		double edgeLength = Math.pow( volume / ( (double) count / targetCount ), 0.3333 );
 
 		int 
 				xc = (int) Math.ceil( ( bounds[ 1 ] - bounds[ 0 ] ) / edgeLength ), 

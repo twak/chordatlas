@@ -150,7 +150,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		setRender( skelFootprint.buildAndSolve( footprint, this, m ) );
 	}
 
-	private void setRender( HalfMesh2 mesh ) {
+	protected void setRender( HalfMesh2 mesh ) {
 
 		SkelFootprint.findOcclusions( mesh );
 

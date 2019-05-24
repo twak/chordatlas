@@ -118,6 +118,9 @@ public class FacadeSuperApp extends SuperSuper <MiniFacade> {
 		
 		FacadeTexApp fta = mf.facadeTexApp;
 		
+		if (fta.postState == null)
+			fta.resetPostProcessState();
+		
 		for ( Loop<? extends Point2d> l : fta.postState.wallFaces ) {
 			
 			Polygon p = Pix2Pix.toPoly( mf, cropRect, bounds, l ) ; 

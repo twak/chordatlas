@@ -119,7 +119,7 @@
 		<jme3_v>3.1.0-stable</jme3_v>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<geotools.version>19.1</geotools.version>
-
+		<batik_v>1.10</batik_v>
 	</properties>
 
 	<dependencies>
@@ -228,17 +228,17 @@
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svg-dom</artifactId>
-			<version>1.8</version>
+			<version>${batik_v}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svggen</artifactId>
-			<version>1.8</version>
+			<version>${batik_v}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-codec</artifactId>
-			<version>1.8</version>
+			<version>${batik_v}</version>
 		</dependency>
 
 
@@ -247,6 +247,7 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>local_gurobi</groupId>
