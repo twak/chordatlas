@@ -9,10 +9,12 @@ import java.util.concurrent.Callable;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.vecmath.Point3d;
 
 import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.IDumpObjs;
@@ -165,10 +167,14 @@ public class ObjGen extends Gen implements IDumpObjs {
 
 		JButton toSkel = new JButton("convert to skeleton");
 		toSkel.addActionListener( e -> toSkeleton() );
+
+		JButton toTex = new JButton("make texturable");
+		toTex.addActionListener( e -> toTex() );
 		
 		out.add(renderLines);
 		out.add(renderTransparent);
 		out.add( toSkel );
+		out.add( toTex );
 
 		return out;
 	}
@@ -177,9 +183,43 @@ public class ObjGen extends Gen implements IDumpObjs {
 		tweed.frame.addGen( new ObjSkelGen( tweed, "s:"+name, filename ), true );
 		setVisible( false );
 	}
+	
+	
+	private void toTex() {
+		
+		PanoGen pg = tweed.frame.getGenOf( PanoGen.class );
+		Pano pano = null;
+		
+		ObjDump od = new ObjDump( getFile() );
+		Point3d meshLoc = od.computeMeanVert(); 
+		
+		if (pg != null) {
+			
+			double bestDist = Double.MAX_VALUE;
+			
+			// find single closest panorama
+			for (Pano p : pg.panos) {
+				
+				double dist = new Point3d ( p.location ).distance( meshLoc );
+				if (dist < bestDist ) {
+					bestDist = dist;
+					pano = p;
+				}
+			}
+		}
+		
+		if (pano == null)
+			JOptionPane.showMessageDialog( tweed.frame(), "failed to find nearest pano", "error", JOptionPane.WARNING_MESSAGE );
+		else {
+			// create reprojection object (gen) 
+			tweed.frame.addGen( new MeshCanvasGen( filename, tweed, pano ), true );
+			setVisible( false );
+		}
+	}
+	
 	@Override
 	public void dumpObj( ObjDump dump ) {
-		dump.setCurrentMaterial( Color.pink, 0.5);
+//		dump.setCurrentMaterial( Color.pink, 0.5);
 		dump.addAll (new ObjRead( getFile() ));
 	}
 

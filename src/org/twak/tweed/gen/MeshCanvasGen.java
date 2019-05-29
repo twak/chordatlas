@@ -1,5 +1,6 @@
 package org.twak.tweed.gen;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -11,34 +12,40 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
 import org.twak.utils.collections.Arrayz;
+import org.twak.utils.geom.ObjDump;
+import org.twak.utils.geom.ObjRead;
 import org.twak.utils.ui.Cancellable;
+import org.twak.utils.ui.ListDownLayout;
 
 import com.jme3.asset.TextureKey;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.texture.Texture;
 
-public class TexGen extends ObjGen {
+public class MeshCanvasGen extends ObjGen {
 
 	public Pano pano;
-//	static int TEX_SIZE[] = new int[] { 3000, 2000};
 	transient Cancellable cancel;
-	boolean autoProject = false;
+	transient private Material mat; // last applied material
 
-	public TexGen(String name, Tweed tweed, Pano pano) {
+	public MeshCanvasGen(String name, Tweed tweed, Pano pano) {
 		super(name, tweed);
 		this.pano = pano;
+		transparency = 0; // force texture pipeline...?
 	}
 
 	@Override
 	public JComponent getUI() {
-		JComponent out = super.getUI();
+		JComponent out =  new JPanel(new ListDownLayout());
 
 		JButton recalc = new JButton("recalculate");
 		out.add(recalc);
@@ -46,71 +53,49 @@ public class TexGen extends ObjGen {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				tweed.enqueue(new Callable<Spatial>() {
-					public Spatial call() throws Exception {
-						calculate();
-						return null;
+				tweed.enqueue(new Runnable() {
+					public void run() {
+						updateTexture();
 					}
 				});
 
 			}
 		});
 		
-		final JCheckBox auto = new JCheckBox("auto project", autoProject);
-		auto.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				autoProject = auto.isSelected();
-				tweed.enqueue(new Callable<Spatial>() {
-					public Spatial call() throws Exception {
-						calculate();
-						return null;
-					}
-				});
-				
-			}
-		});
-		out.add(auto);
-
 		return out;
 	}
 
 	protected void setTexture(Geometry g, Material mat) {
-//		setTexture(g, mat, new int[] { 2048,2048} /*preview size */, pano.getSmallPano(), new File("/home/twak/Desktop/foo.png") );
-		setTexture(g, mat, new int[] {1024, 1024} /*preview size */, pano.getSmallPano(), new File( Tweed.SCRATCH + "foo.png") );
-	}
-	
-	protected void renderTexture( File writeTo ) {
-		setTexture(geometry, null, new int[] {9000, 3000} /*preview size */, pano.getRenderPano(), writeTo );
+		this.mat = mat;
 	}
 	
 	protected void setTexture(Geometry g, Material mat, int[] texSize, BufferedImage srcPano, File writeTo ) {
-		
-		if (!autoProject)
-			return;
 		
 		if (cancel != null)
 			cancel.cancel();
 		
 		cancel = new Cancellable();
-		
+	}
+	
+	private void updateTexture() {
+
 		new Thread() {
 
 			public void run() {
-
-				VertexBuffer vb = g.getMesh().getBuffer(VertexBuffer.Type.TexCoord);
-				VertexBuffer ib = g.getMesh().getBuffer(VertexBuffer.Type.Index);
-				VertexBuffer pb = g.getMesh().getBuffer(VertexBuffer.Type.Position);
+				
+				int[] texSize = new int[] {1024, 1024} ;
+				BufferedImage srcPano = pano.getSmallPano();
+				File writeTo =   new File( Tweed.SCRATCH + "foo.png") ;
+				
+				VertexBuffer vb = geometry.getMesh().getBuffer(VertexBuffer.Type.TexCoord);
+				VertexBuffer ib = geometry.getMesh().getBuffer(VertexBuffer.Type.Index);
+				VertexBuffer pb = geometry.getMesh().getBuffer(VertexBuffer.Type.Position);
 
 				float[][] pts = new float[3][3], uvs = new float[3][2];
 
 				BufferedImage target = new BufferedImage(texSize[0], texSize[1], BufferedImage.TYPE_3BYTE_BGR);
 
-				// if (false) {
 				for (int i = 0; i < ib.getNumElements(); i++) {
-					
-//					System.out.println("rendering triangle " + i +"/ " + ib.getNumElements());
 					
 					assert ib.getNumComponents() == 3;
 
@@ -127,12 +112,7 @@ public class TexGen extends ObjGen {
 					}
 
 					cast(pts, uvs, srcPano, target, cancel, texSize);
-					
-					if (cancel.cancelled)
-						return;
 				}
-
-//				File uniqueTexture = new File("/home/twak/Desktop/foo.png");
 
 				try {
 					System.out.println("writing " + writeTo);
@@ -142,16 +122,17 @@ public class TexGen extends ObjGen {
 				}
 
 				if (mat != null)
-				tweed.enqueue(new Callable<Spatial>() {
-					public Spatial call() throws Exception {
+				tweed.enqueue(new Runnable() {
+					public void run() {
 
 						System.out.println("calculations complete");
 
-						TextureKey key = new TextureKey("Desktop/foo.png", false);
+						TextureKey key = new TextureKey("scratch/foo.png", false);
 						tweed.getAssetManager().deleteFromCache(key);
 						Texture texture = tweed.getAssetManager().loadTexture(key);
 						mat.setTexture("DiffuseMap", texture);
-						return null;
+						mat.setColor("Diffuse", ColorRGBA.White );
+						mat.setColor( "Ambient", ColorRGBA.Gray );
 					}
 				});
 
@@ -203,9 +184,6 @@ public class TexGen extends ObjGen {
 																			}, srcPano, null, null);
 					target.setRGB(x, y, c);
 				}
-				
-				if (cancel.cancelled)
-					return;
 			}
 		}
 	}
@@ -219,4 +197,11 @@ public class TexGen extends ObjGen {
 	private static float cross(float[] a, float[] b) {
 		return a[0] * b[1] - b[0] * a[1];
 	}
+	
+	@Override
+	public void dumpObj( ObjDump dump ) {
+		dump.FLIP_Y_UV_ON_WRITE = true;
+		Jme3z.dump( dump, gNode, 0 );
+	}
+
 }
