@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
 import org.twak.tweed.Tweed;
 import org.twak.utils.Mathz;
@@ -24,14 +25,14 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.texture.Texture;
 
-public class TexGen extends ObjGen {
+public class MeshCanvasGen extends ObjGen {
 
 	public Pano pano;
 //	static int TEX_SIZE[] = new int[] { 3000, 2000};
 	transient Cancellable cancel;
 	boolean autoProject = false;
 
-	public TexGen(String name, Tweed tweed, Pano pano) {
+	public MeshCanvasGen(String name, Tweed tweed, Pano pano) {
 		super(name, tweed);
 		this.pano = pano;
 	}
@@ -52,7 +53,6 @@ public class TexGen extends ObjGen {
 						return null;
 					}
 				});
-
 			}
 		});
 		
@@ -68,7 +68,6 @@ public class TexGen extends ObjGen {
 						return null;
 					}
 				});
-				
 			}
 		});
 		out.add(auto);
