@@ -13,7 +13,7 @@ the system is developed on ubuntu, but most of the non-machine learning systems 
 1. install [java 11+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
 1. run with `java -jar -Xmx10g chordatlas-0.0.1-SNAPSHOT.jar`  (code is academic grade: use at your own risk. the 10g says to use a 10Gb heap)
-1. read the [user interface instructions](https://github.com/twak/chordatlas/wiki/interface).
+1. read the [user interface instructions](https://github.com/twak/chordatlas/wiki/interface-instructions-and-pipeline-videos).
 
 there are additional requirements and instructions for [bigsur](https://github.com/twak/chordatlas/wiki/bigSUR-details) (creates clean meshes from noisy meshes, streetview info, and maps) and [frankengan](https://github.com/twak/chordatlas/wiki/frankenGAN-details) (textures the meshes, generates feature locations).
 
