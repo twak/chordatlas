@@ -275,19 +275,17 @@ public class ObjSkelGenList extends Gen implements IDumpObjs, ICanSave {
 			// same as clicking "joint"
 			// working functionality, commenting out to figure out UI
 			if (superRes) {
-				System.out.println("joan: setting joint to be high...");
 				// same as clicking "high"
 				b.setJoint(sa, exemplarJS, true);
 			} else {
-				System.out.println("joan: setting joint to be medium...");
 				b.setJoint(sa, exemplarJS, false);
 			}
 
 			// same as clicking "redraw distribution"
-			System.out.println("joan: waiting for " + filename + " to complete");
+			System.out.println("waiting for " + filename + " to generate textures...");
 			sa.markDirty();
 			sa.computeTextures(null);
-			System.out.println("joan: " + filename + " completed!");
+			System.out.println(filename + " completed!");
 			
 		}
 	}
