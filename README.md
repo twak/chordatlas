@@ -8,7 +8,7 @@ procex ([video](https://youtu.be/K0yUXjM_YKE)) are a mathematical model of tradi
 
 ## run
 
-the system is developed on ubuntu, but most of the non-machine learning systems should work on any platform. the system is very much "academic-grade" - if you have problems using this system, I would love to [know](https://github.com/twak/chordatlas/issues) so I can fix them!
+the system is developed on ubuntu, but most of the non-machine learning systems should work on any platform. chordatlas is very much "academic-grade" - if you have problems using this system, I would love to [know](https://github.com/twak/chordatlas/issues) so I can fix them!
 
 1. install [java 11+](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 1. download the [chordatlas binary](https://drive.google.com/open?id=1FC5K2kKP12jQLlE97YlwhzceTrLgxuDn)
