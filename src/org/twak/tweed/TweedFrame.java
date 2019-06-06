@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,7 @@ import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
 import org.twak.tweed.gen.PanoGen;
 import org.twak.tweed.gen.skel.SkelGen;
+import org.twak.tweed.plugins.TweedPlugin;
 import org.twak.utils.Filez;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
@@ -444,165 +446,14 @@ public class TweedFrame {
 
 		SimplePopup2 sp = new SimplePopup2( evt );
 
-		if ( hasGIS() ) {
-			sp.add( "+ mesh (obj)", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select .obj mesh file", new File( Tweed.JME ), "obj" ) {
-						public void heresTheFile( File obj ) throws Throwable {
-							//						removeMeshSources();
-
-							obj = queryImport (obj);
-							if ( obj != null ) {
-								String f = tweed.makeWorkspaceRelative( obj ).toString();
-								addGen( new MeshGen( f, tweed ), true );
-							}
-						}
-					};
-				}
-			} );
-
-			sp.add( "+ mesh (minimesh)", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select minimesh index file (index.xml), or obj to convert", new File( Tweed.JME ), null ) {
-						@Override
-						public void heresTheFile( File f ) throws Throwable {
-							
-							if ( !f.getName().equals( MiniTransform.INDEX ) ) {
-								MiniTransform.convertToMini( f, new File( Tweed.DATA + "/minimesh" ),
-										() -> addGen( new MiniGen( new File( "minimesh" ), tweed ), true ) );
-								return;
-							}
-							
-							//						removeMeshSources();
-							addGen( new MiniGen( tweed.makeWorkspaceRelative( f.getParentFile() ), tweed ), true );
-						}
-					};
-				}
-			} );
-
-			sp.add( "+ metadata", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of many csv files", new File( Tweed.JME ), "csv" ) {
-						public void heresTheFile( File obj ) throws Throwable {
-							addGen( new LotInfoGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
-						};
-					};
-				}
-			} );
-			
-			sp.add( "+ panos (jpg)", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of many panoramas images in a directory, or todo.list", new File( Tweed.JME ), null ) {
-						public void heresTheFile( File oneOfMany ) throws Throwable {
-							//						removeGens( PanoGen.class );
-							addGen( new PanoGen( tweed.makeWorkspaceRelative( oneOfMany.getParentFile() ), tweed, Tweed.LAT_LONG ), true );
-						};
-					};
-				}
-			} );
-			
-			sp.add( "+ skel", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select skeleton to load", new File( Tweed.JME ), "xml" ) {
-						public void heresTheFile( File skelGen ) throws Throwable {
-							try {
-								
-									try {
-										XStream xs = new XStream ();// new PureJavaReflectionProvider());
-//										xs.ignoreUnknownElements();
-										SkelGen sg = (SkelGen) xs.fromXML( skelGen );
-										sg.onLoad( tweed );
-										addGen( sg, true );
-//										break;
-									} catch ( Throwable th ) {
-										th.printStackTrace();
-									}
-//							}
-							}
-							catch (Throwable th ) {
-								th.printStackTrace();
-								JOptionPane.showMessageDialog( frame, "failed to load "+skelGen.getName() );
-							}
-						};
-					};
-				}
-			} );
-			
-			sp.add( "+ skels", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select one of many skels to load", new File( Tweed.JME ), "xml" ) {
-						public void heresTheFile( File skelGen ) throws Throwable {
-							try {
-
-								for ( File f : skelGen.getParentFile().listFiles() ) {
-									try {
-										XStream xs = new XStream();// new PureJavaReflectionProvider());
-										xs.ignoreUnknownElements();
-										SkelGen sg = (SkelGen) xs.fromXML( f );
-										sg.onLoad( tweed );
-										addGen( sg, true );
-									} catch ( Throwable th ) {
-										th.printStackTrace();
-									}
-								}
-							} catch ( Throwable th ) {
-								th.printStackTrace();
-								JOptionPane.showMessageDialog( frame, "failed to load " + skelGen.getName() );
-							}
-						};
-					};
-				}
-			} );
-			
-		} else {
-
-			sp.add( "+ gis (2d obj)", new Runnable() {
-				@Override
-				public void run() {
-					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
-						public void heresTheFile( File obj ) throws Throwable {
-							removeGISSources();
-							addGen( new GISGen( tweed.makeWorkspaceRelative( obj ), tweed ), true );
-						};
-					};
-				}
-			} );
-			
-//			sp.add( "+ gis (3d obj)", new Runnable() {
-//				@Override
-//				public void run() {
-//					new SimpleFileChooser( frame, false, "Select .obj gis footprints", new File( Tweed.JME ), "obj" ) {
-//						public void heresTheFile( File obj ) throws Throwable {
-//							
-//						};
-//					};
-//				}
-//			} );
-
-			sp.add( "+ gis (gml)", new Runnable() {
-				@Override
-				public void run() {
-
-					new SimpleFileChooser( frame, false, "Select .gml gis footprints", new File( Tweed.JME ), "gml" ) {
-						public void heresTheFile( File gml ) throws Throwable {
-							removeGISSources();
-							tweed.addGML( gml, null );
-						};
-					};
-				}
-			} );
-		}
-
+		ServiceLoader<TweedPlugin> loader = ServiceLoader.load(TweedPlugin.class);
+		for (TweedPlugin plugin : loader)
+			plugin.addToAddMenu( this, sp );
+		
 		sp.show();
 	}
 
-	private boolean hasGIS() {
+	public boolean hasGIS() {
 		return genList.stream().filter( g -> g instanceof GISGen ).findAny().isPresent();
 	}
 
@@ -611,11 +462,6 @@ public class TweedFrame {
 		removeGens( ObjGen.class );
 	}
 	
-	protected void removeGISSources() {
-		TweedSettings.settings.resetTrans();
-		removeGens( GISGen.class );
-	}
-
 	public void setGens( List<Gen> nGens ) {
 
 		for ( Gen g : new ArrayList<Gen> ( genList ) )
@@ -793,31 +639,5 @@ public class TweedFrame {
 		if (gens.isEmpty())
 			return null;
 		return (E) gens.get(0);
-	}
-
-	private File queryImport( File obj_ ) {
-		
-		File obj = obj_;
-		File c = obj.getParentFile();
-		boolean okay = false;
-		
-		while (c!= null) {
-			if (c.equals( new File ( Tweed.DATA )) )
-				okay = true;
-				c = c.getParentFile();
-		}
-		
-		if (okay)
-			return obj;
-		
-		if (JOptionPane.showConfirmDialog( frame, obj.getName() +" is outside project; import?", "import", JOptionPane.OK_CANCEL_OPTION ) == JOptionPane.OK_OPTION) {
-			try {
-				Files.copy( obj, obj = Filez.makeUnique( new File (Tweed.DATA, obj.getName() ) ) );
-				return obj;
-			} catch ( IOException e ) {
-				e.printStackTrace();
-			}
-		}
-		return null;
 	}
 }
