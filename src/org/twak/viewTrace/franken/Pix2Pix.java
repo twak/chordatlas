@@ -159,7 +159,7 @@ public class Pix2Pix {
 			} catch ( InterruptedException e ) {
 				e.printStackTrace();
 			}
-		} while ( go.exists() && System.currentTimeMillis() - startTime < 1e6 );
+		} while ( go.exists() && System.currentTimeMillis() - startTime < 1e4 );
 
 		startTime = System.currentTimeMillis();
 	
@@ -178,9 +178,9 @@ public class Pix2Pix {
 				return;
 			}
 			
-		} while ( System.currentTimeMillis() - startTime < 1e6 );
+		} while ( System.currentTimeMillis() - startTime < 6000 );
 		
-		System.out.println( "time > 1e6. timeout trying to get bikeGAN result "+ job.name +". \nis bikeGAN running? \nhas bikeGAN root been set correctly in the settings menu? (" + TweedSettings.settings.bikeGanRoot );
+		System.out.println( "timeout trying to get bikeGAN result "+ job.name +". \nis bikeGAN running? \nhas bikeGAN root been set correctly in the settings menu? (" + TweedSettings.settings.bikeGanRoot );
 	}
 
 	private void finished( Job job, File outDir ) {
