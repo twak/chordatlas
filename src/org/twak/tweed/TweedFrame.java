@@ -14,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -33,7 +32,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
@@ -43,17 +41,11 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.vecmath.Vector3d;
 
-import org.twak.readTrace.MiniTransform;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
-import org.twak.tweed.gen.LotInfoGen;
-import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
 import org.twak.tweed.gen.ObjGen;
-import org.twak.tweed.gen.PanoGen;
-import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.plugins.TweedPlugin;
-import org.twak.utils.Filez;
 import org.twak.utils.PaintThing;
 import org.twak.utils.WeakListener;
 import org.twak.utils.geom.HalfMesh2;
@@ -67,12 +59,9 @@ import org.twak.utils.ui.WindowManager;
 import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.SuperMeshPainter;
 
-import com.google.common.io.Files;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 
 public class TweedFrame {
 
@@ -99,7 +88,7 @@ public class TweedFrame {
 
 		AppSettings settings = new AppSettings( true );
 		settings.setAudioRenderer(null);
-		
+
 		settings.setWidth( d3Dim.width );
 		settings.setHeight( d3Dim.height );
 		settings.setSamples( 4 );
@@ -449,7 +438,7 @@ public class TweedFrame {
 		ServiceLoader<TweedPlugin> loader = ServiceLoader.load(TweedPlugin.class);
 		for (TweedPlugin plugin : loader)
 			plugin.addToAddMenu( this, sp );
-		
+
 		sp.show();
 	}
 

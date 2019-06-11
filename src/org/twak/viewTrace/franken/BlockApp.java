@@ -84,6 +84,18 @@ public class BlockApp extends App {
 		}
 	}
 
+	public void setJoint( SelectedApps sa, JointStyle js, boolean superRes) {
+		styleSource = js;
+		appMode = TextureMode.Net;
+		styleSource.install( new SelectedApps( (App) this, sa.geometryUpdate ) );
+		sa.showUI();
+
+		if (superRes) {
+			js.setSuper();
+		}
+		js.redraw();
+	}
+
 	public void setJoint( SelectedApps sa ) {
 		styleSource = new JointStyle(null);
 		appMode = TextureMode.Net;
@@ -92,7 +104,7 @@ public class BlockApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps sa ) {
+	public JComponent createUI( GlobalUpdate globalUpdate, SelectedApps sa ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 

@@ -93,7 +93,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		return NetInfo.index.get(this.getClass());
 	}
 
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( GlobalUpdate globalUpdate, SelectedApps apps ) {
 		
 		JPanel out = new JPanel(new ListDownLayout());
 		
@@ -106,7 +106,7 @@ public abstract class App /*earance*/ implements Cloneable {
 	static Random randy = new Random();
 	static final int Batch_Size = 16;
 	
-	public static synchronized void computeWithChildren( int stage, MultiMap<Integer, App> todo, Runnable globalUpdate ) {
+	public static synchronized void computeWithChildren( int stage, MultiMap<Integer, App> todo, GlobalUpdate globalUpdate ) {
 
 		ProgressMonitor pm = TweedSettings.settings.experimentalInteractiveTextures ? null : new ProgressMonitor( null, "Computing...", "...", 0, 100 );
 
@@ -122,7 +122,7 @@ public abstract class App /*earance*/ implements Cloneable {
 		System.out.println( "time taken " + ( System.currentTimeMillis() - startTime ) );
 	}
 
-	private static void computeWithChildren_( int stage, MultiMap<Integer, App> done, Runnable globalUpdate, ProgressMonitor pm ) {
+	private static void computeWithChildren_( int stage, MultiMap<Integer, App> done, GlobalUpdate globalUpdate, ProgressMonitor pm ) {
 
 		if ( stage >= NetInfo.index.size() ) {
 			return;
@@ -168,7 +168,10 @@ public abstract class App /*earance*/ implements Cloneable {
 				if ( !all.isEmpty() ) 
 					all.iterator().next().finishedBatches( new ArrayList<>( all ) );
 				
-				globalUpdate.run();
+				if (globalUpdate instanceof GlobalUpdate)
+					((GlobalUpdate) globalUpdate).run( k );
+				else
+					globalUpdate.run();
 
 				App.computeWithChildren_( stage + 1, done, globalUpdate, pm );
 			}
