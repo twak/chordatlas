@@ -41,15 +41,15 @@ public class SelectedApps extends ArrayList<App>{
 	
 	public App exemplar;
 	
-	public Runnable geometryUpdate;
+	public GlobalUpdate geometryUpdate;
 	
-	public SelectedApps(App app, Runnable globalUpdate) {
+	public SelectedApps(App app, GlobalUpdate globalUpdate) {
 		add(app);
 		exemplar = app;
 		this.geometryUpdate = globalUpdate;
 	}
 	
-	private SelectedApps(Runnable globalUpdate2) {
+	private SelectedApps(GlobalUpdate globalUpdate2) {
 		this.geometryUpdate = globalUpdate2;
 	}
 	
@@ -59,7 +59,7 @@ public class SelectedApps extends ArrayList<App>{
 		addAll(sa);
 	}
 	
-	private SelectedApps( Collection<App> list, Runnable globalUpdate ) {
+	private SelectedApps( Collection<App> list, GlobalUpdate globalUpdate ) {
 		super (new ArrayList (new LinkedHashSet<>(list) ) );
 		this.geometryUpdate = globalUpdate;
 		exemplar = list.iterator().next();
@@ -260,7 +260,7 @@ public class SelectedApps extends ArrayList<App>{
 				options.removeAll();
 				options.setLayout( new ListDownLayout() );
 
-				buildLayout(exemplar.appMode, options, new Runnable() {
+				buildLayout(exemplar.appMode, options, new GlobalUpdate() {
 					
 					@Override
 					public void run() {
@@ -286,7 +286,7 @@ public class SelectedApps extends ArrayList<App>{
 			}
 		}, "texture:", exemplar.getValidAppModes() );
 		
-		buildLayout(exemplar.appMode, options, new Runnable() {
+		buildLayout(exemplar.appMode, options, new GlobalUpdate() {
 			
 			@Override
 			public void run() {
@@ -317,7 +317,7 @@ public class SelectedApps extends ArrayList<App>{
 				a.markGeometryDirty();
 	}
 
-	private void buildLayout( TextureMode appMode, JPanel out, Runnable update ) {
+	private void buildLayout( TextureMode appMode, JPanel out, GlobalUpdate update ) {
 
 		for ( App a : this )
 			a.appMode = appMode;
@@ -390,7 +390,7 @@ public class SelectedApps extends ArrayList<App>{
 		return null;
 	}
 	
-	private Component createEditor( Runnable update ) {
+	private Component createEditor( GlobalUpdate update ) {
 		
 		JPanel out = new JPanel( new BorderLayout() );
 		JPanel options = new JPanel();

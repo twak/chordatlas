@@ -75,7 +75,7 @@ public class BuildingApp extends App {
 	}
 	
 	@Override
-	public JComponent createUI( Runnable globalUpdate, SelectedApps apps ) {
+	public JComponent createUI( GlobalUpdate globalUpdate, SelectedApps apps ) {
 		JPanel out = new JPanel(new ListDownLayout());
 		
 		addRemoveButton (globalUpdate, out);

@@ -14,6 +14,7 @@ import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.LotInfoGen;
 import org.twak.tweed.gen.MeshGen;
 import org.twak.tweed.gen.MiniGen;
+import org.twak.tweed.gen.ObjGenList;
 import org.twak.tweed.gen.PanoGen;
 import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.tweed.tools.FacadeTool;
@@ -45,6 +46,7 @@ public class HousesPlugin implements TweedPlugin {
 	public void addToAddMenu(TweedFrame tf, SimplePopup2 sp ) {
 
 		if ( tf.hasGIS() ) {
+		
 			sp.add( "+ mesh (obj)", new Runnable() {
 				@Override
 				public void run() {
@@ -82,6 +84,20 @@ public class HousesPlugin implements TweedPlugin {
 				}
 			} );
 
+			sp.add( "+ meshes (obj via list)", new Runnable() {
+				@Override
+				public void run() {
+					new SimpleFileChooser( tf.frame, false, "Select todo.list", new File( Tweed.JME ), "list" ) {
+						public void heresTheFile( File todoFile ) throws Throwable {
+							File folder = tf.tweed.makeWorkspaceRelative( todoFile.getParentFile() );
+							System.out.println("added folder of " + folder.getName());
+							tf.addGen( new ObjGenList( todoFile, folder, tf.tweed ), true );
+						}
+					};
+				}
+			} );
+			
+			
 			sp.add( "+ metadata", new Runnable() {
 				@Override
 				public void run() {
