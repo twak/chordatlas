@@ -67,128 +67,128 @@ public class GreebleGrid {
 		this.tweed = tweed;
 		this.mbs = mbs;
 	}
-	
-	public void attachAll( Node node, List<Face> chain, Output output, ClickMe clickMe ) {
-		for ( String mName : mbs.cache.keySet() )
-			for (float[] mCol : mbs.cache.get( mName ).keySet() )		
-				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe, mbs.get( mName, mCol ) ) );
-		
-		for (String mName : mbs.textures.cache.keySet())
-			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
-				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, texture ) ) );
-		
-		// texture atlas.dump
-	}
-	
-	private Geometry mb2Tex( Output output, List<Face> chain, String name, 
-			String texture, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
-		Geometry geom;
-		{
-			MatMeshBuilder builder =  mbs.getTexture( name, texture );
-			
-			geom = new Geometry( "material_" +texture, builder.getMesh() );
-			geom.setUserData( Jme3z.MAT_KEY, name );
-			
-			/*
-			 * if  (textureAtlas != null) {
-				xy = texutreAtlas.insert (texture)
-				geom.getMesh().getBuffer( Type.TexCoord ); / 16 + (xy) / 16
-				set edge clamp
-				set material texture to one given by atlas
-				
-				after all call dump on texture atlas. 
-
-				- mip-mapping needs to be disabled to avoid bleeding.
-				
-				
-			}
-			*/
-			
-			Material mat;
-			
-			mat = buildTextureMaterial( tweed, texture );
-//			mat.setColor( "Ambient", ColorRGBA.White );
-
-			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
-			
-			geom.setMaterial( mat );
-			geom.updateGeometricState();
-			geom.updateModelBound();
-
-			if ( chain != null )
-				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
-
-		}
-		return geom;
-	}
-
-	public static Material buildTextureMaterial( Tweed tweed, String texture ) {
-		Material mat;
-		mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-		
-		if ( new File( Tweed.DATA + "/" + texture ).exists() ) {
-			Texture t = tweed.getAssetManager().loadTexture( texture );
-			t.setWrap( WrapMode.Repeat );
-
-			mat.setTexture( "DiffuseMap", t );
-			mat.setColor( "Diffuse", ColorRGBA.White );
-			mat.setBoolean( "UseMaterialColors", true );
-
-			String ext = Filez.getExtn( texture );
-
-			String normal = Filez.stripExtn( texture ) + "_norm." + ext, specular = Filez.stripExtn( texture ) + "_spec." + ext;
-
-			if ( new File( Tweed.DATA + "/" + normal ).exists() ) {
-				Texture n = tweed.getAssetManager().loadTexture( normal );
-				n.setWrap( WrapMode.Repeat );
-				mat.setTexture( "NormalMap", n );
-			}
-
-			mat.setColor( "Ambient", ColorRGBA.Gray );
-
-			if ( new File( Tweed.DATA + "/" + specular ).exists() ) {
-				Texture s = tweed.getAssetManager().loadTexture( specular );
-				s.setWrap( WrapMode.Repeat );
-				mat.setFloat( "Shininess", 50 );
-				mat.setTexture( "SpecularMap", s );
-			}
-			mat.setColor( "Specular", ColorRGBA.White );
-		}
-		else
-		{
-			System.out.println( " can't find "+ tweed.SCRATCH+texture );
-			mat.setColor( "Diffuse", ColorRGBA.Green );
-			mat.setColor( "Ambient", ColorRGBA.Red );
-			mat.setBoolean( "UseMaterialColors", true );
-		}
-		return mat;
-	}
-
-	private Geometry mb2Geom( Output output, List<Face> chain, String name, 
-			float[] col, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
-		Geometry geom;
-		{
-			geom = new Geometry( "material_" + col[ 0 ] + "_" + col[ 1 ] + "_" + col[ 2 ], mbs.get( name, col ).getMesh() );
-			geom.setUserData( Jme3z.MAT_KEY, name );
-			
-			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-			mat.setColor( "Diffuse", new ColorRGBA( col[ 0 ], col[ 1 ], col[ 2 ], col[ 3 ] ) );
-			mat.setColor( "Ambient", new ColorRGBA( col[ 0 ] * 0.5f, col[ 1 ] * 0.5f, col[ 2 ] * 0.5f, col[ 3 ] ) );
-
-			mat.setBoolean( "UseMaterialColors", true );
-
-			geom.setMaterial( mat );
-			geom.updateGeometricState();
-			geom.updateModelBound();
-			
-			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
-
-			if ( chain != null )
-				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
-
-		}
-		return geom;
-	}
+//	
+//	public void attachAll( Node node, List<Face> chain, Output output, ClickMe clickMe ) {
+//		for ( String mName : mbs.cache.keySet() )
+//			for (float[] mCol : mbs.cache.get( mName ).keySet() )		
+//				node.attachChild( mb2Geom( output, chain, mName, mCol, node, clickMe, mbs.get( mName, mCol ) ) );
+//		
+//		for (String mName : mbs.textures.cache.keySet())
+//			for (String texture : mbs.textures.cache.get( mName ).keySet() ) 
+//				node.attachChild( mb2Tex( output, chain, mName, texture, node, clickMe, mbs.getTexture( mName, texture ) ) );
+//		
+//		// texture atlas.dump
+//	}
+//	
+//	private Geometry mb2Tex( Output output, List<Face> chain, String name, 
+//			String texture, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
+//		Geometry geom;
+//		{
+//			MatMeshBuilder builder =  mbs.getTexture( name, texture );
+//			
+//			geom = new Geometry( "material_" +texture, builder.getMesh() );
+//			geom.setUserData( Jme3z.MAT_KEY, name );
+//			
+//			/*
+//			 * if  (textureAtlas != null) {
+//				xy = texutreAtlas.insert (texture)
+//				geom.getMesh().getBuffer( Type.TexCoord ); / 16 + (xy) / 16
+//				set edge clamp
+//				set material texture to one given by atlas
+//				
+//				after all call dump on texture atlas. 
+//
+//				- mip-mapping needs to be disabled to avoid bleeding.
+//				
+//				
+//			}
+//			*/
+//			
+//			Material mat;
+//			
+//			mat = buildTextureMaterial( tweed, texture );
+////			mat.setColor( "Ambient", ColorRGBA.White );
+//
+//			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
+//			
+//			geom.setMaterial( mat );
+//			geom.updateGeometricState();
+//			geom.updateModelBound();
+//
+//			if ( chain != null )
+//				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
+//
+//		}
+//		return geom;
+//	}
+//
+//	public static Material buildTextureMaterial( Tweed tweed, String texture ) {
+//		Material mat;
+//		mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+//		
+//		if ( new File( Tweed.DATA + "/" + texture ).exists() ) {
+//			Texture t = tweed.getAssetManager().loadTexture( texture );
+//			t.setWrap( WrapMode.Repeat );
+//
+//			mat.setTexture( "DiffuseMap", t );
+//			mat.setColor( "Diffuse", ColorRGBA.White );
+//			mat.setBoolean( "UseMaterialColors", true );
+//
+//			String ext = Filez.getExtn( texture );
+//
+//			String normal = Filez.stripExtn( texture ) + "_norm." + ext, specular = Filez.stripExtn( texture ) + "_spec." + ext;
+//
+//			if ( new File( Tweed.DATA + "/" + normal ).exists() ) {
+//				Texture n = tweed.getAssetManager().loadTexture( normal );
+//				n.setWrap( WrapMode.Repeat );
+//				mat.setTexture( "NormalMap", n );
+//			}
+//
+//			mat.setColor( "Ambient", ColorRGBA.Gray );
+//
+//			if ( new File( Tweed.DATA + "/" + specular ).exists() ) {
+//				Texture s = tweed.getAssetManager().loadTexture( specular );
+//				s.setWrap( WrapMode.Repeat );
+//				mat.setFloat( "Shininess", 50 );
+//				mat.setTexture( "SpecularMap", s );
+//			}
+//			mat.setColor( "Specular", ColorRGBA.White );
+//		}
+//		else
+//		{
+//			System.out.println( " can't find "+ tweed.SCRATCH+texture );
+//			mat.setColor( "Diffuse", ColorRGBA.Green );
+//			mat.setColor( "Ambient", ColorRGBA.Red );
+//			mat.setBoolean( "UseMaterialColors", true );
+//		}
+//		return mat;
+//	}
+//
+//	private Geometry mb2Geom( Output output, List<Face> chain, String name, 
+//			float[] col, Node node, ClickMe clickMe, MatMeshBuilder mmb ) {
+//		Geometry geom;
+//		{
+//			geom = new Geometry( "material_" + col[ 0 ] + "_" + col[ 1 ] + "_" + col[ 2 ], mbs.get( name, col ).getMesh() );
+//			geom.setUserData( Jme3z.MAT_KEY, name );
+//			
+//			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+//			mat.setColor( "Diffuse", new ColorRGBA( col[ 0 ], col[ 1 ], col[ 2 ], col[ 3 ] ) );
+//			mat.setColor( "Ambient", new ColorRGBA( col[ 0 ] * 0.5f, col[ 1 ] * 0.5f, col[ 2 ] * 0.5f, col[ 3 ] ) );
+//
+//			mat.setBoolean( "UseMaterialColors", true );
+//
+//			geom.setMaterial( mat );
+//			geom.updateGeometricState();
+//			geom.updateModelBound();
+//			
+//			geom.setUserData( GreebleSkel.Appearance, new Object[] { mmb.app } );
+//
+//			if ( chain != null )
+//				geom.setUserData( ClickMe.class.getSimpleName(), new Object[] { clickMe } );
+//
+//		}
+//		return geom;
+//	}
 	
 	
 	public void createWindow( DRectangle winPanel, Matrix4d to3d, 

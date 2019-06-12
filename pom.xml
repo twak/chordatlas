@@ -111,6 +111,11 @@
 			<url>http://jcenter.bintray.com</url>
 		</repository>
 
+		<repository>
+			<id>uni-jena.de</id>
+			<url>https://bio.informatik.uni-jena.de/repository/libs-release-oss/</url>
+		</repository>
+
 	</repositories>
 
 	<properties>
@@ -253,13 +258,14 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
 		</dependency>
-
-
+	
+	
 		<dependency>
-			<groupId>local_gurobi</groupId>
-			<artifactId>gurobi</artifactId>
-			<version>751</version>
+			<groupId>gurobi</groupId>
+			<artifactId>gurobi-linux64</artifactId>
+			<version>7.5.2</version>
 		</dependency>
+	
 
 		<dependency>
 			<groupId>com.github.haifengl</groupId>

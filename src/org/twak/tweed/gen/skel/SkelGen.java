@@ -69,6 +69,7 @@ import org.twak.viewTrace.facades.GreebleGrid;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
+import org.twak.viewTrace.facades.MMeshBuilderCache;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App;
@@ -416,7 +417,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
 			Quad skirt = new Quad( ba.getSkirt().widthF(), ba.getSkirt().heightF() );
 			skirtG = new Geometry( "skirt", skirt );
-			skirtG.setMaterial( GreebleGrid.buildTextureMaterial( tweed, ba.skirtTexture ) );
+			skirtG.setMaterial( MMeshBuilderCache.buildTextureMaterial( tweed, ba.skirtTexture ) );
 			skirtG.setLocalTranslation( ba.getSkirt().xF(), 0, ba.getSkirt().yF() + ba.getSkirt().heightF() );
 			skirtG.setLocalRotation( new Quaternion( new float[] { (float) -Math.PI / 2f, 0, 0 } ) );
 

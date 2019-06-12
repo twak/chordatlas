@@ -247,5 +247,10 @@ public class HousesPlugin implements TweedPlugin {
 		TweedSettings.settings.resetTrans();
 		tf.removeGens( GISGen.class );
 	}
+
+	@Override
+	public void addToNewScene( TweedFrame instance ) {
+		instance.addGen( new GISGen( TweedFrame.instance.tweed ), true );		
+	}
 	
 }
