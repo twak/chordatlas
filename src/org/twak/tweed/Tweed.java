@@ -7,6 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +37,7 @@ import org.twak.tweed.gen.FeatureCache;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.handles.Handle;
 import org.twak.tweed.handles.HandleMe;
+import org.twak.tweed.plugins.TweedPlugin;
 import org.twak.tweed.tools.FacadeTool;
 import org.twak.tweed.tools.HouseTool;
 import org.twak.tweed.tools.MoveTool;
@@ -88,28 +92,29 @@ public class Tweed extends SimpleApplication {
 	public static final String LAT_LONG = "EPSG:4326";
 	
 	public final static String 
-			CLICK = "Click", 
-			MOUSE_MOVE = "MouseyMousey", 
-			SPEED_UP = "SpeedUp", SPEED_DOWN = "SpeedDown",
-			AMBIENT_UP = "AmbientUp", AMBIENT_DOWN = "AmbientDown", 
+			CLICK        = "Click", 
+			MOUSE_MOVE   = "MouseyMousey", 
+			SPEED_UP     = "SpeedUp", SPEED_DOWN = "SpeedDown",
+			AMBIENT_UP   = "AmbientUp", AMBIENT_DOWN = "AmbientDown", 
 			TOGGLE_ORTHO = "ToggleOrtho", 
-			FOV_UP ="FovUp", FOV_DOWN = "FovDown";
+			FOV_UP       = "FovUp", FOV_DOWN = "FovDown";
 
 	public TweedFrame frame;
 	public FeatureCache features;
 	private Picture background;
 	public Vector3d cursorPosition;
 
-
-	Tool[] tools = new Tool[] {  
-			new SelectTool(this), 
-			new HouseTool(this),
-			new MoveTool(this), 
-//			new AlignTool(this), 
-			new FacadeTool(this),
-//			new PlaneTool(this) 
-//			new TextureTool(this),
-};
+	
+	public List<Tool> getTools() {
+		
+		List<Tool> tools = new ArrayList<>();
+		
+		ServiceLoader<TweedPlugin> loader = ServiceLoader.load(TweedPlugin.class);
+		for (TweedPlugin plugin : loader)
+			plugin.addTools( this, tools );
+		
+		return tools;
+	}
 	
 	public Tool tool;
 	
@@ -414,7 +419,7 @@ public class Tweed extends SimpleApplication {
 	
 	public void setTool( Class newTool ) {
 
-		for ( Tool t : tools )
+		for ( Tool t : getTools() )
 			if ( t.getClass() == newTool ) {
 				setTool( t );
 				return;
@@ -426,7 +431,7 @@ public class Tweed extends SimpleApplication {
 		{
 			boolean seenBefore = false;
 
-			for ( Tool t : tools )
+			for ( Tool t : getTools() )
 				if ( t.getClass() == newTool.getClass() )
 					seenBefore = true;
 
@@ -540,7 +545,6 @@ public class Tweed extends SimpleApplication {
 			if (cr != null) 
 				pos = cr.getContactPoint();
 	
-			
 			if (pos == null) {
 				Vector3f dir = cam.getWorldCoordinates( getInputManager().getCursorPosition(), -10 );
 				dir.subtractLocal( cam.getLocation() );
@@ -722,7 +726,7 @@ public class Tweed extends SimpleApplication {
 		panel.add( Fontz.setItalic( new JLabel("tools:")) );
 		
 		
-		for ( Tool t : tools ) {
+		for ( Tool t : getTools() ) {
 
 			JToggleButton tb = new JToggleButton( t.getName() );
 			toolBG.add( tb );

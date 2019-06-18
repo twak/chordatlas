@@ -44,12 +44,14 @@ public class MoveTool extends Tool {
 		
 		clear();
 		
+		if (target != null) {
 		currentHandles.setLocalTranslation(new Vector3f());
 		currentHandles.attachChild ( new MoveHandle (tweed, 0, target ) );
 		currentHandles.attachChild ( new MoveHandle (tweed, 1, target ) );
 		currentHandles.attachChild ( new MoveHandle (tweed, 2, target ) );
 		currentHandles.attachChild ( new RotHandle  (tweed,    target ) );
 		currentHandles.attachChild ( new ScaleHandle(tweed,    target ) );
+		}
 	}
 	
 	@Override

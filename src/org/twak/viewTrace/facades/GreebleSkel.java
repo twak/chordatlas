@@ -277,7 +277,7 @@ public class GreebleSkel {
 //				edges( output, roofColor );
 
 				// output per-material objects
-				greebleGrid.attachAll( node, chain, output, new ClickMe() {
+				greebleGrid.mbs.attachAll( tweed, node, new ClickMe() {
 					@Override
 					public void clicked( Object data ) {
 

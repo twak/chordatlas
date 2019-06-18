@@ -27,6 +27,7 @@ import org.twak.utils.collections.Loop;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.Graph2D;
+import org.twak.utils.geom.Graph3D;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.UnionWalker;
 import org.xml.sax.Attributes;
@@ -129,19 +130,19 @@ public abstract class GMLReader {
 
 						com.vividsolutions.jts.geom.Polygon p = ( (com.vividsolutions.jts.geom.Polygon) arg0 );
 
-						addCoords( p.getExteriorRing().getCoordinates(), transform );
+						addCoords( p.getExteriorRing().getCoordinates(), transform, true );
 						for ( int r = 0; r < p.getNumInteriorRing(); r++ ) {
 							hole( r );
-							addCoords( p.getInteriorRingN( r ).getCoordinates(), transform );
+							addCoords( p.getInteriorRingN( r ).getCoordinates(), transform, true );
 						}
 					} else if ( arg0 instanceof com.vividsolutions.jts.geom.LineString ) {
 						LineString ls = (LineString) arg0;
-						addCoords( ls.getCoordinates(), transform );
+						addCoords( ls.getCoordinates(), transform, false );
 					} else if ( arg0 instanceof MultiPolygon ) {
 						MultiPolygon mp = (MultiPolygon) arg0;
 
 						for ( int i = 0; i < mp.getNumGeometries(); i++ )
-							addCoords( mp.getGeometryN( i ).getCoordinates(), transform );
+							addCoords( mp.getGeometryN( i ).getCoordinates(), transform, true );
 					}
 									
 				} catch (Throwable e) {
@@ -154,8 +155,8 @@ public abstract class GMLReader {
 		}	
 	}	
 	
-	private void addCoords (Coordinate coords[], MathTransform transform) throws Throwable {
-		for (Pair<Coordinate, Coordinate> pair : new ConsecutivePairs<Coordinate>( Arrays.asList( coords ) , true)) {
+	private void addCoords (Coordinate coords[], MathTransform transform, boolean loop) throws Throwable {
+		for (Pair<Coordinate, Coordinate> pair : new ConsecutivePairs<Coordinate>( Arrays.asList( coords ) , loop)) {
 			
 			double 
 				x1 = pair.first().x,// - cen.getCoordinate().x, 
@@ -258,6 +259,37 @@ public abstract class GMLReader {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static Graph3D readGMLGraph( File in, DefaultGeocentricCRS targetCS,  CoordinateReferenceSystem sourceCS ) {
+		Graph3D out = new Graph3D();
+		
+		try {
+			
+			InputSource input = new InputSource( new FileInputStream(in) );
+			
+			new GMLReader(input, targetCS, sourceCS) {
+			
+				
+				public void newPoly (String name) {}
+
+				@Override
+				public void hole(int n) {}
+				
+				public void addLine (double[] s, double[] e) {
+					out.put(  
+							new Point3d( s[0], s[1], s[2] ),
+							new Point3d( e[0], e[1], e[2] ) );
+				}
+			};
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("found " + out.size()+" polygons ");
+		
+		return out;
 	}
 
 	public static LoopL<Point3d> readGML3d( File in, DefaultGeocentricCRS targetCS,  CoordinateReferenceSystem sourceCS ) {

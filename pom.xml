@@ -111,6 +111,11 @@
 			<url>http://jcenter.bintray.com</url>
 		</repository>
 
+		<repository>
+			<id>uni-jena.de</id>
+			<url>https://bio.informatik.uni-jena.de/repository/libs-release-oss/</url>
+		</repository>
+
 	</repositories>
 
 	<properties>
@@ -198,6 +203,12 @@
 			<version>3.6.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>${jme3_g}</groupId>
@@ -247,13 +258,14 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
 		</dependency>
-
-
+	
+	
 		<dependency>
-			<groupId>local_gurobi</groupId>
-			<artifactId>gurobi</artifactId>
-			<version>751</version>
+			<groupId>gurobi</groupId>
+			<artifactId>gurobi-linux64</artifactId>
+			<version>7.5.2</version>
 		</dependency>
+	
 
 		<dependency>
 			<groupId>com.github.haifengl</groupId>
@@ -272,7 +284,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.9.5</version>
+			<version>2.9.9</version>
 		</dependency>
 		
 				<dependency>
@@ -280,14 +292,12 @@
 			<artifactId>mmg</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
-<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.9.5</version>
-</dependency>
 
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.9.9</version>
+		</dependency>
 
 	</dependencies>
 

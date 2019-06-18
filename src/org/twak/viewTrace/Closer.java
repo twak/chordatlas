@@ -49,6 +49,42 @@ public class Closer<E> {
 			rev.put(set, e);
 		}
 	}
+	
+	public void add(Iterable<E> es) {
+		
+		Set<Integer> toMerge = new HashSet<>();
+		Set<E> toMergeE = new HashSet<>();
+		
+		for (E e : es) {
+			Integer s = map.get(e);
+			if (s != null) {
+				toMerge.add( s );
+				toMergeE.addAll(rev.get(s));
+			}
+		}
+		
+		if (toMerge.isEmpty()) {
+			for (E e : es) {
+				map.put(e, nextInt);
+				rev.put(nextInt, e);
+			}
+			nextInt++;
+			return;
+		}
+		
+		int set = toMerge.stream().min( Double::compare ).get();
+		
+		for (E e : toMergeE) {
+			rev.remove(map.get(e), e);
+			rev.put(set, e);
+			map.put(e, set);
+		}
+		
+		for (E e : es) {
+			map.put(e, set);
+			rev.put(set, e);
+		}
+	}
 
 	public Set<Set<E>> close() {
 		Set<Set<E>> out = new HashSet();

@@ -69,12 +69,14 @@ import org.twak.viewTrace.facades.GreebleGrid;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.GreebleSkel;
 import org.twak.viewTrace.facades.GreebleSkel.OnClick;
+import org.twak.viewTrace.facades.MMeshBuilderCache;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.Regularizer;
 import org.twak.viewTrace.franken.App;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.BuildingApp;
 import org.twak.viewTrace.franken.FacadeLabelApp;
+import org.twak.viewTrace.franken.GlobalUpdate;
 import org.twak.viewTrace.franken.SelectedApps;
 
 import com.jme3.math.Quaternion;
@@ -416,7 +418,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
 			Quad skirt = new Quad( ba.getSkirt().widthF(), ba.getSkirt().heightF() );
 			skirtG = new Geometry( "skirt", skirt );
-			skirtG.setMaterial( GreebleGrid.buildTextureMaterial( tweed, ba.skirtTexture ) );
+			skirtG.setMaterial( MMeshBuilderCache.buildTextureMaterial( tweed, ba.skirtTexture ) );
 			skirtG.setLocalTranslation( ba.getSkirt().xF(), 0, ba.getSkirt().yF() + ba.getSkirt().heightF() );
 			skirtG.setLocalRotation( new Quaternion( new float[] { (float) -Math.PI / 2f, 0, 0 } ) );
 
@@ -480,7 +482,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		}
 	}
 	
-	public void updateTexture( App app, Runnable update ) {
+	public void updateTexture( App app, GlobalUpdate update ) {
 		new Thread( new Runnable() {
 
 			@Override
@@ -497,7 +499,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
 	public void updateTextureThenGeom(App app) {
 		
-		updateTexture( app, new Runnable() {
+		updateTexture( app, new GlobalUpdate() {
 			@Override
 			public void run() {
 				tweed.enqueue( new Runnable() {
@@ -536,7 +538,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 			tweed.frame.setGenUI( new JLabel( "no texture found" ) );
 		else {
 
-			SelectedApps sa = new SelectedApps( getUIAppFor( ha ), new Runnable() {
+			SelectedApps sa = new SelectedApps( getUIAppFor( ha ), new GlobalUpdate() {
 				@Override
 				public void run() {
 					tweed.enqueue( new Runnable() {
@@ -842,7 +844,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
 		closeSitePlan();
 
-		new SelectedApps( fr.panesTexApp, new Runnable() {
+		new SelectedApps( fr.panesTexApp, new GlobalUpdate() {
 			@Override
 			public void run() {
 				tweed.enqueue( new Runnable() {

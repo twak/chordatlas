@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.ICanSave;
 import org.twak.tweed.gen.skel.ObjSkelGen;
+import org.twak.tweed.plugins.TweedPlugin;
 import org.twak.utils.Filez;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.auto.Auto;
@@ -280,7 +282,13 @@ public class TweedSettings {
 	
 					load(def);
 					if (!def.exists()) { // new
-						TweedFrame.instance.addGen( new GISGen( TweedFrame.instance.tweed ), true );
+						
+						
+						ServiceLoader<TweedPlugin> loader = ServiceLoader.load(TweedPlugin.class);
+						for (TweedPlugin plugin : loader)
+							plugin.addToNewScene( TweedFrame.instance );
+						
+						
 						save( false );
 					}
 				} else {

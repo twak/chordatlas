@@ -35,7 +35,7 @@ public class Pointz {
 		return new Point3d( p2.x, y, p2.y );
 	}
 	
-	public static Vector3d to3V( Point2d p2, double y ) {
+	public static Vector3d to3V( Tuple2d p2, double y ) {
 		return new Vector3d( p2.x, y, p2.y );
 	}
 

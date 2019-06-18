@@ -167,13 +167,14 @@ public class ObjGen extends Gen implements IDumpObjs {
 
 		JButton toSkel = new JButton("convert to skeleton");
 		toSkel.addActionListener( e -> toSkeleton() );
-		
+
 		JButton toTex = new JButton("make texturable");
 		toTex.addActionListener( e -> toTex() );
 		
 		out.add(renderLines);
 		out.add(renderTransparent);
 		out.add( toSkel );
+		out.add( toTex );
 
 		return out;
 	}
@@ -182,6 +183,7 @@ public class ObjGen extends Gen implements IDumpObjs {
 		tweed.frame.addGen( new ObjSkelGen( tweed, "s:"+name, filename ), true );
 		setVisible( false );
 	}
+
 	
 	private void toTex() {
 		
@@ -210,14 +212,14 @@ public class ObjGen extends Gen implements IDumpObjs {
 			JOptionPane.showMessageDialog( tweed.frame(), "failed to find nearest pano", "error", JOptionPane.WARNING_MESSAGE );
 		else {
 			// create reprojection object (gen) 
-			tweed.frame.addGen( new MeshCanvasGen( "t:"+name, tweed, pano ), true );
+			tweed.frame.addGen( new MeshCanvasGen( filename, tweed, pano ), true );
 			setVisible( false );
 		}
 	}
 	
 	@Override
 	public void dumpObj( ObjDump dump ) {
-		dump.setCurrentMaterial( Color.pink, 0.5);
+//		dump.setCurrentMaterial( Color.pink, 0.5);
 		dump.addAll (new ObjRead( getFile() ));
 	}
 
