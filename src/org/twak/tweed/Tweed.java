@@ -525,7 +525,7 @@ public class Tweed extends SimpleApplication {
 //		System.out.println(">>" + checkForEnd);
 		
 		if (checkForEnd)
-			if (tool.isDragging()) {
+			if (tool != null && tool.isDragging()) {
 				tool.dragEnd();
 			}
 		
@@ -576,9 +576,10 @@ public class Tweed extends SimpleApplication {
 	}
 	
 	private AnalogListener analogListener = new AnalogListener() {
+
 		public void onAnalog( String name, float intensity, float tpf ) {
 			
-			if ( name.equals( CLICK ) ) {
+			if ( name.equals( CLICK ) && tool != null ) {
 
 				if ( tool.isDragging() ) {
 
@@ -741,8 +742,9 @@ public class Tweed extends SimpleApplication {
 
 			panel.add( tb );
 		}
-		
-		((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
+
+		if (panel.getComponents().length >= 2)
+			((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
 
 	}
 	
