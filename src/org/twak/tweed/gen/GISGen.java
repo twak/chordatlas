@@ -639,4 +639,8 @@ public class GISGen  extends LineGen3d implements ICanSave {
 		
 		return new DRectangle(mm[0], mm[4], mm[1]-mm[0], mm[5]-mm[4]);
 	}
+	
+	protected float getLineWidth() {
+		return 3;
+	}
 }

@@ -77,6 +77,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
@@ -619,7 +620,8 @@ public class Tweed extends SimpleApplication {
 
 	public void clearBackground() {
 
-		if ( !TweedSettings.settings.SSAO ) {
+		if ( !TweedSettings.settings.SSAO ) 
+		{
 
 			if ( background == null ) {
 				background = new Picture( "background" );
@@ -662,7 +664,8 @@ public class Tweed extends SimpleApplication {
 
 	protected void buildBackground() {
 
-		if ( !TweedSettings.settings.SSAO ) {
+		if ( !TweedSettings.settings.SSAO )
+		{
 			String bgKey = "background";
 
 			clearBackground();
@@ -818,7 +821,18 @@ public class Tweed extends SimpleApplication {
 			viewPort.removeProcessor( fpp );
 		}
 
-		if ( TweedSettings.settings.SSAO ) {
+		if ( TweedSettings.settings.bloom ) {
+		 FilterPostProcessor fpp=new FilterPostProcessor(getAssetManager());
+		 BloomFilter bloom=new BloomFilter();
+		 bloom.setBlurScale( 5f );
+		 bloom.setExposurePower( 6 );
+//		 bloom.setEnabled( true );
+		 fpp.addFilter(bloom);
+		 viewPort.addProcessor(fpp);
+//		 viewPort.setClearFlags( true, true, true);
+		}
+		
+		 if ( TweedSettings.settings.SSAO ) {
 
 			fpp = new FilterPostProcessor( assetManager );
 			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
@@ -827,6 +841,7 @@ public class Tweed extends SimpleApplication {
 			fpp.addFilter( new FXAAFilter() );
 			viewPort.addProcessor( fpp );
 		}
+
 		
 		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
 	}

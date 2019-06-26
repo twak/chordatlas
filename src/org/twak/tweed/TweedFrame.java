@@ -59,6 +59,8 @@ import org.twak.utils.ui.WindowManager;
 import org.twak.utils.ui.auto.Auto;
 import org.twak.viewTrace.SuperMeshPainter;
 
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
@@ -171,6 +173,7 @@ public class TweedFrame {
 			}
 		}, 200, 200, TimeUnit.MILLISECONDS );
 
+		
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		frame.pack();
 		frame.setVisible( !HEADLESS );
