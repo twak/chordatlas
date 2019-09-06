@@ -5,11 +5,16 @@
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="utils" />
+    <orderEntry type="module" module-name="siteplan" />
+    <orderEntry type="module" module-name="campskeleton" />
+    <orderEntry type="module" module-name="utils" />
+    <orderEntry type="module" module-name="siteplan" />
+    <orderEntry type="module" module-name="campskeleton" />
     <orderEntry type="module" module-name="utils" />
     <orderEntry type="library" name="Maven: gov.nist.math:jama:1.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:batik-anim:1.10" level="project" />
