@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.twak.chordatlas</groupId>
 	<artifactId>chordatlas</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-stable</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -146,17 +146,17 @@
 				<dependency>
 					<groupId>com.github.twak</groupId>
 					<artifactId>jutils</artifactId>
-					<version>master-SNAPSHOT</version>
+					<version>0.0.1-stable</version>
 				</dependency>
 				<dependency>
 					<groupId>com.github.twak</groupId>
 					<artifactId>campskeleton</artifactId>
-					<version>master-SNAPSHOT</version>
+					<version>0.0.1-stable</version>
 				</dependency>
 				<dependency>
 					<groupId>com.github.twak</groupId>
 					<artifactId>siteplan</artifactId>
-					<version>master-SNAPSHOT</version>
+					<version>0.0.1-stable</version>
 				</dependency>
 			</dependencies>
 
