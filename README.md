@@ -1,4 +1,5 @@
 # chordatlas: data-driven urban procedural modeling
+[![](https://jitpack.io/v/twak/chordatlas.svg)](https://jitpack.io/#twak/chordatlas)
 
 chordatlas is an urban procedural modeling and data fusion research platform. [UI video](https://youtu.be/Jz8q09r-RFg). It contains implementations of 3 projects that have be presented at various Siggraphs: [frankengan](http://geometry.cs.ucl.ac.uk/projects/2018/frankengan/), [bigsur](http://geometry.cs.ucl.ac.uk/projects/2017/bigsur/), and [procex](http://www.twak.co.uk/2011/04/interactive-architectural-modeling-with.html). 
 
