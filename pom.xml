@@ -108,7 +108,7 @@
 
 		<repository>
 			<id>jcenter</id>
-			<url>http://jcenter.bintray.com</url>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
 
 		<repository>
@@ -121,7 +121,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<jme3_g>org.jmonkeyengine</jme3_g>
-		<jme3_v>3.1.0-stable</jme3_v>
+		<jme3_v>3.3.2-stable</jme3_v>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<geotools.version>19.1</geotools.version>
 		<batik_v>1.10</batik_v>

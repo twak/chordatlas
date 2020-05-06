@@ -64,10 +64,10 @@ import org.twak.viewTrace.facades.GreebleSkel;
 import com.google.common.io.Files;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.terrain.geomipmap.TerrainLodControl;
-import com.jme3.terrain.geomipmap.TerrainQuad;
-import com.jme3.terrain.heightmap.AbstractHeightMap;
-import com.jme3.terrain.heightmap.ImageBasedHeightMap;
+//import com.jme3.terrain.geomipmap.TerrainLodControl;
+//import com.jme3.terrain.geomipmap.TerrainQuad;
+//import com.jme3.terrain.heightmap.AbstractHeightMap;
+//import com.jme3.terrain.heightmap.ImageBasedHeightMap;
 import com.jme3.texture.Texture;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
@@ -106,31 +106,30 @@ public class GISGen  extends LineGen3d implements ICanSave {
 
 		if ( showTerrain ) {
 			// https://wiki.jmonkeyengine.org/jme3/advanced/terrain.html
-			DRectangle bounds = rect();
-			int size = 1 + Mathz.nextPower2( (int) Math.max( bounds.width, bounds.height ) );
-			Texture heightMapImage = tweed.getAssetManager().loadTexture( GreebleSkel.TILE_JPG );
-			AbstractHeightMap heightmap = null;
-			heightmap = new ImageBasedHeightMap( heightMapImage.getImage(), 1f );
-			heightmap.load();
-
-			TerrainQuad terrain = new TQ( "terrain", 65, size, heightmap.getHeightMap() );
-
-			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
-			ColorRGBA c = Jme3z.toJme( color );
-			mat.setColor( "Diffuse", c );
-			mat.setColor( "Ambient", c.mult( 0.1f ) );
-			mat.setBoolean( "UseMaterialColors", true );
-
-			//		mat.setBoolean( "UseMaterialColors", true );
-			terrain.setMaterial( mat );
-			Point2d gc = bounds.getCenter();
-			terrain.setLocalTranslation( (float) gc.x, -10f, (float) gc.y );
-			terrain.setLocalScale( 1f, 0.05f, 1f );
-
-			TerrainLodControl control = new TerrainLodControl( terrain, Collections.singletonList( tweed.getCamera() ) );
-			terrain.addControl( control );
-
-			gNode.attachChild( terrain );
+//			DRectangle bounds = rect();
+//			int size = 1 + Mathz.nextPower2( (int) Math.max( bounds.width, bounds.height ) );
+//			Texture heightMapImage = tweed.getAssetManager().loadTexture( GreebleSkel.TILE_JPG );
+//			AbstractHeightMap heightmap = null;
+//			heightmap = new ImageBasedHeightMap( heightMapImage.getImage(), 1f );
+//			heightmap.load();
+//
+//			TerrainQuad terrain = new TQ( "terrain", 65, size, heightmap.getHeightMap() );
+//
+//			Material mat = new Material( tweed.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md" );
+//			ColorRGBA c = Jme3z.toJme( color );
+//			mat.setColor( "Diffuse", c );
+//			mat.setColor( "Ambient", c.mult( 0.1f ) );
+//			mat.setBoolean( "UseMaterialColors", true );
+//
+//			terrain.setMaterial( mat );
+//			Point2d gc = bounds.getCenter();
+//			terrain.setLocalTranslation( (float) gc.x, -10f, (float) gc.y );
+//			terrain.setLocalScale( 1f, 0.05f, 1f );
+//
+//			TerrainLodControl control = new TerrainLodControl( terrain, Collections.singletonList( tweed.getCamera() ) );
+//			terrain.addControl( control );
+//
+//			gNode.attachChild( terrain );
 		}
 	}
 	
