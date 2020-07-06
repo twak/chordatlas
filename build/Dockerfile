@@ -1,4 +1,4 @@
-# deps to build a ChordAtlas jar - saves pulling from 1000 different mvn repos.... 
+# deps to build a ChordAtlas jar - saves pulling from 1000 different mvn repos....
 
 FROM ubuntu:16.04
 MAINTAINER twakelly@gmail.com
@@ -15,25 +15,33 @@ RUN apt update && apt-get install -y openjdk-8-jdk
 
 #gurobi
 
-RUN mkdir /opt/gurobi && cd /opt/gurobi && wget http://packages.gurobi.com/7.5/gurobi7.5.1_linux64.tar.gz
-RUN cd /opt/gurobi && tar -xvzf gurobi7.5.1_linux64.tar.gz
+RUN mkdir /opt/gurobi && cd /opt/gurobi && wget http://packages.gurobi.com/9.0/gurobi9.0.2_linux64.tar.gz
+RUN cd /opt/gurobi && tar -xvzf gurobi9.0.2_linux64.tar.gz
 
-ENV PATH /opt/gurobi/gurobi7.5.1/linux64/bin:$PATH
-ENV GUROBI_HOME /opt/gurobi/gurobi7.5.1/linux64/bin:$PATH
+ENV PATH /opt/gurobi/gurobi902/linux64/bin:$PATH
+ENV GUROBI_HOME /opt/gurobi/gurobi902/linux64/bin:$PATH
 
-RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi751/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=751 -Dpackaging=jar
+RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi902/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=902 -Dpackaging=jar
 
 WORKDIR /tmp
 
 # clone, build and install each of the projects
 
-RUN for r in jutils campskeleton  siteplan  chordatlas; \
+RUN for r in jutils campskeleton  siteplan; \
     do \
 		git clone --branch master "https://github.com/twak/$r.git"; \
     	cd $r; \
 		mvn install; \
 		cd ..; \
     done
+
+WORKDIR /tmp
+RUN git clone --branch master "https://github.com/twak/chordatlas.git"
+WORKDIR /tmp/chordatlas
+COPY chordatlas.iml chordatlas.iml
+COPY pom.xml pom.xml
+RUN mvn install
+WORKDIR /tmp
 
 ENV PATH /tmp/chordatlas/build/:$PATH
 RUN chmod +x /tmp/chordatlas/build/*.sh
