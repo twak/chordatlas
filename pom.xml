@@ -102,8 +102,10 @@
 
 		<repository>
 			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
+			<name>OSGeo Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+			<snapshots><enabled>false</enabled></snapshots>
+			<releases><enabled>true</enabled></releases>
 		</repository>
 
 		<repository>
@@ -309,8 +311,8 @@
 	
 	
 		<dependency>
-			<groupId>gurobi</groupId>
-			<artifactId>gurobi-linux64</artifactId>
+			<groupId>local_gurobi</groupId>
+			<artifactId>local_gurobi</artifactId>
 			<version>local</version>
 		</dependency>
 	
