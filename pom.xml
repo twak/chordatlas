@@ -311,7 +311,7 @@
 		<dependency>
 			<groupId>gurobi</groupId>
 			<artifactId>gurobi-linux64</artifactId>
-			<version>7.5.2</version>
+			<version>local</version>
 		</dependency>
 	
 
