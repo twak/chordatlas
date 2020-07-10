@@ -313,7 +313,7 @@
 		<dependency>
 			<groupId>local_gurobi</groupId>
 			<artifactId>local_gurobi</artifactId>
-			<version>local</version>
+			<version>local_gurobi</version>
 		</dependency>
 	
 

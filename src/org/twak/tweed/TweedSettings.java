@@ -220,7 +220,7 @@ public class TweedSettings {
 		
 		if (folder == null)
 			return;
-		
+
 		recentFiles.f.remove( folder );
 		
 //		if (recentFiles.f.isEmpty() || !recentFiles.f.contains (folder) ) {

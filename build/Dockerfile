@@ -23,7 +23,7 @@ RUN cd /opt/gurobi && tar -xvzf gurobi9.0.2_linux64.tar.gz
 ENV PATH /opt/gurobi/gurobi902/linux64/bin:$PATH
 ENV GUROBI_HOME /opt/gurobi/gurobi902/linux64/bin:$PATH
 
-RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi902/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=local_gurobi -Dpackaging=jar
+RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi902/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=local_gurobi -Dversion=local_gurobi -Dpackaging=jar
 
 WORKDIR /tmp
 
