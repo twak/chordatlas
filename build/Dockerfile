@@ -1,4 +1,6 @@
-# deps to build a ChordAtlas jar - saves pulling from 1000 different mvn repos.... 
+# deps to build a ChordAtlas jar - we have a bunch of deps that have a bunch of deps... No-cache build:
+# docker image build --no-cache=true --tag chordatlas --file Dockerfile .
+
 
 FROM ubuntu:16.04
 MAINTAINER twakelly@gmail.com
@@ -15,25 +17,33 @@ RUN apt update && apt-get install -y openjdk-8-jdk
 
 #gurobi
 
-RUN mkdir /opt/gurobi && cd /opt/gurobi && wget http://packages.gurobi.com/7.5/gurobi7.5.1_linux64.tar.gz
-RUN cd /opt/gurobi && tar -xvzf gurobi7.5.1_linux64.tar.gz
+RUN mkdir /opt/gurobi && cd /opt/gurobi && wget http://packages.gurobi.com/9.0/gurobi9.0.2_linux64.tar.gz
+RUN cd /opt/gurobi && tar -xvzf gurobi9.0.2_linux64.tar.gz
 
-ENV PATH /opt/gurobi/gurobi7.5.1/linux64/bin:$PATH
-ENV GUROBI_HOME /opt/gurobi/gurobi7.5.1/linux64/bin:$PATH
+ENV PATH /opt/gurobi/gurobi902/linux64/bin:$PATH
+ENV GUROBI_HOME /opt/gurobi/gurobi902/linux64/bin:$PATH
 
-RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi751/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=751 -Dpackaging=jar
+RUN mvn install:install-file -Dfile=/opt/gurobi/gurobi902/linux64/lib/gurobi.jar -DgroupId=local_gurobi -DartifactId=gurobi -Dversion=local_gurobi -Dpackaging=jar
 
 WORKDIR /tmp
 
-# clone, build and install each of the projects
+# clone, build and install each of the projects. if we are using stable, shouldn't be required?
+#RUN for r in jutils campskeleton  siteplan; \
+#    do \
+#		git clone --branch stable "https://github.com/twak/$r.git"; \
+#    	cd $r; \
+#		mvn install; \
+#		cd ..; \
+#    done
 
-RUN for r in jutils campskeleton  siteplan  chordatlas; \
-    do \
-		git clone --branch master "https://github.com/twak/$r.git"; \
-    	cd $r; \
-		mvn install; \
-		cd ..; \
-    done
+WORKDIR /tmp
+
+#https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
+#ADD https://api.github.com/repos/twak/chordatlas/git/refs/heads/stable /tmp/version.json
+RUN git clone --branch stable "https://github.com/twak/chordatlas.git"
+WORKDIR /tmp/chordatlas
+RUN mvn -Dmaven.artifact.threads=64 package -T 64
+WORKDIR /tmp
 
 ENV PATH /tmp/chordatlas/build/:$PATH
 RUN chmod +x /tmp/chordatlas/build/*.sh
