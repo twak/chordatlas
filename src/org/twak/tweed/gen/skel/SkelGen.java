@@ -88,7 +88,7 @@ import com.thoughtworks.xstream.XStream;
 
 public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 
-	public BlockGen blockGen;
+	public transient BlockGen blockGen;
 
 	public HalfMesh2 block = null;
 
