@@ -63,7 +63,7 @@ public class BlockGen extends ObjGen {
 	File root;
 	String selectedSelectedName = "";
 	public LoopL<Point3d> polies;
-	public ProfileGen profileGen;
+	public transient ProfileGen profileGen;
 	
 	private static SliceParameters P = new SliceParameters(10); // when set by Slice UI, used for all future blocks!
 
