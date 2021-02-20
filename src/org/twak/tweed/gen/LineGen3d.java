@@ -82,7 +82,9 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 
 			Material lineMaterial = new Material( tweed.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md" );
 			lineMaterial.setColor( "Color", new ColorRGBA( color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 1f ) );
+			lineMaterial.getAdditionalRenderState().setLineWidth( getLineWidth() );
 			geom.setMaterial( lineMaterial );
+			
 
 			geom.setLocalTranslation( 0, 0, 0 );
 
@@ -158,7 +160,7 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 
 				if ( TweedSettings.settings.LOD ) {
 					LodGenerator lod = new LodGenerator( geom );
-					lod.bakeLods( LodGenerator.TriangleReductionMethod.COLLAPSE_COST, 10, 100 );
+					lod.bakeLods( LodGenerator.TriangleReductionMethod.COLLAPSE_COST, 0, 100 );
 
 					GISLodControl lc = new GISLodControl();
 					lc.setTrisPerPixel( 0.000001f );
@@ -178,6 +180,10 @@ public abstract class LineGen3d extends Gen implements IDumpObjs{
 		
 	}
 	
+	protected float getLineWidth() {
+		return 2;
+	}
+
 	protected void polyClicked( int callbackI ) {
 		
 	}

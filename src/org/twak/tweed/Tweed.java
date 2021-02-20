@@ -77,6 +77,8 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.filters.DepthOfFieldFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
@@ -122,7 +124,9 @@ public class Tweed extends SimpleApplication {
 	private DirectionalLight sun;
 	private PointLight point;
 	PointLightShadowRenderer plsr;
-	FilterPostProcessor fpp ;
+	FilterPostProcessor fpp;
+	private DepthOfFieldFilter dofFilter;
+
 	
 	public Node debug;
 	
@@ -525,7 +529,7 @@ public class Tweed extends SimpleApplication {
 //		System.out.println(">>" + checkForEnd);
 		
 		if (checkForEnd)
-			if (tool.isDragging()) {
+			if (tool != null && tool.isDragging()) {
 				tool.dragEnd();
 			}
 		
@@ -555,6 +559,9 @@ public class Tweed extends SimpleApplication {
 			
 			if (pos != null)
 				point.setPosition( pos.add ( cam.getDirection().mult( -0.3f ) ));
+			
+			if (dofFilter != null)
+				dofFilter.setFocusDistance( pos.distance( cam.getLocation() ) );
 		}
 	};
 	
@@ -576,9 +583,10 @@ public class Tweed extends SimpleApplication {
 	}
 	
 	private AnalogListener analogListener = new AnalogListener() {
+
 		public void onAnalog( String name, float intensity, float tpf ) {
 			
-			if ( name.equals( CLICK ) ) {
+			if ( name.equals( CLICK ) && tool != null ) {
 
 				if ( tool.isDragging() ) {
 
@@ -618,7 +626,8 @@ public class Tweed extends SimpleApplication {
 
 	public void clearBackground() {
 
-		if ( !TweedSettings.settings.SSAO ) {
+		if ( canShowBackground() ) 
+		{
 
 			if ( background == null ) {
 				background = new Picture( "background" );
@@ -633,7 +642,7 @@ public class Tweed extends SimpleApplication {
 	final static String BG_LOC = "scratch/bg.jpg";
 
 	public void setBackground( BufferedImage bi ) {
-		if ( !TweedSettings.settings.SSAO ) {
+		if ( canShowBackground() ) {
 
 			try {
 
@@ -661,7 +670,8 @@ public class Tweed extends SimpleApplication {
 
 	protected void buildBackground() {
 
-		if ( !TweedSettings.settings.SSAO ) {
+		if ( canShowBackground() )
+		{
 			String bgKey = "background";
 
 			clearBackground();
@@ -741,8 +751,9 @@ public class Tweed extends SimpleApplication {
 
 			panel.add( tb );
 		}
-		
-		((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
+
+		if (panel.getComponents().length >= 2)
+			((JToggleButton)panel.getComponent( 1 ) ).setSelected( true );
 
 	}
 	
@@ -811,24 +822,54 @@ public class Tweed extends SimpleApplication {
 			viewPort.addProcessor( plsr );
 		}
 
-		
-		if ( fpp != null ) {
+		if (fpp != null) {
 			viewPort.removeProcessor( fpp );
+			fpp = null;
 		}
 
-		if ( TweedSettings.settings.SSAO ) {
-
-			fpp = new FilterPostProcessor( assetManager );
-			SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
-			//			fpp.addFilter( new ColorOverlayFilter( ColorRGBA.Magenta ));
-			fpp.addFilter( filter );
-			fpp.addFilter( new FXAAFilter() );
-			viewPort.addProcessor( fpp );
-		}
 		
+		if ( TweedSettings.settings.bloom ) {
+
+			
+			if (fpp == null)
+				fpp = new FilterPostProcessor( getAssetManager() );
+
+			BloomFilter bloom = new BloomFilter();
+			bloom.setBlurScale( 5f );
+			bloom.setExposurePower( 6 );
+			fpp.addFilter( bloom );
+		}
+
+			if ( TweedSettings.settings.SSAO ) {
+				if (fpp == null)
+					fpp = new FilterPostProcessor( getAssetManager() );
+				SSAOFilter filter = new SSAOFilter( 0.50997847f, 1.440001f, 1.39999998f, 0 );
+				fpp.addFilter( filter );
+				fpp.addFilter( new FXAAFilter() );
+			}
+
+
+			if (  TweedSettings.settings.depthOfField ) {
+				if (fpp == null)
+					fpp = new FilterPostProcessor( getAssetManager() );
+				dofFilter = new DepthOfFieldFilter();
+				dofFilter.setFocusDistance( 0 );
+				dofFilter.setFocusRange( 50 );
+				dofFilter.setBlurScale( 3f );
+				fpp.addFilter( dofFilter );
+			}
+			
+		
+		if (fpp != null)
+			viewPort.addProcessor( fpp );
+			
 		WindowManager.setTitle( TweedFrame.APP_NAME +" " + new File( dataDir ).getName() );
 	}
-
+	
+	private boolean canShowBackground() {
+		return !(TweedSettings.settings.bloom || TweedSettings.settings.SSAO);// || TweedSettings.settings.depthOfField);
+	}
+	
 	public static void deleteScratch() {
 		try {
 			if ( Tweed.SCRATCH.contains( "scratch" ) )

@@ -84,6 +84,8 @@ public class TweedSettings {
 	public boolean calculateFootprintNormals = true;
 	public double  snapFootprintVert = 0;
 	public boolean SSAO = true;
+	public boolean bloom = false; 
+	public boolean depthOfField = false;
 	public boolean shadows = false;
 	
 	public double blockMeshPadding = 5;
