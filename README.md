@@ -20,6 +20,13 @@ there are additional requirements and instructions for [bigsur](https://github.c
 
 more adventurous hackers may be interested in compiling their [own datasets](https://github.com/twak/chordatlas/wiki/datasets) or [building the system](https://github.com/twak/chordatlas/wiki/build-instructions).
 
+## plugins
+
+plugins for chordatlas/tweed (mostly under development; my goal is to split out the tweed GUI/engine from applications):
+
+1. streets ([stub](https://github.com/twak/tweedstreets), [impl](https://github.com/Jhilik3/tweedstreets))
+1. floorplans ([tba](https://github.com/twak/planchordatlas))
+
 ## cite
 
 if you use this project in your own publications, please cite the appropriate paper(s). this helps us get more funding to improve the systems:
