@@ -307,15 +307,15 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.10-java7</version>
+			<version>1.4.10</version>
 		</dependency>
 
 
-		<dependency>
-			<groupId>local_gurobi</groupId>
-			<artifactId>local_gurobi</artifactId>
-			<version>local_gurobi</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>local_gurobi</groupId>-->
+<!--			<artifactId>local_gurobi</artifactId>-->
+<!--			<version>local_gurobi</version>-->
+<!--		</dependency>-->
 	
 
 		<dependency>
