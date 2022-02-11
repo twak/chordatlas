@@ -12,7 +12,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.twak.camp.Output.Face;
-import org.twak.mmg.Command;
 import org.twak.mmg.MMG;
 import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
@@ -55,7 +54,7 @@ public class GreebleMMG {
 		
 		mf.facadeTexApp.postState.wallFaces.add( flat );
 		
-		for ( Command c : mogram)
+		for ( MO c : mogram)
 			if ( c.function.getClass() == MiniFacadeImport.class )
 				( (MiniFacadeImport) c.function ).mf = mf;
 		
@@ -217,7 +216,7 @@ public class GreebleMMG {
 			ex.printStackTrace();
 		}
 		
-		Medium.mediums = new Medium[] { new OneD(), new Facade2d() } ;
+		Medium.mediums = new Medium[] { new D1(), new Facade2d() } ;
 		
 		MOgram mogram = createMOgram( createTemplateMF( 6, 5 ) );
 		new MOgramEditor( mogram ).setVisible( true );

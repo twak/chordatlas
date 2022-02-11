@@ -8,3 +8,5 @@
 /dependency-reduced-pom.xml
 /OpenAL64.dll
 /lwjgl64.dll
+/.idea/
+/.idea/libraries/

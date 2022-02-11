@@ -9,7 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import org.twak.mmg.Command;
 import org.twak.mmg.Function;
 import org.twak.mmg.InputSet;
 import org.twak.mmg.MMG;
@@ -17,6 +16,7 @@ import org.twak.mmg.MO;
 import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.Refs;
+import org.twak.mmg.functions.ui.TwoPointEdge;
 import org.twak.mmg.media.GreebleMMG;
 import org.twak.mmg.prim.Edge;
 import org.twak.mmg.prim.ScreenSpace;
@@ -83,9 +83,7 @@ public class MiniFacadeImport extends Function {
 	}
 
 	@Override
-	public List<Node> createSN( InputSet is, List<Object> vals, MMG mmg, Command mo, MOgram mogram ) {
-
-		ScreenSpace.lastPosition = 0;
+	public List<Node> createSN( InputSet is, List<Object> vals, MMG mmg, MO mo, MOgram mogram ) {
 
 		List<Node> out = new ArrayList<>();
 		Node root = new Node( this, null );
@@ -101,7 +99,7 @@ public class MiniFacadeImport extends Function {
 		return out;
 	}
 
-	private void createWall( Command mo, List<Node> out, Node root, MMG mmg ) {
+	private void createWall( MO mo, List<Node> out, Node root, MMG mmg ) {
 
 
 		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces ) {
@@ -144,7 +142,7 @@ public class MiniFacadeImport extends Function {
 	
 	
 	
-	private void createRectangles( Command mo, List<Node> out, String name, List<FRect> rects,
+	private void createRectangles( MO mo, List<Node> out, String name, List<FRect> rects,
 			Node root, MMG mmg ) {
 
 		Node 	top = getLabel( TOP_RECT    + name.toLowerCase(), mmg ),

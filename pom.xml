@@ -160,6 +160,12 @@
 					<artifactId>siteplan</artifactId>
 					<version>master-SNAPSHOT</version>
 				</dependency>
+
+				<dependency>
+					<groupId>com.github.twak</groupId>
+					<artifactId>mmg</artifactId>
+					<version>master-SNAPSHOT</version>
+				</dependency>
 			</dependencies>
 
 		</profile>
@@ -182,6 +188,12 @@
 				<dependency>
 					<groupId>org.twak.siteplan</groupId>
 					<artifactId>siteplan</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+
+				<dependency>
+					<groupId>org.twak.mmg</groupId>
+					<artifactId>mmg</artifactId>
 					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 			</dependencies>
@@ -310,21 +322,19 @@
 			<version>1.4.10-java7</version>
 		</dependency>
 
-
-		<dependency>
-			<groupId>local_gurobi</groupId>
-			<artifactId>local_gurobi</artifactId>
-			<version>local_gurobi</version>
-		</dependency>
-	
+		<!--
+                <dependency>
+                    <groupId>local_gurobi</groupId>
+                    <artifactId>local_gurobi</artifactId>
+                    <version>local_gurobi</version>
+                </dependency>
+                -->
 
 		<dependency>
 			<groupId>com.github.haifengl</groupId>
 			<artifactId>smile-core</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-		<!-- java topology suite <dependency> <groupId>com.vividsolutions</groupId> 
-			<artifactId>jts</artifactId> <version>1.13</version> </dependency> -->
 
 		<dependency>
 			<groupId>com.esotericsoftware.yamlbeans</groupId>

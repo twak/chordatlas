@@ -8,9 +8,8 @@
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="jdk" jdkName="13" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="utils" />
     <orderEntry type="library" name="Maven: javax.vecmath:vecmath:1.5.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-xml:19.1" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-api:19.1" level="project" />
@@ -136,7 +135,6 @@
     <orderEntry type="library" name="Maven: com.thoughtworks.xstream:xstream:1.4.10-java7" level="project" />
     <orderEntry type="library" name="Maven: xmlpull:xmlpull:1.1.3.1" level="project" />
     <orderEntry type="library" name="Maven: xpp3:xpp3_min:1.1.4c" level="project" />
-    <orderEntry type="library" name="Maven: local_gurobi:local_gurobi:local_gurobi" level="project" />
     <orderEntry type="library" name="Maven: com.github.haifengl:smile-core:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.haifengl:smile-data:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.haifengl:smile-math:1.2.1" level="project" />
@@ -144,14 +142,19 @@
     <orderEntry type="library" name="Maven: com.github.haifengl:smile-graph:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.esotericsoftware.yamlbeans:yamlbeans:1.09" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.9.9" level="project" />
+    <orderEntry type="module" module-name="mmg" />
+    <orderEntry type="library" name="Maven: org.pushing-pixels:radiance-substance:3.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.pushing-pixels:radiance-trident:3.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.pushing-pixels:radiance-neon:3.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.locationtech.jts:jts-core:1.18.2" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.9" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
     <orderEntry type="module" module-name="utils" />
     <orderEntry type="library" name="Maven: gov.nist.math:jama:1.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:batik-anim:1.10" level="project" />
     <orderEntry type="module" module-name="campskeleton" />
-    <orderEntry type="library" name="Maven: com.github.twak:jutils:master-eada9966f1-1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.twak:jutils:master-b72c04b2ab-1" level="project" />
     <orderEntry type="module" module-name="siteplan" />
-    <orderEntry type="library" name="Maven: com.github.twak:campskeleton:master-9e1fed0913-1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.twak:campskeleton:master-8df5b241d5-1" level="project" />
   </component>
 </module>
