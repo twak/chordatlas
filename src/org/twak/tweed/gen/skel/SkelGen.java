@@ -28,6 +28,7 @@ import org.twak.camp.Output.Face;
 import org.twak.camp.Tag;
 import org.twak.camp.ui.Bar;
 import org.twak.camp.ui.Marker;
+import org.twak.mmg.media.GreebleMMG;
 import org.twak.siteplan.anchors.Ship;
 import org.twak.siteplan.anchors.Ship.Instance;
 import org.twak.siteplan.campskeleton.Plan;
@@ -515,8 +516,6 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 		} );
 	}
 
-
-	
 	/**
 	 * When someone clicks on geometry with userdata GreebleSkel.Appearance of a
 	 * class, what do we show in the UI?

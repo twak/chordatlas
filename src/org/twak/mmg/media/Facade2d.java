@@ -20,26 +20,26 @@ public class Facade2d extends Medium {
                     FixedLinearForm.class, SplitLinearAbs.class, SplitLinearRel.class, OffsetLinear.class, 
                     TwoLinearPoint.class, ProjectPointLinear.class,
                     ThreeLinearOffsetLinear.class, TweenLinear.class,
-                    
-                    FixedOBB.class, ThreePointOBB.class, FourLinearOBB.class, OBBExportLinearForm.class, OBBExportEdge.class, 
-                    DivideOBB.class, RepeatOBB.class, FixedNum.class,
-                    OffsetOBB.class, DividePointOBB.class, RepeatPointOBB.class, BoundOBB.class,
-                    
+
                     DrawEdge.class, TwoPointEdge.class, EdgeRandomPoint.class,
-                    //FixedEdge.class,
+
                     ProjectPointEdge.class, TwoEdgePoint.class, EdgesToFace.class,
-                    
+
                     FixedLabel.class,
                     
-                    LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class,
-                    
+                    LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class, PtPtBox.class,
+
+                    FaceSplit.class, FaceRelSplit.class, FaceBoolean.class,
                     OffsetFace.class, CloneFace.class,
-                    
+
+                    FourPointCurvePath.class,
+
                     Erase.class,
                     AddLabel.class,
                     LabelToFace.class,
                 });
-        
+
+        scale= 10;
     }
 
     @Override

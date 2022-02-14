@@ -35,6 +35,7 @@ import org.twak.viewTrace.franken.FacadeLabelApp;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import org.twak.viewTrace.franken.FacadeTexApp;
 
 public class HouseTool extends Tool {
 
@@ -211,22 +212,34 @@ public class HouseTool extends Tool {
 		SkelGen sg = new SkelGen( mesh, tweed, null );
 		sg.name = "houses";
 		tweed.frame.addGen( sg, true );
-		
-		MOgram mogram = GreebleMMG.createMOgram( null );
-		for ( HalfFace hf : mesh )
-			for ( HalfEdge he : hf ) {
-				
-				
-				SuperEdge se = (SuperEdge)he;
-				
-				FacadeLabelApp mfa = se.toEdit.facadeLabelApp;
-				
-				se.toEdit = new MiniFacade();
-				se.toEdit.featureGen = new MMGFeatureGen( mogram );
-				
-				mfa.appMode = TextureMode.MMG;
-				mfa.mogram = mogram;
+
+
+		if (true)
+		for (HalfFace hf : mesh)
+			for (HalfEdge he : hf) {
+
+				FacadeTexApp mfa =  ((SuperEdge)he).toEdit.facadeTexApp;
+
+				mfa.appMode = TextureMode.Off;//"tex.jpg";
 			}
+
+		else {
+
+			MOgram mogram = GreebleMMG.createMOgram(null);
+			for (HalfFace hf : mesh)
+				for (HalfEdge he : hf) {
+
+					SuperEdge se = (SuperEdge) he;
+
+					FacadeLabelApp mfa = se.toEdit.facadeLabelApp;
+
+					se.toEdit = new MiniFacade();
+					se.toEdit.featureGen = new MMGFeatureGen(mogram);
+
+					mfa.appMode = TextureMode.MMG;
+					mfa.mogram = mogram;
+				}
+		}
 		
 		return sg;
 	}

@@ -9,40 +9,35 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import org.twak.mmg.Function;
-import org.twak.mmg.InputSet;
-import org.twak.mmg.MMG;
-import org.twak.mmg.MO;
-import org.twak.mmg.MOgram;
-import org.twak.mmg.Node;
-import org.twak.mmg.Refs;
+import org.twak.mmg.*;
 import org.twak.mmg.functions.ui.TwoPointEdge;
 import org.twak.mmg.media.GreebleMMG;
-import org.twak.mmg.prim.Edge;
-import org.twak.mmg.prim.ScreenSpace;
+import org.twak.mmg.prim.*;
 import org.twak.mmg.ui.Cowput;
 import org.twak.utils.Cache;
 import org.twak.utils.Pair;
-import org.twak.utils.collections.ConsecutivePairs;
-import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.Loopable;
+import org.twak.utils.collections.*;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleHelper;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacade.Feature;
+import org.twak.viewTrace.facades.PostProcessState;
 
-public class MiniFacadeImport extends Function {
+public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
+
 
 	private static final String TOP_RECT = "⇧ ", BOTTOM_RECT = "⇩ ", SIDES_RECT = "⇦⇨ ";
-	public MiniFacade mf;
 	private Map<String, MO> fixedLabels;
+
+	// input comes from mmg if it contains the magic key
+	public static final String MINI_FACADE_KEY = "mini-facade";
+	public MiniFacade mf2;
 	
 	public MiniFacadeImport( MiniFacade mf, Map<String, MO> fixedLabels ) {
 		color = fixed;
-		
-		this.mf = mf;
+		this.mf2 = mf;
 		this.fixedLabels = fixedLabels;
 	}
 
@@ -53,18 +48,23 @@ public class MiniFacadeImport extends Function {
 
 		Map<String, MO> out = new LinkedHashMap<>();
 
+		int i = 0;
 		for ( String s : new String[] { GreebleHelper.FLOOR_EDGE, GreebleHelper.WALL_EDGE, GreebleHelper.ROOF_EDGE } ) {
 			FixedLabel fl = new FixedLabel( s );
+			fl.label.location.y += Label.HEIGHT * 1.3 * i++ + Label.HEIGHT * 0.3;
+			fl.label.location.x = Label.HEIGHT * 0.3;
 			out.put( s, new MO( fl ) );
 		}
 
-		for ( Feature f : new Feature[] { Feature.DOOR, Feature.WINDOW } ) {
-			for ( String s : new String[] { TOP_RECT, BOTTOM_RECT, SIDES_RECT } ) {
-				String name = s + f.name().toLowerCase();
-				FixedLabel fl = new FixedLabel( name );
-				out.put( name, new MO( fl ) );
-			}
-		}
+//		for ( Feature f : new Feature[] { Feature.DOOR, Feature.WINDOW } ) {
+//			for ( String s : new String[] { TOP_RECT, BOTTOM_RECT, SIDES_RECT } ) {
+//				String name = s + f.name().toLowerCase();
+//				FixedLabel fl = new FixedLabel( name );
+//				fl.label.location.y += Label.HEIGHT * 1.3 * i++ + Label.HEIGHT * 0.3;
+//				fl.label.location.x = Label.HEIGHT * 0.3;
+//				out.put( name, new MO( fl ) );
+//			}
+//		}
 
 		return out;
 	}
@@ -73,8 +73,7 @@ public class MiniFacadeImport extends Function {
 		
 		try {
 			return mmg.getNodes( fixedLabels.get( s ) ).get( 0 );
-		}
-		catch ( NullPointerException e ) {
+		} catch ( NullPointerException e ) {
 			System.err.println( "not all node names declared in fixedlabels :(" );
 			e.printStackTrace();
 		}
@@ -82,14 +81,15 @@ public class MiniFacadeImport extends Function {
 		return null;
 	}
 
+
 	@Override
 	public List<Node> createSN( InputSet is, List<Object> vals, MMG mmg, MO mo, MOgram mogram ) {
 
 		List<Node> out = new ArrayList<>();
-		Node root = new Node( this, null );
+		Node root = new Node( this, new IndexNodeResult() );
 		out.add( root );
 
-
+		MiniFacade mf = mf2;
 
 		for ( MiniFacade.Feature f : mf.featureGen.keySet() )
 			createRectangles( mo, out, f.name().toLowerCase(), mf.featureGen.get( f ), root, mmg );
@@ -99,14 +99,22 @@ public class MiniFacadeImport extends Function {
 		return out;
 	}
 
+	public static Point2d toMMGSpace(Point2d pt) {
+		return new Point2d(pt.x, -pt.y);
+	}
+
+	public static Point2d fromMMGSpace(Point2d pt) {
+		return new Point2d(pt.x, -pt.y);
+	}
+
 	private void createWall( MO mo, List<Node> out, Node root, MMG mmg ) {
 
 
-		for ( Loop<? extends Point2d> loop : mf.facadeTexApp.postState.wallFaces ) {
+		for ( Loop<? extends Point2d> loop : mf2.facadeTexApp.postState.wallFaces ) {
 			
 			Node pointRoot = new Node( this, null );
 			out.add( pointRoot );
-			Nodez.connect( root, "wall_faces", pointRoot, Refs.Structure.Unordered );
+			Nodez.connect( root, "wall_faces", pointRoot, Refs.Structure.Loop );
 			
 			Cache<Point2d, Node> nodeCache = new Cache<Point2d, Node>() {
 				@Override public Node create( Point2d point2d ) {
@@ -116,14 +124,22 @@ public class MiniFacadeImport extends Function {
 					return n;
 				}
 			};
-			
-			for ( Loopable<? extends Point2d> lp : loop.loopableIterator() ) {
 
-				Edge e = new Edge( lp.get(), lp.getNext().get() );
+			LoopL<Node> edgesLL = new LoopL<>();
+			Loop<Node>edgesL = edgesLL.loop();
+
+			Loopable<? extends Point2d> start = findNearestOrigin(loop), current = start;
+
+			do {
+
+				Point2d a = toMMGSpace(current.get()), b = toMMGSpace(current.getNext().get());
+
+				Edge e = new Edge( a, b );
 				Node en = new Node( this, e );
+				edgesL.append(en);
 				out.add(en);
 
-				TwoPointEdge.connectEdge( mo, nodeCache.get( lp.get() ), nodeCache.get( lp.getNext().get() ), en );
+				TwoPointEdge.connectEdge( mo, nodeCache.get( a ), nodeCache.get( b ), en );
 
 				String label;
 
@@ -135,13 +151,24 @@ public class MiniFacadeImport extends Function {
 					label = GreebleHelper.ROOF_EDGE;
 
 				FixedLabel.label( getLabel( label, mmg ), en );
-			}
+				current = current.next;
+
+			} while (current != start);
+
+			Node face = EdgesToFace.createFace(this, edgesLL, mo);
+			out.add(face);
 		}
 
+		PointEdgeBuilder.sortGeometryNodes(out);
 	}
-	
-	
-	
+
+	private Loopable<? extends Point2d> findNearestOrigin(Loop<? extends Point2d> loop) {
+		final Point2d zero = new Point2d();
+		return loop.streamAble().min( (a, b) -> Double.compare(a.get().distance(zero), b.get().distance(zero))).get();
+
+	}
+
+
 	private void createRectangles( MO mo, List<Node> out, String name, List<FRect> rects,
 			Node root, MMG mmg ) {
 
@@ -197,7 +224,7 @@ public class MiniFacadeImport extends Function {
 	}
 	
 	private void randomMF(MOgram mogram) {
-		mf = GreebleMMG.createTemplateMF( Math.random() * 5 + 5, Math.random() * 5 + 3 );
+		mf2 = GreebleMMG.createTemplateMF( Math.random() * 5 + 5, Math.random() * 5 + 3 );
 		mogram.somethingChanged();
 	}
 	
@@ -209,6 +236,33 @@ public class MiniFacadeImport extends Function {
 		rr.addActionListener( e -> randomMF(mogram) );
 	}
 
-	
 
+	@Override
+	public Class<?> outputType() {
+		return Face.class;
+	}
+
+	@Override
+	public Object save() {
+
+		List<Loop<? extends  Point2d>> out = new ArrayList<>();
+
+		for (Loop<? extends Point2d> lp : mf2.facadeTexApp.postState.wallFaces ) {
+
+			Loop<Point2d> copy = new Loop<>();
+			for (Point2d p : lp)
+				copy.append(new Point2d(p));
+
+			out.add(copy);
+		}
+
+		return out;
+	}
+
+	@Override
+	public void load(Object o) {
+		this.mf2 = new MiniFacade();
+		this.mf2.facadeTexApp.postState = new PostProcessState();
+		this.mf2.facadeTexApp.postState.wallFaces = (List<Loop<? extends Point2d>>) o;
+	}
 }

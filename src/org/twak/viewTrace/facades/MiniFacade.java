@@ -6,6 +6,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.twak.viewTrace.franken.FacadeTexApp;
 import org.twak.viewTrace.franken.HasSuper;
 import org.twak.viewTrace.franken.SuperSuper;
 
-public class MiniFacade implements HasSuper {
+public class MiniFacade implements HasSuper, Serializable {
 	
 	public double width, height, groundFloorHeight, left;
 	public boolean softLeft, softRight;

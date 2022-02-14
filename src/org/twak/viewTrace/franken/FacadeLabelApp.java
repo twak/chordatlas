@@ -24,6 +24,7 @@ import org.twak.mmg.media.GreebleMMG;
 import org.twak.mmg.ui.MOgramEditor;
 import org.twak.tweed.Tweed;
 import org.twak.tweed.gen.skel.FacadeDesigner;
+import org.twak.utils.WeakListener;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.ui.AutoCheckbox;
@@ -125,20 +126,12 @@ public class FacadeLabelApp extends App {
 		else if (appMode == TextureMode.MMG ) {
 			
 			JButton edit = new JButton("edit mogram");
-			edit.addActionListener( new ActionListener() {
-				
-				@Override
-				public void actionPerformed( ActionEvent e ) {
-					if (mogram == null)
-						mogram = GreebleMMG.createMOgram(mf);
-					
-					MOgramEditor me = new MOgramEditor( mogram );
-					MOgramEditor.quitOnLastClosed = false;
-					me.setVisible( true );		
-					
-				}
-			} );
+			edit.addActionListener( new EditActionListener(globalUpdate) );
 			out.add( edit );
+
+			JButton update = new JButton("update from mogram");
+			update.addActionListener( e -> globalUpdate.run() );
+			out.add(update);
 			
 		}
 		else if (appMode == TextureMode.Procedural ) {
@@ -220,6 +213,34 @@ public class FacadeLabelApp extends App {
 		
 		return out;
 	}
+
+	class EditActionListener implements WeakListener.Changed, ActionListener
+	{
+		Runnable globalUpdate;
+
+		public EditActionListener (Runnable globalUpdate) {
+			this.globalUpdate = globalUpdate;
+		}
+
+		public void changed() {
+			globalUpdate.run();
+		}
+
+		@Override
+		public void actionPerformed( ActionEvent e ) {
+
+			if (mogram == null)
+				mogram = GreebleMMG.createMOgram(mf);
+
+			mogram.somethingChangedListener.add(this);
+
+			MOgramEditor me = new MOgramEditor( mogram );
+
+			MOgramEditor.quitOnLastClosed = false;
+			me.setVisible( true );
+
+		}
+	};
 	
 	@Override
 	public void computeBatch(Runnable whenDone, List<App> batch) {

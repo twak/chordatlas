@@ -924,8 +924,7 @@ public class Tweed extends SimpleApplication {
 			TweedSettings.settings.fromOrigin.transform( tmp );
 			tmp.get( trans );
 		}
-		
-			
+
 		MathTransform cartesian2Country = CRS.findMathTransform( 
 				DefaultGeocentricCRS.CARTESIAN,
 				kludgeCMS.get( TweedSettings.settings.gmlCoordSystem ),

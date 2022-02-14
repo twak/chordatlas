@@ -22,25 +22,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.vecmath.Vector3d;
 
+import org.pushingpixels.substance.api.skin.SubstanceGraphiteLookAndFeel;
+import org.pushingpixels.substance.internal.AnimationConfigurationManager;
 import org.twak.tweed.gen.GISGen;
 import org.twak.tweed.gen.Gen;
 import org.twak.tweed.gen.MiniGen;
@@ -590,19 +577,6 @@ public class TweedFrame {
 		selectedGenListener.fire();
 	}
 
-	public static void main( String[] args ) throws Throwable {
-
-		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon512.png" );
-
-		UIManager.put( "Slider.paintValue", false );
-
-		JPopupMenu.setDefaultLightWeightPopupEnabled( false ); // show menus over 3d canvas
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled( false );
-
-		PaintThing.lookup.put( HalfMesh2.class, new SuperMeshPainter() );
-
-		new TweedFrame();
-	}
 
 	public void somethingChanged() {
 		canvas.repaint();
@@ -631,5 +605,36 @@ public class TweedFrame {
 		if (gens.isEmpty())
 			return null;
 		return (E) gens.get(0);
+	}
+
+	public static void main( String[] args ) throws Throwable {
+
+
+		//-Dsun.java2d.uiScale=1
+		WindowManager.init( APP_NAME, "/org/twak/tweed/resources/icon512.png" );
+
+		SwingUtilities.invokeLater(new Runnable() {
+									   @Override
+									   public void run() {
+
+			AnimationConfigurationManager.getInstance().setTimelineDuration(0);
+		   try {
+			   UIManager.setLookAndFeel(new SubstanceGraphiteLookAndFeel());
+		   } catch (UnsupportedLookAndFeelException e) {
+			   e.printStackTrace();
+		   }
+
+		   UIManager.put( "Slider.paintValue", false );
+
+			JPopupMenu.setDefaultLightWeightPopupEnabled( false ); // show menus over 3d canvas
+			ToolTipManager.sharedInstance().setLightWeightPopupEnabled( false );
+
+			PaintThing.lookup.put( HalfMesh2.class, new SuperMeshPainter() );
+
+			new TweedFrame();
+
+
+			}
+		});
 	}
 }

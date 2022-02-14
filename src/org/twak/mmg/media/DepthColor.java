@@ -50,7 +50,7 @@ public class DepthColor extends RenderData {
 		} );
 		
 		out.add( c );
-		out.add( new AutoDoubleSlider( this, "depth", "depth", -1, 1, () -> mogram.somethingChanged() ) );
+		out.add( new AutoDoubleSlider( this, "depth", "depth", -0.5, 0.5, () -> mogram.somethingChanged() ) );
 		
     	return out;
     }

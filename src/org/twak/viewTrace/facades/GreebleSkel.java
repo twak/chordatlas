@@ -102,14 +102,11 @@ public class GreebleSkel {
 	}
 
 	private void createMesh( Output output ) {
-		
-		float[] roofColor = BLANK_ROOF;
+
 		
 		if ( output.faces == null )
 			return;
-		
-		
-		roofColor = Colourz.toF4( miniroof.roofTexApp.color );
+
 		Set<MiniFacade> allMFs = new HashSet<>();
 		
 		for ( Face f : output.faces.values() )  {
@@ -282,7 +279,7 @@ public class GreebleSkel {
 					public void clicked( Object data ) {
 
 						try {
-							SwingUtilities.invokeAndWait( new Runnable() {
+							SwingUtilities.invokeLater( new Runnable() {
 
 								@Override
 								public void run() {
@@ -588,8 +585,7 @@ public class GreebleSkel {
 		
 		Matrix4d to2d = new Matrix4d( to3d ); // now in jme space
 		to2d.invert();
-		
-		
+
 		LinearForm3D facePlane = new LinearForm3D( new Vector3d( out.x, out.z, out.y ), new Point3d( bottomS.x, bottomS.z, bottomS.y ) );
 		
 		if (! ( mf.featureGen instanceof MMGFeatureGen) ) {
@@ -598,7 +594,7 @@ public class GreebleSkel {
 		}
 		else  {
 			features.clear(); // let greeble generate all windows
-			GreebleMMG.greeble2DPolygon( ((MMGFeatureGen)mf.featureGen).mogram , greebleGrid.mbs, f, ll, to2dXY, along, bottomS, start, end, flat, to3d, to2d, facePlane );
+			new GreebleMMG (  mf, ((MMGFeatureGen)mf.featureGen).mogram , greebleGrid.mbs).greeble2DPolygon( f, ll, wallTag, to2dXY, along, bottomS, start, end, flat, to3d, to2d, facePlane );
 		}
 	}
 

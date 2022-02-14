@@ -113,9 +113,9 @@
 			<url>https://jcenter.bintray.com</url>
 		</repository>
 
-		<repository>
+		<repository> <!--gurobi -->
 			<id>uni-jena.de</id>
-			<url>https://bio.informatik.uni-jena.de/repository/libs-release-oss/</url>
+			<url>http://tweetyproject.org/mvn/</url>
 		</repository>
 
 	</repositories>
@@ -123,7 +123,8 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<jme3_g>org.jmonkeyengine</jme3_g>
-		<jme3_v>3.3.2-stable</jme3_v>
+		<!-- <jme3_v>3.3.2-stable</jme3_v> -->
+		<jme3_v>3.5.0-stable</jme3_v>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<geotools.version>19.1</geotools.version>
 		<batik_v>1.10</batik_v>
@@ -246,20 +247,6 @@
 			<version>${geotools.version}</version>
 		</dependency>
 
-		<!--  dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-epsg-extension</artifactId>
-			<version>${geotools.version}</version>
-		</dependency -->
-
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.8.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
@@ -271,7 +258,6 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>${jme3_g}</groupId>
@@ -298,7 +284,6 @@
 			<artifactId>jme3-terrain</artifactId>
 			<version>${jme3_v}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svg-dom</artifactId>
@@ -314,12 +299,16 @@
 			<artifactId>batik-codec</artifactId>
 			<version>${batik_v}</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.10-java7</version>
+			<version>1.4.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.9</version>
 		</dependency>
 
 		<!--
@@ -329,14 +318,20 @@
                     <version>local_gurobi</version>
                 </dependency>
                 -->
-
 		<dependency>
-			<groupId>com.github.haifengl</groupId>
-			<artifactId>smile-core</artifactId>
-			<version>1.2.1</version>
+			<groupId>gurobi</groupId>
+			<artifactId>gurobi</artifactId>
+			<version>9.1.0</version>
 		</dependency>
-		<!-- java topology suite <dependency> <groupId>com.vividsolutions</groupId> 
-			<artifactId>jts</artifactId> <version>1.13</version> </dependency> -->
+		<!--
+                <dependency>
+                    <groupId>com.github.haifengl</groupId>
+                    <artifactId>smile-core</artifactId>
+                    <version>1.2.1</version>
+                </dependency>
+
+               java topology suite <dependency> <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId> <version>1.13</version> </dependency> -->
 
 		<dependency>
 			<groupId>com.esotericsoftware.yamlbeans</groupId>
@@ -348,12 +343,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>2.9.9</version>
-		</dependency>
-
-		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>2.9.9</version>
 		</dependency>
 
 	</dependencies>
