@@ -1,6 +1,7 @@
 package org.twak.viewTrace.facades;
 
 import java.awt.event.MouseEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,9 +38,9 @@ public class FRect extends DRectangle implements ICanEdit {
 	public PanesLabelApp panesLabelApp;
 	public PanesTexApp panesTexApp;
 	
-	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( f -> new HeightDepth( 0, 0.2 ) );
+	public Cache<Feature, HeightDepth> attachedHeight = new Cach<>( new Cach.ConstMake(new HeightDepth( 0, 0.2 )) );
 	
-	public static class HeightDepth extends MutableDouble {
+	public static class HeightDepth extends MutableDouble implements Serializable {
 		
 		public double depth = -1;
 		
@@ -51,7 +52,6 @@ public class FRect extends DRectangle implements ICanEdit {
 			super( height );
 			this.depth = depth;
 		}
-
 	}
 	
 	AOuter outer;

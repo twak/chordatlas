@@ -1,5 +1,6 @@
 package org.twak.viewTrace.facades;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,7 @@ import org.twak.utils.collections.LoopL;
 import org.twak.utils.geom.DRectangle;
 import org.twak.viewTrace.facades.GreebleHelper.LPoint2d;
 
-public class PostProcessState {
+public class PostProcessState implements Serializable {
 
 	// last perimeter from skeleton evaluation
 	public List<Loop<? extends Point2d>> 

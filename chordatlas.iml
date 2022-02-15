@@ -138,10 +138,12 @@
     <orderEntry type="module" module-name="utils" />
     <orderEntry type="library" name="Maven: gov.nist.math:jama:1.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:batik-anim:1.10" level="project" />
+    <orderEntry type="library" name="Maven: org.orbisgis:poly2tri-core:0.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.0" level="project" />
     <orderEntry type="module" module-name="campskeleton" />
-    <orderEntry type="library" name="Maven: com.github.twak:jutils:master-b72c04b2ab-1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.twak:jutils:master-44a4fd896b-1" level="project" />
     <orderEntry type="module" module-name="siteplan" />
-    <orderEntry type="library" name="Maven: com.github.twak:campskeleton:master-8df5b241d5-1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.twak:campskeleton:master-7d92175182-1" level="project" />
     <orderEntry type="module" module-name="mmg" />
     <orderEntry type="library" name="Maven: org.pushing-pixels:radiance-substance:3.5.1" level="project" />
     <orderEntry type="library" name="Maven: org.pushing-pixels:radiance-trident:3.5.1" level="project" />

@@ -54,7 +54,7 @@ public class FacadeLabelApp extends App {
 	
 	public MiniFacade mf;
 	public String     texture;
-	public MOgram     mogram;
+	public MOgram     mogram = GreebleMMG.theMOgram;
 	
 	public boolean 
 			debugLabels = false, 
@@ -67,7 +67,6 @@ public class FacadeLabelApp extends App {
 	public FacadeLabelApp( MiniFacade mf ) {
 		super( );
 		this.mf = mf;
-		
 	}
 
 	public FacadeLabelApp( FacadeLabelApp o ) {
@@ -78,7 +77,6 @@ public class FacadeLabelApp extends App {
 		this.regScale  = o.regScale;
 		
 		this.texture = o.texture;
-		
 	}
 
 	@Override
@@ -229,13 +227,11 @@ public class FacadeLabelApp extends App {
 		@Override
 		public void actionPerformed( ActionEvent e ) {
 
-			if (mogram == null)
-				mogram = GreebleMMG.createMOgram(mf);
+			mogram = GreebleMMG.theMOgram;
 
+			GreebleMMG.findAndSetMF(mogram, mf);
 			mogram.somethingChangedListener.add(this);
-
 			MOgramEditor me = new MOgramEditor( mogram );
-
 			MOgramEditor.quitOnLastClosed = false;
 			me.setVisible( true );
 

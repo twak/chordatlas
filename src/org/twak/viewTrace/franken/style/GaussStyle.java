@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -21,7 +22,7 @@ import org.twak.viewTrace.franken.SelectedApps;
 import org.twak.viewTrace.franken.style.ui.UIVector;
 import org.twak.viewTrace.franken.style.ui.UIVector.MeanImageProvider;
 
-public class GaussStyle implements StyleSource, MeanImageProvider {
+public class GaussStyle implements StyleSource, MeanImageProvider, Serializable {
 
 	public double[] mean;
 	double std;

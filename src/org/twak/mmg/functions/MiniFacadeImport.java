@@ -33,7 +33,7 @@ public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
 
 	// input comes from mmg if it contains the magic key
 	public static final String MINI_FACADE_KEY = "mini-facade";
-	public MiniFacade mf2;
+	public transient MiniFacade mf2;
 	
 	public MiniFacadeImport( MiniFacade mf, Map<String, MO> fixedLabels ) {
 		color = fixed;

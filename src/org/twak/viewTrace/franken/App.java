@@ -3,6 +3,7 @@ package org.twak.viewTrace.franken;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -24,7 +25,7 @@ import org.twak.viewTrace.franken.style.GaussStyle;
 import org.twak.viewTrace.franken.style.JointStyle;
 import org.twak.viewTrace.franken.style.StyleSource;
 
-public abstract class App /*earance*/ implements Cloneable {
+public abstract class App /*earance*/ implements Cloneable, Serializable {
 	
 	public enum TextureUVs {
 		Square, Zero_One, Rectangle;

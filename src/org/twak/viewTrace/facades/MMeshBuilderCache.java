@@ -36,8 +36,11 @@ public class MMeshBuilderCache extends Cach2<String, float[], MatMeshBuilder> {
 		
 		if (out.app == null)
 			out.app = onclick;
-		else if (out.app != onclick)
-			System.err.println( "warning: attempt to assign different click-source" );
+		else if (out.app != onclick) {
+			System.err.println("warning: attempt to assign different click-source");
+			put(name, col, out = new MatMeshBuilder(name, col) );
+			out.app = onclick;
+		}
 		
 		return out;
 	}

@@ -534,12 +534,17 @@ public class TweedFrame {
 
 		gen.visible = visible;
 
-		layerList.add( new GenListItem( gen, selectedGenListener, this, new java.awt.event.ActionListener() {
+		SwingUtilities.invokeLater(new Runnable() {
 			@Override
-			public void actionPerformed( ActionEvent arg0 ) {
-				setSelected( gen );
+			public void run() {
+				layerList.add( new GenListItem( gen, selectedGenListener, TweedFrame.this, new java.awt.event.ActionListener() {
+					@Override
+					public void actionPerformed( ActionEvent arg0 ) {
+						setSelected( gen );
+					}
+				} ) );
 			}
-		} ) );
+		});
 
 		genList.add( gen );
 		layerList.revalidate();

@@ -14,11 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -781,8 +777,7 @@ public class Tweed extends SimpleApplication {
 			assetManager.unregisterLocator( JME, FileLocator.class );
 			deleteScratch();
 		}
-		
-		frame.setGenUI( new JPanel() );
+
 		
 		DATA = dataDir;
 		SCRATCH = DATA + File.separator + "scratch" + File.separator;
@@ -805,7 +800,13 @@ public class Tweed extends SimpleApplication {
 		setCameraSpeed( 0 );
 		setAmbient( 0 );
 
-		frame.setGens( TweedSettings.settings.genList );
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				frame.setGenUI( new JPanel() );
+				frame.setGens( TweedSettings.settings.genList );
+			}
+		});
 
 		if (plsr != null) {
 			rootNode.setShadowMode( ShadowMode.Off );
