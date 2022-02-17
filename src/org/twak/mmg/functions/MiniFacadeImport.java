@@ -90,6 +90,8 @@ public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
 		out.add( root );
 
 		MiniFacade mf = mf2;
+		if (mf == null)
+			return out;
 
 		for ( MiniFacade.Feature f : mf.featureGen.keySet() )
 			createRectangles( mo, out, f.name().toLowerCase(), mf.featureGen.get( f ), root, mmg );
@@ -150,7 +152,7 @@ public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
 				else
 					label = GreebleHelper.ROOF_EDGE;
 
-				FixedLabel.label( getLabel( label, mmg ), en );
+				FixedLabel.label( getLabel( label, mmg ), en, mmg );
 				current = current.next;
 
 			} while (current != start);
@@ -208,13 +210,13 @@ public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
 
 				switch ( i++ ) {
 				case 1:
-					FixedLabel.label( bot, en );
+					FixedLabel.label( bot, en, mmg );
 					break;
 				case 3:
-					FixedLabel.label( top, en );
+					FixedLabel.label( top, en, mmg );
 					break;
 				default:
-					FixedLabel.label( sid, en );
+					FixedLabel.label( sid, en, mmg );
 				}
 			}
 
@@ -234,6 +236,10 @@ public class MiniFacadeImport extends Function implements Fixed, MultiNodeFn {
 		JButton rr = new JButton("randomize");
 		panel.add( rr );
 		rr.addActionListener( e -> randomMF(mogram) );
+
+		JButton useThis = new JButton("set in chordatlas");
+		useThis.addActionListener(e -> GreebleMMG.theMOgram = mogram );
+		panel.add(useThis);
 	}
 
 

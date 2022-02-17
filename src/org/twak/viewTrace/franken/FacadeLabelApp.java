@@ -230,7 +230,7 @@ public class FacadeLabelApp extends App {
 			mogram = GreebleMMG.theMOgram;
 
 			GreebleMMG.findAndSetMF(mogram, mf);
-			mogram.somethingChangedListener.add(this);
+//			mogram.somethingChangedListener.add(this);
 			MOgramEditor me = new MOgramEditor( mogram );
 			MOgramEditor.quitOnLastClosed = false;
 			me.setVisible( true );

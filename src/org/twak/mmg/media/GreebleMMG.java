@@ -1,6 +1,7 @@
 package org.twak.mmg.media;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,7 @@ import org.twak.mmg.functions.MiniFacadeImport;
 import org.twak.mmg.ui.MOgramEditor;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.CloneSerializable;
-import org.twak.utils.collections.Loop;
-import org.twak.utils.collections.Loopable;
-import org.twak.utils.collections.Loopz;
-import org.twak.utils.collections.MultiMap;
+import org.twak.utils.collections.*;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMeshez;
@@ -68,7 +66,7 @@ public class GreebleMMG {
 		mf.facadeTexApp.resetPostProcessState();
 		mf.facadeTexApp.postState.wallFaces.add( flat );
 
-		MultiMap<DepthColor, Loop<Point2d>> shapes = new MultiMap<>();
+		MultiMap<DepthColor, LoopL<Point2d>> shapes = new MultiMap<>();
 
 		findAndSetMF(mogram, mf);
 
@@ -78,7 +76,7 @@ public class GreebleMMG {
 				if (n.context.mo.renderData != null && n.result instanceof org.twak.mmg.prim.Face && !n.erased) {
 					DepthColor dc = (DepthColor) n.context.mo.renderData;
 					if (dc.visible)
-						shapes.put(dc, ((org.twak.mmg.prim.Face) n.result).getPoints().get(0));
+						shapes.put(dc, ((org.twak.mmg.prim.Face) n.result).getPoints());
 				}
 
 //		HalfMesh2 mesh = tesselate(shapes);
@@ -135,51 +133,49 @@ public class GreebleMMG {
 
 	
 	// dictated not executed, twak
-	private static void createSurfacesWithDepth(MiniFacade mf, MultiMap<DepthColor, Loop<Point2d>> mesh,
+	private static void createSurfacesWithDepth(MiniFacade mf, MultiMap<DepthColor, LoopL<Point2d>> mesh,
 												MMeshBuilderCache mbs, Matrix4d to3d ) {
 		
-		for (Map.Entry<DepthColor, List<Loop<Point2d>>> col : mesh.entrySet())
-			for (Loop<Point2d> poly : col.getValue()) {
+		for (Map.Entry<DepthColor, List<LoopL<Point2d>>> col : mesh.entrySet())
+			for (LoopL<Point2d> ll : col.getValue()) {
 
-				for (Point2d p : poly )
-					p.set(MiniFacadeImport.fromMMGSpace(p) );
+				LoopL<Point2d> fromMMGSpace = Loopz.transform(ll, AffineTransform.getScaleInstance(1, -1));
 
-				for (Loop<Point2d> hl : poly.holes)
-					for (Point2d p : hl )
-						p.set(MiniFacadeImport.fromMMGSpace(p) );
+				for (Loop<Point2d> poly : fromMMGSpace) {
 
-			DepthColor dc = col.getKey();
-			
-			MatMeshBuilder mat = mbs.get( "mmg_"+dc.color.toString(), dc.color, mf );
-			
-			// skirt around face
-			for (Loopable<Point2d> lep : poly.loopableIterator()) {
-				
-				double heDepth = dc.depth, overDepth = 0;
+					DepthColor dc = col.getKey();
 
-				if (heDepth > 0 ) {
+					MatMeshBuilder mat = mbs.get("mmg_" + dc.color.toString(), dc.color, mf);
 
-					Point2d
-							start = lep.get(),
-							end   = lep.next.get();
+					// skirt around face
+					for (Loopable<Point2d> lep : poly.loopableIterator()) {
 
-					Point3d 
-						a = new Point3d (start.x, heDepth  , start.y ),
-						b = new Point3d (end.x  , heDepth  , end.y   ),
-						c = new Point3d (end.x  , overDepth, end.y   ),
-						d = new Point3d (start.x, overDepth, start.y );
+						double heDepth = dc.depth, overDepth = 0;
 
-						for (Point3d p : new Point3d[] {a,b,d,c}  ) 
-							to3d.transform( p );
-					
-					mat.add( a, d, c, b );
+						if (heDepth > 0) {
+
+							Point2d
+									start = lep.get(),
+									end = lep.next.get();
+
+							Point3d
+									a = new Point3d(start.x, heDepth, start.y),
+									b = new Point3d(end.x, heDepth, end.y),
+									c = new Point3d(end.x, overDepth, end.y),
+									d = new Point3d(start.x, overDepth, start.y);
+
+							for (Point3d p : new Point3d[]{a, b, d, c})
+								to3d.transform(p);
+
+							mat.add(a, d, c, b);
+						}
+					}
+
+					// main polygon
+					Loop<Point3d> p3 = Loopz.transform(Loopz.to3d(poly, dc.depth, 1), to3d);
+					mat.addWithHoles(p3.singleton(), true);
 				}
 			}
-			
-			// main polygon
-			Loop <Point3d> p3 = Loopz.transform( Loopz.to3d( poly, dc.depth, 1 ), to3d );
-			mat.addWithHoles( p3.singleton(), true );
-		}
 	}
 
 	public static MOgram createMOgram(MiniFacade mf) {
