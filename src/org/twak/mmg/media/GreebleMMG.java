@@ -20,6 +20,7 @@ import org.twak.mmg.MOgram;
 import org.twak.mmg.Node;
 import org.twak.mmg.functions.MiniFacadeImport;
 import org.twak.mmg.ui.MOgramEditor;
+import org.twak.siteplan.jme.Jme3z;
 import org.twak.tweed.gen.skel.WallTag;
 import org.twak.utils.CloneSerializable;
 import org.twak.utils.collections.*;
@@ -135,7 +136,14 @@ public class GreebleMMG {
 	// dictated not executed, twak
 	private static void createSurfacesWithDepth(MiniFacade mf, MultiMap<DepthColor, LoopL<Point2d>> mesh,
 												MMeshBuilderCache mbs, Matrix4d to3d ) {
-		
+
+//		System.out.println("************************************");
+//		System.out.println("************************************");
+//		System.out.println("************************************");
+//		System.out.println("************************************");
+//		System.out.println("************************************");
+//		System.out.println("************************************");
+
 		for (Map.Entry<DepthColor, List<LoopL<Point2d>>> col : mesh.entrySet())
 			for (LoopL<Point2d> ll : col.getValue()) {
 
@@ -148,34 +156,47 @@ public class GreebleMMG {
 					MatMeshBuilder mat = mbs.get("mmg_" + dc.color.toString(), dc.color, mf);
 
 					// skirt around face
-					for (Loopable<Point2d> lep : poly.loopableIterator()) {
+					for (Loopable<Point2d> lep : poly.loopableIterator())
+						skirtEdge(to3d, dc, mat, lep, false);
 
-						double heDepth = dc.depth, overDepth = 0;
-
-						if (heDepth > 0) {
-
-							Point2d
-									start = lep.get(),
-									end = lep.next.get();
-
-							Point3d
-									a = new Point3d(start.x, heDepth, start.y),
-									b = new Point3d(end.x, heDepth, end.y),
-									c = new Point3d(end.x, overDepth, end.y),
-									d = new Point3d(start.x, overDepth, start.y);
-
-							for (Point3d p : new Point3d[]{a, b, d, c})
-								to3d.transform(p);
-
-							mat.add(a, d, c, b);
-						}
-					}
+					for (Loop<Point2d> hoLoop : poly.holes)
+						for (Loopable<Point2d> lep : hoLoop.loopableIterator() )
+							skirtEdge(to3d, dc, mat, lep, true);
 
 					// main polygon
 					Loop<Point3d> p3 = Loopz.transform(Loopz.to3d(poly, dc.depth, 1), to3d);
-					mat.addWithHoles(p3.singleton(), true);
+					mat.addWithHoles(p3.singleton() );
 				}
 			}
+	}
+
+	private static void skirtEdge(Matrix4d to3d, DepthColor dc, MatMeshBuilder mat, Loopable<Point2d> lep, boolean reverse) {
+		double heDepth = dc.depth, overDepth = 0;
+
+//		if (heDepth > 0)
+		{
+
+			Point2d
+					start = lep.get(),
+					end = lep.next.get();
+
+			if (reverse) {
+				Point2d n = start;
+				start = end;
+				end = n;
+			}
+
+			Point3d
+					a = new Point3d(start.x, heDepth, start.y),
+					b = new Point3d(end.x, heDepth, end.y),
+					c = new Point3d(end.x, overDepth, end.y),
+					d = new Point3d(start.x, overDepth, start.y);
+
+			for (Point3d p : new Point3d[]{a, b, d, c})
+				to3d.transform(p);
+
+			mat.add(a, d, c, b);
+		}
 	}
 
 	public static MOgram createMOgram(MiniFacade mf) {
