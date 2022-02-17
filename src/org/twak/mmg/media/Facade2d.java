@@ -29,7 +29,7 @@ public class Facade2d extends Medium {
                     
                     LiftTwoPt1TwoPoint.class, LiftTwoPt1Path.class, PtPtBox.class,
 
-                    FaceSplit.class, FaceRelSplit.class, FaceBoolean.class,
+                    FaceSplit.class, FaceRelSplit.class, FaceBoolean.class, FaceExportEdges.class,
                     OffsetFace.class, CloneFace.class,
 
                     FourPointCurvePath.class,
