@@ -572,7 +572,7 @@ public class TweedFrame {
 
 	public void setSelected( Gen gen ) {
 
-		setGenUI( gen.getUI() );
+		SwingUtilities.invokeLater(() -> setGenUI( gen.getUI() ));
 
 		if ( selectedGen == gen )
 			return;
