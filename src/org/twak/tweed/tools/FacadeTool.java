@@ -40,6 +40,7 @@ import org.twak.utils.Imagez;
 import org.twak.utils.collections.LoopL;
 import org.twak.utils.collections.Loopz;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.FacadeFinder.ToProjMega;
@@ -142,7 +143,7 @@ public class FacadeTool extends SelectTool {
 
 					if ( !singleFolder )
 						try {
-							new XStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
+							SaveLoad.createXStream().toXML( tpm.megafacade, new FileOutputStream( new File( megaFolder, LINE_XML ) ) );
 
 						} catch ( FileNotFoundException e ) {
 							e.printStackTrace();

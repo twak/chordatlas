@@ -31,6 +31,7 @@ import org.twak.utils.collections.CountThings;
 import org.twak.utils.geom.ObjDump;
 
 import com.thoughtworks.xstream.XStream;
+import org.twak.utils.ui.SaveLoad;
 
 /**
  * $ apitrace trace --o dbg.txt --api gl chromium-browser --tmp-profile --ignore-gpu-blacklist https://www.google.co.uk/maps/@51.515444,-0.1249868,249a,35y,347.1h,56.93t/data=\!3m1\!1e3
@@ -98,7 +99,7 @@ public class ReadTrace {
 		assert dump.exists();
 		folder = dump.getParentFile();
 		
-		frames = (List) new XStream().fromXML( cacheFile );
+		frames = (List) SaveLoad.createXStream().fromXML( cacheFile );
 		
 		postProcessFrames();
 	}
@@ -208,8 +209,8 @@ public class ReadTrace {
 		br.close();
 		
 		System.out.println("done");
-		
-		new XStream().toXML( frames,new FileOutputStream( CACHE_FILE ) );
+
+		SaveLoad.createXStream().toXML( frames,new FileOutputStream( CACHE_FILE ) );
 
 		postProcessFrames();
 	}
@@ -496,7 +497,7 @@ public class ReadTrace {
 		{
 			File f= new File (miniMesh, "index.xml");
 			f.getParentFile().mkdirs();
-			new XStream().toXML( miniTransform, new FileOutputStream( f ) );
+			SaveLoad.createXStream().toXML( miniTransform, new FileOutputStream( f ) );
 		}
 	}
 	

@@ -61,10 +61,7 @@ import org.twak.utils.geom.HalfMesh2;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.ObjDump;
-import org.twak.utils.ui.Colourz;
-import org.twak.utils.ui.ListDownLayout;
-import org.twak.utils.ui.Plot;
-import org.twak.utils.ui.SimpleFileChooser;
+import org.twak.utils.ui.*;
 import org.twak.viewTrace.facades.FRect;
 import org.twak.viewTrace.facades.GreebleGrid;
 import org.twak.viewTrace.facades.GreebleHelper;
@@ -790,7 +787,7 @@ public class SkelGen extends Gen implements IDumpObjs, ICanSave {
 							}
 						}
 
-						new XStream().toXML( new SkelGen( nBlock, null, null ), new FileOutputStream( f ) );
+						SaveLoad.createXStream().toXML( new SkelGen( nBlock, null, null ), new FileOutputStream( f ) );
 					}
 				};
 			}

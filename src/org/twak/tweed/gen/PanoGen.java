@@ -59,6 +59,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
 import com.thoughtworks.xstream.XStream;
+import org.twak.utils.ui.SaveLoad;
 
 public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 	
@@ -176,7 +177,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 		if ( meta.exists() ) 
 		{
 			try {
-				panos = (List<Pano>) new XStream().fromXML( meta );
+				panos = (List<Pano>) SaveLoad.createXStream().fromXML( meta );
 			} catch ( Throwable th ) {
 				th.printStackTrace();
 			}
@@ -202,7 +203,7 @@ public class PanoGen extends Gen implements IDumpObjs, ICanSave {
 				}
 				
 				if (!panos.isEmpty())
-					new XStream().toXML( panos, new FileOutputStream( meta ) );
+					SaveLoad.createXStream().toXML( panos, new FileOutputStream( meta ) );
 				
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();

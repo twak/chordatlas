@@ -19,6 +19,7 @@ import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjDump.Face;
 import org.twak.utils.geom.ObjDump.Material;
 import org.twak.utils.streams.InaxPoint3dCollector;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.utils.ui.auto.Auto;
 
 import com.jme3.math.Matrix4f;
@@ -175,7 +176,7 @@ public class MiniTransform {
 				}
 
 		try {
-			new XStream().toXML( mt, new FileWriter( new File( outfile, INDEX ) ) );
+			SaveLoad.createXStream().toXML( mt, new FileWriter( new File( outfile, INDEX ) ) );
 		} catch ( IOException e1 ) {
 			e1.printStackTrace();
 		}

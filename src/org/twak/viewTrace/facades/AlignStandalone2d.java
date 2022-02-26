@@ -25,6 +25,7 @@ import org.twak.tweed.gen.FeatureCache.MegaFeatures;
 import org.twak.utils.Line;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.ui.Plot;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.utils.ui.WindowManager;
 
 import com.thoughtworks.xstream.XStream;
@@ -98,7 +99,7 @@ public class AlignStandalone2d extends JPanel {
 		if (!folder.exists())
 			return;
 		
-		MegaFeatures mf = new MegaFeatures((Line) new XStream().fromXML( new File (folder, "line.xml") ));
+		MegaFeatures mf = new MegaFeatures((Line) SaveLoad.createXStream().fromXML( new File (folder, "line.xml") ));
 		
 		features = new ArrayList<>();
 		

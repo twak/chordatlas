@@ -36,6 +36,7 @@ import org.twak.utils.PaintThing.ICanPaintU;
 import org.twak.utils.collections.MultiMap;
 import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.PanMouseAdaptor;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.facades.MiniFacade;
 
 import com.esotericsoftware.yamlbeans.YamlReader;
@@ -164,7 +165,7 @@ public class FeatureCache {
 			Arrays.sort( toProcess );
 			
 			if (lineFile.exists())
-				megafacade = (Line) new XStream().fromXML( lineFile );
+				megafacade = (Line) SaveLoad.createXStream().fromXML( lineFile );
 			else
 				megafacade = new Line( 0, 0, 1, 0 );
 

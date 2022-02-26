@@ -9,6 +9,7 @@ import org.twak.tweed.gen.skel.SkelGen;
 import org.twak.utils.geom.ObjDump;
 
 import com.thoughtworks.xstream.XStream;
+import org.twak.utils.ui.SaveLoad;
 
 public class SkelFootprintConsole {
 
@@ -37,7 +38,7 @@ public class SkelFootprintConsole {
 				System.out.println("for " + runTime +" seconds");
 			}
 			
-			new SkelFootprintConsole().go( (SolverState) new XStream().fromXML( f ), new File( args[ 1 ] ), runTime );
+			new SkelFootprintConsole().go( (SolverState) SaveLoad.createXStream().fromXML( f ), new File( args[ 1 ] ), runTime );
 		} else if ( args.length == 1 ) {
 			
 //			File f = new File (args[0]);
@@ -74,7 +75,7 @@ public class SkelFootprintConsole {
 
 	private static void dump( SkelGen gen, File f, ObjDump obj ) {
 		
-		SolverState SS= (SolverState) new XStream().fromXML( f );
+		SolverState SS= (SolverState) SaveLoad.createXStream().fromXML( f );
 		
 		SkelFootprint.postProcesss(SS);
 		

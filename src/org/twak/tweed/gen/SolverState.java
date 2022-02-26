@@ -32,6 +32,7 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.SuperLine;
 import org.twak.viewTrace.facades.MiniFacade;
 import org.twak.viewTrace.facades.MiniFacadePainter;
@@ -236,7 +237,7 @@ public class SolverState implements Serializable
 
 			System.out.print( "writing state to " + location +" ..." );
    		    location.getAbsoluteFile().getParentFile().mkdirs();
-			new XStream().toXML( this, new FileOutputStream( location ) );
+			SaveLoad.createXStream().toXML( this, new FileOutputStream( location ) );
 			System.out.println( "done!" );
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();

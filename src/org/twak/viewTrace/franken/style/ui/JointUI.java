@@ -32,13 +32,7 @@ import org.twak.tweed.TweedFrame;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.utils.Mathz;
 import org.twak.utils.Stringz;
-import org.twak.utils.ui.AutoDoubleSlider;
-import org.twak.utils.ui.AutoListCombo;
-import org.twak.utils.ui.AutoTextField;
-import org.twak.utils.ui.ListDownLayout;
-import org.twak.utils.ui.ListRightLayout;
-import org.twak.utils.ui.SimpleFileChooser;
-import org.twak.utils.ui.WindowManager;
+import org.twak.utils.ui.*;
 import org.twak.viewTrace.franken.BlockApp;
 import org.twak.viewTrace.franken.NetInfo;
 import org.twak.viewTrace.franken.SelectedApps;
@@ -324,7 +318,7 @@ public class JointUI extends JPanel {
 						BlockApp editing = jd.root;
 						try {
 							
-							jd = (JointStyle) new XStream().fromXML( f );
+							jd = (JointStyle) SaveLoad.createXStream().fromXML( f );
 							jd.root = editing;
 							jd.redraw();
 							
@@ -351,7 +345,7 @@ public class JointUI extends JPanel {
 					@Override
 					public void heresTheFile( File f ) throws Throwable {
 //						f = new File (f.getParentFile(), Filez.stripExtn( f.getName() ) +".xml");
-						new XStream().toXML( jd, new FileOutputStream( f ) );
+						SaveLoad.createXStream().toXML( jd, new FileOutputStream( f ) );
 					}
 				};
 			}

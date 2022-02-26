@@ -45,6 +45,7 @@ import org.twak.utils.collections.SuperLoop;
 import org.twak.utils.geom.DRectangle;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.geom.ObjRead;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.FacadeFinder;
 import org.twak.viewTrace.FacadeFinder.FacadeMode;
 import org.twak.viewTrace.Slice;
@@ -172,7 +173,7 @@ public class BlockGen extends ObjGen {
 				File f = getSolutionFile();
 				if ( f.exists() ) {
 
-					SolverState SS = (SolverState) new XStream().fromXML( f );
+					SolverState SS = (SolverState) SaveLoad.createXStream().fromXML( f );
 					SkelFootprint.postProcesss( SS );
 					
 					tweed.frame.addGen( new SkelGen( SS.mesh, tweed, BlockGen.this ), true );

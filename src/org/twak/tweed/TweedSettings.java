@@ -25,6 +25,7 @@ import org.twak.tweed.gen.ICanSave;
 import org.twak.tweed.gen.skel.ObjSkelGen;
 import org.twak.tweed.plugins.TweedPlugin;
 import org.twak.utils.Filez;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.auto.Auto;
 
@@ -141,7 +142,7 @@ public class TweedSettings {
 			}
 			else
 			{
-				XStream xs = new XStream();//new PureJavaReflectionProvider());
+				XStream xs = SaveLoad.createXStream();//new PureJavaReflectionProvider());
 				xs.ignoreUnknownElements();
 				
 				settings = (TweedSettings) xs.fromXML( def );
@@ -229,7 +230,7 @@ public class TweedSettings {
 			while (recentFiles.f.size() > 20)
 				recentFiles.f.remove( recentFiles.f.size() - 1 );
 			try {
-				new XStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
+				SaveLoad.createXStream().toXML( recentFiles, new FileOutputStream( RECENT_FILE_LOCATION ) );
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 			}
@@ -240,7 +241,7 @@ public class TweedSettings {
 
 		if (recentFiles == null) {
 			try {
-				recentFiles = (RecentFiles) new XStream().fromXML( RECENT_FILE_LOCATION );
+				recentFiles = (RecentFiles) SaveLoad.createXStream().fromXML( RECENT_FILE_LOCATION );
 			}                  catch (Throwable th) {
 				System.out.println( "couldn't load recent project list" );
 				recentFiles = new RecentFiles();

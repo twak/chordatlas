@@ -66,6 +66,7 @@ import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.geom.LinearForm3D;
 import org.twak.utils.ui.Plot;
 import org.twak.utils.ui.Rainbow;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.ColorRGBAPainter;
 import org.twak.viewTrace.ModeCollector;
 import org.twak.viewTrace.SuperLine;
@@ -126,7 +127,7 @@ public class SkelFootprint {
 		
 		if ( FALSE ) {
 			try {
-				SS = (SolverState) new XStream().fromXML( new FileReader( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/solutions/652.9836272423689_-455.4482046683377/solver_state.xml" ) ) );
+				SS = (SolverState) SaveLoad.createXStream().fromXML( new FileReader( new File( "/media/twak/8bc5e750-9a70-4180-8eee-ced2fbba6484/data/regent/solutions/652.9836272423689_-455.4482046683377/solver_state.xml" ) ) );
 			} catch ( FileNotFoundException e ) {
 				e.printStackTrace();
 				SS = null;

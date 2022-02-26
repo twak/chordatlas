@@ -47,6 +47,7 @@ import org.twak.utils.geom.Line3d;
 import org.twak.utils.geom.LinearForm;
 import org.twak.utils.geom.ObjDump;
 import org.twak.utils.ui.ListDownLayout;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.FindLines;
 import org.twak.viewTrace.GBias;
 import org.twak.viewTrace.LineSoup;
@@ -809,7 +810,7 @@ public class ProfileGen extends Gen  implements IDumpObjs {
 		}
 		
 		try {
-			new XStream().toXML( out, new FileOutputStream( new File ( Tweed.SCRATCH+"profiles.xml" ) ) );
+			SaveLoad.createXStream().toXML( out, new FileOutputStream( new File ( Tweed.SCRATCH+"profiles.xml" ) ) );
 			
 		} catch ( FileNotFoundException e ) {
 			e.printStackTrace();

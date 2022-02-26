@@ -32,6 +32,7 @@ import org.twak.utils.geom.HalfMesh2.HalfEdge;
 import org.twak.utils.geom.HalfMesh2.HalfFace;
 import org.twak.utils.ui.ListDownLayout;
 import org.twak.utils.Parallel;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.viewTrace.facades.Regularizer;
 
 import com.jme3.math.Vector2f;
@@ -109,7 +110,7 @@ public class ResultsGen extends Gen implements IDumpObjs, GenHandlesSelect {
 		System.out.println("reading solution " + f.getParentFile().getName());
 		
 		try {
-			SolverState SS = (SolverState) new XStream().fromXML( f );
+			SolverState SS = (SolverState) SaveLoad.createXStream().fromXML( f );
 			
 			for (HalfFace hf : SS.mesh) 
 				plansIn.incrementAndGet();

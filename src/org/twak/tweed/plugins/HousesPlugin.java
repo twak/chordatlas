@@ -23,6 +23,7 @@ import org.twak.tweed.tools.MoveTool;
 import org.twak.tweed.tools.SelectTool;
 import org.twak.tweed.tools.Tool;
 import org.twak.utils.Filez;
+import org.twak.utils.ui.SaveLoad;
 import org.twak.utils.ui.SimpleFileChooser;
 import org.twak.utils.ui.SimplePopup2;
 
@@ -129,7 +130,7 @@ public class HousesPlugin implements TweedPlugin {
 							try {
 								
 									try {
-										XStream xs = new XStream ();// new PureJavaReflectionProvider());
+										XStream xs = SaveLoad.createXStream();// new PureJavaReflectionProvider());
 //										xs.ignoreUnknownElements();
 										SkelGen sg = (SkelGen) xs.fromXML( skelGen );
 										sg.onLoad( tf.tweed );
@@ -158,7 +159,7 @@ public class HousesPlugin implements TweedPlugin {
 
 								for ( File f : skelGen.getParentFile().listFiles() ) {
 									try {
-										XStream xs = new XStream();// new PureJavaReflectionProvider());
+										XStream xs = SaveLoad.createXStream();// new PureJavaReflectionProvider());
 										xs.ignoreUnknownElements();
 										SkelGen sg = (SkelGen) xs.fromXML( f );
 										sg.onLoad( tf.tweed );

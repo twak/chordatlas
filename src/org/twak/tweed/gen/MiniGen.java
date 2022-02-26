@@ -58,6 +58,7 @@ import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.thoughtworks.xstream.XStream;
+import org.twak.utils.ui.SaveLoad;
 
 public class MiniGen extends Gen implements HandleMe, ICanSave {
 	
@@ -85,7 +86,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 	}
 	
 	public void init() {
-		trans = (MiniTransform) new XStream ().fromXML ( Tweed.toWorkspace( new File (root, "index.xml") ) );
+		trans = (MiniTransform) SaveLoad.createXStream().fromXML ( Tweed.toWorkspace( new File (root, "index.xml") ) );
 	}
 
 	@Override
@@ -169,7 +170,7 @@ public class MiniGen extends Gen implements HandleMe, ICanSave {
 			public void run() {
 
 				try {
-					new XStream().toXML( trans, new FileOutputStream( Tweed.toWorkspace( new File( root, "index.xml" ) ) ) );
+					SaveLoad.createXStream().toXML( trans, new FileOutputStream( Tweed.toWorkspace( new File( root, "index.xml" ) ) ) );
 					System.out.println("index file written");
 				} catch ( FileNotFoundException e ) {
 					e.printStackTrace();

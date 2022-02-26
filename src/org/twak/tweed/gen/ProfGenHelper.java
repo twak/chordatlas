@@ -18,6 +18,7 @@ import org.twak.tweed.Tweed;
 import org.twak.utils.ui.Plot;
 
 import com.thoughtworks.xstream.XStream;
+import org.twak.utils.ui.SaveLoad;
 
 public class ProfGenHelper {
 
@@ -80,7 +81,7 @@ public class ProfGenHelper {
 
 	public static void main (String[] args) {
 		
-		new ProfGenHelper( (List<Prof>) new XStream().fromXML( new File( Tweed.SCRATCH + "profiles.xml" ) ) );
+		new ProfGenHelper( (List<Prof>) SaveLoad.createXStream().fromXML( new File( Tweed.SCRATCH + "profiles.xml" ) ) );
 		
 	}
 }
